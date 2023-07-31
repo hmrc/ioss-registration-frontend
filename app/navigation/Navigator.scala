@@ -40,4 +40,10 @@ class Navigator @Inject()() {
     case CheckMode =>
       checkRouteMap(page)(userAnswers)
   }
+
+  def nextPage(page: Page, userAnswers: UserAnswers): Call = {
+    normalRoutes(page)(userAnswers)
+  }
+
+
 }

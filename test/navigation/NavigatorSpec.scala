@@ -27,22 +27,34 @@ class NavigatorSpec extends SpecBase {
 
   "Navigator" - {
 
-    "in Normal mode" - {
+    "with mode" - {
 
-      "must go from a page that doesn't exist in the route map to Index" in {
+      "in Normal mode" - {
 
-        case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, NormalMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad
+        "must go from a page that doesn't exist in the route map to Index" in {
+
+          case object UnknownPage extends Page
+          navigator.nextPage(UnknownPage, NormalMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad
+        }
+      }
+
+      "in Check mode" - {
+
+        "must go from a page that doesn't exist in the edit route map to CheckYourAnswers" in {
+
+          case object UnknownPage extends Page
+          navigator.nextPage(UnknownPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
+        }
       }
     }
+  }
 
-    "in Check mode" - {
+  "without mode" - {
 
-      "must go from a page that doesn't exist in the edit route map to CheckYourAnswers" in {
+    "must go from a page that doesn't exist in the route map to Index" in {
 
-        case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad
-      }
+      case object UnknownPage extends Page
+      navigator.nextPage(UnknownPage, UserAnswers("id")) mustBe routes.IndexController.onPageLoad
     }
   }
 }

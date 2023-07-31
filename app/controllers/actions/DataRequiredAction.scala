@@ -18,9 +18,10 @@ package controllers.actions
 
 import javax.inject.Inject
 import controllers.routes
-import models.requests.{DataRequest, OptionalDataRequest}
+import models.requests.{DataRequest, OptionalDataRequest, UnauthenticatedDataRequest, UnauthenticatedOptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
+import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,3 +39,18 @@ class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionC
 }
 
 trait DataRequiredAction extends ActionRefiner[OptionalDataRequest, DataRequest]
+
+
+class UnauthenticatedDataRequiredAction @Inject()(implicit val executionContext: ExecutionContext)
+  extends ActionRefiner[UnauthenticatedOptionalDataRequest, UnauthenticatedDataRequest] {
+
+  override protected def refine[A](request: UnauthenticatedOptionalDataRequest[A]): Future[Either[Result, UnauthenticatedDataRequest[A]]] = {
+
+    request.userAnswers match {
+      case None =>
+        Left(Redirect(routes.RegisteredForIossInEuController.onPageLoad())).toFuture
+      case Some(data) =>
+        Right(UnauthenticatedDataRequest(request.request, request.userId, data)).toFuture
+    }
+  }
+}

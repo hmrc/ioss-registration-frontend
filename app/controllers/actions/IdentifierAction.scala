@@ -19,13 +19,14 @@ package controllers.actions
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.routes
-import models.requests.IdentifierRequest
+import models.requests.{IdentifierRequest, SessionRequest}
 import play.api.mvc.Results._
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -55,20 +56,15 @@ class AuthenticatedIdentifierAction @Inject()(
   }
 }
 
-class SessionIdentifierAction @Inject()(
-                                         val parser: BodyParsers.Default
-                                       )
-                                       (implicit val executionContext: ExecutionContext) extends IdentifierAction {
+class SessionIdentifierAction @Inject()(implicit val executionContext: ExecutionContext)
+  extends ActionRefiner[Request, SessionRequest] with ActionFunction[Request, SessionRequest] {
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
+  override def refine[A](request: Request[A]): Future[Either[Result, SessionRequest[A]]] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    hc.sessionId match {
-      case Some(session) =>
-        block(IdentifierRequest(request, session.value))
-      case None =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-    }
+    hc.sessionId
+      .map(session => Right(SessionRequest(request, session.value)).toFuture)
+      .getOrElse(Left(Redirect(routes.JourneyRecoveryController.onPageLoad())).toFuture)
   }
 }

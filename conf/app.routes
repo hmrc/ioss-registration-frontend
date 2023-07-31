@@ -1,21 +1,53 @@
 # microservice specific routes
 
-->          /hmrc-frontend                               hmrcfrontend.Routes
+->          /hmrc-frontend                                   hmrcfrontend.Routes
 
-GET         /                                            controllers.IndexController.onPageLoad
+GET         /                                                controllers.IndexController.onPageLoad
 
-GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                                    controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /language/:lang                              controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET         /language/:lang                                  controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
-GET         /refresh-session                             controllers.KeepAliveController.keepAlive
+GET         /refresh-session                                 controllers.KeepAliveController.keepAlive
+GET         /refresh-session-unauthenticated                 controllers.KeepAliveController.keepAliveUnauthenticated()
 
-GET         /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                              controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad
+GET         /check-your-answers                              controllers.CheckYourAnswersController.onPageLoad
 
-GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut
-GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey
-GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad
+GET         /account/sign-out-survey                         controllers.auth.AuthController.signOut
+GET         /account/sign-out                                controllers.auth.AuthController.signOutNoSurvey
+GET         /account/signed-out                              controllers.auth.SignedOutController.onPageLoad
 
-GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad
+GET         /unauthorised                                    controllers.UnauthorisedController.onPageLoad
+
+GET         /ioss-registered                                 controllers.RegisteredForIossInEuController.onPageLoad()
+POST        /ioss-registered                                 controllers.RegisteredForIossInEuController.onSubmit()
+
+GET         /cannot-register-already-registered              controllers.CannotRegisterAlreadyRegisteredController.onPageLoad()
+
+GET         /selling-goods-outside-single-market             controllers.SellsGoodsToEuOrNiController.onPageLoad()
+POST        /selling-goods-outside-single-market             controllers.SellsGoodsToEuOrNiController.onSubmit()
+
+GET         /cannot-register-ioss                            controllers.CannotRegisterForIossController.onPageLoad()
+
+GET         /goods-value                                     controllers.GoodsConsignmentValueController.onPageLoad()
+POST        /goods-value                                     controllers.GoodsConsignmentValueController.onSubmit()
+
+GET         /do-not-need-to-account-for-eu-vat               controllers.ConsignmentValueLessThanMinimumController.onPageLoad()
+
+GET         /registered-for-vat-in-uk                        controllers.RegisteredForVatInUkController.onPageLoad()
+POST        /registered-for-vat-in-uk                        controllers.RegisteredForVatInUkController.onSubmit()
+
+GET         /cannot-register-no-vat-in-uk                    controllers.CannotRegisterNoVatInUkController.onPageLoad()
+
+GET         /ni-based                                        controllers.BusinessBasedInNiController.onPageLoad()
+POST        /ni-based                                        controllers.BusinessBasedInNiController.onSubmit()
+
+GET         /norway-based                                    controllers.NorwegianBasedBusinessController.onPageLoad()
+POST        /norway-based                                    controllers.NorwegianBasedBusinessController.onSubmit()
+
+GET         /register-to-use-service                         controllers.EligibleToRegisterController.onPageLoad()
+POST        /register-to-use-service                         controllers.EligibleToRegisterController.onSubmit()
+
+GET         /cannot-register-no-ni-or-norway-business        controllers.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad()
