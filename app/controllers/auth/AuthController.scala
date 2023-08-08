@@ -34,6 +34,13 @@ class AuthController @Inject()(
                                 identify: IdentifierAction
                               )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
+
+  def onSignIn(): Action[AnyContent] = {
+    ???
+
+
+  }
+
   def signOut(): Action[AnyContent] = identify.async {
     implicit request =>
       sessionRepository

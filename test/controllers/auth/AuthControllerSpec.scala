@@ -25,12 +25,48 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
+import models.responses
 
 import java.net.URLEncoder
 
 import scala.concurrent.Future
 
 class AuthControllerSpec extends SpecBase with MockitoSugar {
+
+  ".onSignIn" - {
+
+    "when we already have some user answers" - {
+
+    }
+
+    "when we don't already have some user answers" - {
+
+      "and the call to get their vat details fails" - {
+
+        val failureResponse = responses.UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "foo")
+
+//        "must return an internal server error" in {
+//
+//          val application = applicationBuilder(None).build()
+//
+//          running(application) {
+//
+//            val request = FakeRequest(GET, routes.AuthController.onSignIn().url)
+//            val result = route(application, request).value
+//
+//            val expectedAnswers = emptyUserAnswers.set(???, ???).success.value
+//
+//            status(result) mustBe SEE_OTHER
+//            redirectLocation(result).value mustBe routes.???
+//
+//          }
+//
+//        }
+
+      }
+    }
+
+  }
 
   "signOut" - {
 

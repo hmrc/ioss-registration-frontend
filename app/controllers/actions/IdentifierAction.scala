@@ -19,44 +19,102 @@ package controllers.actions
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.routes
-import models.requests.{IdentifierRequest, SessionRequest}
+import logging.Logging
+import models.requests.{AuthenticatedIdentifierRequest, SessionRequest}
 import play.api.mvc.Results._
 import play.api.mvc._
+import services.UrlBuilderService
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]
+trait IdentifierAction extends ActionBuilder[AuthenticatedIdentifierRequest, AnyContent] with ActionFunction[Request, AuthenticatedIdentifierRequest]
 
 class AuthenticatedIdentifierAction @Inject()(
                                                override val authConnector: AuthConnector,
                                                config: FrontendAppConfig,
-                                               val parser: BodyParsers.Default
+                                               urlBuilderService: UrlBuilderService
                                              )
-                                             (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
+                                             (implicit val executionContext: ExecutionContext)
+  extends ActionRefiner[Request, AuthenticatedIdentifierRequest]
+    with AuthorisedFunctions
+    with Logging {
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
+  private type IdentifierActionResult[A] = Future[Either[Result, AuthenticatedIdentifierRequest[A]]]
 
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+  //noinspection ScalaStyle
+  override def refine[A](request: Request[A]): IdentifierActionResult[A] = {
 
-    authorised().retrieve(Retrievals.internalId) {
-      _.map {
-        internalId => block(IdentifierRequest(request, internalId))
-      }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
-    } recover {
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request.withHeaders(request.headers), request.session)
+
+    authorised(
+      AuthProviders(AuthProvider.GovernmentGateway) and
+        (AffinityGroup.Individual or AffinityGroup.Organisation) and
+        CredentialStrength(CredentialStrength.strong)
+    ).retrieve(
+      Retrievals.credentials and
+        Retrievals.allEnrolments and
+        Retrievals.affinityGroup and
+        Retrievals.confidenceLevel and
+        Retrievals.credentialRole) {
+
+      case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == User =>
+        findVrnFromEnrolments(enrolments) match {
+          case Some(vrn) => Right(AuthenticatedIdentifierRequest(request, credentials, vrn)).toFuture
+          case _ => throw InsufficientEnrolments()
+        }
+
+      case _ ~ _ ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == Assistant =>
+        throw UnsupportedCredentialRole()
+
+      case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
+        findVrnFromEnrolments(enrolments) match {
+          case Some(vrn) =>
+            if (confidence >= ConfidenceLevel.L200) {
+              Right(AuthenticatedIdentifierRequest(request, credentials, vrn)).toFuture
+            } else {
+              throw InsufficientConfidenceLevel()
+            }
+
+          case _ =>
+            throw InsufficientEnrolments()
+        }
+
+      case _ =>
+        throw new UnauthorizedException("Unable to retrieve authorisation data")
+
+    }.recoverWith {
       case _: NoActiveSession =>
-        Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
-      case _: AuthorisationException =>
-        Redirect(routes.UnauthorisedController.onPageLoad)
+        logger.info("No active session")
+        Left(Redirect(config.loginUrl, Map("continue" -> Seq(urlBuilderService.loginContinueUrl(request))))).toFuture
+
+      case e: AuthorisationException =>
+        logger.info("Authorisation Exception", e.getMessage)
+        Left(Redirect(routes.UnauthorisedController.onPageLoad)).toFuture
     }
   }
+
+  private def findVrnFromEnrolments(enrolments: Enrolments): Option[Vrn] =
+    enrolments.enrolments.find(_.key == "HMRC-MTD-VAT")
+      .flatMap {
+        enrolment =>
+          enrolment.identifiers.find(_.key == "VRN").map(e => Vrn(e.value))
+      } orElse enrolments.enrolments.find(_.key == "HMCE-VATDEC-ORG")
+      .flatMap {
+        enrolment =>
+          enrolment.identifiers.find(_.key == "VATRegNo").map(e => Vrn(e.value))
+      }
+
 }
 
-class SessionIdentifierAction @Inject()(implicit val executionContext: ExecutionContext)
+class SessionIdentifierAction @Inject()()(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[Request, SessionRequest] with ActionFunction[Request, SessionRequest] {
 
   override def refine[A](request: Request[A]): Future[Either[Result, SessionRequest[A]]] = {
