@@ -18,33 +18,32 @@ package models
 
 import play.api.libs.json._
 
-sealed trait Address {
+sealed trait Address
 
-  object Address {
+object Address {
 
-    def reads: Reads[Address] =
-      DesAddress.format.widen[Address]
+  def reads: Reads[Address] =
+    DesAddress.format.widen[Address]
 
-    def writes: Writes[Address] = Writes {
-      case d: DesAddress => Json.toJson(d)(DesAddress.format)
-    }
-
-    implicit def format: Format[Address] = Format(reads, writes)
+  def writes: Writes[Address] = Writes {
+    case d: DesAddress => Json.toJson(d)(DesAddress.format)
   }
 
-  case class DesAddress(
-                         line1: String,
-                         line2: Option[String],
-                         line3: Option[String],
-                         line4: Option[String],
-                         line5: Option[String],
-                         postCode: Option[String],
-                         countryCode: String,
-                       ) extends Address
+  implicit def format: Format[Address] = Format(reads, writes)
+}
 
-  object DesAddress {
+case class DesAddress(
+                       line1: String,
+                       line2: Option[String],
+                       line3: Option[String],
+                       line4: Option[String],
+                       line5: Option[String],
+                       postCode: Option[String],
+                       countryCode: String,
+                     ) extends Address
 
-    implicit val format: OFormat[DesAddress] = Json.format[DesAddress]
+object DesAddress {
 
-  }
+  implicit val format: OFormat[DesAddress] = Json.format[DesAddress]
+
 }

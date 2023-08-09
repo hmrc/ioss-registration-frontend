@@ -16,6 +16,9 @@
 
 package models.domain
 
+import models.DesAddress
+import play.api.libs.json.{Json, OFormat}
+
 import java.time.LocalDate
 
 case class VatCustomerInfo(
@@ -25,6 +28,9 @@ case class VatCustomerInfo(
                             organisationName: Option[String],
                             individualName: Option[String],
                             singleMarketIndicator: Option[Boolean]
-                          ) {
+                          )
 
+object VatCustomerInfo {
+
+  implicit val format: OFormat[VatCustomerInfo] = Json.format[VatCustomerInfo]
 }

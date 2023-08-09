@@ -16,6 +16,15 @@
 
 package connectors
 
-class RegistrationConnector {
+import models.domain.VatCustomerInfo
+import play.api.Configuration
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
+
+import scala.concurrent.{ExecutionContext, Future}
+
+class RegistrationConnector(config: Configuration, httpClient: HttpClient)
+                           (implicit executionContext: ExecutionContext) extends HttpErrorFunctions {
+  def getVatCustomerInfo()(implicit hc: HeaderCarrier): Future[VatCustomerInfo] =
+    httpClient.GET[VatCustomerInfo](s"/vat-information")
 
 }

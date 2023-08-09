@@ -16,12 +16,30 @@
 
 package controllers.actions
 
-import models.requests.{SessionRequest, UnauthenticatedOptionalDataRequest}
-import play.api.mvc.ActionTransformer
-import repositories.UnauthenticatedUserAnswersRepository
+import models.requests.{AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest, SessionRequest, UnauthenticatedOptionalDataRequest}
+import play.api.mvc.{ActionRefiner, ActionTransformer, Result}
+import repositories.{AuthenticatedUserAnswersRepository, UnauthenticatedUserAnswersRepository}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+
+class AuthenticatedDataRetrievalAction @Inject()(
+  authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository,
+  migrationService: DataMigrationService
+)(implicit val executionContext: ExecutionContext)
+extends ActionRefiner[AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest] {
+
+  override protected def refine[A](request: AuthenticatedIdentifierRequest[A]): Future[Either[Result., AuthenticatedOptionalDataRequest[A]]] = {
+
+    request.queryString.get("k").flatMap(_.headOption) match {
+      case Some(sessionId) =>
+
+    }
+    sessionRepository.get(request.userId).map {
+      OptionalDataRequest(request.request, request.userId, _)
+    }
+  }
+}
 
 class UnauthenticatedDataRetrievalAction @Inject()(val sessionRepository: UnauthenticatedUserAnswersRepository)
                                                   (implicit val executionContext: ExecutionContext)
