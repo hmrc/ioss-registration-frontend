@@ -35,8 +35,6 @@ import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IdentifierAction extends ActionBuilder[AuthenticatedIdentifierRequest, AnyContent] with ActionFunction[Request, AuthenticatedIdentifierRequest]
-
 class AuthenticatedIdentifierAction @Inject()(
                                                override val authConnector: AuthConnector,
                                                config: FrontendAppConfig,

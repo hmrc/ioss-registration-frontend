@@ -16,31 +16,31 @@
 
 package controllers.actions
 
-import javax.inject.Inject
 import controllers.routes
 import controllers.filters.{routes => filterRoutes}
 import models.requests.{DataRequest, OptionalDataRequest, UnauthenticatedDataRequest, UnauthenticatedOptionalDataRequest}
+import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
 import utils.FutureSyntax.FutureOps
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRequiredActionImpl @Inject()(implicit val executionContext: ExecutionContext) extends DataRequiredAction {
+//TODO
+class AuthenticatedDataRequiredActionImpl @Inject()()(implicit val executionContext: ExecutionContext)
+  extends ActionRefiner[AuthenticatedOptionalDataRequest, AuthenticatedDataRequest] {
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
+  override protected def refine[A](request: AuthenticatedOptionalDataRequest[A]): Future[Either[Result, AuthenticatedDataRequest[A]]] = {
 
     request.userAnswers match {
       case None =>
         Future.successful(Left(Redirect(routes.JourneyRecoveryController.onPageLoad())))
       case Some(data) =>
-        Future.successful(Right(DataRequest(request.request, request.userId, data)))
+        Future.successful(Right(AuthenticatedDataRequest(request.request, request.credentials, request.vrn, data)))
     }
   }
 }
-
-trait DataRequiredAction extends ActionRefiner[OptionalDataRequest, DataRequest]
-
 
 class UnauthenticatedDataRequiredAction @Inject()(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[UnauthenticatedOptionalDataRequest, UnauthenticatedDataRequest] {
@@ -53,5 +53,12 @@ class UnauthenticatedDataRequiredAction @Inject()(implicit val executionContext:
       case Some(data) =>
         Right(UnauthenticatedDataRequest(request.request, request.userId, data)).toFuture
     }
+  }
+}
+
+class AuthenticatedDataRequiredAction @Inject()()(implicit executionContext: ExecutionContext) {
+
+  def apply(): AuthenticatedDataRequiredActionImpl = {
+    new AuthenticatedDataRequiredActionImpl()
   }
 }

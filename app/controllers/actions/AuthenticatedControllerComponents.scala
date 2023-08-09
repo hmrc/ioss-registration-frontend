@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import models.requests.DataRequest
+import models.requests.AuthenticatedDataRequest
 import play.api.http.FileMimeTypes
 import play.api.i18n.{Langs, MessagesApi}
 import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder, MessagesActionBuilder, MessagesControllerComponents, PlayBodyParsers}
@@ -33,14 +33,14 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def identify: AuthenticatedIdentifierAction
 
-  def getData: DataRetrievalAction
+  def getData: AuthenticatedDataRetrievalAction
 
-  def requireData: DataRequiredAction
+  def requireData: AuthenticatedDataRequiredAction
 
-//  def authAndGetData(): ActionBuilder[DataRequest, AnyContent] =
-//    identify andThen
-//      getData andThen
-//      requireData
+  def authAndGetData(): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
+    identify andThen
+      getData andThen
+      getData
 
 }
 
@@ -53,7 +53,7 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                fileMimeTypes: FileMimeTypes,
                                                                executionContext: ExecutionContext,
                                                                sessionRepository: AuthenticatedUserAnswersRepository,
-                                                               identify: IdentifierAction,
-                                                               getData: DataRetrievalAction,
-                                                               requireData: DataRequiredAction
+                                                               identify: AuthenticatedIdentifierAction,
+                                                               getData: AuthenticatedDataRetrievalAction,
+                                                               requireData: AuthenticatedDataRequiredAction
                                                              ) extends AuthenticatedControllerComponents

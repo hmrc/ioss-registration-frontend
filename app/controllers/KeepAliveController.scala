@@ -16,8 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthenticatedControllerComponents, DataRetrievalAction, IdentifierAction}
-import controllers.actions.UnauthenticatedControllerComponents
+import controllers.actions.{AuthenticatedControllerComponents, UnauthenticatedControllerComponents}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
@@ -36,7 +35,7 @@ class KeepAliveController @Inject()(
       request.userAnswers
         .map {
           answers =>
-            sessionRepository.keepAlive(answers.id).map(_ => Ok)
+            authCc.sessionRepository.keepAlive(answers.id).map(_ => Ok)
         }
         .getOrElse(Future.successful(Ok))
   }

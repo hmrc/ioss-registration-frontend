@@ -16,18 +16,20 @@
 
 package controllers.actions
 
+import models.requests.{AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest, SessionRequest}
 import models.requests.{AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest, SessionRequest, UnauthenticatedOptionalDataRequest}
 import play.api.mvc.{ActionRefiner, ActionTransformer, Result}
+import repositories.AuthenticatedUserAnswersRepository
 import repositories.{AuthenticatedUserAnswersRepository, UnauthenticatedUserAnswersRepository}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedDataRetrievalAction @Inject()(
-  authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository,
-  migrationService: DataMigrationService
-)(implicit val executionContext: ExecutionContext)
-extends ActionRefiner[AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest] {
+                                         authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository,
+                                         migrationService: DataMigrationService
+                                       )(implicit val executionContext: ExecutionContext)
+  extends ActionRefiner[AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest] {
 
   override protected def refine[A](request: AuthenticatedIdentifierRequest[A]): Future[Either[Result., AuthenticatedOptionalDataRequest[A]]] = {
 
