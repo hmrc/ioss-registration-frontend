@@ -36,9 +36,9 @@ class IndexControllerSpec extends SpecBase {
 
         val view = application.injector.instanceOf[IndexView]
 
-        status(result) mustEqual OK
+        status(result) mustBe OK
 
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustBe view()(request, messages(application)).toString
       }
     }
   }

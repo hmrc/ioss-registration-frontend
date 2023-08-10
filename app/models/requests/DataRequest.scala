@@ -23,7 +23,6 @@ case class OptionalDataRequest[A](request: Request[A], userId: String, userAnswe
 
 case class DataRequest[A](request: Request[A], userId: String, userAnswers: UserAnswers) extends WrappedRequest[A](request)
 
-
 case class UnauthenticatedOptionalDataRequest[A](
                                                   request: Request[A],
                                                   userId: String,

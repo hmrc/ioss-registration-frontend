@@ -18,6 +18,7 @@ package controllers.actions
 
 import javax.inject.Inject
 import controllers.routes
+import controllers.filters.{routes => filterRoutes}
 import models.requests.{DataRequest, OptionalDataRequest, UnauthenticatedDataRequest, UnauthenticatedOptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
@@ -48,7 +49,7 @@ class UnauthenticatedDataRequiredAction @Inject()(implicit val executionContext:
 
     request.userAnswers match {
       case None =>
-        Left(Redirect(routes.RegisteredForIossInEuController.onPageLoad())).toFuture
+        Left(Redirect(filterRoutes.RegisteredForIossInEuController.onPageLoad())).toFuture
       case Some(data) =>
         Right(UnauthenticatedDataRequest(request.request, request.userId, data)).toFuture
     }
