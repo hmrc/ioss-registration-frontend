@@ -35,10 +35,6 @@ error.number = Please enter a valid number
 error.required = Please enter a value
 error.summary.title = There is a problem
 
-index.title = ioss-registration-frontend
-index.heading = ioss-registration-frontend
-index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
-
 checkYourAnswers.title = Check Your Answers
 checkYourAnswers.heading = Check Your Answers
 
