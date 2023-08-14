@@ -67,7 +67,7 @@ cannotRegisterAlreadyRegistered.returnToBTA = <a class="govuk-link" href="/busin
 sellsGoodsToEuOrNi.title = Does your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland?
 sellsGoodsToEuOrNi.heading = Does your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland?
 sellsGoodsToEuOrNi.caption = This includes selling goods from Great Britain but not Northern Ireland.
-sellsGoodsToEuOrNi.error.required = Select yes if your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland
+sellsGoodsToEuOrNi.error.required = Select yes if your business sells goods from countries outside the EU to consumers in the EU or Northern Ireland
 sellsGoodsToEuOrNi.change.hidden = Sells goods from countries outside the EU to consumers in the EU or Northern Ireland
 
 cannotRegisterForIoss.title = You cannot register
