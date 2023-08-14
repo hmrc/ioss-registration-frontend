@@ -62,7 +62,7 @@ cannotRegisterAlreadyRegistered.title = Come back later
 cannotRegisterAlreadyRegistered.heading = Come back later
 cannotRegisterAlreadyRegistered.p1 = You can only be registered on one Import One Stop Shop scheme.
 cannotRegisterAlreadyRegistered.p2 = You can register for this service after you deregister from your current IOSS scheme.
-cannotRegisterAlreadyRegistered.returnToBTA = <a class="govuk-link" href="/business-account">Return to your BTA account</a>
+cannotRegisterAlreadyRegistered.returnToBTA = <a class="govuk-link" href="/business-account">Return to Business Tax Account</a>
 
 sellsGoodsToEuOrNi.title = Does your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland?
 sellsGoodsToEuOrNi.heading = Does your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland?
