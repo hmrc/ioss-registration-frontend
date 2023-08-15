@@ -14,30 +14,14 @@
  * limitations under the License.
  */
 
-package navigation
+package pages.filters
 
-import javax.inject.{Inject, Singleton}
-
+import controllers.filters.routes
+import pages.{Page, Waypoints}
 import play.api.mvc.Call
-import controllers.routes
-import pages._
-import models._
 
-@Singleton
-class Navigator @Inject()() {
+case object ConsignmentValueExceedsLimitPage extends Page {
 
-  private val normalRoutes: Page => UserAnswers => Call = {
-    case _ => _ => routes.IndexController.onPageLoad
-  }
-
-  private val checkRouteMap: Page => UserAnswers => Call = {
-    case _ => _ => routes.CheckYourAnswersController.onPageLoad
-  }
-
-  def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
-    case NormalMode =>
-      normalRoutes(page)(userAnswers)
-    case CheckMode =>
-      checkRouteMap(page)(userAnswers)
-  }
+  override def route(waypoints: Waypoints): Call =
+    routes.ConsignmentValueExceedsLimitController.onPageLoad(waypoints)
 }

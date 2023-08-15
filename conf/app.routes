@@ -1,21 +1,56 @@
 # microservice specific routes
 
-->          /hmrc-frontend                               hmrcfrontend.Routes
+->          /hmrc-frontend                                   hmrcfrontend.Routes
 
-GET         /                                            controllers.IndexController.onPageLoad
+GET         /                                                controllers.IndexController.onPageLoad
 
-GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                                    controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /language/:lang                              controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET         /language/:lang                                  controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
-GET         /refresh-session                             controllers.KeepAliveController.keepAlive
+GET         /refresh-session                                 controllers.KeepAliveController.keepAlive
+GET         /refresh-session-unauthenticated                 controllers.KeepAliveController.keepAliveUnauthenticated()
 
-GET         /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                              controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad
+GET         /check-your-answers                              controllers.CheckYourAnswersController.onPageLoad
 
-GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut
-GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey
-GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad
+GET         /account/sign-out-survey                         controllers.auth.AuthController.signOut
+GET         /account/sign-out                                controllers.auth.AuthController.signOutNoSurvey
+GET         /account/signed-out                              controllers.auth.SignedOutController.onPageLoad
 
-GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad
+GET         /unauthorised                                    controllers.UnauthorisedController.onPageLoad
+
+# Filter questions section
+GET         /ioss-registered                                 controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /ioss-registered                                 controllers.filters.RegisteredForIossInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /cannot-register-already-registered              controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /selling-goods-outside-single-market             controllers.filters.SellsGoodsToEuOrNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /selling-goods-outside-single-market             controllers.filters.SellsGoodsToEuOrNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /cannot-register-ioss                            controllers.filters.CannotRegisterForIossController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /goods-value                                     controllers.filters.GoodsConsignmentValueController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /goods-value                                     controllers.filters.GoodsConsignmentValueController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /do-not-need-to-account-for-eu-vat               controllers.filters.ConsignmentValueExceedsLimitController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /registered-for-vat-in-uk                        controllers.filters.RegisteredForVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /registered-for-vat-in-uk                        controllers.filters.RegisteredForVatInUkController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /cannot-register-no-vat-in-uk                    controllers.filters.CannotRegisterNoVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /ni-based                                        controllers.filters.BusinessBasedInNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /ni-based                                        controllers.filters.BusinessBasedInNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /norway-based                                    controllers.filters.NorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /norway-based                                    controllers.filters.NorwegianBasedBusinessController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /register-to-use-service                         controllers.filters.EligibleToRegisterController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /register-to-use-service                         controllers.filters.EligibleToRegisterController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /cannot-register-no-ni-or-norway-business        controllers.filters.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+# Next section

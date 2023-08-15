@@ -17,6 +17,7 @@
 package base
 
 import controllers.actions._
+import generators.Generators
 import models.UserAnswers
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
@@ -26,7 +27,11 @@ import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.FakeRequest
+
+import java.time.{Clock, Instant, LocalDate, ZoneId}
 
 trait SpecBase
   extends AnyFreeSpec
@@ -34,11 +39,15 @@ trait SpecBase
     with TryValues
     with OptionValues
     with ScalaFutures
-    with IntegrationPatience {
+    with IntegrationPatience
+    with Generators {
 
   val userAnswersId: String = "id"
 
-  def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId)
+  val arbitraryDate: LocalDate = datesBetween(LocalDate.of(2021, 7, 1), LocalDate.of(2022, 12, 31)).sample.value
+  val arbitraryInstant: Instant = arbitraryDate.atStartOfDay(ZoneId.systemDefault()).toInstant
+  val stubClockAtArbitraryDate: Clock = Clock.fixed(arbitraryInstant, ZoneId.systemDefault())
+  def emptyUserAnswers : UserAnswers = UserAnswers(userAnswersId, lastUpdated = arbitraryInstant)
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
@@ -47,6 +56,9 @@ trait SpecBase
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+        bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers))
       )
+
+  lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("", "").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 }

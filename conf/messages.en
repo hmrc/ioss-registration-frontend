@@ -35,10 +35,6 @@ error.number = Please enter a valid number
 error.required = Please enter a value
 error.summary.title = There is a problem
 
-index.title = ioss-registration-frontend
-index.heading = ioss-registration-frontend
-index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
-
 checkYourAnswers.title = Check Your Answers
 checkYourAnswers.heading = Check Your Answers
 
@@ -55,3 +51,63 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+registeredForIossInEu.title = Is your business already registered for the Import One Stop Shop scheme in an EU country?
+registeredForIossInEu.heading = Is your business already registered for the Import One Stop Shop scheme in an EU country?
+registeredForIossInEu.checkYourAnswersLabel = Already registered for the Import One Stop Shop scheme in an EU country
+registeredForIossInEu.error.required = Select yes if your business is already registered for the Import One Stop Shop scheme in an EU country
+registeredForIossInEu.change.hidden = Already registered for the Import One Stop Shop scheme in an EU country
+
+cannotRegisterAlreadyRegistered.title = Come back later
+cannotRegisterAlreadyRegistered.heading = Come back later
+cannotRegisterAlreadyRegistered.p1 = You can only be registered on one Import One Stop Shop scheme.
+cannotRegisterAlreadyRegistered.p2 = You can register for this service after you deregister from your current IOSS scheme.
+cannotRegisterAlreadyRegistered.returnToBTA = <a class="govuk-link" href="/business-account">Return to Business Tax Account</a>
+
+sellsGoodsToEuOrNi.title = Does your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland?
+sellsGoodsToEuOrNi.heading = Does your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland?
+sellsGoodsToEuOrNi.caption = This includes selling goods from Great Britain but not Northern Ireland.
+sellsGoodsToEuOrNi.error.required = Select yes if your business sells goods from countries outside the EU to consumers in the EU or Northern Ireland
+sellsGoodsToEuOrNi.change.hidden = Sells goods from countries outside the EU to consumers in the EU or Northern Ireland
+
+cannotRegisterForIoss.title = You cannot register
+cannotRegisterForIoss.heading = You cannot register
+cannotRegisterForIoss.p1 = Only use this service if you sell goods from Great Britain or other non-EU countries to consumers in the EU.
+
+goodsConsignmentValue.title = Do any of these goods have a consignment value of £135 or less?
+goodsConsignmentValue.heading = Do any of these goods have a consignment value of £135 or less?
+goodsConsignmentValue.caption = A consignment is a shipment to a consumer. It is usually on one invoice or travel document.
+goodsConsignmentValue.error.required = Select yes if any of these goods have a consignment value of £135 or less
+goodsConsignmentValue.change.hidden = Goods that have a consignment value of £135 or less
+
+consignmentValueLessThanMinimum.title = You cannot register
+consignmentValueLessThanMinimum.heading = You cannot register
+consignmentValueLessThanMinimum.p1 = Only use this service if you sell goods with a consignment value of less than £135.
+
+registeredForVatInUk.title = Is your business registered for VAT in the UK?
+registeredForVatInUk.heading = Is your business registered for VAT in the UK?
+registeredForVatInUk.error.required = Select yes if your business is registered for VAT in the UK
+registeredForVatInUk.change.hidden = Registered for vat in the UK
+
+cannotRegisterNoVatInUk.title = You cannot register
+cannotRegisterNoVatInUk.heading = You cannot register
+cannotRegisterNoVatInUk.p1 = Your business must be registered for VAT in the UK to use this service.
+
+businessBasedInNi.title = Are you a Northern Ireland business?
+businessBasedInNi.heading = Are you a Northern Ireland business?
+businessBasedInNi.caption = This means HMRC identifies your business as trading under the Northern Ireland Protocol.
+businessBasedInNi.error.required = Select yes if you are a Northern Ireland business
+businessBasedInNi.change.hidden = Northern Ireland based business
+
+norwegianBasedBusiness.title = Are you a Norwegian Business?
+norwegianBasedBusiness.heading = Are you a Norwegian Business?
+norwegianBasedBusiness.error.required = Select yes if you are a Norwegian Business
+norwegianBasedBusiness.change.hidden = Norwegian based business
+
+eligibleToRegister.title = Your business can register to use this service
+eligibleToRegister.heading = Your business can register to use this service
+eligibleToRegister.p1 = You can log into the Government Gateway service to continue registration.
+
+cannotRegisterNoNiOrNorwayBusiness.title = You cannot register
+cannotRegisterNoNiOrNorwayBusiness.heading = You cannot register
+cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a Northern Irish or Norwegian business.
