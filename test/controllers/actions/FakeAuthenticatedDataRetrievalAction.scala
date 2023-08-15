@@ -22,6 +22,7 @@ import models.requests.{AuthenticatedIdentifierRequest, AuthenticatedOptionalDat
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
 import repositories.AuthenticatedUserAnswersRepository
+import services.DataMigrationService
 import uk.gov.hmrc.domain.Vrn
 import utils.FutureSyntax.FutureOps
 

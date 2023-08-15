@@ -21,4 +21,12 @@ sealed trait ErrorResponse {
   val body: String
 }
 
+case object InvalidJson extends ErrorResponse {
+  override val body: String = "Invalid JSON received"
+}
+
+case object NotFound extends ErrorResponse {
+  override val body: String = "Not found"
+}
+
 case class UnexpectedResponseStatus(status: Int, body: String) extends ErrorResponse

@@ -16,6 +16,31 @@
 
 package services
 
-class DataMigrationService {
+import models.{SessionData, UserAnswers}
+import repositories.{AuthenticatedUserAnswersRepository, SessionRepository, UnauthenticatedUserAnswersRepository}
 
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+
+class DataMigrationService @Inject()(
+                                      authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository,
+                                      unauthenticatedUserAnswersRepository: UnauthenticatedUserAnswersRepository,
+                                      sessionRepository: SessionRepository
+                                    )(implicit executionContext: ExecutionContext) {
+  def migrate(sessionId: String, userId: String): Future[UserAnswers] = {
+    for {
+      maybeAnswers <- unauthenticatedUserAnswersRepository.get(sessionId)
+      answers = maybeAnswers.fold(UserAnswers(userId))(_.copy(id = userId))
+      success <- authenticatedUserAnswersRepository.set(answers)
+      sessionData <- sessionRepository.get(sessionId)
+      updatedSessionData = sessionData.headOption.fold(SessionData(userId))(_.copy(userId = userId))
+      _ <- sessionRepository.set(updatedSessionData)
+    } yield if (success) {
+      answers
+    } else {
+      throw DataOperationFailedError("Failed to set authenticated user answers during migration")
+    }
+  }
 }
+
+case class DataOperationFailedError(message: String) extends Exception(message)

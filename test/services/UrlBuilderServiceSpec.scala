@@ -38,7 +38,7 @@ class UrlBuilderServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar 
 
       val result = service.loginContinueUrl(FakeRequest(GET, "/foo?k=session-id"))
 
-      result mustBe "server_name/oo?k=session-id"
+      result mustBe "server_name/foo?k=session-id"
     }
   }
 

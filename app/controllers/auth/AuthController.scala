@@ -17,6 +17,7 @@
 package controllers.auth
 
 import config.FrontendAppConfig
+import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -28,15 +29,27 @@ import scala.concurrent.ExecutionContext
 
 class AuthController @Inject()(
                                 cc: AuthenticatedControllerComponents,
+                                registrationConnector: RegistrationConnector,
                                 config: FrontendAppConfig
                               )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
 
-  def onSignIn(): Action[AnyContent] = {
-    ???
+  def onSignIn(): Action[AnyContent] = cc.authAndGetOptionalData() {
+    implicit request =>
+      request.userAnswers match {
+        case Some(answers) =>
+          ???
+        case None =>
+          registrationConnector.getVatCustomerInfo().flatMap {
+            case Right(vatInfo) =>
 
+          }
+
+
+
+      }
 
   }
 

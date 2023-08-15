@@ -16,7 +16,6 @@
 
 package services
 
-import controllers.auth.{routes => authRoutes}
 import config.FrontendAppConfig
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier

@@ -16,15 +16,20 @@
 
 package connectors
 
-import models.domain.VatCustomerInfo
+import config.Service
+import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import play.api.Configuration
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class RegistrationConnector(config: Configuration, httpClient: HttpClient)
-                           (implicit executionContext: ExecutionContext) extends HttpErrorFunctions {
-  def getVatCustomerInfo()(implicit hc: HeaderCarrier): Future[VatCustomerInfo] =
-    httpClient.GET[VatCustomerInfo](s"/vat-information")
 
+class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpClient)
+                           (implicit executionContext: ExecutionContext) extends HttpErrorFunctions {
+
+  private val baseUrl: Service = config.get[Service]("microservice.services.import-one-stop-shop-registration")
+  def getVatCustomerInfo()(implicit hc: HeaderCarrier): Future[VatCustomerInfoResponse] = {
+    httpClient.GET[VatCustomerInfoResponse](s"$baseUrl/ioss-registered")
+  }
 }

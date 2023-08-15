@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import models.requests.AuthenticatedDataRequest
+import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest}
 import play.api.http.FileMimeTypes
 import play.api.i18n.{Langs, MessagesApi}
 import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder, MessagesActionBuilder, MessagesControllerComponents, PlayBodyParsers}
@@ -37,11 +37,18 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def requireData: AuthenticatedDataRequiredAction
 
-  def authAndGetData(): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
-    identify andThen
+  def authAndGetData(): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+    actionBuilder andThen
+      identify andThen
       getData andThen
-      getData
+      requireData()
+  }
 
+  def authAndGetOptionalData(): ActionBuilder[AuthenticatedOptionalDataRequest, AnyContent] = {
+    actionBuilder andThen
+      identify andThen
+      getData
+  }
 }
 
 case class DefaultAuthenticatedControllerComponents @Inject()(
