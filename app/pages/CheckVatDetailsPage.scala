@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import models._
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import controllers.routes
+import models.CheckVatDetails
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-trait ModelGenerators {
+case object CheckVatDetailsPage extends QuestionPage[CheckVatDetails] {
 
-  implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
-    Arbitrary {
-      Gen.oneOf(CheckVatDetails.values.toSeq)
-    }
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "checkVatDetails"
+
+  override def route(waypoints: Waypoints): Call =
+    routes.CheckVatDetailsController.onPageLoad(waypoints)
 }

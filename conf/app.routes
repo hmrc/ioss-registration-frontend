@@ -54,3 +54,6 @@ POST        /register-to-use-service                         controllers.filters
 GET         /cannot-register-no-ni-or-norway-business        controllers.filters.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 # Next section
+GET         /confirm-vat-details                             controllers.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /confirm-vat-details                             controllers.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+

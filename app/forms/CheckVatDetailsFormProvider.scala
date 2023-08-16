@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import models._
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import javax.inject.Inject
 
-trait ModelGenerators {
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.CheckVatDetails
 
-  implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
-    Arbitrary {
-      Gen.oneOf(CheckVatDetails.values.toSeq)
-    }
+class CheckVatDetailsFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[CheckVatDetails] =
+    Form(
+      "value" -> enumerable[CheckVatDetails]("checkVatDetails.error.required")
+    )
 }

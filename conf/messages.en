@@ -114,3 +114,11 @@ eligibleToRegister.p1 = You can log into the Government Gateway service to conti
 cannotRegisterNoNiOrNorwayBusiness.title = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.heading = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a Northern Irish or Norwegian business.
+
+checkVatDetails.title = CheckVatDetails
+checkVatDetails.heading = CheckVatDetails
+checkVatDetails.yes = DetailsIncorrect
+checkVatDetails.wrongAccount = Option 2
+checkVatDetails.checkYourAnswersLabel = CheckVatDetails
+checkVatDetails.error.required = Select checkVatDetails
+checkVatDetails.change.hidden = CheckVatDetails
