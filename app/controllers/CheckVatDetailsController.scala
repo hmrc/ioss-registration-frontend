@@ -30,11 +30,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckVatDetailsController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       cc: AuthenticatedControllerComponents,
-                                       formProvider: CheckVatDetailsFormProvider,
-                                       view: CheckVatDetailsView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                           override val messagesApi: MessagesApi,
+                                           cc: AuthenticatedControllerComponents,
+                                           formProvider: CheckVatDetailsFormProvider,
+                                           view: CheckVatDetailsView
+                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
   val form: Form[CheckVatDetails] = formProvider()
@@ -60,7 +60,7 @@ class CheckVatDetailsController @Inject()(
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckVatDetailsPage, value))
-            _              <- cc.sessionRepository.set(updatedAnswers)
+            _ <- cc.sessionRepository.set(updatedAnswers)
           } yield Redirect(CheckVatDetailsPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
       )
   }

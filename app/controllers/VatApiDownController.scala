@@ -14,33 +14,27 @@
  * limitations under the License.
  */
 
-package controllers.filters
+package controllers
 
 import controllers.actions._
-import controllers.auth.routes
 import pages.Waypoints
+
+import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.filters.EligibleToRegisterView
+import views.html.VatApiDownView
 
-import javax.inject.Inject
+class VatApiDownController @Inject()(
+                                       override val messagesApi: MessagesApi,
+                                       cc: AuthenticatedControllerComponents,
+                                       view: VatApiDownView
+                                     ) extends FrontendBaseController with I18nSupport {
 
-class EligibleToRegisterController @Inject()(
-                                              override val messagesApi: MessagesApi,
-                                              cc: UnauthenticatedControllerComponents,
-                                              view: EligibleToRegisterView
-                                            ) extends FrontendBaseController with I18nSupport {
+  protected val controllerComponents: MessagesControllerComponents = cc
 
-  val controllerComponents: MessagesControllerComponents = cc
-
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = Action {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
-      Ok(view(waypoints))
-  }
-
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = Action {
-    _ =>
-      Redirect(routes.AuthController.onSignIn())
+      Ok(view())
   }
 }

@@ -2,7 +2,7 @@
 
 ->          /hmrc-frontend                                   hmrcfrontend.Routes
 
-GET         /                                                controllers.IndexController.onPageLoad
+GET         /                                                controllers.IndexController.onPageLoad()
 
 GET         /assets/*file                                    controllers.Assets.versioned(path="/public", file: Asset)
 
@@ -18,8 +18,18 @@ GET         /check-your-answers                              controllers.CheckYo
 GET         /account/sign-out-survey                         controllers.auth.AuthController.signOut
 GET         /account/sign-out                                controllers.auth.AuthController.signOutNoSurvey
 GET         /account/signed-out                              controllers.auth.SignedOutController.onPageLoad
+GET         /account/login                                   controllers.auth.AuthController.redirectToLogin(continueUrl: String)
+GET         /account/register                                controllers.auth.AuthController.redirectToRegister(continueUrl: String)
+GET         /cannot-use-agent                                controllers.auth.AuthController.unsupportedAffinityGroup()
+GET         /provider-unsupported                            controllers.auth.AuthController.unsupportedAuthProvider(continueUrl: String)
+GET         /credential-unsupported                          controllers.auth.AuthController.insufficientEnrolments()
+GET         /account/role-unsupported                        controllers.auth.AuthController.unsupportedCredentialRole()
+
+GET         /on-sign-in                                      controllers.auth.AuthController.onSignIn()
 
 GET         /unauthorised                                    controllers.UnauthorisedController.onPageLoad
+
+GET         /registration-service-error                      controllers.VatApiDownController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 # Filter questions section
 GET         /ioss-registered                                 controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
@@ -56,4 +66,3 @@ GET         /cannot-register-no-ni-or-norway-business        controllers.filters
 # Next section
 GET         /confirm-vat-details                             controllers.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /confirm-vat-details                             controllers.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
-

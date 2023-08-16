@@ -18,16 +18,16 @@ package controllers
 
 import base.SpecBase
 import forms.CheckVatDetailsFormProvider
-import models.{CheckVatDetails, NormalMode, UserAnswers}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import models.{CheckVatDetails, UserAnswers}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{CheckVatDetailsPage, EmptyWaypoints, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{AuthenticatedUserAnswersRepository, SessionRepository}
+import repositories.AuthenticatedUserAnswersRepository
 import views.html.CheckVatDetailsView
 
 import scala.concurrent.Future
@@ -77,7 +77,7 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must save the answer and redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
@@ -100,6 +100,7 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe CheckVatDetailsPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).route.url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 

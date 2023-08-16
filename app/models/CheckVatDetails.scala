@@ -25,7 +25,9 @@ sealed trait CheckVatDetails
 object CheckVatDetails extends Enumerable.Implicits {
 
   case object Yes extends WithName("yes") with CheckVatDetails
+
   case object DetailsIncorrect extends WithName("detailsIncorrect") with CheckVatDetails
+
   case object WrongAccount extends WithName("wrongAccount") with CheckVatDetails
 
   val values: Seq[CheckVatDetails] = Seq(

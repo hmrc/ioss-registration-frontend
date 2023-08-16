@@ -55,6 +55,41 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
+vatApiDown.title = Sorry, there is a problem with the service
+vatApiDown.heading = Sorry, there is a problem with the service
+vatApiDown.tryAgain = Try again later.
+vatApiDown.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
+
+unsupportedAffinityGroup.title = You cannot use this service
+unsupportedAffinityGroup.heading = You cannot use this service
+unsupportedAffinityGroup.p1 = You signed in with a Government Gateway user ID for agent services.
+unsupportedAffinityGroup.p2 = You need to sign in with the Government Gateway user ID for the organisation or individual that is registering for the One Stop Shop Union scheme.
+
+unsupportedAuthProvider.title = You cannot use these details to register
+unsupportedAuthProvider.heading = You cannot use these details to register
+unsupportedAuthProvider.p1 = You need to use Government Gateway to
+unsupportedAuthProvider.p1.link = sign in and register
+unsupportedAuthProvider.p2 = If you do not have a Government Gateway user ID and password you should
+unsupportedAuthProvider.p2.link = create them now
+
+unsupportedCredentialRole.title = You cannot use this service
+unsupportedCredentialRole.heading = You cannot use this service
+unsupportedCredentialRole.p1 = You signed in to Government Gateway as a standard user. To register for this scheme you must be an administrator user.
+unsupportedCredentialRole.p2 = Contact the person who set up your Government Gateway.
+
+insufficientEnrolments.title = You cannot use this service
+insufficientEnrolments.heading = Sign in with a different Government Gateway
+insufficientEnrolments.p1 = Your Government Gateway user ID is not linked to a VAT registration number.
+insufficientEnrolments.haveABusinessTaxAccount = If you know you have a Business tax account where you can see your VAT details
+insufficientEnrolments.enteredWrongGGUserID = You have entered the wrong Government Gateway user ID.
+insufficientEnrolments.signInWithYourGGUserID.link.text = Sign in with your Government Gateway user ID
+insufficientEnrolments.usedToSeeVATReturns = used to see VAT returns.
+insufficientEnrolments.cannotSeeVATDetailsInBTA = If you cannot see VAT details in the Business tax account for the business you want to register
+insufficientEnrolments.businessTaxAccount.link.text = Link your Government Gateway user ID to your VAT registration number in your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">Business tax account (opens in new tab)</a>.
+insufficientEnrolments.goToManageAccount = Go to ''Manage account'', then ''Get online access to a tax, duty or scheme''.
+insufficientEnrolments.yourBusinessIsNotRegistered = If your business is not registered for UK VAT
+insufficientEnrolments.registerForUkVat = Register for UK VAT (opens in new tab)
+
 registeredForIossInEu.title = Is your business already registered for the Import One Stop Shop scheme in an EU country?
 registeredForIossInEu.heading = Is your business already registered for the Import One Stop Shop scheme in an EU country?
 registeredForIossInEu.checkYourAnswersLabel = Already registered for the Import One Stop Shop scheme in an EU country
