@@ -17,16 +17,16 @@
 package connectors
 
 import base.SpecBase
+import com.github.tomakehurst.wiremock.client.WireMock._
 import models.domain.VatCustomerInfo
+import models.responses.{InvalidJson, NotFound, UnexpectedResponseStatus}
+import org.scalacheck.Gen
 import play.api.Application
+import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
-import com.github.tomakehurst.wiremock.client.WireMock._
-import models.responses.{InvalidJson, NotFound, UnexpectedResponseStatus}
-import org.scalacheck.Gen
-import play.api.http.Status.{BAD_GATEWAY, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_IMPLEMENTED, SERVICE_UNAVAILABLE}
 
 
 class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
@@ -35,11 +35,12 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
   private def application: Application =
     applicationBuilder()
+      .configure("microservice.services.ioss-registration.port" -> server.port)
       .build()
 
   ".getCustomerVatInfo" - {
 
-    val url: String = "http://localhost:10190/vat-information"
+    val url: String = "/ioss-registration/vat-information"
 
     "must return vat information when the backend returns some" in {
 
