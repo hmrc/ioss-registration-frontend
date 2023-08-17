@@ -21,7 +21,7 @@ import models.requests.AuthenticatedIdentifierRequest
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.{Request, Result}
 import services.UrlBuilderService
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.{AuthConnector, Enrolments}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
 
@@ -37,6 +37,7 @@ class FakeAuthenticatedIdentifierAction extends AuthenticatedIdentifierAction(
     Future.successful(Right(AuthenticatedIdentifierRequest(
       request,
       Credentials("12345-credId", "GGW"),
-      Vrn("123456789")
+      Vrn("123456789"),
+      Enrolments(Set.empty)
     )))
 }

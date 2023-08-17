@@ -38,8 +38,7 @@ class DataMigrationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaF
   val sessionRepository: SessionRepository = mock[SessionRepository]
 
   override def beforeEach(): Unit = {
-    reset(authenticatedUserAnswersRepository)
-    reset(unauthenticatedUserAnswersRepository)
+    reset(authenticatedUserAnswersRepository, unauthenticatedUserAnswersRepository)
   }
 
   ".migrate" - {

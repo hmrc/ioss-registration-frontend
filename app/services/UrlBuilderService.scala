@@ -17,6 +17,7 @@
 package services
 
 import config.FrontendAppConfig
+import controllers.auth.{routes => authRoutes}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -36,7 +37,7 @@ class UrlBuilderService @Inject()(config: FrontendAppConfig) {
       .getOrElse(request.uri)
   }
 
-  // TODO - IdentityVerificationController
+  // TODO -> IdentityVerificationController
 //  def ivFailureUrl(request: Request[_]): String =
-//    config.loginContinueUrl + authRoutes.???
+//    config.loginContinueUrl + authRoutes.IdentityVerificationController.handleFailure(loginContinueUrl(request), None).url
 }

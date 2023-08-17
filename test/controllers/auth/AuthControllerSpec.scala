@@ -19,19 +19,22 @@ package controllers.auth
 import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
+import controllers.auth.{routes => authRoutes}
+import models.{UserAnswers, VatApiCallResult, responses}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
+import pages.{CheckVatDetailsPage, EmptyWaypoints, VatApiDownPage, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{AuthenticatedUserAnswersRepository, SessionRepository}
-import models.responses
-import org.scalatest.BeforeAndAfterEach
+import queries.VatApiCallResultQuery
+import repositories.AuthenticatedUserAnswersRepository
+import utils.FutureSyntax.FutureOps
 import views.html.auth.{InsufficientEnrolmentsView, UnsupportedAffinityGroupView, UnsupportedAuthProviderView, UnsupportedCredentialRoleView}
 
 import java.net.URLEncoder
-import scala.concurrent.Future
 
 class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
@@ -39,40 +42,192 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
   private val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
 
   private val continueUrl: String = "continueUrl"
+  private val waypoints: Waypoints = EmptyWaypoints
+
+  private def appBuilder(answers: Option[UserAnswers]) =
+    applicationBuilder(answers)
+      .overrides(
+        bind[RegistrationConnector].toInstance(mockRegistrationConnector),
+        bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository)
+  )
+
+  override def beforeEach(): Unit = {
+    reset(mockRegistrationConnector)
+    reset(mockAuthenticatedUserAnswersRepository)
+  }
 
   ".onSignIn" - {
 
     "when we already have some user answers" - {
 
+      "and we have a made a call to get VAT info" - {
+
+        "must redirect to the next page without making calls to get data or updating the users answers" in {
+
+          val answers = emptyUserAnswers.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+          val application = appBuilder(Some(answers)).build()
+
+          running(application) {
+            val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+            val result = route(application, request).value
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+            verifyNoInteractions(mockRegistrationConnector)
+            verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+          }
+        }
+      }
+
+      "and we have not yet made a call to get VAT info" - {
+
+        "and we can find their VAT details" - {
+
+          "must create user answers with their VAT details, then redirect to the next page" in {
+
+            val application = appBuilder(Some(emptyUserAnswers)).build()
+
+            when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+            running(application) {
+
+              val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+              val result = route(application, request).value
+
+              val expectedAnswers = emptyUserAnswersWithVatInfo.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+              verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+            }
+          }
+        }
+
+        "and we cannot find their VAT details" - {
+
+          "must redirect to VAT API down page" in {
+
+            val application = appBuilder(Some(emptyUserAnswers)).build()
+
+            when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(responses.NotFound).toFuture
+            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+            running(application) {
+
+              val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+              val result = route(application, request).value
+
+              val expectedAnswers = emptyUserAnswers.set(VatApiCallResultQuery, VatApiCallResult.Error).success.value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
+              verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+            }
+          }
+        }
+
+        "and the call to get their VAT details fails" - {
+
+          val failureResponse = responses.UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "foo")
+
+          "must return an internal server error" in {
+
+            val application = appBuilder(None).build()
+
+            when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(failureResponse).toFuture
+            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+            running(application) {
+
+              val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+              val result = route(application, request).value
+
+              val expectedAnswers = emptyUserAnswers.set(VatApiCallResultQuery, VatApiCallResult.Error).success.value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
+              verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+            }
+          }
+        }
+      }
     }
 
     "when we don't already have some user answers" - {
+
+      "and we can find their VAT details" - {
+
+        "must create user answers with their VAT details, then redirect to the next page" in {
+
+          val application = appBuilder(None).build()
+
+          when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+          when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+          running(application) {
+            val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+            val result = route(application, request).value
+
+            val expectedAnswers = emptyUserAnswersWithVatInfo.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+            verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+          }
+        }
+      }
+
+      "and we cannot find their VAT details" - {
+
+        "must redirect to VAT API down page" in {
+
+          val application = appBuilder(None).build()
+
+          when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(responses.NotFound).toFuture
+          when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+          running(application) {
+
+            val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+            val result = route(application, request).value
+
+            val expectedAnswers = emptyUserAnswers.set(VatApiCallResultQuery, VatApiCallResult.Error).success.value
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
+            verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+          }
+        }
+
+      }
 
       "and the call to get their vat details fails" - {
 
         val failureResponse = responses.UnexpectedResponseStatus(INTERNAL_SERVER_ERROR, "foo")
 
-//        "must return an internal server error" in {
-//
-//          val application = applicationBuilder(None).build()
-//
-//          running(application) {
-//
-//            val request = FakeRequest(GET, routes.AuthController.onSignIn().url)
-//            val result = route(application, request).value
-//
-//            val expectedAnswers = emptyUserAnswers.set(???, ???).success.value
-//
-//            status(result) mustBe SEE_OTHER
-//            redirectLocation(result).value mustBe routes.???
-//
-//          }
-//
-//        }
+        "must return an internal server error" in {
 
+          val application = appBuilder(None).build()
+
+          when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(failureResponse).toFuture
+          when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+          running(application) {
+
+            val request = FakeRequest(GET, routes.AuthController.onSignIn().url)
+            val result = route(application, request).value
+
+            val expectedAnswers = emptyUserAnswers.set(VatApiCallResultQuery, VatApiCallResult.Error).success.value
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
+            verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+          }
+        }
       }
     }
-
   }
 
   ".redirectToRegister" - {

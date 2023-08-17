@@ -19,6 +19,7 @@ package controllers.actions
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.routes
+import controllers.auth.{routes => authRoutes}
 import logging.Logging
 import models.requests.{AuthenticatedIdentifierRequest, SessionRequest}
 import play.api.mvc.Results._
@@ -64,22 +65,19 @@ class AuthenticatedIdentifierAction @Inject()(
         Retrievals.credentialRole) {
 
       case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == User =>
-        println("******USER*******")
         findVrnFromEnrolments(enrolments) match {
-          case Some(vrn) => Right(AuthenticatedIdentifierRequest(request, credentials, vrn)).toFuture
+          case Some(vrn) => Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments)).toFuture
           case _ => throw InsufficientEnrolments()
         }
 
       case _ ~ _ ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == Assistant =>
-        println("******Assistant*******")
         throw UnsupportedCredentialRole()
 
       case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
-        println("******Individual*******")
         findVrnFromEnrolments(enrolments) match {
           case Some(vrn) =>
             if (confidence >= ConfidenceLevel.L200) {
-              Right(AuthenticatedIdentifierRequest(request, credentials, vrn)).toFuture
+              Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments)).toFuture
             } else {
               throw InsufficientConfidenceLevel()
             }
@@ -96,8 +94,36 @@ class AuthenticatedIdentifierAction @Inject()(
         logger.info("No active session")
         Left(Redirect(config.loginUrl, Map("continue" -> Seq(urlBuilderService.loginContinueUrl(request))))).toFuture
 
+      case _: UnsupportedAffinityGroup =>
+        logger.info("Unsupported affinity group")
+        Left(Redirect(authRoutes.AuthController.unsupportedAffinityGroup())).toFuture
+
+      case _: UnsupportedAuthProvider =>
+        logger.info("Unsupported auth provider")
+        Left(Redirect(authRoutes.AuthController.unsupportedAuthProvider(urlBuilderService.loginContinueUrl(request)))).toFuture
+
+      case _: UnsupportedCredentialRole =>
+        logger.info("Unsupported credential role")
+        Left(Redirect(authRoutes.AuthController.unsupportedCredentialRole())).toFuture
+
+      case _: InsufficientEnrolments =>
+        logger.info("Insufficient enrolments")
+        Left(Redirect(authRoutes.AuthController.insufficientEnrolments())).toFuture
+
+      case _: IncorrectCredentialStrength =>
+        logger.info("Incorrect credential strength")
+        upliftCredentialStrength(request)
+
+      case _: InsufficientConfidenceLevel =>
+        logger.info("Insufficient confidence level")
+        upliftConfidenceLevel(request)
+
       case e: AuthorisationException =>
         logger.info("Authorisation Exception", e.getMessage)
+        Left(Redirect(routes.UnauthorisedController.onPageLoad)).toFuture
+
+      case e: UnauthorizedException =>
+        logger.info("Unauthorised Exception", e.getMessage)
         Left(Redirect(routes.UnauthorisedController.onPageLoad)).toFuture
     }
   }
@@ -113,6 +139,26 @@ class AuthenticatedIdentifierAction @Inject()(
           enrolment.identifiers.find(_.key == "VATRegNo").map(e => Vrn(e.value))
       }
 
+  private def upliftCredentialStrength[A](request: Request[A]): IdentifierActionResult[A] =
+    Left(Redirect(
+      config.mfaUpliftUrl,
+      Map(
+        "origin" -> Seq(config.origin),
+        "continueUrl" -> Seq(urlBuilderService.loginContinueUrl(request))
+      )
+    )).toFuture
+
+  private def upliftConfidenceLevel[A](request: Request[A]): IdentifierActionResult[A] =
+    Left(Redirect(
+      config.ivUpliftUrl,
+      Map(
+        "origin" -> Seq(config.origin),
+        "confidenceLevel" -> Seq(ConfidenceLevel.L200.toString),
+        "completionUrl" -> Seq(urlBuilderService.loginContinueUrl(request)),
+//        "failureUrl" -> Seq(urlBuilderService.ivFailureUrl(request)) TODO ->
+      )
+    )
+    ).toFuture
 }
 
 class SessionIdentifierAction @Inject()()(implicit val executionContext: ExecutionContext)
