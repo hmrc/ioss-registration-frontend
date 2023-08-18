@@ -10,6 +10,7 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.tryAgain = Try again
 
 date.day = Day
 date.month = Month
@@ -93,6 +94,48 @@ insufficientEnrolments.registerForUkVat = Register for UK VAT (opens in new tab)
 ivFailedIdentityVerification.title = We could not confirm your identity
 ivFailedIdentityVerification.heading = We could not confirm your identity
 ivFailedIdentityVerification.p = We could not confirm your identity
+
+ivError.title = Sorry, there is a problem with the service
+ivError.heading = Sorry, there is a problem with the service
+
+ivIncomplete.title = Sorry, there is a problem with the service
+ivIncomplete.heading = Sorry, there is a problem with the service
+ivIncomplete.p = Try again later.
+
+ivInsufficientEvidence.title = We could not confirm your identity online
+ivInsufficientEvidence.heading = We could not confirm your identity online
+ivInsufficientEvidence.p = You will need to contact HMRC by phone to confirm your identity.
+
+ivLockedOut.title = We could not confirm your identity
+ivLockedOut.heading = We could not confirm your identity
+ivLockedOut.p = You have entered information that does not match our records too many times. For security reasons, you must wait 24 hours and then sign in to try again.
+
+ivPreconditionFailed.title = Sorry, there is a problem
+ivPreconditionFailed.heading = Sorry, there is a problem
+ivPreconditionFailed.p = Try again later.
+
+ivTechnicalIssue.title = Sorry, there is a problem with the service
+ivTechnicalIssue.heading = Sorry, there is a problem with the service
+
+ivTimeout.title = Sorry, there is a problem with the service
+ivTimeout.heading = Sorry, there is a problem with the service
+
+ivUserAborted.title = Sorry, there is a problem with the service
+ivUserAborted.heading = Sorry, there is a problem with the service
+ivUserAborted.p1 = We are unable to validate your details at the moment. Select another method of verification or try again later.
+
+ivNotEnoughEvidenceSources.title = You have registered for Government Gateway but cannot claim yet
+ivNotEnoughEvidenceSources.heading = You have registered for Government Gateway but cannot claim yet
+ivNotEnoughEvidenceSources.p1 = We are limiting the number of people who can access our services at one time.
+ivNotEnoughEvidenceSources.p2 = You can try again later by signing into Government Gateway.
+
+ivFailedMatching.title = We could not confirm your identity
+ivFailedMatching.heading = We could not confirm your identity
+ivFailedMatching.p = We could not confirm your identity.
+
+ivFailed.title = We could not confirm your identity
+ivFailed.heading = We could not confirm your identity
+ivFailed.p = We could not confirm your identity
 
 registeredForIossInEu.title = Is your business already registered for the Import One Stop Shop scheme in an EU country?
 registeredForIossInEu.heading = Is your business already registered for the Import One Stop Shop scheme in an EU country?

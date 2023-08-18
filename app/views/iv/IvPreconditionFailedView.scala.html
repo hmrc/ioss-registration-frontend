@@ -18,11 +18,13 @@
         layout: templates.Layout
 )
 
-@(continueUrl: String)(implicit request: Request[_], messages: Messages)
+@()(implicit request: Request[_], messages: Messages)
 
-    @layout(pageTitle = titleNoForm(messages("ivFailedIdentityVerification.title")), showBackLink = false) {
+    @layout(pageTitle = titleNoForm(messages("ivPreconditionFailed.title")), showBackLink = false) {
 
-        <h1 class="govuk-heading-l">@messages("ivFailedIdentityVerification.heading")</h1>
+        <h1 class="govuk-heading-l">@messages("ivPreconditionFailed.heading")</h1>
 
-        <p class="govuk-body">@messages("ivFailedIdentityVerification.p")</p>
-    }
+        <p class="govuk-body">@messages("ivPreconditionFailed.p")</p>
+
+        <a href="https://www.gov.uk" class="govuk-link">@messages("site.govuk")</a>
+}

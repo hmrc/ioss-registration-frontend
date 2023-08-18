@@ -20,9 +20,15 @@
 
 @(continueUrl: String)(implicit request: Request[_], messages: Messages)
 
-    @layout(pageTitle = titleNoForm(messages("ivFailedIdentityVerification.title")), showBackLink = false) {
+    @layout(pageTitle = titleNoForm(messages("ivUserAborted.title")), showBackLink = false) {
 
-        <h1 class="govuk-heading-l">@messages("ivFailedIdentityVerification.heading")</h1>
+        <h1 class="govuk-heading-l">@messages("ivUserAborted.heading")</h1>
 
-        <p class="govuk-body">@messages("ivFailedIdentityVerification.p")</p>
+        <p class="govuk-body">@messages("ivUserAborted.p1")</p>
+
+        <a href="@continueUrl" class="govuk-button" data-module="govuk-button" role="button" draggable="false">
+        @messages("site.tryAgain")
+        </a>
+
+        <a href="https://www.gov.uk" class="govuk-link">@messages("site.govuk")</a>
     }

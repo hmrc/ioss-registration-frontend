@@ -37,7 +37,6 @@ class UrlBuilderService @Inject()(config: FrontendAppConfig) {
       .getOrElse(request.uri)
   }
 
-  // TODO -> IdentityVerificationController
-//  def ivFailureUrl(request: Request[_]): String =
-//    config.loginContinueUrl + authRoutes.IdentityVerificationController.handleFailure(loginContinueUrl(request), None).url
+  def ivFailureUrl(request: Request[_]): String =
+    config.loginContinueUrl + authRoutes.IdentityVerificationController.handleIvFailure(loginContinueUrl(request), None).url
 }

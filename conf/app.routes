@@ -17,7 +17,17 @@ GET         /check-your-answers                              controllers.CheckYo
 
 GET         /identity-problem                                controllers.auth.IdentityVerificationController.identityError(continueUrl: String)
 GET         /identity-complete                               controllers.auth.IdentityVerificationController.handleIvFailure(continueUrl: String, journeyId: Option[String])
-
+GET         /iv/error                                        controllers.auth.IvReturnController.error()
+GET         /iv/incomplete                                   controllers.auth.IvReturnController.incomplete()
+GET         /iv/insufficient-evidence                        controllers.auth.IvReturnController.insufficientEvidence()
+GET         /iv/locked-out                                   controllers.auth.IvReturnController.lockedOut()
+GET         /iv/precondition-failed                          controllers.auth.IvReturnController.preconditionFailed()
+GET         /iv/technical-issue                              controllers.auth.IvReturnController.technicalIssue()
+GET         /iv/timeout                                      controllers.auth.IvReturnController.timeout()
+GET         /iv/user-aborted                                 controllers.auth.IvReturnController.userAborted(continueUrl: String)
+GET         /iv/insufficient-evidence-sources                controllers.auth.IvReturnController.notEnoughEvidenceSources()
+GET         /iv/failed-matching                              controllers.auth.IvReturnController.failedMatching(continueUrl: String)
+GET         /iv/failed-identity-verification                 controllers.auth.IvReturnController.failed(continueUrl: String)
 
 GET         /account/sign-out-survey                         controllers.auth.AuthController.signOut
 GET         /account/sign-out                                controllers.auth.AuthController.signOutNoSurvey

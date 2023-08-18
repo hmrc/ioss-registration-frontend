@@ -17,6 +17,7 @@
 package controllers.auth
 
 import connectors.IdentityVerificationConnector
+import controllers.auth.{routes => authRoutes}
 import models.iv.IdentityVerificationResult._
 import models.iv._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -36,7 +37,8 @@ class IdentityVerificationController @Inject()(
                                                 val controllerComponents: MessagesControllerComponents,
                                                 ivConnector: IdentityVerificationConnector,
                                                 view: IdentityProblemView
-                                              )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                              )(implicit ec: ExecutionContext)
+  extends FrontendBaseController with I18nSupport {
 
   def identityError(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
@@ -59,28 +61,28 @@ class IdentityVerificationController @Inject()(
           ivConnector.getJourneyStatus(id).flatMap {
             case Some(result: IdentityVerificationResult) =>
               result match {
-                case InsufficientEvidence       => ??? // TODO -> handleInsufficientEvidence()
+                case InsufficientEvidence       => handleInsufficientEvidence()
                 case Success                    => Redirect(continueUrl).toFuture
-                case Incomplete                 => Redirect(routes.IvReturnController.incomplete().url).toFuture
-                case FailedMatching             => Redirect(routes.IvReturnController.failedMatching(continueUrl).url).toFuture
-                case FailedIdentityVerification => Redirect(routes.IvReturnController.failed(continueUrl).url).toFuture
-                case UserAborted                => Redirect(routes.IvReturnController.userAborted(continueUrl).url).toFuture
-                case LockedOut                  => Redirect(routes.IvReturnController.lockedOut().url).toFuture
-                case PrecondFailed              => Redirect(routes.IvReturnController.preconditionFailed().url).toFuture
-                case TechnicalIssue             => Redirect(routes.IvReturnController.technicalIssue().url).toFuture
-                case TimeOut                    => Redirect(routes.IvReturnController.timeOut().url).toFuture
+                case Incomplete                 => Redirect(authRoutes.IvReturnController.incomplete().url).toFuture
+                case FailedMatching             => Redirect(authRoutes.IvReturnController.failedMatching(continueUrl).url).toFuture
+                case FailedIdentityVerification => Redirect(authRoutes.IvReturnController.failed(continueUrl).url).toFuture
+                case UserAborted                => Redirect(authRoutes.IvReturnController.userAborted(continueUrl).url).toFuture
+                case LockedOut                  => Redirect(authRoutes.IvReturnController.lockedOut().url).toFuture
+                case PrecondFailed              => Redirect(authRoutes.IvReturnController.preconditionFailed().url).toFuture
+                case TechnicalIssue             => Redirect(authRoutes.IvReturnController.technicalIssue().url).toFuture
+                case TimeOut                    => Redirect(authRoutes.IvReturnController.timeout().url).toFuture
               }
             case _ =>
-              Redirect(routes.IvReturnController.error().url).toFuture
+              Redirect(authRoutes.IvReturnController.error().url).toFuture
           }
       }.getOrElse {
-        Redirect(routes.IdentityVerificationController.identityError(continueUrl).url).toFuture
+        Redirect(authRoutes.IdentityVerificationController.identityError(continueUrl).url).toFuture
       }
   }
 
   private def handleInsufficientEvidence()(implicit hc: HeaderCarrier): Future[Result] =
     ivConnector.getDisabledEvidenceSource().map {
-      case list if allSourcesDisabled(list) => Redirect(routes.IvReturnController.notEnoughEvidenceSources().url)
-      case _                                => Redirect(routes.IvReturnController.insufficientEvidence().url)
+      case list if allSourcesDisabled(list) => Redirect(authRoutes.IvReturnController.notEnoughEvidenceSources().url)
+      case _                                => Redirect(authRoutes.IvReturnController.insufficientEvidence().url)
     }
 }
