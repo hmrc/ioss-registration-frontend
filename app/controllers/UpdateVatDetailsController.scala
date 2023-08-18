@@ -16,19 +16,25 @@
 
 package controllers
 
-import play.api.i18n.I18nSupport
+import controllers.actions._
+import pages.Waypoints
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.UnauthorisedView
+import views.html.UpdateVatDetailsView
 
 import javax.inject.Inject
 
-class UnauthorisedController @Inject()(
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: UnauthorisedView
-                                      ) extends FrontendBaseController with I18nSupport {
+class UpdateVatDetailsController @Inject()(
+                                            override val messagesApi: MessagesApi,
+                                            cc: AuthenticatedControllerComponents,
+                                            view: UpdateVatDetailsView
+                                          ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = Action { implicit request =>
-    Ok(view())
+  protected val controllerComponents: MessagesControllerComponents = cc
+
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
+    implicit request =>
+      Ok(view())
   }
 }

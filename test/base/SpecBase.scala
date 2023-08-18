@@ -18,12 +18,13 @@ package base
 
 import controllers.actions._
 import generators.Generators
-import models.{DesAddress, UserAnswers}
 import models.domain.VatCustomerInfo
+import models.{DesAddress, UserAnswers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
+import pages.filters.RegisteredForIossInEuPage
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
@@ -68,6 +69,8 @@ trait SpecBase
   def testCredentials: Credentials = Credentials(userAnswersId, "GGW")
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, lastUpdated = arbitraryInstant)
   def emptyUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.copy(vatInfo = Some(vatCustomerInfo))
+  def basicUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.set(RegisteredForIossInEuPage, false).success.value.copy(vatInfo = Some(vatCustomerInfo))
+
 
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, clock: Option[Clock] = None): GuiceApplicationBuilder = {
 

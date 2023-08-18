@@ -120,11 +120,11 @@ class AuthenticatedIdentifierAction @Inject()(
 
       case e: AuthorisationException =>
         logger.info("Authorisation Exception", e.getMessage)
-        Left(Redirect(routes.UnauthorisedController.onPageLoad)).toFuture
+        Left(Redirect(routes.UnauthorisedController.onPageLoad())).toFuture
 
       case e: UnauthorizedException =>
         logger.info("Unauthorised Exception", e.getMessage)
-        Left(Redirect(routes.UnauthorisedController.onPageLoad)).toFuture
+        Left(Redirect(routes.UnauthorisedController.onPageLoad())).toFuture
     }
   }
 

@@ -27,9 +27,9 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import repositories.{AuthenticatedUserAnswersRepository, SessionRepository, UnauthenticatedUserAnswersRepository}
+import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class DataMigrationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with Matchers with BeforeAndAfterEach {
 
@@ -53,10 +53,10 @@ class DataMigrationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val json = Json.obj("foo" -> "bar")
         val unauthenticatedData = UserAnswers(sessionId, json, None)
 
-        when(unauthenticatedUserAnswersRepository.get(any())) thenReturn Future.successful(Some(unauthenticatedData))
-        when(authenticatedUserAnswersRepository.set(any())) thenReturn Future.successful(true)
-        when(sessionRepository.get(any())) thenReturn Future.successful(Seq.empty)
-        when(sessionRepository.set(any())) thenReturn Future.successful(true)
+        when(unauthenticatedUserAnswersRepository.get(any())) thenReturn Some(unauthenticatedData).toFuture
+        when(authenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+        when(sessionRepository.get(any())) thenReturn Seq.empty.toFuture
+        when(sessionRepository.set(any())) thenReturn true.toFuture
 
         val service = new DataMigrationService(authenticatedUserAnswersRepository, unauthenticatedUserAnswersRepository, sessionRepository)
 
@@ -75,10 +75,10 @@ class DataMigrationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val captor = ArgumentCaptor.forClass(classOf[UserAnswers])
         val emptyJson = Json.obj()
 
-        when(unauthenticatedUserAnswersRepository.get(any())) thenReturn Future.successful(None)
-        when(authenticatedUserAnswersRepository.set(any())) thenReturn Future.successful(true)
-        when(sessionRepository.get(any())) thenReturn Future.successful(Seq.empty)
-        when(sessionRepository.set(any())) thenReturn Future.successful(true)
+        when(unauthenticatedUserAnswersRepository.get(any())) thenReturn None.toFuture
+        when(authenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+        when(sessionRepository.get(any())) thenReturn Seq.empty.toFuture
+        when(sessionRepository.set(any())) thenReturn true.toFuture
 
         val service = new DataMigrationService(authenticatedUserAnswersRepository, unauthenticatedUserAnswersRepository, sessionRepository)
 
@@ -97,10 +97,10 @@ class DataMigrationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val json = Json.obj("foo" -> "bar")
         val unauthenticatedData = UserAnswers(sessionId, json, None)
 
-        when(unauthenticatedUserAnswersRepository.get(any())) thenReturn Future.successful(Some(unauthenticatedData))
-        when(authenticatedUserAnswersRepository.set(any())) thenReturn Future.successful(false)
-        when(sessionRepository.get(any())) thenReturn Future.successful(Seq.empty)
-        when(sessionRepository.set(any())) thenReturn Future.successful(true)
+        when(unauthenticatedUserAnswersRepository.get(any())) thenReturn Some(unauthenticatedData).toFuture
+        when(authenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
+        when(sessionRepository.get(any())) thenReturn Seq.empty.toFuture
+        when(sessionRepository.set(any())) thenReturn true.toFuture
 
         val service = new DataMigrationService(authenticatedUserAnswersRepository, unauthenticatedUserAnswersRepository, sessionRepository)
 

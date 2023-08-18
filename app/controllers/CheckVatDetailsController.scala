@@ -19,11 +19,13 @@ package controllers
 import controllers.actions._
 import forms.CheckVatDetailsFormProvider
 import models.CheckVatDetails
-import pages.{CheckVatDetailsPage, Waypoints}
+import pages.{CheckVatDetailsPage, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
+import viewmodels.CheckVatDetailsViewModel
 import views.html.CheckVatDetailsView
 
 import javax.inject.Inject
@@ -42,26 +44,40 @@ class CheckVatDetailsController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(CheckVatDetailsPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
+      request.userAnswers.vatInfo match {
+        case Some(vatInfo) =>
+          val preparedForm = request.userAnswers.get(CheckVatDetailsPage) match {
+            case None => form
+            case Some(value) => form.fill(value)
+          }
 
-      Ok(view(preparedForm, waypoints))
+          val viewModel = CheckVatDetailsViewModel(request.vrn, vatInfo)
+          Ok(view(preparedForm, waypoints, viewModel))
+
+        case None =>
+          Redirect(JourneyRecoveryPage.route(waypoints))
+      }
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+      request.userAnswers.vatInfo match {
+        case Some(vatInfo) =>
+          form.bindFromRequest().fold(
+            formWithErrors => {
+              val viewModel = CheckVatDetailsViewModel(request.vrn, vatInfo)
+              BadRequest(view(formWithErrors, waypoints, viewModel)).toFuture
+            },
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckVatDetailsPage, value))
-            _ <- cc.sessionRepository.set(updatedAnswers)
-          } yield Redirect(CheckVatDetailsPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
-      )
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckVatDetailsPage, value))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(CheckVatDetailsPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+          )
+        case None =>
+          Redirect(JourneyRecoveryPage.route(waypoints)).toFuture
+      }
   }
 }

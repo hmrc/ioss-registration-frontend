@@ -197,10 +197,26 @@ cannotRegisterNoNiOrNorwayBusiness.title = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.heading = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a Northern Irish or Norwegian business.
 
-checkVatDetails.title = CheckVatDetails
-checkVatDetails.heading = CheckVatDetails
-checkVatDetails.yes = DetailsIncorrect
-checkVatDetails.wrongAccount = Option 2
-checkVatDetails.checkYourAnswersLabel = CheckVatDetails
-checkVatDetails.error.required = Select checkVatDetails
-checkVatDetails.change.hidden = CheckVatDetails
+checkVatDetails.title = Confirm VAT details for your business
+checkVatDetails.heading = Confirm VAT details for your business
+checkVatDetails.error.required = Select if you want to register this business for the One Stop Shop Union scheme
+checkVatDetails.question = Do you want to register this business for the One Stop Shop Union scheme?
+checkVatDetails.vrn = UK VAT registration number
+checkVatDetails.organisationName = Business name
+checkVatDetails.individualName = Name
+checkVatDetails.partOfVatGroup = Part of a UK VAT group
+checkVatDetails.address = Principal place of business address
+checkVatDetails.yes = Yes
+checkVatDetails.detailsIncorrect = Yes, but some of my VAT details are incorrect
+checkVatDetails.wrongAccount = No, I want to register a different business
+
+useOtherAccount.title = Sign in with a different Government Gateway user ID
+useOtherAccount.heading = Sign in with a different Government Gateway user ID
+useOtherAccount.p1 = You signed in with a Government Gateway user ID that is linked to VAT registration number {0}.
+useOtherAccount.p2.1 = You need to
+useOtherAccount.p2.link.text = sign in with a different Government Gateway user ID
+useOtherAccount.p2.2 = if you want to register for a business with a different VAT registration number.
+
+updateVatDetails.title = Update your VAT details
+updateVatDetails.heading = Update your VAT details
+updateVatDetails.guidance = Sign into your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.

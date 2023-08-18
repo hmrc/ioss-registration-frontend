@@ -19,9 +19,10 @@ package controllers
 import controllers.actions.{AuthenticatedControllerComponents, UnauthenticatedControllerComponents}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class KeepAliveController @Inject()(
                                      authCc: AuthenticatedControllerComponents,
@@ -37,7 +38,7 @@ class KeepAliveController @Inject()(
           answers =>
             authCc.sessionRepository.keepAlive(answers.id).map(_ => Ok)
         }
-        .getOrElse(Future.successful(Ok))
+        .getOrElse(Ok.toFuture)
   }
 
   def keepAliveUnauthenticated: Action[AnyContent] = unauthCC.identifyAndGetOptionalData.async {
@@ -47,6 +48,6 @@ class KeepAliveController @Inject()(
           answers =>
             unauthCC.sessionRepository.keepAlive(answers.id).map(_ => Ok)
         }
-        .getOrElse(Future.successful(Ok))
+        .getOrElse(Ok.toFuture)
   }
 }

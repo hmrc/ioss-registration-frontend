@@ -18,19 +18,21 @@ package controllers
 
 import base.SpecBase
 import forms.CheckVatDetailsFormProvider
-import models.{CheckVatDetails, UserAnswers}
+import models.CheckVatDetails
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
+import pages.filters.RegisteredForIossInEuPage
 import pages.{CheckVatDetailsPage, EmptyWaypoints, Waypoints}
 import play.api.data.Form
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
+import utils.FutureSyntax.FutureOps
+import viewmodels.CheckVatDetailsViewModel
 import views.html.CheckVatDetailsView
-
-import scala.concurrent.Future
 
 class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
 
@@ -45,7 +47,7 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
         val request = FakeRequest(GET, checkVatDetailsRoute)
@@ -53,15 +55,17 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[CheckVatDetailsView]
+        implicit val msgs: Messages = messages(application)
+        val viewModel = CheckVatDetailsViewModel(vrn, vatCustomerInfo)
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form, waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form, waypoints, viewModel)(request, implicitly).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(CheckVatDetailsPage, CheckVatDetails.values.head).success.value
+      val userAnswers = basicUserAnswersWithVatInfo.set(CheckVatDetailsPage, CheckVatDetails.values.head).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -69,11 +73,13 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
         val request = FakeRequest(GET, checkVatDetailsRoute)
 
         val view = application.injector.instanceOf[CheckVatDetailsView]
+        implicit val msgs: Messages = messages(application)
+        val viewModel = CheckVatDetailsViewModel(vrn, vatCustomerInfo)
 
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form.fill(CheckVatDetails.values.head), waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form.fill(CheckVatDetails.values.head), waypoints, viewModel)(request, implicitly).toString
       }
     }
 
@@ -81,10 +87,10 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
@@ -93,10 +99,10 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, checkVatDetailsRoute)
-            .withFormUrlEncodedBody(("value", CheckVatDetails.values.head.toString))
+            .withFormUrlEncodedBody(("value", CheckVatDetails.Yes.toString))
 
         val result = route(application, request).value
-        val expectedAnswers = emptyUserAnswers.set(CheckVatDetailsPage, CheckVatDetails.Yes).success.value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(CheckVatDetailsPage, CheckVatDetails.Yes).success.value
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe CheckVatDetailsPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).route.url
@@ -106,7 +112,7 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
         val request =
@@ -116,11 +122,13 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
         val boundForm = form.bind(Map("value" -> "invalid value"))
 
         val view = application.injector.instanceOf[CheckVatDetailsView]
+        implicit val msgs: Messages = messages(application)
+        val viewModel = CheckVatDetailsViewModel(vrn, vatCustomerInfo)
 
         val result = route(application, request).value
 
         status(result) mustBe BAD_REQUEST
-        contentAsString(result) mustBe view(boundForm, waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(boundForm, waypoints, viewModel)(request, messages(application)).toString
       }
     }
 
@@ -138,9 +146,44 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to Journey Recovery for a GET if no VAT data is found" in {
+
+      val application = applicationBuilder(userAnswers =
+        Some(emptyUserAnswers.set(RegisteredForIossInEuPage, false).success.value))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, checkVatDetailsRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
     "redirect to Journey Recovery for a POST if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, checkVatDetailsRoute)
+            .withFormUrlEncodedBody(("value", CheckVatDetails.values.head.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+
+        redirectLocation(result).value mustBe routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "redirect to Journey Recovery for a POST if no VAT data is found" in {
+
+      val application = applicationBuilder(userAnswers =
+        Some(emptyUserAnswers.set(RegisteredForIossInEuPage, false).success.value))
+        .build()
 
       running(application) {
         val request =
