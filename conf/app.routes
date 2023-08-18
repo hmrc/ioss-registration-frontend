@@ -15,6 +15,10 @@ GET         /there-is-a-problem                              controllers.Journey
 
 GET         /check-your-answers                              controllers.CheckYourAnswersController.onPageLoad
 
+GET         /identity-problem                                controllers.auth.IdentityVerificationController.identityError(continueUrl: String)
+GET         /identity-complete                               controllers.auth.IdentityVerificationController.handleIvFailure(continueUrl: String, journeyId: Option[String])
+
+
 GET         /account/sign-out-survey                         controllers.auth.AuthController.signOut
 GET         /account/sign-out                                controllers.auth.AuthController.signOutNoSurvey
 GET         /account/signed-out                              controllers.auth.SignedOutController.onPageLoad

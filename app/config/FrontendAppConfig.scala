@@ -22,6 +22,8 @@ import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 
+import java.net.URI
+
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
@@ -41,6 +43,13 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val registerUrl: String      = configuration.get[String]("urls.register")
   val ivUpliftUrl: String      = configuration.get[String]("urls.ivUplift")
   val mfaUpliftUrl: String     = configuration.get[String]("urls.mfaUplift")
+
+  val ivEvidenceStatusUrl: String =
+    s"${configuration.get[Service]("microservice.services.identity-verification").baseUrl}/disabled-evidences?origin=$origin"
+
+  private val ivJourneyServiceUrl: String =
+    s"${configuration.get[Service]("microservice.services.identity-verification").baseUrl}/journey/"
+  def ivJourneyResultUrl(journeyId: String): String = new URI(s"$ivJourneyServiceUrl$journeyId").toString
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/ioss-registration-frontend"

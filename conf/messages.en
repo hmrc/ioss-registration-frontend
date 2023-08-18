@@ -90,6 +90,10 @@ insufficientEnrolments.goToManageAccount = Go to ''Manage account'', then ''Get 
 insufficientEnrolments.yourBusinessIsNotRegistered = If your business is not registered for UK VAT
 insufficientEnrolments.registerForUkVat = Register for UK VAT (opens in new tab)
 
+ivFailedIdentityVerification.title = We could not confirm your identity
+ivFailedIdentityVerification.heading = We could not confirm your identity
+ivFailedIdentityVerification.p = We could not confirm your identity
+
 registeredForIossInEu.title = Is your business already registered for the Import One Stop Shop scheme in an EU country?
 registeredForIossInEu.heading = Is your business already registered for the Import One Stop Shop scheme in an EU country?
 registeredForIossInEu.checkYourAnswersLabel = Already registered for the Import One Stop Shop scheme in an EU country
