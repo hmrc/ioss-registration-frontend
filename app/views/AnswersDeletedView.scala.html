@@ -15,15 +15,20 @@
  *@
 
 @this(
-    layout: templates.Layout,
-    govukSummaryList: GovukSummaryList
+        layout: templates.Layout,
+        govukButton: GovukButton
 )
 
-@(list: SummaryList)(implicit request: Request[_], messages: Messages)
+@()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
+@layout(pageTitle = titleNoForm(messages("answersDeleted.title")), showBackLink = false, timeout = false) {
 
-    <h1 class="govuk-heading-l">@messages("checkYourAnswers.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("answersDeleted.heading")</h1>
 
-    @govukSummaryList(list)
+    <p class="govuk-body">
+        @govukButton(
+            ButtonViewModel(messages("site.startAgain"))
+                    .asLink(routes.IndexController.onPageLoad().url)
+        )
+    </p>
 }

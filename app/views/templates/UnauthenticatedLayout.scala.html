@@ -44,7 +44,7 @@
                 countdown           = Some(appConfig.countdown),
                 keepAliveUrl        = Some(routes.KeepAliveController.keepAliveUnauthenticated().url),
                 keepAliveButtonText = Some(messages("timeout.unauthenticated.keepAlive")),
-                signOutUrl          = Some(controllers.auth.routes.AuthController.signOut.url), //TODO
+                signOutUrl          = Some(controllers.routes.AnswersDeletedController.onPageLoad().url),
                 signOutButtonText   = Some(messages("timeout.unauthenticated.signOut")),
                 title               = None,
                 message             = Some(messages("timeout.unauthenticated.message"))

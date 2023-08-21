@@ -137,6 +137,9 @@ ivFailed.title = We could not confirm your identity
 ivFailed.heading = We could not confirm your identity
 ivFailed.p = We could not confirm your identity
 
+answersDeleted.title = For your security, we deleted your answers
+answersDeleted.heading = For your security, we deleted your answers
+
 registeredForIossInEu.title = Is your business already registered for the Import One Stop Shop scheme in an EU country?
 registeredForIossInEu.heading = Is your business already registered for the Import One Stop Shop scheme in an EU country?
 registeredForIossInEu.checkYourAnswersLabel = Already registered for the Import One Stop Shop scheme in an EU country

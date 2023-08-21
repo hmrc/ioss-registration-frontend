@@ -19,6 +19,7 @@ package pages
 import controllers.routes
 import models.CheckVatDetails.{DetailsIncorrect, WrongAccount, Yes}
 import models.{CheckVatDetails, UserAnswers}
+import pages.filters.RegisteredForIossInEuPage
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
@@ -33,7 +34,7 @@ case object CheckVatDetailsPage extends QuestionPage[CheckVatDetails] {
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     (answers.get(this), answers.vatInfo) match {
-      case (Some(Yes), Some(vatInfo)) if vatInfo.desAddress.line1.nonEmpty => ??? // TODO -> HasTradingNamePage
+      case (Some(Yes), Some(vatInfo)) if vatInfo.desAddress.line1.nonEmpty => RegisteredForIossInEuPage // TODO -> Change to HasTradingNamePage when created
       case (Some(WrongAccount), _)                                         => UseOtherAccountPage
       case (Some(DetailsIncorrect), _)                                     => UpdateVatDetailsPage
       case _                                                               => JourneyRecoveryPage

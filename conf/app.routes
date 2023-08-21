@@ -45,6 +45,8 @@ GET         /unauthorised                                    controllers.Unautho
 
 GET         /registration-service-error                      controllers.VatApiDownController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
+GET         /answers-deleted                                 controllers.AnswersDeletedController.onPageLoad()
+
 # Filter questions section
 GET         /ioss-registered                                 controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /ioss-registered                                 controllers.filters.RegisteredForIossInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

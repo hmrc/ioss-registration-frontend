@@ -369,7 +369,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           val result = controller.onPageLoad()(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe "http://localhost:9553/bas-gateway/uplift-mfa?origin=IOSS&continueUrl=http%3A%2F%2Flocalhost%3A10190%2Fpay-vat-on-goods-sold-to-eu%2Fregister-for-import-one-stop-shop%2F%3Fk%3D123"
+          redirectLocation(result).value mustBe "http://localhost:9553/bas-gateway/uplift-mfa?origin=IOSS&continueUrl=http%3A%2F%2Flocalhost%3A10190%2F%3Fk%3D123"
         }
       }
     }
