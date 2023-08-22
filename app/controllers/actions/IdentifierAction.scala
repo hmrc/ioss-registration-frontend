@@ -154,8 +154,8 @@ class AuthenticatedIdentifierAction @Inject()(
       Map(
         "origin" -> Seq(config.origin),
         "confidenceLevel" -> Seq(ConfidenceLevel.L200.toString),
-        "completionUrl" -> Seq(urlBuilderService.loginContinueUrl(request)),
-        "failureUrl" -> Seq(urlBuilderService.ivFailureUrl(request))
+        "completionURL" -> Seq(urlBuilderService.loginContinueUrl(request)),
+        "failureURL" -> Seq(urlBuilderService.ivFailureUrl(request))
       )
     )
     ).toFuture
