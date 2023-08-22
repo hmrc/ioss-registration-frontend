@@ -20,34 +20,9 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("insufficientEnrolments.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("insufficientEnrolments.title"))) {
 
     <h1 class="govuk-heading-l">@messages("insufficientEnrolments.heading")</h1>
 
-    <p class="govuk-body">@messages("insufficientEnrolments.p1")</p>
-
-    <h2 class="govuk-heading-m govuk-!-margin-top-6">@messages("insufficientEnrolments.haveABusinessTaxAccount")</h2>
-
-    <p class="govuk-body">@messages("insufficientEnrolments.enteredWrongGGUserID")</p>
-
-    <p class="govuk-body">
-        <a href="@controllers.auth.routes.AuthController.redirectToLogin(routes.IndexController.onPageLoad().url).url" class="govuk-link">
-        @messages("insufficientEnrolments.signInWithYourGGUserID.link.text")
-        </a>
-        @messages("insufficientEnrolments.usedToSeeVATReturns")
-    </p>
-
-    <h2 class="govuk-heading-m govuk-!-margin-top-6">@messages("insufficientEnrolments.cannotSeeVATDetailsInBTA")</h2>
-
-    <p class="govuk-body">@Html(messages("insufficientEnrolments.businessTaxAccount.link.text"))</p>
-
-    <p class="govuk-body">@messages("insufficientEnrolments.goToManageAccount")</p>
-
-    <h2 class="govuk-heading-m govuk-!-margin-top-6">@messages("insufficientEnrolments.yourBusinessIsNotRegistered")</h2>
-
-    <p class="govuk-body">
-        <a href="https://www.gov.uk/vat-registration/how-to-register" class="govuk-link" target="_blank">
-        @messages("insufficientEnrolments.registerForUkVat")
-        </a>
-    </p>
+    <p class="govuk-body">@Html(messages("insufficientEnrolments.registerForUkVat"))</p>
 }

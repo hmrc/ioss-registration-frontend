@@ -35,8 +35,8 @@ case object CheckVatDetailsPage extends QuestionPage[CheckVatDetails] {
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     (answers.get(this), answers.vatInfo) match {
       case (Some(Yes), Some(vatInfo)) if vatInfo.desAddress.line1.nonEmpty => RegisteredForIossInEuPage // TODO -> Change to HasTradingNamePage when created
-      case (Some(WrongAccount), _)                                         => UseOtherAccountPage
       case (Some(DetailsIncorrect), _)                                     => UpdateVatDetailsPage
+      case (Some(WrongAccount), _)                                         => UseOtherAccountPage
       case _                                                               => JourneyRecoveryPage
     }
 }

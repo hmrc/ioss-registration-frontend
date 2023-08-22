@@ -78,18 +78,9 @@ unsupportedCredentialRole.heading = You cannot use this service
 unsupportedCredentialRole.p1 = You signed in to Government Gateway as a standard user. To register for this scheme you must be an administrator user.
 unsupportedCredentialRole.p2 = Contact the person who set up your Government Gateway.
 
-insufficientEnrolments.title = You cannot use this service
-insufficientEnrolments.heading = Sign in with a different Government Gateway
-insufficientEnrolments.p1 = Your Government Gateway user ID is not linked to a VAT registration number.
-insufficientEnrolments.haveABusinessTaxAccount = If you know you have a Business tax account where you can see your VAT details
-insufficientEnrolments.enteredWrongGGUserID = You have entered the wrong Government Gateway user ID.
-insufficientEnrolments.signInWithYourGGUserID.link.text = Sign in with your Government Gateway user ID
-insufficientEnrolments.usedToSeeVATReturns = used to see VAT returns.
-insufficientEnrolments.cannotSeeVATDetailsInBTA = If you cannot see VAT details in the Business tax account for the business you want to register
-insufficientEnrolments.businessTaxAccount.link.text = Link your Government Gateway user ID to your VAT registration number in your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">Business tax account (opens in new tab)</a>.
-insufficientEnrolments.goToManageAccount = Go to ''Manage account'', then ''Get online access to a tax, duty or scheme''.
-insufficientEnrolments.yourBusinessIsNotRegistered = If your business is not registered for UK VAT
-insufficientEnrolments.registerForUkVat = Register for UK VAT (opens in new tab)
+insufficientEnrolments.title = Your business is not registered for VAT
+insufficientEnrolments.heading = Your business is not registered for VAT
+insufficientEnrolments.registerForUkVat = <a href="https://www.gov.uk/register-for-vat/how-register-for-vat" class="govuk-link">Apply for a new VAT number to use this service</a>
 
 ivFailedIdentityVerification.title = We could not confirm your identity
 ivFailedIdentityVerification.heading = We could not confirm your identity
@@ -202,8 +193,8 @@ cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a North
 
 checkVatDetails.title = Confirm VAT details for your business
 checkVatDetails.heading = Confirm VAT details for your business
-checkVatDetails.error.required = Select if you want to register this business for the One Stop Shop Union scheme
-checkVatDetails.question = Do you want to register this business for the One Stop Shop Union scheme?
+checkVatDetails.error.required = Select if you want to register this business for the Import One Stop Shop Union scheme
+checkVatDetails.question = Do you want to register this business for the Import One Stop Shop Union scheme?
 checkVatDetails.vrn = UK VAT registration number
 checkVatDetails.organisationName = Business name
 checkVatDetails.individualName = Name
@@ -213,16 +204,16 @@ checkVatDetails.yes = Yes
 checkVatDetails.detailsIncorrect = Yes, but some of my VAT details are incorrect
 checkVatDetails.wrongAccount = No, I want to register a different business
 
+updateVatDetails.title = Update your VAT details
+updateVatDetails.heading = Update your VAT details
+updateVatDetails.guidance = Sign into your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.
+
 useOtherAccount.title = Sign in with a different Government Gateway user ID
 useOtherAccount.heading = Sign in with a different Government Gateway user ID
 useOtherAccount.p1 = You signed in with a Government Gateway user ID that is linked to VAT registration number {0}.
 useOtherAccount.p2.1 = You need to
 useOtherAccount.p2.link.text = sign in with a different Government Gateway user ID
 useOtherAccount.p2.2 = if you want to register for a business with a different VAT registration number.
-
-updateVatDetails.title = Update your VAT details
-updateVatDetails.heading = Update your VAT details
-updateVatDetails.guidance = Sign into your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.
 
 expiredVrnDate.title = The VAT number for this account is no longer valid
 expiredVrnDate.heading = The VAT number for this account is no longer valid
