@@ -24,8 +24,7 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.UnauthenticatedUserAnswersRepository
-
-import scala.concurrent.Future
+import utils.FutureSyntax.FutureOps
 
 class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
 
@@ -36,7 +35,7 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
       "must keep the answers alive and return OK" in {
 
         val mockSessionRepository = mock[UnauthenticatedUserAnswersRepository]
-        when(mockSessionRepository.keepAlive(any())) thenReturn Future.successful(true)
+        when(mockSessionRepository.keepAlive(any())) thenReturn true.toFuture
 
         val application =
           applicationBuilder(Some(emptyUserAnswers))
@@ -60,7 +59,7 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
       "must return OK" in {
 
         val mockSessionRepository = mock[UnauthenticatedUserAnswersRepository]
-        when(mockSessionRepository.keepAlive(any())) thenReturn Future.successful(true)
+        when(mockSessionRepository.keepAlive(any())) thenReturn true.toFuture
 
         val application =
           applicationBuilder(None)

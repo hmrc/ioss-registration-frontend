@@ -10,6 +10,7 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.tryAgain = Try again
 
 date.day = Day
 date.month = Month
@@ -19,6 +20,9 @@ timeout.title = You’re about to be signed out
 timeout.message = For security reasons, you will be signed out of this service in
 timeout.keepAlive = Stay signed in
 timeout.signOut = Sign out
+timeout.unauthenticated.keepAlive = Continue registering
+timeout.unauthenticated.message = For your security, we will delete your answers in
+timeout.unauthenticated.signOut = Delete your answers
 
 error.browser.title.prefix = Error:
 error.boolean = Please give an answer
@@ -51,6 +55,90 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+vatApiDown.title = Sorry, there is a problem with the service
+vatApiDown.heading = Sorry, there is a problem with the service
+vatApiDown.tryAgain = Try again later.
+vatApiDown.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
+
+unsupportedAffinityGroup.title = You cannot use this service
+unsupportedAffinityGroup.heading = You cannot use this service
+unsupportedAffinityGroup.p1 = You signed in with a Government Gateway user ID for agent services.
+unsupportedAffinityGroup.p2 = You need to sign in with the Government Gateway user ID for the organisation or individual that is registering for the One Stop Shop Union scheme.
+
+unsupportedAuthProvider.title = You cannot use these details to register
+unsupportedAuthProvider.heading = You cannot use these details to register
+unsupportedAuthProvider.p1 = You need to use Government Gateway to
+unsupportedAuthProvider.p1.link = sign in and register
+unsupportedAuthProvider.p2 = If you do not have a Government Gateway user ID and password you should
+unsupportedAuthProvider.p2.link = create them now
+
+unsupportedCredentialRole.title = You cannot use this service
+unsupportedCredentialRole.heading = You cannot use this service
+unsupportedCredentialRole.p1 = You signed in to Government Gateway as a standard user. To register for this scheme you must be an administrator user.
+unsupportedCredentialRole.p2 = Contact the person who set up your Government Gateway.
+
+insufficientEnrolments.title = You cannot use this service
+insufficientEnrolments.heading = Sign in with a different Government Gateway
+insufficientEnrolments.p1 = Your Government Gateway user ID is not linked to a VAT registration number.
+insufficientEnrolments.haveABusinessTaxAccount = If you know you have a Business tax account where you can see your VAT details
+insufficientEnrolments.enteredWrongGGUserID = You have entered the wrong Government Gateway user ID.
+insufficientEnrolments.signInWithYourGGUserID.link.text = Sign in with your Government Gateway user ID
+insufficientEnrolments.usedToSeeVATReturns = used to see VAT returns.
+insufficientEnrolments.cannotSeeVATDetailsInBTA = If you cannot see VAT details in the Business tax account for the business you want to register
+insufficientEnrolments.businessTaxAccount.link.text = Link your Government Gateway user ID to your VAT registration number in your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">Business tax account (opens in new tab)</a>.
+insufficientEnrolments.goToManageAccount = Go to ''Manage account'', then ''Get online access to a tax, duty or scheme''.
+insufficientEnrolments.yourBusinessIsNotRegistered = If your business is not registered for UK VAT
+insufficientEnrolments.registerForUkVat = Register for UK VAT (opens in new tab)
+
+ivFailedIdentityVerification.title = We could not confirm your identity
+ivFailedIdentityVerification.heading = We could not confirm your identity
+ivFailedIdentityVerification.p = We could not confirm your identity
+
+ivError.title = Sorry, there is a problem with the service
+ivError.heading = Sorry, there is a problem with the service
+
+ivIncomplete.title = Sorry, there is a problem with the service
+ivIncomplete.heading = Sorry, there is a problem with the service
+ivIncomplete.p = Try again later.
+
+ivInsufficientEvidence.title = We could not confirm your identity online
+ivInsufficientEvidence.heading = We could not confirm your identity online
+ivInsufficientEvidence.p = You will need to contact HMRC by phone to confirm your identity.
+
+ivLockedOut.title = We could not confirm your identity
+ivLockedOut.heading = We could not confirm your identity
+ivLockedOut.p = You have entered information that does not match our records too many times. For security reasons, you must wait 24 hours and then sign in to try again.
+
+ivPreconditionFailed.title = Sorry, there is a problem
+ivPreconditionFailed.heading = Sorry, there is a problem
+ivPreconditionFailed.p = Try again later.
+
+ivTechnicalIssue.title = Sorry, there is a problem with the service
+ivTechnicalIssue.heading = Sorry, there is a problem with the service
+
+ivTimeout.title = Sorry, there is a problem with the service
+ivTimeout.heading = Sorry, there is a problem with the service
+
+ivUserAborted.title = Sorry, there is a problem with the service
+ivUserAborted.heading = Sorry, there is a problem with the service
+ivUserAborted.p1 = We are unable to validate your details at the moment. Select another method of verification or try again later.
+
+ivNotEnoughEvidenceSources.title = You have registered for Government Gateway but cannot claim yet
+ivNotEnoughEvidenceSources.heading = You have registered for Government Gateway but cannot claim yet
+ivNotEnoughEvidenceSources.p1 = We are limiting the number of people who can access our services at one time.
+ivNotEnoughEvidenceSources.p2 = You can try again later by signing into Government Gateway.
+
+ivFailedMatching.title = We could not confirm your identity
+ivFailedMatching.heading = We could not confirm your identity
+ivFailedMatching.p = We could not confirm your identity.
+
+ivFailed.title = We could not confirm your identity
+ivFailed.heading = We could not confirm your identity
+ivFailed.p = We could not confirm your identity
+
+answersDeleted.title = For your security, we deleted your answers
+answersDeleted.heading = For your security, we deleted your answers
 
 registeredForIossInEu.title = Is your business already registered for the Import One Stop Shop scheme in an EU country?
 registeredForIossInEu.heading = Is your business already registered for the Import One Stop Shop scheme in an EU country?
@@ -111,3 +199,27 @@ eligibleToRegister.p1 = You can log into the Government Gateway service to conti
 cannotRegisterNoNiOrNorwayBusiness.title = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.heading = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a Northern Irish or Norwegian business.
+
+checkVatDetails.title = Confirm VAT details for your business
+checkVatDetails.heading = Confirm VAT details for your business
+checkVatDetails.error.required = Select if you want to register this business for the One Stop Shop Union scheme
+checkVatDetails.question = Do you want to register this business for the One Stop Shop Union scheme?
+checkVatDetails.vrn = UK VAT registration number
+checkVatDetails.organisationName = Business name
+checkVatDetails.individualName = Name
+checkVatDetails.partOfVatGroup = Part of a UK VAT group
+checkVatDetails.address = Principal place of business address
+checkVatDetails.yes = Yes
+checkVatDetails.detailsIncorrect = Yes, but some of my VAT details are incorrect
+checkVatDetails.wrongAccount = No, I want to register a different business
+
+useOtherAccount.title = Sign in with a different Government Gateway user ID
+useOtherAccount.heading = Sign in with a different Government Gateway user ID
+useOtherAccount.p1 = You signed in with a Government Gateway user ID that is linked to VAT registration number {0}.
+useOtherAccount.p2.1 = You need to
+useOtherAccount.p2.link.text = sign in with a different Government Gateway user ID
+useOtherAccount.p2.2 = if you want to register for a business with a different VAT registration number.
+
+updateVatDetails.title = Update your VAT details
+updateVatDetails.heading = Update your VAT details
+updateVatDetails.guidance = Sign into your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.

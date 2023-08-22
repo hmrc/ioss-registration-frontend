@@ -21,4 +21,9 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
+
+  implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
+    Arbitrary {
+      Gen.oneOf(CheckVatDetails.values.toSeq)
+    }
 }

@@ -29,9 +29,8 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.UnauthenticatedUserAnswersRepository
+import utils.FutureSyntax.FutureOps
 import views.html.filters.RegisteredForVatInUkView
-
-import scala.concurrent.Future
 
 class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
 
@@ -82,7 +81,7 @@ class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[UnauthenticatedUserAnswersRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -143,7 +142,7 @@ class RegisteredForVatInUkControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[UnauthenticatedUserAnswersRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
         applicationBuilder(userAnswers = None)

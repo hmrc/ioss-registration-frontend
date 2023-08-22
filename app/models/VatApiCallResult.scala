@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package controllers.actions
+package models
 
-import javax.inject.Inject
-import models.requests.IdentifierRequest
-import play.api.mvc._
+sealed trait VatApiCallResult
 
-import scala.concurrent.{ExecutionContext, Future}
+object VatApiCallResult extends Enumerable.Implicits {
 
-class FakeIdentifierAction @Inject()(bodyParsers: PlayBodyParsers) extends IdentifierAction {
+  case object Success extends WithName("success") with VatApiCallResult
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(IdentifierRequest(request, "id"))
+  case object NotFound extends WithName("notFound") with VatApiCallResult
 
-  override def parser: BodyParser[AnyContent] =
-    bodyParsers.default
+  case object Error extends WithName("error") with VatApiCallResult
 
-  override protected def executionContext: ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
+  val values: Seq[WithName with VatApiCallResult] = Seq(Success, NotFound, Error)
+
+  implicit val enumerable: Enumerable[VatApiCallResult] =
+    Enumerable(values.map(v => v.toString -> v): _*)
 }

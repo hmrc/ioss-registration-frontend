@@ -17,40 +17,103 @@
 package controllers.auth
 
 import config.FrontendAppConfig
-import controllers.actions.IdentifierAction
+import connectors.RegistrationConnector
+import controllers.actions.AuthenticatedControllerComponents
+import models.{UserAnswers, VatApiCallResult}
+import pages.{CheckVatDetailsPage, EmptyWaypoints, VatApiDownPage}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import repositories.SessionRepository
+import queries.VatApiCallResultQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
+import views.html.auth.{InsufficientEnrolmentsView, UnsupportedAffinityGroupView, UnsupportedAuthProviderView, UnsupportedCredentialRoleView}
 
+import java.time.{Clock, Instant}
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class AuthController @Inject()(
-                                val controllerComponents: MessagesControllerComponents,
+                                cc: AuthenticatedControllerComponents,
+                                registrationConnector: RegistrationConnector,
+                                insufficientEnrolmentsView: InsufficientEnrolmentsView,
+                                unsupportedAffinityGroupView: UnsupportedAffinityGroupView,
+                                unsupportedAuthProviderView: UnsupportedAuthProviderView,
+                                unsupportedCredentialRoleView: UnsupportedCredentialRoleView,
                                 config: FrontendAppConfig,
-                                sessionRepository: SessionRepository,
-                                identify: IdentifierAction
+                                clock: Clock
                               )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def signOut(): Action[AnyContent] = identify.async {
+  protected val controllerComponents: MessagesControllerComponents = cc
+
+  def onSignIn(): Action[AnyContent] = cc.authAndGetOptionalData().async {
     implicit request =>
-      sessionRepository
-        .clear(request.userId)
-        .map {
-          _ =>
-            Redirect(config.signOutUrl, Map("continue" -> Seq(config.exitSurveyUrl)))
+      val answers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId, lastUpdated = Instant.now(clock)))
+      answers.get(VatApiCallResultQuery) match {
+        case Some(vatApiCallResult) if vatApiCallResult == VatApiCallResult.Success =>
+          Redirect(CheckVatDetailsPage.route(EmptyWaypoints).url).toFuture
+
+        case _ =>
+          registrationConnector.getVatCustomerInfo().flatMap {
+            case Right(vatInfo) =>
+              for {
+                updatedAnswers <- Future.fromTry(answers.copy(vatInfo = Some(vatInfo)).set(VatApiCallResultQuery, VatApiCallResult.Success))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(CheckVatDetailsPage.route(EmptyWaypoints).url)
+
+            case _ =>
+              for {
+                updatedAnswers <- Future.fromTry(answers.set(VatApiCallResultQuery, VatApiCallResult.Error))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(VatApiDownPage.route(EmptyWaypoints).url)
+          }
       }
   }
 
-  def signOutNoSurvey(): Action[AnyContent] = identify.async {
+  def redirectToRegister(continueUrl: String): Action[AnyContent] = Action {
+    Redirect(config.registerUrl,
+      Map(
+        "origin"      -> Seq(config.origin),
+        "continueUrl" -> Seq(continueUrl),
+        "accountType" -> Seq("Organisation"))
+    )
+  }
+
+  def redirectToLogin(continueUrl: String): Action[AnyContent] = Action {
+    Redirect(config.loginUrl,
+      Map(
+        "origin"   -> Seq(config.origin),
+        "continue" -> Seq(continueUrl))
+    )
+  }
+
+  def signOut(): Action[AnyContent] = Action {
+    _ =>
+      Redirect(config.signOutUrl, Map("continue" -> Seq(config.exitSurveyUrl)))
+  }
+
+  def signOutNoSurvey(): Action[AnyContent] = Action {
+    _ =>
+      Redirect(config.signOutUrl, Map("continue" -> Seq(routes.SignedOutController.onPageLoad.url)))
+  }
+
+  def unsupportedAffinityGroup(): Action[AnyContent] = Action {
     implicit request =>
-    sessionRepository
-      .clear(request.userId)
-      .map {
-        _ =>
-        Redirect(config.signOutUrl, Map("continue" -> Seq(routes.SignedOutController.onPageLoad.url)))
-      }
+      Ok(unsupportedAffinityGroupView())
+  }
+
+  def unsupportedAuthProvider(continueUrl: String): Action[AnyContent] = Action {
+    implicit request =>
+      Ok(unsupportedAuthProviderView(continueUrl))
+  }
+
+  def insufficientEnrolments(): Action[AnyContent] = Action {
+    implicit request =>
+      Ok(insufficientEnrolmentsView())
+  }
+
+  def unsupportedCredentialRole(): Action[AnyContent] = Action {
+    implicit request =>
+      Ok(unsupportedCredentialRoleView())
   }
 }

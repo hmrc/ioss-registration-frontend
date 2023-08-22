@@ -17,7 +17,7 @@
 package controllers.filters
 
 import base.SpecBase
-import controllers.routes
+import controllers.auth.{routes => authRoutes}
 import controllers.filters.{routes => filterRoutes}
 import pages.{EmptyWaypoints, Waypoints}
 import play.api.test.FakeRequest
@@ -56,8 +56,7 @@ class EligibleToRegisterControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        //TODO Redirect to auth onSignIn() when created
-        redirectLocation(result).value mustBe routes.IndexController.onPageLoad.url
+        redirectLocation(result).value mustBe authRoutes.AuthController.onSignIn().url
       }
     }
   }

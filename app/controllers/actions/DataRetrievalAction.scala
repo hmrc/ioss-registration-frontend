@@ -16,12 +16,54 @@
 
 package controllers.actions
 
-import models.requests.{SessionRequest, UnauthenticatedOptionalDataRequest}
-import play.api.mvc.ActionTransformer
-import repositories.UnauthenticatedUserAnswersRepository
+import models.requests.{AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest, SessionRequest, UnauthenticatedOptionalDataRequest}
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionRefiner, ActionTransformer, Result}
+import repositories.{AuthenticatedUserAnswersRepository, UnauthenticatedUserAnswersRepository}
+import services.DataMigrationService
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+
+class AuthenticatedDataRetrievalAction @Inject()(
+                                                  authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository,
+                                                  migrationService: DataMigrationService
+                                                )(implicit val executionContext: ExecutionContext)
+  extends ActionRefiner[AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest] {
+
+  override protected def refine[A](request: AuthenticatedIdentifierRequest[A]): Future[Either[Result, AuthenticatedOptionalDataRequest[A]]] = {
+
+    request.queryString.get("k").flatMap(_.headOption) match {
+      case Some(sessionId) =>
+        migrationService
+          .migrate(sessionId, request.userId)
+          .map(_ => Left(Redirect(request.path)))
+
+      case None =>
+        authenticatedUserAnswersRepository
+          .get(request.userId)
+          .flatMap {
+            case None =>
+              copyCurrentSessionData(request).map(Right(_))
+            case Some(answers) =>
+              AuthenticatedOptionalDataRequest(request, request.credentials, request.vrn, Some(answers)).toFuture.map(Right(_))
+          }
+    }
+  }
+
+  private def copyCurrentSessionData[A](request: AuthenticatedIdentifierRequest[A]): Future[AuthenticatedOptionalDataRequest[A]] = {
+    val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    hc.sessionId.map {
+      id =>
+        migrationService
+          .migrate(id.value, request.userId)
+          .map(ua => AuthenticatedOptionalDataRequest(request, request.credentials, request.vrn, Some(ua)))
+    }.getOrElse(AuthenticatedOptionalDataRequest(request, request.credentials, request.vrn, None).toFuture)
+  }
+}
 
 class UnauthenticatedDataRetrievalAction @Inject()(val sessionRepository: UnauthenticatedUserAnswersRepository)
                                                   (implicit val executionContext: ExecutionContext)

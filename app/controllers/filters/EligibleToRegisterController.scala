@@ -17,7 +17,7 @@
 package controllers.filters
 
 import controllers.actions._
-import controllers.routes
+import controllers.auth.routes
 import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -41,7 +41,6 @@ class EligibleToRegisterController @Inject()(
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = Action {
     _ =>
-      // TODO Redirect to auth onSignIn() when created.
-      Redirect(routes.IndexController.onPageLoad)
+      Redirect(routes.AuthController.onSignIn())
   }
 }
