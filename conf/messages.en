@@ -223,3 +223,7 @@ useOtherAccount.p2.2 = if you want to register for a business with a different V
 updateVatDetails.title = Update your VAT details
 updateVatDetails.heading = Update your VAT details
 updateVatDetails.guidance = Sign into your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.
+
+expiredVrnDate.title = The VAT number for this account is no longer valid
+expiredVrnDate.heading = The VAT number for this account is no longer valid
+expiredVrnDate.link = <a href="https://www.gov.uk/register-for-vat/how-register-for-vat" class="govuk-link">Apply for a new VAT number to use this service</a>

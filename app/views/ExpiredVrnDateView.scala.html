@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package pages
-import controllers.routes
-import play.api.mvc.Call
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton
+)
 
-object ExpiredVrnDatePage extends Page {
+@()(implicit request: Request[_], messages: Messages)
 
-  override def route(waypoints: Waypoints): Call =
-    routes.ExpiredVrnDateController.onPageLoad(waypoints)
+    @layout(pageTitle = titleNoForm(messages("expiredVrnDate.title"))) {
 
-}
+        <h1 class="govuk-heading-l">@messages("expiredVrnDate.heading")</h1>
+
+        <p class="govuk-body">@Html(messages("expiredVrnDate.link"))</p>
+    }

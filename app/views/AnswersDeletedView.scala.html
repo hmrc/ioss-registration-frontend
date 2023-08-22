@@ -27,7 +27,7 @@
 
     <p class="govuk-body">
         @govukButton(
-            ButtonViewModel(messages("site.startAgain"))
+            ButtonViewModel(messages("site.startAgain")).withAttribute("id", "continue")
                     .asLink(routes.IndexController.onPageLoad().url)
         )
     </p>
