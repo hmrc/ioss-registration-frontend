@@ -56,7 +56,7 @@ class AuthController @Inject()(
         case _ =>
           registrationConnector.getVatCustomerInfo().flatMap {
             case Right(vatInfo) =>
-              if (vatInfo.deregistrationDecisionDate.exists(_.isBefore(LocalDate.now(clock)))) {
+              if (vatInfo.deregistrationDecisionDate.exists(!_.isAfter(LocalDate.now(clock)))) {
                 Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
               } else {
                 for {
