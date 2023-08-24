@@ -19,8 +19,10 @@ package controllers.auth
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
+import models.domain.VatCustomerInfo
 import models.{UserAnswers, VatApiCallResult}
-import pages.{CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage}
+import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
+import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.VatApiCallResultQuery
@@ -58,6 +60,10 @@ class AuthController @Inject()(
             case Right(vatInfo) =>
               if (vatInfo.deregistrationDecisionDate.exists(!_.isAfter(LocalDate.now(clock)))) {
                 Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
+              } else if (!isMatchedNiIndicator(answers, vatInfo)) {
+                Redirect(CannotRegisterNoNiProtocolPage.route(EmptyWaypoints).url).toFuture
+              } else if (!isNorwegianBasedBusiness(answers, vatInfo)) {
+                Redirect(CannotRegisterNotNorwegianBasedBusinessPage.route(EmptyWaypoints).url).toFuture
               } else {
                 for {
                   updatedAnswers <- Future.fromTry(answers.copy(vatInfo = Some(vatInfo)).set(VatApiCallResultQuery, VatApiCallResult.Success))
@@ -74,10 +80,23 @@ class AuthController @Inject()(
       }
   }
 
+
+  private def isMatchedNiIndicator(answers: UserAnswers, vatCustomerInfo: VatCustomerInfo): Boolean =
+    (vatCustomerInfo.singleMarketIndicator, answers.get(BusinessBasedInNiPage)) match {
+      case (Some(true), Some(true)) => true
+      case _ => false
+    }
+
+  private def isNorwegianBasedBusiness(answers: UserAnswers, vatCustomerInfo: VatCustomerInfo): Boolean =
+    (vatCustomerInfo.desAddress.countryCode, answers.get(NorwegianBasedBusinessPage)) match {
+      case ("NO", Some(true)) => true
+      case _ => false
+    }
+
   def redirectToRegister(continueUrl: String): Action[AnyContent] = Action {
     Redirect(config.registerUrl,
       Map(
-        "origin"      -> Seq(config.origin),
+        "origin" -> Seq(config.origin),
         "continueUrl" -> Seq(continueUrl),
         "accountType" -> Seq("Organisation"))
     )
@@ -86,7 +105,7 @@ class AuthController @Inject()(
   def redirectToLogin(continueUrl: String): Action[AnyContent] = Action {
     Redirect(config.loginUrl,
       Map(
-        "origin"   -> Seq(config.origin),
+        "origin" -> Seq(config.origin),
         "continue" -> Seq(continueUrl))
     )
   }

@@ -1,90 +1,94 @@
 # microservice specific routes
 
-->          /hmrc-frontend                                   hmrcfrontend.Routes
+->          /hmrc-frontend                                       hmrcfrontend.Routes
 
-GET         /                                                controllers.IndexController.onPageLoad()
+GET         /                                                    controllers.IndexController.onPageLoad()
 
-GET         /assets/*file                                    controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                                        controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /language/:lang                                  controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET         /language/:lang                                      controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
-GET         /refresh-session                                 controllers.KeepAliveController.keepAlive
-GET         /refresh-session-unauthenticated                 controllers.KeepAliveController.keepAliveUnauthenticated()
+GET         /refresh-session                                     controllers.KeepAliveController.keepAlive
+GET         /refresh-session-unauthenticated                     controllers.KeepAliveController.keepAliveUnauthenticated()
 
-GET         /there-is-a-problem                              controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                                  controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                              controllers.CheckYourAnswersController.onPageLoad
+GET         /check-your-answers                                  controllers.CheckYourAnswersController.onPageLoad
 
-GET         /identity-problem                                controllers.auth.IdentityVerificationController.identityError(continueUrl: String)
-GET         /identity-complete                               controllers.auth.IdentityVerificationController.handleIvFailure(continueUrl: String, journeyId: Option[String])
-GET         /iv/error                                        controllers.auth.IvReturnController.error()
-GET         /iv/incomplete                                   controllers.auth.IvReturnController.incomplete()
-GET         /iv/insufficient-evidence                        controllers.auth.IvReturnController.insufficientEvidence()
-GET         /iv/locked-out                                   controllers.auth.IvReturnController.lockedOut()
-GET         /iv/precondition-failed                          controllers.auth.IvReturnController.preconditionFailed()
-GET         /iv/technical-issue                              controllers.auth.IvReturnController.technicalIssue()
-GET         /iv/timeout                                      controllers.auth.IvReturnController.timeout()
-GET         /iv/user-aborted                                 controllers.auth.IvReturnController.userAborted(continueUrl: String)
-GET         /iv/insufficient-evidence-sources                controllers.auth.IvReturnController.notEnoughEvidenceSources()
-GET         /iv/failed-matching                              controllers.auth.IvReturnController.failedMatching(continueUrl: String)
-GET         /iv/failed-identity-verification                 controllers.auth.IvReturnController.failed(continueUrl: String)
+GET         /identity-problem                                    controllers.auth.IdentityVerificationController.identityError(continueUrl: String)
+GET         /identity-complete                                   controllers.auth.IdentityVerificationController.handleIvFailure(continueUrl: String, journeyId: Option[String])
+GET         /iv/error                                            controllers.auth.IvReturnController.error()
+GET         /iv/incomplete                                       controllers.auth.IvReturnController.incomplete()
+GET         /iv/insufficient-evidence                            controllers.auth.IvReturnController.insufficientEvidence()
+GET         /iv/locked-out                                       controllers.auth.IvReturnController.lockedOut()
+GET         /iv/precondition-failed                              controllers.auth.IvReturnController.preconditionFailed()
+GET         /iv/technical-issue                                  controllers.auth.IvReturnController.technicalIssue()
+GET         /iv/timeout                                          controllers.auth.IvReturnController.timeout()
+GET         /iv/user-aborted                                     controllers.auth.IvReturnController.userAborted(continueUrl: String)
+GET         /iv/insufficient-evidence-sources                    controllers.auth.IvReturnController.notEnoughEvidenceSources()
+GET         /iv/failed-matching                                  controllers.auth.IvReturnController.failedMatching(continueUrl: String)
+GET         /iv/failed-identity-verification                     controllers.auth.IvReturnController.failed(continueUrl: String)
 
-GET         /account/sign-out-survey                         controllers.auth.AuthController.signOut
-GET         /account/sign-out                                controllers.auth.AuthController.signOutNoSurvey
-GET         /account/signed-out                              controllers.auth.SignedOutController.onPageLoad
-GET         /account/login                                   controllers.auth.AuthController.redirectToLogin(continueUrl: String)
-GET         /account/register                                controllers.auth.AuthController.redirectToRegister(continueUrl: String)
-GET         /cannot-use-agent                                controllers.auth.AuthController.unsupportedAffinityGroup()
-GET         /provider-unsupported                            controllers.auth.AuthController.unsupportedAuthProvider(continueUrl: String)
-GET         /credential-unsupported                          controllers.auth.AuthController.insufficientEnrolments()
-GET         /account/role-unsupported                        controllers.auth.AuthController.unsupportedCredentialRole()
+GET         /account/sign-out-survey                             controllers.auth.AuthController.signOut
+GET         /account/sign-out                                    controllers.auth.AuthController.signOutNoSurvey
+GET         /account/signed-out                                  controllers.auth.SignedOutController.onPageLoad
+GET         /account/login                                       controllers.auth.AuthController.redirectToLogin(continueUrl: String)
+GET         /account/register                                    controllers.auth.AuthController.redirectToRegister(continueUrl: String)
+GET         /cannot-use-agent                                    controllers.auth.AuthController.unsupportedAffinityGroup()
+GET         /provider-unsupported                                controllers.auth.AuthController.unsupportedAuthProvider(continueUrl: String)
+GET         /credential-unsupported                              controllers.auth.AuthController.insufficientEnrolments()
+GET         /account/role-unsupported                            controllers.auth.AuthController.unsupportedCredentialRole()
 
-GET         /on-sign-in                                      controllers.auth.AuthController.onSignIn()
+GET         /on-sign-in                                          controllers.auth.AuthController.onSignIn()
 
-GET         /unauthorised                                    controllers.UnauthorisedController.onPageLoad()
+GET         /unauthorised                                        controllers.UnauthorisedController.onPageLoad()
 
-GET         /registration-service-error                      controllers.VatApiDownController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /registration-service-error                          controllers.VatApiDownController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /answers-deleted                                 controllers.AnswersDeletedController.onPageLoad()
+GET         /answers-deleted                                     controllers.AnswersDeletedController.onPageLoad()
 
 # Filter questions section
-GET         /ioss-registered                                 controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /ioss-registered                                 controllers.filters.RegisteredForIossInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /ioss-registered                                     controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /ioss-registered                                     controllers.filters.RegisteredForIossInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-already-registered              controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-already-registered                  controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /selling-goods-outside-single-market             controllers.filters.SellsGoodsToEuOrNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /selling-goods-outside-single-market             controllers.filters.SellsGoodsToEuOrNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /selling-goods-outside-single-market                 controllers.filters.SellsGoodsToEuOrNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /selling-goods-outside-single-market                 controllers.filters.SellsGoodsToEuOrNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-ioss                            controllers.filters.CannotRegisterForIossController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-ioss                                controllers.filters.CannotRegisterForIossController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /goods-value                                     controllers.filters.GoodsConsignmentValueController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /goods-value                                     controllers.filters.GoodsConsignmentValueController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /goods-value                                         controllers.filters.GoodsConsignmentValueController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /goods-value                                         controllers.filters.GoodsConsignmentValueController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /do-not-need-to-account-for-eu-vat               controllers.filters.ConsignmentValueExceedsLimitController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /do-not-need-to-account-for-eu-vat                   controllers.filters.ConsignmentValueExceedsLimitController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /registered-for-vat-in-uk                        controllers.filters.RegisteredForVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /registered-for-vat-in-uk                        controllers.filters.RegisteredForVatInUkController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /registered-for-vat-in-uk                            controllers.filters.RegisteredForVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /registered-for-vat-in-uk                            controllers.filters.RegisteredForVatInUkController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-no-vat-in-uk                    controllers.filters.CannotRegisterNoVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-no-vat-in-uk                        controllers.filters.CannotRegisterNoVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /ni-based                                        controllers.filters.BusinessBasedInNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /ni-based                                        controllers.filters.BusinessBasedInNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /ni-based                                            controllers.filters.BusinessBasedInNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /ni-based                                            controllers.filters.BusinessBasedInNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /norway-based                                    controllers.filters.NorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /norway-based                                    controllers.filters.NorwegianBasedBusinessController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /norway-based                                        controllers.filters.NorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /norway-based                                        controllers.filters.NorwegianBasedBusinessController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /register-to-use-service                         controllers.filters.EligibleToRegisterController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /register-to-use-service                         controllers.filters.EligibleToRegisterController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /register-to-use-service                             controllers.filters.EligibleToRegisterController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /register-to-use-service                             controllers.filters.EligibleToRegisterController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-no-ni-or-norway-business        controllers.filters.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-no-ni-or-norway-business            controllers.filters.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 # Next section
-GET         /confirm-vat-details                             controllers.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /confirm-vat-details                             controllers.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /confirm-vat-details                                 controllers.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /confirm-vat-details                                 controllers.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /register-different-business                     controllers.UseOtherAccountController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /register-different-business                         controllers.UseOtherAccountController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /update-vat-details                              controllers.UpdateVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /update-vat-details                                  controllers.UpdateVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /expired-vrn-date                                controllers.ExpiredVrnDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /expired-vrn-date                                    controllers.ExpiredVrnDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /cannot-register-no-ni-protocol                      controllers.CannotRegisterNoNiProtocolController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /cannot-register-not-norwegian-based-business        controllers.CannotRegisterNotNorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)

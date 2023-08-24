@@ -218,3 +218,13 @@ useOtherAccount.p2.2 = if you want to register for a business with a different V
 expiredVrnDate.title = The VAT number for this account is no longer valid
 expiredVrnDate.heading = The VAT number for this account is no longer valid
 expiredVrnDate.link = <a href="https://www.gov.uk/register-for-vat/how-register-for-vat" class="govuk-link">Apply for a new VAT number to use this service</a>
+
+cannotRegisterNoNiProtocol.title = Register to trade under the Northern Ireland Protocol
+cannotRegisterNoNiProtocol.heading = Register to trade under the Northern Ireland Protocol
+cannotRegisterNoNiProtocol.p1 = You need a VAT number starting with 'XI' to use this service.
+cannotRegisterNoNiProtocol.link = <a href="https://www.gov.uk/register-for-vat/selling-or-moving-goods-between-northern-ireland-and-the-eu" class="govuk-link">Find out more and register</a>
+
+cannotRegisterNotNorwegianBasedBusiness.title = You cannot register for this service
+cannotRegisterNotNorwegianBasedBusiness.heading = You cannot register for this service
+cannotRegisterNotNorwegianBasedBusiness.p1 = To register as a Norwegian trader, your business trading address must be in Norway.
+cannotRegisterNotNorwegianBasedBusiness.link = <a href="/business-account" class="govuk-link">Return to Business Tax Account</a>
