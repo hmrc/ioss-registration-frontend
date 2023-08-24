@@ -15,14 +15,15 @@
  *@
 
 @this(
-        layout: templates.Layout
+        layout: templates.Layout,
+        govukButton: GovukButton
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("insufficientEnrolments.title"))) {
+    @layout(pageTitle = titleNoForm(messages("expiredVrnDate.title"))) {
 
-    <h1 class="govuk-heading-l">@messages("insufficientEnrolments.heading")</h1>
+        <h1 class="govuk-heading-l">@messages("expiredVrnDate.heading")</h1>
 
-    <p class="govuk-body">@Html(messages("insufficientEnrolments.registerForUkVat"))</p>
-}
+        <p class="govuk-body">@Html(messages("expiredVrnDate.link"))</p>
+    }

@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{CheckVatDetailsPage, EmptyWaypoints, VatApiDownPage, Waypoints}
+import pages.{CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -35,6 +35,7 @@ import utils.FutureSyntax.FutureOps
 import views.html.auth.{InsufficientEnrolmentsView, UnsupportedAffinityGroupView, UnsupportedAuthProviderView, UnsupportedCredentialRoleView}
 
 import java.net.URLEncoder
+import java.time.LocalDate
 
 class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
@@ -84,23 +85,52 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
         "and we can find their VAT details" - {
 
-          "must create user answers with their VAT details, then redirect to the next page" in {
+          "and the de-registration date is today or before" - {
 
-            val application = appBuilder(Some(emptyUserAnswers)).build()
+            "must redirect to Expired Vrn Date page" in {
 
-            when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+              val application = appBuilder(Some(emptyUserAnswers)).build()
 
-            running(application) {
+              val nonExpiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate)))
 
-              val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
-              val result = route(application, request).value
+              when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(nonExpiredVrnVatInfo).toFuture
+              when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
-              val expectedAnswers = emptyUserAnswersWithVatInfo.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+              running(application) {
 
-              status(result) mustBe SEE_OTHER
-              redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
-              verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+                val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                val result = route(application, request).value
+
+                status(result) mustBe SEE_OTHER
+                redirectLocation(result).value mustBe ExpiredVrnDatePage.route(waypoints).url
+                verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+              }
+            }
+          }
+
+          "and the de-registration date is later than today" - {
+
+            "must create user answers with their VAT details, then redirect to the next page" in {
+
+              val application = appBuilder(Some(emptyUserAnswers)).build()
+
+              val nonExpiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate).plusDays(1)))
+
+              when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(nonExpiredVrnVatInfo).toFuture
+              when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+              running(application) {
+
+                val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                val result = route(application, request).value
+
+                val expectedAnswers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(nonExpiredVrnVatInfo))
+                  .set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+                status(result) mustBe SEE_OTHER
+                redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+                verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+              }
             }
           }
         }
@@ -159,22 +189,50 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
       "and we can find their VAT details" - {
 
-        "must create user answers with their VAT details, then redirect to the next page" in {
+        "and the de-registration date is today or before" - {
 
-          val application = appBuilder(None).build()
+          "must redirect to Expired Vrn Date page" in {
 
-          when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-          when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+            val application = appBuilder(None).build()
 
-          running(application) {
-            val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
-            val result = route(application, request).value
+            val expiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate)))
 
-            val expectedAnswers = emptyUserAnswersWithVatInfo.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+            when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(expiredVrnVatInfo).toFuture
+            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
-            verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+            running(application) {
+              val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+              val result = route(application, request).value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe ExpiredVrnDatePage.route(waypoints).url
+              verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+            }
+          }
+        }
+
+        "and the de-registration date is later than today" - {
+
+          "must create user answers with their VAT details, then redirect to the next page" in {
+
+            val application = appBuilder(None).build()
+
+            val nonExpiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate).plusDays(1)))
+
+            when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(nonExpiredVrnVatInfo).toFuture
+            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+            running(application) {
+              val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+              val result = route(application, request).value
+
+              val expectedAnswers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(nonExpiredVrnVatInfo))
+                .set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+              verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+            }
           }
         }
       }

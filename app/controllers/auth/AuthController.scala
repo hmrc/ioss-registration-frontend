@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
 import models.{UserAnswers, VatApiCallResult}
-import pages.{CheckVatDetailsPage, EmptyWaypoints, VatApiDownPage}
+import pages.{CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.VatApiCallResultQuery
@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.auth.{InsufficientEnrolmentsView, UnsupportedAffinityGroupView, UnsupportedAuthProviderView, UnsupportedCredentialRoleView}
 
-import java.time.{Clock, Instant}
+import java.time.{Clock, Instant, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -56,10 +56,14 @@ class AuthController @Inject()(
         case _ =>
           registrationConnector.getVatCustomerInfo().flatMap {
             case Right(vatInfo) =>
-              for {
-                updatedAnswers <- Future.fromTry(answers.copy(vatInfo = Some(vatInfo)).set(VatApiCallResultQuery, VatApiCallResult.Success))
-                _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(CheckVatDetailsPage.route(EmptyWaypoints).url)
+              if (vatInfo.deregistrationDecisionDate.exists(!_.isAfter(LocalDate.now(clock)))) {
+                Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
+              } else {
+                for {
+                  updatedAnswers <- Future.fromTry(answers.copy(vatInfo = Some(vatInfo)).set(VatApiCallResultQuery, VatApiCallResult.Success))
+                  _ <- cc.sessionRepository.set(updatedAnswers)
+                } yield Redirect(CheckVatDetailsPage.route(EmptyWaypoints).url)
+              }
 
             case _ =>
               for {

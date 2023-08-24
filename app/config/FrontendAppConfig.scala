@@ -51,8 +51,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
     s"${configuration.get[Service]("microservice.services.identity-verification").baseUrl}/journey/"
   def ivJourneyResultUrl(journeyId: String): String = new URI(s"$ivJourneyServiceUrl$journeyId").toString
 
-  private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
-  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/ioss-registration-frontend"
+  private val exitSurveyBaseUrl: String = configuration.get[String]("feedback-frontend.host") + configuration.get[String]("feedback-frontend.url")
+  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/${origin.toLowerCase}"
 
   val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("features.welsh-translation")

@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-        layout: templates.Layout
-)
+package pages
+import controllers.routes
+import play.api.mvc.Call
 
-@()(implicit request: Request[_], messages: Messages)
+object ExpiredVrnDatePage extends Page {
 
-@layout(pageTitle = titleNoForm(messages("insufficientEnrolments.title"))) {
+  override def route(waypoints: Waypoints): Call =
+    routes.ExpiredVrnDateController.onPageLoad(waypoints)
 
-    <h1 class="govuk-heading-l">@messages("insufficientEnrolments.heading")</h1>
-
-    <p class="govuk-body">@Html(messages("insufficientEnrolments.registerForUkVat"))</p>
 }
