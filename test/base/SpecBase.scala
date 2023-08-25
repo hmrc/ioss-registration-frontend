@@ -59,8 +59,8 @@ trait SpecBase
       partOfVatGroup = false,
       organisationName = Some("Company name"),
       individualName = None,
-      singleMarketIndicator = Some(true),
-      deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate))
+      singleMarketIndicator = true,
+      deregistrationDecisionDate = None
     )
 
   val vrn: Vrn = Vrn("123456789")
