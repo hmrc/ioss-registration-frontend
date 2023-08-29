@@ -19,10 +19,13 @@ package controllers.auth
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
+import logging.Logging
+import models.domain.VatCustomerInfo
 import models.{UserAnswers, VatApiCallResult}
-import pages.{CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage}
+import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
+import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage}
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.VatApiCallResultQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
@@ -42,7 +45,7 @@ class AuthController @Inject()(
                                 unsupportedCredentialRoleView: UnsupportedCredentialRoleView,
                                 config: FrontendAppConfig,
                                 clock: Clock
-                              )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                              )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
@@ -55,24 +58,53 @@ class AuthController @Inject()(
 
         case _ =>
           registrationConnector.getVatCustomerInfo().flatMap {
-            case Right(vatInfo) =>
-              if (vatInfo.deregistrationDecisionDate.exists(!_.isAfter(LocalDate.now(clock)))) {
-                Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
-              } else {
-                for {
-                  updatedAnswers <- Future.fromTry(answers.copy(vatInfo = Some(vatInfo)).set(VatApiCallResultQuery, VatApiCallResult.Success))
-                  _ <- cc.sessionRepository.set(updatedAnswers)
-                } yield Redirect(CheckVatDetailsPage.route(EmptyWaypoints).url)
-              }
-
+            case Right(vatInfo) if checkVrnExpired(vatInfo) =>
+              Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
+            case Right(vatInfo) => checkNiOrNorwayAndRedirect(vatInfo, answers)
             case _ =>
-              for {
-                updatedAnswers <- Future.fromTry(answers.set(VatApiCallResultQuery, VatApiCallResult.Error))
-                _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(VatApiDownPage.route(EmptyWaypoints).url)
+              saveAndRedirect(answers, None)
           }
       }
   }
+
+  private def checkNiOrNorwayAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Future[Result] = {
+    (vatInfo.singleMarketIndicator, answers.get(BusinessBasedInNiPage)) match {
+      case (true, Some(true)) => saveAndRedirect(answers, Some(vatInfo))
+      case (_, Some(true)) => Redirect(CannotRegisterNoNiProtocolPage.route(EmptyWaypoints).url).toFuture
+      case _ if isNorwegianBasedBusiness(answers, vatInfo) => saveAndRedirect(answers, Some(vatInfo))
+      case _ => Redirect(CannotRegisterNotNorwegianBasedBusinessPage.route(EmptyWaypoints).url).toFuture
+    }
+  }
+
+  private def checkVrnExpired(vatInfo: VatCustomerInfo): Boolean =
+    vatInfo.deregistrationDecisionDate.exists(!_.isAfter(LocalDate.now(clock)))
+
+  private def saveAndRedirect(answers: UserAnswers, vatInfo: Option[VatCustomerInfo]): Future[Result] = {
+
+    val (updateUAWithVatInfo, page) = if (vatInfo.isDefined) {
+      (
+        Future.fromTry(answers.copy(vatInfo = vatInfo).set(VatApiCallResultQuery, VatApiCallResult.Success)),
+        CheckVatDetailsPage
+      )
+    } else {
+      (
+        Future.fromTry(answers.set(VatApiCallResultQuery, VatApiCallResult.Error)),
+        VatApiDownPage
+      )
+    }
+
+
+    for {
+      updatedAnswers <- updateUAWithVatInfo
+      _ <- cc.sessionRepository.set(updatedAnswers)
+    } yield Redirect(page.route(EmptyWaypoints).url)
+  }
+
+  private def isNorwegianBasedBusiness(answers: UserAnswers, vatCustomerInfo: VatCustomerInfo): Boolean =
+    (vatCustomerInfo.desAddress.countryCode, answers.get(NorwegianBasedBusinessPage)) match {
+      case ("NO", Some(true)) => true
+      case _ => false
+    }
 
   def redirectToRegister(continueUrl: String): Action[AnyContent] = Action {
     Redirect(config.registerUrl,

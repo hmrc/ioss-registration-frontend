@@ -20,12 +20,13 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.auth.{routes => authRoutes}
-import models.{UserAnswers, VatApiCallResult, responses}
+import models.{DesAddress, UserAnswers, VatApiCallResult, responses}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage, Waypoints}
+import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
+import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -45,17 +46,17 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
   private val continueUrl: String = "continueUrl"
   private val waypoints: Waypoints = EmptyWaypoints
 
+  override def beforeEach(): Unit = {
+    reset(mockRegistrationConnector)
+    reset(mockAuthenticatedUserAnswersRepository)
+  }
+
   private def appBuilder(answers: Option[UserAnswers]) =
     applicationBuilder(answers)
       .overrides(
         bind[RegistrationConnector].toInstance(mockRegistrationConnector),
         bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository)
-  )
-
-  override def beforeEach(): Unit = {
-    reset(mockRegistrationConnector)
-    reset(mockAuthenticatedUserAnswersRepository)
-  }
+      )
 
   ".onSignIn" - {
 
@@ -65,7 +66,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
         "must redirect to the next page without making calls to get data or updating the users answers" in {
 
-          val answers = emptyUserAnswers.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+          val answers = emptyUserAnswersWithVatInfo.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
 
           val application = appBuilder(Some(answers)).build()
 
@@ -89,12 +90,12 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             "must redirect to Expired Vrn Date page" in {
 
-              val application = appBuilder(Some(emptyUserAnswers)).build()
+              val application = appBuilder(answers = Some(emptyUserAnswersWithVatInfo)).build()
 
               val nonExpiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate)))
 
               when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(nonExpiredVrnVatInfo).toFuture
-              when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+              when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
 
               running(application) {
 
@@ -112,9 +113,14 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             "must create user answers with their VAT details, then redirect to the next page" in {
 
-              val application = appBuilder(Some(emptyUserAnswers)).build()
+              val answers = emptyUserAnswersWithVatInfo.set(BusinessBasedInNiPage, true).success.value
 
-              val nonExpiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate).plusDays(1)))
+              val application = appBuilder(answers = Some(answers)).build()
+
+              val nonExpiredVrnVatInfo = vatCustomerInfo.copy(
+                singleMarketIndicator = true,
+                deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate).plusDays(1))
+              )
 
               when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(nonExpiredVrnVatInfo).toFuture
               when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
@@ -125,11 +131,157 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                 val result = route(application, request).value
 
                 val expectedAnswers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(nonExpiredVrnVatInfo))
+                  .set(BusinessBasedInNiPage, true).success.value
                   .set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
 
                 status(result) mustBe SEE_OTHER
                 redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
                 verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+              }
+            }
+          }
+
+          "and the user answers that they are registered to trade under the NI protocol but ETMP indicate they are not" - {
+
+            "must redirect to the Cannot Register No Ni Protocol page" in {
+
+              val updatedVatInfo = vatCustomerInfo.copy(singleMarketIndicator = false)
+
+              val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
+                .set(BusinessBasedInNiPage, true).success.value
+
+              val application = appBuilder(answers = Some(answers)).build()
+
+              when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
+              when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
+
+              running(application) {
+
+                val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                val result = route(application, request).value
+
+                status(result) mustBe SEE_OTHER
+                redirectLocation(result).value mustBe CannotRegisterNoNiProtocolPage.route(waypoints).url
+                verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+              }
+            }
+          }
+
+          // TODO users answered no in filter Qs to NI question, and yes to Norway but ETMP shows NI true and No Norway so should be able to register
+          //          "and the user answers that they are not registered to trade under the NI protocol but ETMP indicate they are" - {
+          //
+          //            "must redirect to the Cannot Register No Ni Protocol page" in {
+          //
+          //              val answers = emptyUserAnswersWithVatInfo
+          //                .set(BusinessBasedInNiPage, false).success.value
+          //                .set(NorwegianBasedBusinessPage, true).success.value
+          //
+          //              val application = appBuilder(answers = Some(answers)).build()
+          //
+          //              when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+          //              when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
+          //
+          //              running(application) {
+          //
+          //                val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+          //                val result = route(application, request).value
+          //
+          //                status(result) mustBe SEE_OTHER
+          //                redirectLocation(result).value mustBe CannotRegisterNoNiProtocolPage.route(waypoints).url
+          //                verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+          //              }
+          //            }
+          //          }
+
+          "they are registered to trade under the NI protocol" - {
+
+            "must create user answers with their VAT details, then redirect to the next page" in {
+
+              val answers = emptyUserAnswersWithVatInfo.set(BusinessBasedInNiPage, true).success.value
+
+              val application = appBuilder(answers = Some(answers)).build()
+
+              when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+              when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+              running(application) {
+
+                val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                val result = route(application, request).value
+
+                val expectedAnswers = answers
+                  .set(BusinessBasedInNiPage, true).success.value
+                  .set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+                status(result) mustBe SEE_OTHER
+                redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+                verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+              }
+            }
+          }
+
+          "and they are not registered to trade under the NI protocol" - {
+
+            "and they answer that their business is Norway based" - {
+
+              "but ETMP indicate their registered PPOB is not Norway" - {
+
+                "must redirect to the Cannot Register Not Norwegian Based Business page" in {
+
+                  val updatedVatInfo = vatCustomerInfo.copy(singleMarketIndicator = false)
+
+                  val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
+                    .set(BusinessBasedInNiPage, false).success.value
+                    .set(NorwegianBasedBusinessPage, true).success.value
+
+                  val application = appBuilder(answers = Some(answers)).build()
+
+                  when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
+                  when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
+
+                  running(application) {
+
+                    val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                    val result = route(application, request).value
+
+                    status(result) mustBe SEE_OTHER
+                    redirectLocation(result).value mustBe CannotRegisterNotNorwegianBasedBusinessPage.route(waypoints).url
+                    verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+                  }
+                }
+              }
+
+              "and ETMP indicate their registered PPOB is Norway" - {
+
+                "must create user answers with their VAT details, then redirect to the next page" in {
+
+                  val desAddress = DesAddress("Line1", None, None, None, None, Some("AA11 1AA"), "NO")
+                  val updatedVatInfo = vatCustomerInfo.copy(
+                    singleMarketIndicator = false,
+                    desAddress = desAddress
+                  )
+
+                  val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
+                    .set(BusinessBasedInNiPage, false).success.value
+                    .set(NorwegianBasedBusinessPage, true).success.value
+
+                  val application = appBuilder(answers = Some(answers)).build()
+
+                  when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
+                  when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+                  running(application) {
+
+                    val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                    val result = route(application, request).value
+
+                    val expectedAnswers = answers.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+                    status(result) mustBe SEE_OTHER
+                    redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+                    verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+                  }
+                }
               }
             }
           }
@@ -189,50 +341,26 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
       "and we can find their VAT details" - {
 
-        "and the de-registration date is today or before" - {
+        "must create user answers with their VAT details, then redirect to the next page" in {
 
-          "must redirect to Expired Vrn Date page" in {
+          val application = appBuilder(answers = Some(emptyUserAnswers
+            .set(BusinessBasedInNiPage, true).success.value))
+            .build()
 
-            val application = appBuilder(None).build()
+          when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+          when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
-            val expiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate)))
+          running(application) {
+            val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+            val result = route(application, request).value
 
-            when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(expiredVrnVatInfo).toFuture
-            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+            val expectedAnswers = emptyUserAnswersWithVatInfo
+              .set(BusinessBasedInNiPage, true).success.value
+              .set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
 
-            running(application) {
-              val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
-              val result = route(application, request).value
-
-              status(result) mustBe SEE_OTHER
-              redirectLocation(result).value mustBe ExpiredVrnDatePage.route(waypoints).url
-              verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
-            }
-          }
-        }
-
-        "and the de-registration date is later than today" - {
-
-          "must create user answers with their VAT details, then redirect to the next page" in {
-
-            val application = appBuilder(None).build()
-
-            val nonExpiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate).plusDays(1)))
-
-            when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(nonExpiredVrnVatInfo).toFuture
-            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
-
-            running(application) {
-              val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
-              val result = route(application, request).value
-
-              val expectedAnswers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(nonExpiredVrnVatInfo))
-                .set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
-
-              status(result) mustBe SEE_OTHER
-              redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
-              verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
-            }
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+            verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }
       }
@@ -258,7 +386,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
             verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }
-
       }
 
       "and the call to get their vat details fails" - {
