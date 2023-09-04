@@ -79,7 +79,7 @@ POST        /register-to-use-service                             controllers.fil
 
 GET         /cannot-register-no-ni-or-norway-business            controllers.filters.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-# Next section
+# VAT details section
 GET         /confirm-vat-details                                 controllers.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /confirm-vat-details                                 controllers.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
@@ -92,3 +92,7 @@ GET         /expired-vrn-date                                    controllers.Exp
 GET         /cannot-register-no-ni-protocol                      controllers.CannotRegisterNoNiProtocolController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /cannot-register-not-norwegian-based-business        controllers.CannotRegisterNotNorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+# Trading name section
+GET         /have-uk-trading-name                                controllers.HasTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /have-uk-trading-name                                controllers.HasTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
