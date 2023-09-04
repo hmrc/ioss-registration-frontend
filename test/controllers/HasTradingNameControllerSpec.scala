@@ -18,7 +18,6 @@ package controllers
 
 import base.SpecBase
 import forms.HasTradingNameFormProvider
-import models.UserAnswers
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -63,7 +62,7 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(HasTradingNamePage, true).success.value
+      val userAnswers = emptyUserAnswersWithVatInfo.set(HasTradingNamePage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -108,7 +107,7 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo)).build()
 
       running(application) {
         val request =
