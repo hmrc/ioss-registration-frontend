@@ -17,7 +17,7 @@
 package pages
 
 import controllers.routes
-import models.UserAnswers
+import models.{Index, UserAnswers}
 import pages.filters.RegisteredForIossInEuPage
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
@@ -32,7 +32,7 @@ case object HasTradingNamePage extends QuestionPage[Boolean] {
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
-      case true => RegisteredForIossInEuPage // TODO TradingNamePage
+      case true => TradingNamePage(Index(0))
       case false => RegisteredForIossInEuPage // TODO PreviousRegistrations
     }.orRecover
 }

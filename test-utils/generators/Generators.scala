@@ -16,11 +16,11 @@
 
 package generators
 
-import java.time.{Instant, LocalDate, ZoneOffset}
-
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
 import org.scalacheck.{Gen, Shrink}
+
+import java.time.{Instant, LocalDate, ZoneOffset}
 
 trait Generators extends ModelGenerators {
 
@@ -96,6 +96,15 @@ trait Generators extends ModelGenerators {
     chars     <- listOfN(length, arbitrary[Char])
   } yield chars.mkString
 
+  def stringsShorterThan(maxLength: Int): Gen[String] = {
+    require(maxLength > 1, "Max length must be greater than 1")
+
+    for {
+      length <- Gen.choose(1, maxLength - 1)
+      chars <- listOfN(length, arbitrary[Char] suchThat (_ != ' '))
+    } yield chars.mkString
+  }
+
   def stringsExceptSpecificValues(excluded: Seq[String]): Gen[String] =
     nonEmptyString suchThat (!excluded.contains(_))
 
@@ -117,4 +126,69 @@ trait Generators extends ModelGenerators {
         Instant.ofEpochMilli(millis).atOffset(ZoneOffset.UTC).toLocalDate
     }
   }
+
+  def safeInputs: Gen[Char] = Gen.oneOf(
+    Gen.alphaNumChar,
+    Gen.const('"'),
+    Gen.const('\''),
+    Gen.const('.'),
+    Gen.const(','),
+    Gen.const('/'),
+    Gen.const('-'),
+    Gen.const('_'),
+    Gen.const(' '),
+    Gen.const('&'),
+    Gen.const('’'),
+    Gen.const('('),
+    Gen.const(')'),
+    Gen.const('!'),
+    Gen.oneOf('À' to 'ÿ')
+  )
+
+  def unsafeInputs: Gen[Char] = Gen.oneOf(
+    Gen.const('<'),
+    Gen.const('>'),
+    Gen.const('='),
+    Gen.const('|')
+  )
+
+  def safeInputsWithMaxLength(maxLength: Int): Gen[String] = (for {
+    length <- choose(1, maxLength)
+    chars <- listOfN(length, safeInputs)
+  } yield chars.mkString).suchThat(_.trim.nonEmpty)
+
+  def unsafeInputsWithMaxLength(maxLength: Int): Gen[String] = (for {
+    length <- choose(2, maxLength)
+    invalidChar <- unsafeInputs
+    validChars <- listOfN(length - 1, unsafeInputs)
+  } yield (validChars :+ invalidChar).mkString).suchThat(_.trim.nonEmpty)
+
+  def commonFieldString(maxLength: Int): Gen[String] = (for {
+    length <- choose(1, maxLength)
+    chars <- listOfN(length, commonFieldSafeInputs)
+  } yield chars.mkString).suchThat(_.trim.nonEmpty).retryUntil(_.matches(retryUntilString))
+
+  val retryUntilString = """^(?!^[’'"])(?:[A-Za-z0-9À-ÿ \!\)\(.,_/’'"&-])(?<![’'"]$)$"""
+
+  def tradingNameReservedWords: Gen[String] = Gen.oneOf(
+    Gen.const("limited"),
+    Gen.const("ltd"),
+    Gen.const("llp"),
+    Gen.const("plc")
+  )
+
+  private def commonFieldSafeInputs: Gen[Char] = Gen.oneOf(
+    Gen.alphaNumChar,
+    Gen.oneOf('À' to 'ÿ'),
+    Gen.const('.'),
+    Gen.const(','),
+    Gen.const('/'),
+    Gen.const('’'),
+    Gen.const('\''),
+    Gen.const('"'),
+    Gen.const('_'),
+    Gen.const('&'),
+    Gen.const(' '),
+    Gen.const('\'')
+  )
 }

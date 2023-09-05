@@ -16,14 +16,15 @@
 
 package forms.mappings
 
-import java.time.LocalDate
-
 import generators.Generators
+import models.Index
 import org.scalacheck.Gen
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.validation.{Invalid, Valid}
+
+import java.time.LocalDate
 
 class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with Generators  with Constraints {
 
@@ -84,6 +85,34 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     "must return Invalid for a number above the threshold" in {
       val result = maximumValue(1, "error.max").apply(2)
       result mustEqual Invalid("error.max", 1)
+    }
+  }
+
+  "inRange" - {
+
+    "must return Invalid for a number less than the lower threshold" in {
+      val result = inRange(1, 5, "error.max").apply(0)
+      result mustEqual Invalid("error.max", 1, 5)
+    }
+
+    "must return Valid for a number equal to the lower threshold" in {
+      val result = inRange(1, 5, "error.max").apply(1)
+      result mustEqual Valid
+    }
+
+    "must return Valid for a number equal to the upper threshold" in {
+      val result = inRange(1, 5, "error.max").apply(5)
+      result mustEqual Valid
+    }
+
+    "must return Valid for a number in range" in {
+      val result = inRange(1, 5, "error.max").apply(3)
+      result mustEqual Valid
+    }
+
+    "must return Invalid for a number above the upper threshold" in {
+      val result = inRange(1, 5, "error.max").apply(6)
+      result mustEqual Invalid("error.max", 1, 5)
     }
   }
 
@@ -186,6 +215,94 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
           val result = minDate(min, "error.past", "foo")(date)
           result mustEqual Invalid("error.past", "foo")
       }
+    }
+  }
+
+  "nonEmptySet" - {
+
+    "must return Valid when set is not empty" in {
+
+      val set = Set("bar", "baz")
+
+      val result = nonEmptySet("error.set")(set)
+      result mustEqual Valid
+    }
+
+    "must return Invalid when set is empty" in {
+
+      val set = Set.empty
+
+      val result = nonEmptySet("error.set")(set)
+      result mustEqual Invalid("error.set")
+    }
+
+  }
+
+  "notADuplicate" - {
+
+    "must return Valid when there is not another entry in the existing answers with the same value" in {
+
+      val answer = "foo"
+      val existingAnswers = Seq("bar", "baz")
+      val index = Index(0)
+
+      val result = notADuplicate(index, existingAnswers, "error.duplicate", "foo")(answer)
+      result mustEqual Valid
+    }
+
+    "must return Valid when this answer is in the existing answers at the same index position, but nowhere else" in {
+
+      val answer = "foo"
+      val existingAnswers = Seq("bar", "foo", "baz")
+      val index = Index(1)
+
+      val result = notADuplicate(index, existingAnswers, "error.duplicate", "foo")(answer)
+      result mustEqual Valid
+    }
+
+    "must return Invalid when this answer is in the existing answers at a different index position" in {
+
+      val answer = "foo"
+      val existingAnswers = Seq("bar", "foo", "baz")
+      val index = Index(0)
+
+      val result = notADuplicate(index, existingAnswers, "error.duplicate", "foo")(answer)
+      result mustEqual Invalid("error.duplicate", "foo")
+    }
+  }
+
+  "notContainStrings" - {
+
+    "must return Valid when excludedStrings is empty" in {
+      val answer = "name"
+      val excludedStrings: Set[String] = Set()
+
+      val result = notContainStrings(excludedStrings, "error.key")(answer)
+      result mustEqual Valid
+    }
+
+    "must return Valid when answer does not include any excludedStrings" in {
+      val answer = "name"
+      val excludedStrings: Set[String] = Set("limited", "plc")
+
+      val result = notContainStrings(excludedStrings, "error.key")(answer)
+      result mustEqual Valid
+    }
+
+    "must return Valid when answer has excludedStrings as substring" in {
+      val answer = "delimited"
+      val excludedStrings: Set[String] = Set("limited", "plc")
+
+      val result = notContainStrings(excludedStrings, "error.key")(answer)
+      result mustEqual Valid
+    }
+
+    "must return Invalid when answer has excludedStrings as stand alone word" in {
+      val answer = "name limited"
+      val excludedStrings: Set[String] = Set("limited", "plc")
+
+      val result = notContainStrings(excludedStrings, "error.key")(answer)
+      result mustEqual Invalid("error.key")
     }
   }
 }

@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package config
+package pages
 
-object Constants {
+import controllers.routes
+import models.Index
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-  val maxTradingNames: Int = 10
+case class TradingNamePage(index: Index) extends QuestionPage[String] {
 
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
+  override def path: JsPath = JsPath \ toString \ index.position
 
+  override def toString: String = "tradingName"
 
+  override def route(waypoints: Waypoints): Call =
+    routes.TradingNameController.onPageLoad(waypoints, index)
 }

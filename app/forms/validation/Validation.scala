@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package config
+package forms.validation
 
-object Constants {
+object Validation {
 
-  val maxTradingNames: Int = 10
-
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
+  val commonTextPattern = """^(?!^[’'"])(?:[A-Za-z0-9À-ÿ \!\)\(.,_/’'"&-]|[’'"](?=[A-Za-z0-9À-ÿ \!\)\(.,_/’'"&-]))*[A-Za-z0-9À-ÿ \!\)\(.,_/’'"&-](?<![’'"]$)$"""
 
 
 }

@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.auth.{routes => authRoutes}
-import models.{DesAddress, UserAnswers, VatApiCallResult, responses}
+import models.{UserAnswers, VatApiCallResult, responses}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
@@ -255,7 +255,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 "must create user answers with their VAT details, then redirect to the next page" in {
 
-                  val desAddress = DesAddress("Line1", None, None, None, None, Some("AA11 1AA"), "NO")
+                  val desAddress = arbitraryDesAddress.arbitrary.sample.value.copy(countryCode = "NO")
                   val updatedVatInfo = vatCustomerInfo.copy(
                     singleMarketIndicator = false,
                     desAddress = desAddress
@@ -426,9 +426,9 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
+        status(result) mustBe SEE_OTHER
 
-        redirectLocation(result).value mustEqual "http://localhost:9553/bas-gateway/register?origin=IOSS&continueUrl=continueUrl&accountType=Organisation"
+        redirectLocation(result).value mustBe "http://localhost:9553/bas-gateway/register?origin=IOSS&continueUrl=continueUrl&accountType=Organisation"
       }
     }
   }
@@ -444,9 +444,9 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
+        status(result) mustBe SEE_OTHER
 
-        redirectLocation(result).value mustEqual "http://localhost:9553/bas-gateway/sign-in?origin=IOSS&continue=continueUrl"
+        redirectLocation(result).value mustBe "http://localhost:9553/bas-gateway/sign-in?origin=IOSS&continue=continueUrl"
       }
     }
   }
@@ -467,8 +467,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
         val encodedContinueUrl = URLEncoder.encode(appConfig.exitSurveyUrl, "UTF-8")
         val expectedRedirectUrl = s"${appConfig.signOutUrl}?continue=$encodedContinueUrl"
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual expectedRedirectUrl
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe expectedRedirectUrl
       }
     }
   }
@@ -489,8 +489,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
         val encodedContinueUrl = URLEncoder.encode(routes.SignedOutController.onPageLoad.url, "UTF-8")
         val expectedRedirectUrl = s"${appConfig.signOutUrl}?continue=$encodedContinueUrl"
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual expectedRedirectUrl
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe expectedRedirectUrl
       }
     }
   }

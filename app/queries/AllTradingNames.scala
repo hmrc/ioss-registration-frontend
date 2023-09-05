@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package config
+package queries
+import play.api.libs.json.JsPath
 
-object Constants {
+case object AllTradingNames extends Gettable[List[String]] with Settable[List[String]] {
 
-  val maxTradingNames: Int = 10
-
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
-
-
+  override def path: JsPath = JsPath \ "tradingNames"
 }

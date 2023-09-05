@@ -96,3 +96,7 @@ GET         /cannot-register-not-norwegian-based-business        controllers.Can
 # Trading name section
 GET         /have-uk-trading-name                                controllers.HasTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /have-uk-trading-name                                controllers.HasTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /uk-trading-name/:index                              controllers.TradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /uk-trading-name/:index                              controllers.TradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+

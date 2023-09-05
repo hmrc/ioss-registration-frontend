@@ -35,7 +35,7 @@ class CheckVatDetailsSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
       forAll(gen) {
         checkVatDetails =>
 
-          JsString(checkVatDetails.toString).validate[CheckVatDetails].asOpt.value mustEqual checkVatDetails
+          JsString(checkVatDetails.toString).validate[CheckVatDetails].asOpt.value mustBe checkVatDetails
       }
     }
 
@@ -46,7 +46,7 @@ class CheckVatDetailsSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
       forAll(gen) {
         invalidValue =>
 
-          JsString(invalidValue).validate[CheckVatDetails] mustEqual JsError("error.invalid")
+          JsString(invalidValue).validate[CheckVatDetails] mustBe JsError("error.invalid")
       }
     }
 
@@ -57,7 +57,7 @@ class CheckVatDetailsSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
       forAll(gen) {
         checkVatDetails =>
 
-          Json.toJson(checkVatDetails) mustEqual JsString(checkVatDetails.toString)
+          Json.toJson(checkVatDetails) mustBe JsString(checkVatDetails.toString)
       }
     }
   }

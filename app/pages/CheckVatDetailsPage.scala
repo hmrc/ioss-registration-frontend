@@ -19,7 +19,6 @@ package pages
 import controllers.routes
 import models.CheckVatDetails.{DetailsIncorrect, WrongAccount, Yes}
 import models.{CheckVatDetails, UserAnswers}
-import pages.filters.RegisteredForIossInEuPage
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
