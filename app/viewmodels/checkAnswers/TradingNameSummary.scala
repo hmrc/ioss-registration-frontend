@@ -17,24 +17,49 @@
 package viewmodels.checkAnswers
 
 import models.{Index, UserAnswers}
-import pages.{CheckAnswersPage, TradingNamePage, Waypoints}
+import pages.{AddItemPage, AddTradingNamePage, CheckAnswersPage, TradingNamePage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
+import queries.AllTradingNames
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
+import viewmodels.ListItemWrapper
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object TradingNameSummary  {
+object TradingNameSummary {
 
-  def row(answers: UserAnswers, waypoints: Waypoints, index: Index, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(TradingNamePage(index)).map {
-      answer =>
+  def addToListRows(answers: UserAnswers, waypoints: Waypoints, sourcePage: AddItemPage): Seq[ListItemWrapper] =
+    answers.get(AllTradingNames).getOrElse(List.empty).zipWithIndex.map {
+      case (tradingName, index) =>
+
+        ListItemWrapper(
+          ListItem(
+            name = HtmlFormat.escape(tradingName.name).toString,
+            changeUrl = TradingNamePage(Index(index)).changeLink(waypoints, sourcePage).url,
+            removeUrl = ??? // TODO - Remove trading name controller
+          ),
+          removeButtonEnabled = true
+        )
+    }
+
+
+  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)
+                     (implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(AllTradingNames).map {
+      tradingNames =>
+
+        val value = tradingNames.map {
+          name =>
+            HtmlFormat.escape(name.name)
+        }.mkString("<br/>")
 
         SummaryListRowViewModel(
-          key     = "tradingName.checkYourAnswersLabel",
-          value   = ValueViewModel(HtmlFormat.escape(answer).toString),
+          key = "tradingName.checkYourAnswersLabel",
+          value = ValueViewModel(HtmlContent(value)),
           actions = Seq(
-            ActionItemViewModel("site.change", TradingNamePage(index).changeLink(waypoints, sourcePage).url)
+            ActionItemViewModel("site.change", AddTradingNamePage().changeLink(waypoints, sourcePage).url)
               .withVisuallyHiddenText(messages("tradingName.change.hidden"))
           )
         )

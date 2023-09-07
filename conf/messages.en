@@ -39,6 +39,8 @@ error.number = Please enter a valid number
 error.required = Please enter a value
 error.summary.title = There is a problem
 
+saveProgress.button = Save and come back later
+
 checkYourAnswers.title = Check Your Answers
 checkYourAnswers.heading = Check Your Answers
 
@@ -245,3 +247,13 @@ tradingName.error.duplicate = You have entered this trading name already. Enter 
 tradingName.error.invalid = Trading name must only include letters, numbers, hyphens, spaces and apostrophes
 tradingName.change.hidden = your UK trading name
 
+addTradingName.title.singular = You have added one UK trading name
+addTradingName.title.plural = You have added {0} UK trading names
+addTradingName.heading.singular = You have added one UK trading name
+addTradingName.heading.plural = You have added {0} UK trading names
+addTradingName.maximumReached = You have added the maximum number of trading names.
+addTradingName.error.required = Select yes if you need to add another UK trading name
+addTradingName.change.hidden = Change {0}
+addTradingName.remove.hidden = Remove {0}
+addTradingName.addAnother = Add another trading name?
+addTradingName.addAnother.hint = You can add up to 10 trading names.

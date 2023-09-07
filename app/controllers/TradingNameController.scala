@@ -19,7 +19,7 @@ package controllers
 import config.Constants.maxTradingNames
 import controllers.actions._
 import forms.TradingNameFormProvider
-import models.Index
+import models.{Index, TradingName}
 import pages.{TradingNamePage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -45,11 +45,11 @@ class TradingNameController @Inject()(
     (cc.authAndGetData() andThen cc.limitIndex(index, maxTradingNames)) {
       implicit request =>
 
-        val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames).getOrElse(Seq.empty))
+        val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames).getOrElse(Seq.empty).map(_.name))
 
         val preparedForm = request.userAnswers.get(TradingNamePage(index)) match {
           case None => form
-          case Some(value) => form.fill(value)
+          case Some(value) => form.fill(value.name)
         }
 
         Ok(view(preparedForm, waypoints, index))
@@ -59,7 +59,7 @@ class TradingNameController @Inject()(
     (cc.authAndGetData() andThen cc.limitIndex(index, maxTradingNames)).async {
       implicit request =>
 
-        val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames).getOrElse(Seq.empty))
+        val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames).getOrElse(Seq.empty).map(_.name))
 
         form.bindFromRequest().fold(
           formWithErrors =>
@@ -67,7 +67,7 @@ class TradingNameController @Inject()(
 
           value =>
             for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(TradingNamePage(index), value))
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(TradingNamePage(index), TradingName(value)))
               _ <- cc.sessionRepository.set(updatedAnswers)
             } yield Redirect(TradingNamePage(index).navigate(waypoints, request.userAnswers, updatedAnswers).route)
         )

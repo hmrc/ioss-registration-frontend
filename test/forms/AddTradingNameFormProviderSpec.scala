@@ -14,10 +14,32 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-trait AddToListQuestionPage {
-  self: Page =>
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-  val addItemWaypoint: Waypoint
+class AddTradingNameFormProviderSpec extends BooleanFieldBehaviours {
+
+  val requiredKey = "addTradingName.error.required"
+  val invalidKey = "error.boolean"
+
+  val form = new AddTradingNameFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

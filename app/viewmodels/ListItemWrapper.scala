@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package pages
+package viewmodels
 
-trait AddToListQuestionPage {
-  self: Page =>
+import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
 
-  val addItemWaypoint: Waypoint
-}
+case class ListItemWrapper(listItem: ListItem, removeButtonEnabled: Boolean)

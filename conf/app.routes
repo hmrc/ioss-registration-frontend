@@ -100,3 +100,5 @@ POST        /have-uk-trading-name                                controllers.Has
 GET         /uk-trading-name/:index                              controllers.TradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /uk-trading-name/:index                              controllers.TradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
+GET         /add-uk-trading-name                                 controllers.AddTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /add-uk-trading-name                                 controllers.AddTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

@@ -17,16 +17,21 @@
 package pages
 
 import controllers.routes
-import models.Index
+import models.{Index, NormalMode, TradingName, UserAnswers}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case class TradingNamePage(index: Index) extends QuestionPage[String] {
+case class TradingNamePage(index: Index) extends QuestionPage[TradingName] with AddToListQuestionPage {
+
+  override val addItemWaypoint: Waypoint = AddTradingNamePage().waypoint(NormalMode)
 
   override def path: JsPath = JsPath \ toString \ index.position
 
-  override def toString: String = "tradingName"
+  override def toString: String = "tradingNames"
 
   override def route(waypoints: Waypoints): Call =
     routes.TradingNameController.onPageLoad(waypoints, index)
+
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    AddTradingNamePage(Some(index))
 }

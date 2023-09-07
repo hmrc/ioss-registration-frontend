@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-trait AddToListQuestionPage {
-  self: Page =>
+import javax.inject.Inject
 
-  val addItemWaypoint: Waypoint
+import forms.mappings.Mappings
+import play.api.data.Form
+
+class AddTradingNameFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("addTradingName.error.required")
+    )
 }

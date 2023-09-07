@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package pages
+package queries
 
-trait AddToListQuestionPage {
-  self: Page =>
+import play.api.libs.json.{JsObject, JsPath}
 
-  val addItemWaypoint: Waypoint
+case object DeriveNumberOfTradingNames extends Derivable[Seq[JsObject], Int] {
+
+  override val derive: Seq[JsObject] => Int = _.size
+
+  override def path: JsPath = JsPath \ "tradingNames"
 }

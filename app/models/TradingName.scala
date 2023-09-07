@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package pages
+package models
 
-trait AddToListSection {
+import play.api.libs.json.{Json, OFormat}
 
+case class TradingName(name: String)
+
+object TradingName {
+  implicit lazy val format: OFormat[TradingName] = Json.format[TradingName]
 }

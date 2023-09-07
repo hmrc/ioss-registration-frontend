@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.TradingNameFormProvider
-import models.Index
+import models.{Index, TradingName}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Gen
@@ -67,7 +67,7 @@ class TradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = basicUserAnswersWithVatInfo.set(TradingNamePage(index), "answer").success.value
+      val userAnswers = basicUserAnswersWithVatInfo.set(TradingNamePage(index), TradingName("answer")).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -102,7 +102,7 @@ class TradingNameControllerSpec extends SpecBase with MockitoSugar {
             .withFormUrlEncodedBody(("value", companyName))
 
         val result = route(application, request).value
-        val expectedAnswers = basicUserAnswersWithVatInfo.set(TradingNamePage(index), companyName).success.value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(TradingNamePage(index), TradingName(companyName)).success.value
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe TradingNamePage(index).navigate(waypoints, emptyUserAnswersWithVatInfo, expectedAnswers).url
@@ -178,16 +178,16 @@ class TradingNameControllerSpec extends SpecBase with MockitoSugar {
 
       val answers =
         basicUserAnswersWithVatInfo
-          .set(TradingNamePage(Index(0)), "foo").success.value
-          .set(TradingNamePage(Index(1)), "foo").success.value
-          .set(TradingNamePage(Index(2)), "foo").success.value
-          .set(TradingNamePage(Index(3)), "foo").success.value
-          .set(TradingNamePage(Index(4)), "foo").success.value
-          .set(TradingNamePage(Index(5)), "foo").success.value
-          .set(TradingNamePage(Index(6)), "foo").success.value
-          .set(TradingNamePage(Index(7)), "foo").success.value
-          .set(TradingNamePage(Index(8)), "foo").success.value
-          .set(TradingNamePage(Index(9)), "foo").success.value
+          .set(TradingNamePage(Index(0)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(1)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(2)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(3)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(4)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(5)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(6)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(7)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(8)), TradingName("foo")).success.value
+          .set(TradingNamePage(Index(9)), TradingName("foo")).success.value
 
       val application = applicationBuilder(userAnswers = Some(answers)).build()
 
