@@ -30,7 +30,7 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
   }
 
   override val normalModeUrlFragment: String = "add-uk-trading-name"
-  override val checkModeUrlFragment: String = "check-add-uk-trading-name"
+  override val checkModeUrlFragment: String = "change-add-uk-trading-name"
 
   override def path: JsPath = JsPath \ toString
 
@@ -52,7 +52,7 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
         }
 
       case false =>
-        HasTradingNamePage // TODO Change to next page when created
+        HasTradingNamePage // TODO Change to prev reg page when created
     }.orRecover
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfTradingNames

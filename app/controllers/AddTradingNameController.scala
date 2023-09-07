@@ -78,6 +78,7 @@ class AddTradingNameController @Inject()(
       }
   }
 
+  // TODO -> Add to AnswerExtractor???
   private def getNumberOfTradingNames(waypoints: Waypoints)(block: Int => Future[Result])
                                      (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
     request.userAnswers.get(DeriveNumberOfTradingNames).map {

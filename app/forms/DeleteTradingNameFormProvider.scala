@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-import models.{CheckMode, Mode, NormalMode}
+import javax.inject.Inject
 
-case class Waypoint(
-                     page: WaypointPage,
-                     mode: Mode,
-                     urlFragment: String
-                   )
+import forms.mappings.Mappings
+import play.api.data.Form
 
-object Waypoint {
+class DeleteTradingNameFormProvider @Inject() extends Mappings {
 
-  private val fragments: Map[String, Waypoint] =
-    Map(
-      AddTradingNamePage().normalModeUrlFragment -> AddTradingNamePage().waypoint(NormalMode),
-      AddTradingNamePage().checkModeUrlFragment -> AddTradingNamePage().waypoint(CheckMode)
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("deleteTradingName.error.required")
     )
-
-  def fromString(s: String): Option[Waypoint] =
-    fragments.get(s)
 }

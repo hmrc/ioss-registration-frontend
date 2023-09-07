@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package pages
+package journey
 
-import models.{CheckMode, Mode, NormalMode}
+import generators.ModelGenerators
+import org.scalatest.freespec.AnyFreeSpec
 
-case class Waypoint(
-                     page: WaypointPage,
-                     mode: Mode,
-                     urlFragment: String
-                   )
+class VatDetailsJourney extends AnyFreeSpec with JourneyHelpers with ModelGenerators {
 
-object Waypoint {
 
-  private val fragments: Map[String, Waypoint] =
-    Map(
-      AddTradingNamePage().normalModeUrlFragment -> AddTradingNamePage().waypoint(NormalMode),
-      AddTradingNamePage().checkModeUrlFragment -> AddTradingNamePage().waypoint(CheckMode)
-    )
 
-  def fromString(s: String): Option[Waypoint] =
-    fragments.get(s)
 }

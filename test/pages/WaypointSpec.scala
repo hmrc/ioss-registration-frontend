@@ -16,10 +16,20 @@
 
 package pages
 
+import models.{CheckMode, NormalMode}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 
 class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
-  // TODO once authenticated journey initiates with loop journeys
+
+  "must return Add Trading Name when given it's Normal mode waypoint" in {
+
+    Waypoint.fromString("add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(NormalMode)
+  }
+
+  "must return Add Trading Name when given it's Check mode waypoint" in {
+
+    Waypoint.fromString("change-add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(CheckMode)
+  }
 }

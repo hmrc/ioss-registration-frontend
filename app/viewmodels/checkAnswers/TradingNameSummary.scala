@@ -17,7 +17,7 @@
 package viewmodels.checkAnswers
 
 import models.{Index, UserAnswers}
-import pages.{AddItemPage, AddTradingNamePage, CheckAnswersPage, TradingNamePage, Waypoints}
+import pages.{AddItemPage, AddTradingNamePage, CheckAnswersPage, DeleteTradingNamePage, TradingNamePage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import queries.AllTradingNames
@@ -38,7 +38,7 @@ object TradingNameSummary {
           ListItem(
             name = HtmlFormat.escape(tradingName.name).toString,
             changeUrl = TradingNamePage(Index(index)).changeLink(waypoints, sourcePage).url,
-            removeUrl = ??? // TODO - Remove trading name controller
+            removeUrl = DeleteTradingNamePage(Index(index)).route(waypoints).url
           ),
           removeButtonEnabled = true
         )

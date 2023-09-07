@@ -52,6 +52,15 @@ trait ModelGenerators {
       )
     }
 
+  implicit lazy val arbitraryTradingName: Arbitrary[TradingName] =
+    Arbitrary {
+      for {
+        name <- commonFieldString(maxFieldLength)
+      }  yield {
+        TradingName(name)
+      }
+    }
+
   private def commonFieldString(maxLength: Int): Gen[String] = (for {
     length <- choose(1, maxLength)
     chars <- listOfN(length, commonFieldSafeInputs)

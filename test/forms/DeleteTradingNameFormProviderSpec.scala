@@ -14,24 +14,32 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-import models.{CheckMode, Mode, NormalMode}
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-case class Waypoint(
-                     page: WaypointPage,
-                     mode: Mode,
-                     urlFragment: String
-                   )
+class DeleteTradingNameFormProviderSpec extends BooleanFieldBehaviours {
 
-object Waypoint {
+  val requiredKey = "deleteTradingName.error.required"
+  val invalidKey = "error.boolean"
 
-  private val fragments: Map[String, Waypoint] =
-    Map(
-      AddTradingNamePage().normalModeUrlFragment -> AddTradingNamePage().waypoint(NormalMode),
-      AddTradingNamePage().checkModeUrlFragment -> AddTradingNamePage().waypoint(CheckMode)
+  val form = new DeleteTradingNameFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
     )
 
-  def fromString(s: String): Option[Waypoint] =
-    fragments.get(s)
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }
