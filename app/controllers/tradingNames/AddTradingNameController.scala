@@ -17,14 +17,14 @@
 package controllers.tradingNames
 
 import config.Constants.maxTradingNames
+import controllers.AnswerExtractor
 import controllers.actions._
 import forms.tradingNames.AddTradingNameFormProvider
-import models.requests.AuthenticatedDataRequest
+import pages.Waypoints
 import pages.tradingNames.AddTradingNamePage
-import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.tradingNames.DeriveNumberOfTradingNames
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
@@ -39,7 +39,7 @@ class AddTradingNameController @Inject()(
                                           cc: AuthenticatedControllerComponents,
                                           formProvider: AddTradingNameFormProvider,
                                           view: AddTradingNameView
-                                        )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                        )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with AnswerExtractor {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
@@ -47,7 +47,7 @@ class AddTradingNameController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-      getNumberOfTradingNames(waypoints) {
+      getDerivedItems(waypoints, DeriveNumberOfTradingNames) {
         number =>
 
           val canAddTradingNames = number < maxTradingNames
@@ -59,8 +59,7 @@ class AddTradingNameController @Inject()(
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-
-      getNumberOfTradingNames(waypoints) {
+      getDerivedItems(waypoints, DeriveNumberOfTradingNames) {
         number =>
 
           val canAddTradingNames = number < maxTradingNames
@@ -77,14 +76,5 @@ class AddTradingNameController @Inject()(
               } yield Redirect(AddTradingNamePage().navigate(waypoints, request.userAnswers, updatedAnswers).route)
           )
       }
-  }
-
-  // TODO -> Add to AnswerExtractor???
-  private def getNumberOfTradingNames(waypoints: Waypoints)(block: Int => Future[Result])
-                                     (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
-    request.userAnswers.get(DeriveNumberOfTradingNames).map {
-      number =>
-        block(number)
-    }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
   }
 }

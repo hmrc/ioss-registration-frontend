@@ -18,10 +18,11 @@ package controllers
 
 import logging.Logging
 import models.requests.AuthenticatedDataRequest
-import play.api.libs.json.Reads
+import pages.{JourneyRecoveryPage, Waypoints}
+import play.api.libs.json.{JsObject, Reads}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Result}
-import queries.Gettable
+import queries.{Derivable, Gettable}
 import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.Future
@@ -49,6 +50,14 @@ trait AnswerExtractor extends Logging {
         logAnswerNotFoundMessage(query)
         Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture
       })
+
+  def getDerivedItems(waypoints: Waypoints, derivable: Derivable[Seq[JsObject], Int])(block: Int => Future[Result])
+                                     (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
+    request.userAnswers.get(derivable).map {
+      number =>
+        block(number)
+    }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
+  }
 
   private def logAnswerNotFoundMessage[T](query: Gettable[T]): Unit = logger.warn(s"$query question has not been answered")
 }
