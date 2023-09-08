@@ -17,10 +17,11 @@
 package viewmodels.checkAnswers
 
 import models.{Index, UserAnswers}
-import pages.{AddItemPage, AddTradingNamePage, CheckAnswersPage, DeleteTradingNamePage, TradingNamePage, Waypoints}
+import pages.tradingNames.{AddTradingNamePage, DeleteTradingNamePage, TradingNamePage}
+import pages.{AddItemPage, CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import queries.AllTradingNames
+import queries.tradingNames.AllTradingNames
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
@@ -56,11 +57,11 @@ object TradingNameSummary {
         }.mkString("<br/>")
 
         SummaryListRowViewModel(
-          key = "tradingName.checkYourAnswersLabel",
+          key = "tradingNames.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
           actions = Seq(
             ActionItemViewModel("site.change", AddTradingNamePage().changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("tradingName.change.hidden"))
+              .withVisuallyHiddenText(messages("tradingNames.change.hidden"))
           )
         )
     }

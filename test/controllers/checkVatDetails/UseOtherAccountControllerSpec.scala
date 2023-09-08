@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.checkVatDetails
 
 import base.SpecBase
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import viewmodels.govuk.SummaryListFluency
-import views.html.CheckYourAnswersView
+import views.html.checkVatDetails.UseOtherAccountView
 
-class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
+class UseOtherAccountControllerSpec extends SpecBase {
 
-  "Check Your Answers Controller" - {
+  private val waypoints: Waypoints = EmptyWaypoints
+
+  "UseOtherAccount Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.UseOtherAccountController.onPageLoad(waypoints).url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[CheckYourAnswersView]
-        val list = SummaryListViewModel(Seq.empty)
+        val view = application.injector.instanceOf[UseOtherAccountView]
 
-        status(result) mustBe OK
-        contentAsString(result) mustBe view(list,list)(request, messages(application)).toString
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(vrn)(request, messages(application)).toString
       }
     }
   }

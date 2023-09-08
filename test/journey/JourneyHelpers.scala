@@ -81,6 +81,11 @@ trait JourneyHelpers extends Matchers with TryValues with OptionValues {
       journeyState.copy(answers = journeyState.answers.set(page, answer).success.value)
     }
 
+  def setUserAnswerTo(answer: UserAnswers): JourneyStep[Unit] =
+    State.modify { journeyState =>
+      journeyState.copy(answers = answer)
+    }
+
   def remove[A](settable: Settable[A]): JourneyStep[Unit] =
     State.modify { journeyState =>
       journeyState.copy(answers = journeyState.answers.remove(settable).success.value)

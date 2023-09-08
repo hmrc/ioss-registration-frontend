@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
-package pages
+package models
 
-import models.{CheckMode, NormalMode}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import pages.tradingNames.AddTradingNamePage
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import play.api.libs.json.{JsSuccess, Json}
 
-class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
+class TradingNameSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues {
 
-  "must return Add Trading Name when given it's Normal mode waypoint" in {
+  "TradingName" - {
 
-    Waypoint.fromString("add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(NormalMode)
-  }
+    "must serialise / deserialise from and to a Trading name" - {
 
-  "must return Add Trading Name when given it's Check mode waypoint" in {
+      "with all optional fields present" in {
 
-    Waypoint.fromString("change-add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(CheckMode)
-  }
+        val tradingName: TradingName = TradingName("The Scrumptious Cake Company")
 
-  "must return Check Your Answers when given its waypoint" in {
+        val expectedJson = Json.obj(
+          "name" -> "The Scrumptious Cake Company"
+        )
 
-    Waypoint.fromString("check-your-answers").value mustBe CheckYourAnswersPage.waypoint
+        Json.toJson(tradingName) mustBe expectedJson
+        expectedJson.validate[TradingName] mustBe JsSuccess(tradingName)
+      }
+    }
   }
 }

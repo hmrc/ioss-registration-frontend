@@ -25,8 +25,9 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
+import pages.checkVatDetails.CheckVatDetailsPage
 import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
-import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage, Waypoints}
+import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

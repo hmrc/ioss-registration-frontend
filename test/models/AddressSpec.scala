@@ -40,8 +40,8 @@ class AddressSpec extends AnyFreeSpec with Matchers {
           "countryCode" -> "ES"
         )
 
-        Json.toJson(address) mustEqual expectedJson
-        expectedJson.validate[Address] mustEqual JsSuccess(address)
+        Json.toJson(address) mustBe expectedJson
+        expectedJson.validate[Address] mustBe JsSuccess(address)
       }
 
       "with all optional fields missing" in {
@@ -53,8 +53,8 @@ class AddressSpec extends AnyFreeSpec with Matchers {
           "countryCode" -> "FR"
         )
 
-        Json.toJson(address) mustEqual expectedJson
-        expectedJson.validate[Address] mustEqual JsSuccess(address)
+        Json.toJson(address) mustBe expectedJson
+        expectedJson.validate[Address] mustBe JsSuccess(address)
       }
 
       "excluding trailing and leading whitespace and double spaces" in {
@@ -68,7 +68,7 @@ class AddressSpec extends AnyFreeSpec with Matchers {
           "countryCode" -> "DE"
         )
 
-        expectedJson.as[DesAddress] mustEqual DesAddress(
+        expectedJson.as[DesAddress] mustBe DesAddress(
           "line 1",
           Some("line 2"),
           Some("line 3"),

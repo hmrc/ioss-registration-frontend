@@ -22,8 +22,9 @@ import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
 import models.domain.VatCustomerInfo
 import models.{UserAnswers, VatApiCallResult}
+import pages.checkVatDetails.CheckVatDetailsPage
 import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
-import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, CheckVatDetailsPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage}
+import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.VatApiCallResultQuery

@@ -43,6 +43,9 @@ saveProgress.button = Save and come back later
 
 checkYourAnswers.title = Check Your Answers
 checkYourAnswers.heading = Check Your Answers
+checkYourAnswers.details.heading = One Stop Shop details
+checkYourAnswers.info.p1 = By registering for this scheme, you confirm that the information you are providing is correct and complete.
+checkYourAnswers.info.p2 = After registering, do not click the Back button or refresh the page.
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -205,6 +208,14 @@ checkVatDetails.address = Principal place of business address
 checkVatDetails.yes = Yes
 checkVatDetails.detailsIncorrect = Yes, but some of my VAT details are incorrect
 checkVatDetails.wrongAccount = No, I want to register a different business
+
+vatRegistrationDetails.checkYourAnswers.heading = VAT registration details
+vatRegistrationDetails.checkYourAnswers.organisationName = Business name
+vatRegistrationDetails.checkYourAnswers.individualName = Name
+vatRegistrationDetails.checkYourAnswers.partOfVatGroup = Part of a VAT group
+vatRegistrationDetails.checkYourAnswers.vatRegistrationDate = UK VAT registration date
+vatRegistrationDetails.checkYourAnswers.businessAddress = Business address
+vatRegistrationDetails.checkYourAnswers.manageVatBTA = <a class="govuk-link" href="/business-account">Manage your VAT registration in your BTA account</a>
 
 updateVatDetails.title = Update your VAT details
 updateVatDetails.heading = Update your VAT details

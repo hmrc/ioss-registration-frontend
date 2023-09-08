@@ -15,15 +15,33 @@
  *@
 
 @this(
-    layout: templates.Layout,
-    govukSummaryList: GovukSummaryList
+        layout: templates.Layout,
+        govukSummaryList: GovukSummaryList
 )
 
-@(list: SummaryList)(implicit request: Request[_], messages: Messages)
+@(vatRegistrationDetailsList: SummaryList, list: SummaryList)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
+    @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
-    <h1 class="govuk-heading-l">@messages("checkYourAnswers.heading")</h1>
+        <h1 class="govuk-heading-l">@messages("checkYourAnswers.heading")</h1>
 
-    @govukSummaryList(list)
-}
+        <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
+
+        @govukSummaryList(
+            SummaryListViewModel(
+                vatRegistrationDetailsList.rows
+            ).withCssClass("govuk-body govuk-!-margin-bottom-9")
+        )
+
+        <p class="govuk-body govuk-!-margin-bottom-9">
+        @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA"))
+        </p>
+
+        <h2 class="govuk-heading-m">@messages("checkYourAnswers.details.heading")</h2>
+
+        @govukSummaryList(list)
+
+        <p class="govuk-body">@messages("checkYourAnswers.info.p1")</p>
+
+        <p class="govuk-body">@messages("checkYourAnswers.info.p2")</p>
+    }

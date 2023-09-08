@@ -18,9 +18,12 @@ package controllers
 
 import com.google.inject.Inject
 import controllers.actions.AuthenticatedControllerComponents
+import pages.{CheckYourAnswersPage, EmptyWaypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.VatRegistrationDetailsSummary
+import viewmodels.checkAnswers.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -35,10 +38,37 @@ class CheckYourAnswersController @Inject()(
   def onPageLoad(): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
 
-      val list = SummaryListViewModel(
-        rows = Seq.empty
+      val thisPage = CheckYourAnswersPage
+      val waypoints = EmptyWaypoints
+
+      val vatRegistrationDetailsList = SummaryListViewModel(
+        rows = Seq(
+          VatRegistrationDetailsSummary.rowBusinessName(request.userAnswers),
+          VatRegistrationDetailsSummary.rowIndividualName(request.userAnswers),
+          VatRegistrationDetailsSummary.rowPartOfVatUkGroup(request.userAnswers),
+          VatRegistrationDetailsSummary.rowUkVatRegistrationDate(request.userAnswers),
+          VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)
+        ).flatten
       )
 
-      Ok(view(list))
+      val hasTradingNameSummaryRow = HasTradingNameSummary.row(request.userAnswers, waypoints, thisPage)
+      val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
+
+      val list = SummaryListViewModel(
+        rows = Seq(
+          hasTradingNameSummaryRow,
+
+          hasTradingNameSummaryRow.map { sr =>
+            if (tradingNameSummaryRow.nonEmpty) {
+              sr.withCssClass("govuk-summary-list__row--no-border")
+            } else {
+              sr
+            }
+          },
+          tradingNameSummaryRow
+        ).flatten
+      )
+
+      Ok(view(vatRegistrationDetailsList, list))
   }
 }
