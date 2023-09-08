@@ -300,6 +300,13 @@ deleteAllTradingNames.warning = This will delete all the trading names you have 
 deleteAllTradingNames.error.required = Select yes if you want to remove all your alternative trading names from this scheme
 deleteAllTradingNames.change.hidden = Remove all your alternative trading names from this scheme
 
+previouslyRegistered.title = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
+previouslyRegistered.heading = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
+previouslyRegistered.hint = This includes One Stop Shop (OSS) schemes.
+previouslyRegistered.checkYourAnswersLabel = previouslyRegistered
+previouslyRegistered.error.required = Select yes if your business has ever registered for an Import One Stop Shop scheme in an EU country
+previouslyRegistered.change.hidden = if your business has ever registered for an Import One Stop Shop scheme in an EU country
+
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.hint = EU member states will only use these if they need to repay you.

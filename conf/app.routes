@@ -114,3 +114,8 @@ POST        /remove-all-trading-names                            controllers.tra
 
 GET         /bank-details                                        controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /bank-details                                        controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /previous-oss                                         controllers.previousRegistrations.PreviouslyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /previous-oss                                         controllers.previousRegistrations.PreviouslyRegisteredController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET        /amend-previous-oss                                   controllers.previousRegistrations.PreviouslyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /amend-previous-oss                                   controllers.previousRegistrations.PreviouslyRegisteredController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
