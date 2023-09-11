@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package viewmodels
+package models.previousRegistrations
 
-package object govuk {
+import models.Country
+import models.domain._
+import play.api.libs.json.{Json, OFormat}
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+case class PreviousRegistrationDetails(
+                                        previousEuCountry: Country,
+                                        previousSchemesDetails: Seq[PreviousSchemeDetails]
+                                      )
+
+object PreviousRegistrationDetails {
+
+  implicit val format: OFormat[PreviousRegistrationDetails] = Json.format[PreviousRegistrationDetails]
 }

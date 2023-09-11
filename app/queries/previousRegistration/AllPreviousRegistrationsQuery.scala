@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package viewmodels
+package queries.previousRegistration
 
-package object govuk {
+import models.previousRegistrations.PreviousRegistrationDetails
+import play.api.libs.json.JsPath
+import queries.{Gettable, Settable}
 
-  object all
-    extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with RadiosFluency
-      with SelectFluency
-      with SummaryListFluency
-      with TagFluency
+case object AllPreviousRegistrationsQuery extends Gettable[List[PreviousRegistrationDetails]] with Settable[List[PreviousRegistrationDetails]] {
+
+  override def path: JsPath = JsPath \ "previousRegistrations"
 }

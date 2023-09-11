@@ -307,6 +307,11 @@ previouslyRegistered.checkYourAnswersLabel = previouslyRegistered
 previouslyRegistered.error.required = Select yes if your business has ever registered for an Import One Stop Shop scheme in an EU country
 previouslyRegistered.change.hidden = if your business has ever registered for an Import One Stop Shop scheme in an EU country
 
+previousEuCountry.title = Which country did your business register in?
+previousEuCountry.heading = Which country did your business register in?
+previousEuCountry.error.required = Select an EU country
+previousEuCountry.error.duplicate = You selected this EU country already. Select a different one.
+
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.hint = EU member states will only use these if they need to repay you.
