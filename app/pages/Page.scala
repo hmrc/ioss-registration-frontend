@@ -31,7 +31,6 @@ trait Page {
   def navigate(waypoints: Waypoints, originalAnswers: UserAnswers, updatedAnswers: UserAnswers): PageAndWaypoints = {
     val targetPage: Page = nextPage(waypoints, originalAnswers, updatedAnswers)
     val recalibratedWaypoints: Waypoints = waypoints.recalibrate(this, targetPage)
-
     PageAndWaypoints(targetPage, recalibratedWaypoints)
   }
 
@@ -40,10 +39,10 @@ trait Page {
       case EmptyWaypoints =>
         nextPageNormalMode(waypoints, originalAnswers, updatedAnswers)
 
-      case b: NonEmptyWaypoints =>
-        b.currentMode match {
-          case CheckMode => nextPageCheckMode(b, originalAnswers, updatedAnswers)
-          case NormalMode => nextPageNormalMode(b, originalAnswers, updatedAnswers)
+      case nonEmptyWaypoints: NonEmptyWaypoints =>
+        nonEmptyWaypoints.currentMode match {
+          case CheckMode => nextPageCheckMode(nonEmptyWaypoints, originalAnswers, updatedAnswers)
+          case NormalMode => nextPageNormalMode(nonEmptyWaypoints, originalAnswers, updatedAnswers)
         }
     }
   }

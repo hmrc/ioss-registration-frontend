@@ -29,4 +29,8 @@ case object NotFound extends ErrorResponse {
   override val body: String = "Not found"
 }
 
+case object ConflictFound extends ErrorResponse {
+  override val body = "Conflict"
+}
+
 case class UnexpectedResponseStatus(status: Int, body: String) extends ErrorResponse
