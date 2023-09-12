@@ -312,6 +312,22 @@ previousEuCountry.heading = Which country did your business register in?
 previousEuCountry.error.required = Select an EU country
 previousEuCountry.error.duplicate = You selected this EU country already. Select a different one.
 
+previousScheme.title = Which scheme did your business register for?
+previousScheme.heading = Which scheme did your business register for?
+previousScheme.ossu = One Stop Shop Union
+previousScheme.ossnu = One Stop Shop non-Union
+previousScheme.iosswoi = Import One Stop Shop without intermediary
+previousScheme.iosswi = Import One Stop Shop with intermediary
+previousScheme.oss = One Stop Shop (OSS)
+previousScheme.ioss = Import One Stop Shop (IOSS)
+previousScheme.checkYourAnswersLabel = Scheme
+previousScheme.error.required = Select which scheme did your business register for
+previousScheme.change.hidden = which scheme did your business register for
+previousScheme.oss.exceed.error = Cannot select another OSS registration for {0}
+previousScheme.oss.schemes.exceed.error = Cannot select another {0} OSS registration for {1}
+previousScheme.ioss.exceed.error = Cannot select another IOSS registration for {0}
+previousScheme.remove.hidden = Remove tax details for {0} {1} scheme
+
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.hint = EU member states will only use these if they need to repay you.

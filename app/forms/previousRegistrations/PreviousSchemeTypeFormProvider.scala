@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package config
+package forms.previousRegistrations
 
-object Constants {
+import forms.mappings.Mappings
+import models.PreviousSchemeType
+import play.api.data.Form
 
-  val maxTradingNames: Int = 10
+import javax.inject.Inject
 
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+class PreviousSchemeTypeFormProvider @Inject() extends Mappings {
 
+  def apply(): Form[PreviousSchemeType] =
+    Form(
+      "value" -> enumerable[PreviousSchemeType]("previousScheme.error.required")
+    )
 }

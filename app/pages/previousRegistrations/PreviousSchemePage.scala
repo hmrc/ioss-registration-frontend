@@ -16,21 +16,18 @@
 
 package pages.previousRegistrations
 
-import models.{Country, Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import models.{Index, PreviousScheme}
+import pages.{QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case class PreviousEuCountryPage(index: Index) extends QuestionPage[Country] {
+case class PreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[PreviousScheme] {
 
-  override def path: JsPath = JsPath \ toString \ index.position
+  override def path: JsPath = JsPath \ "previousRegistrations" \ countryIndex.position \ "previousSchemesDetails" \ schemeIndex.position \ toString
 
-  override def toString: String = "previousEuCountry"
+  override def toString: String = "previousScheme"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousEuCountryController.onPageLoad(waypoints, Index(0))
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    PreviousSchemePage(index, Index(0))
+    controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, Index(0), Index(0))
 
 }

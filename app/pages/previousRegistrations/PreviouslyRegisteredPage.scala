@@ -16,7 +16,6 @@
 
 package pages.previousRegistrations
 
-import controllers.routes
 import models.{Index, UserAnswers}
 import pages.filters.RegisteredForIossInEuPage
 import pages.{JourneyRecoveryPage, Page, QuestionPage, Waypoints}
@@ -33,9 +32,9 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
     controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    answers.get(PreviouslyRegisteredPage) match {
-      case Some(true) => PreviousEuCountryPage(Index(0))
-      case Some(false) => RegisteredForIossInEuPage //TODO taxRegisteredInEu
+    answers.get(this).map {
+      case true => PreviousEuCountryPage(Index(0))
+      case false => RegisteredForIossInEuPage //TODO taxRegisteredInEu
       case _ => JourneyRecoveryPage
-    }
+    }.orRecover
 }

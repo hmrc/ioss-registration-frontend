@@ -121,3 +121,7 @@ POST       /previous-oss                                         controllers.pre
 GET        /previous-country/:index                              controllers.previousRegistrations.PreviousEuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST       /previous-country/:index                              controllers.previousRegistrations.PreviousEuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
+
+GET        /previous-scheme/:countryIndex/:schemeIndex           controllers.previousRegistrations.PreviousSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+POST       /previous-scheme/:countryIndex/:schemeIndex           controllers.previousRegistrations.PreviousSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+

@@ -16,29 +16,35 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.UserAnswers
-import pages.{CheckAnswersPage, Waypoints}
-import pages.previousRegistrations.PreviouslyRegisteredPage
+import models.{Index, UserAnswers}
+import pages.previousRegistrations.PreviousSchemePage
 import play.api.i18n.Messages
+import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object PreviouslyRegisteredSummary  {
+object PreviousSchemeSummary  {
 
-  def row(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PreviouslyRegisteredPage).map {
+  def row(
+           answers: UserAnswers,
+           countryIndex: Index,
+           schemeIndex: Index
+         )(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
       answer =>
 
-        val value = if (answer) "site.yes" else "site.no"
+        val value = ValueViewModel(
+          HtmlContent(
+            HtmlFormat.escape(messages(s"previousScheme.$answer"))
+          )
+        )
 
         SummaryListRowViewModel(
-          key     = "previouslyRegistered.checkYourAnswersLabel",
-          value   = ValueViewModel(value),
-          actions = Seq(
-            ActionItemViewModel("site.change", PreviouslyRegisteredPage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("previouslyRegistered.change.hidden"))
-          )
+          key     = "previousScheme.checkYourAnswersLabel",
+          value   = value,
+          actions = Seq()
         )
     }
 }
