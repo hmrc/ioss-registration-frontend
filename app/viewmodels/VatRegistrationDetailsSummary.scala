@@ -32,12 +32,8 @@ object VatRegistrationDetailsSummary {
       answer =>
 
         answer.organisationName.map { organisationName =>
-          val value = HtmlFormat.escape(organisationName).toString
 
-          SummaryListRowViewModel(
-            key = "vatRegistrationDetails.checkYourAnswers.organisationName",
-            value = ValueViewModel(HtmlContent(value))
-          )
+          createNameSummaryListRow(organisationName, "organisationName")
         }
     }
 
@@ -46,12 +42,8 @@ object VatRegistrationDetailsSummary {
       answer =>
 
         answer.individualName.map { individualName =>
-          val value = HtmlFormat.escape(individualName).toString
 
-          SummaryListRowViewModel(
-            key = "vatRegistrationDetails.checkYourAnswers.individualName",
-            value = ValueViewModel(HtmlContent(value))
-          )
+          createNameSummaryListRow(individualName, "individualName")
         }
     }
 
@@ -98,4 +90,13 @@ object VatRegistrationDetailsSummary {
           value = ValueViewModel(HtmlContent(value))
         )
     }
+
+  private def createNameSummaryListRow(name: String, checkYourAnswersKey: String)(implicit messages: Messages): SummaryListRow = {
+    val value = HtmlFormat.escape(name).toString()
+
+    SummaryListRowViewModel(
+      key = s"vatRegistrationDetails.checkYourAnswers.$checkYourAnswersKey",
+      value = ValueViewModel(HtmlContent(value))
+    )
+  }
 }

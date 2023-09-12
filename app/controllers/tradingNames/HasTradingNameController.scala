@@ -77,22 +77,25 @@ class HasTradingNameController @Inject()(
 
   private def getCompanyName(waypoints: Waypoints)(block: String => Future[Result])
                             (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
+
     request.userAnswers.vatInfo match {
-      case Some(vatInfo) if vatInfo.organisationName.isDefined =>
-        val name = vatInfo.organisationName.getOrElse {
-          val exception = new IllegalStateException("No organisation name when expecting one")
-          logger.error(exception.getMessage, exception)
-          throw exception
+      case Some(vatInfo) =>
+        (vatInfo.organisationName, vatInfo.individualName) match {
+          case (Some(organisationName), _) =>
+            block(organisationName)
+
+          case (_, Some(individualName)) =>
+            block(individualName)
+
+          case _ =>
+            val exception = new IllegalStateException("Both organisationName and individualName are both missing")
+            logger.error(exception.getMessage, exception)
+            Future.failed(exception)
         }
-        block(name)
-      case Some(vatInfo) if vatInfo.individualName.isDefined =>
-        val name = vatInfo.individualName.getOrElse {
-          val exception = new IllegalStateException("No individual name when expecting one")
-          logger.error(exception.getMessage, exception)
-          throw exception
-        }
-        block(name)
-      case _ => Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
+
+      case None =>
+        Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
     }
   }
 }
+

@@ -18,6 +18,7 @@ package controllers.tradingNames
 
 import base.SpecBase
 import forms.tradingNames.HasTradingNameFormProvider
+import models.domain.VatCustomerInfo
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -47,7 +48,7 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo)).build()
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
         val request = FakeRequest(GET, hasTradingNameRoute)
@@ -63,7 +64,7 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = emptyUserAnswersWithVatInfo.set(HasTradingNamePage, true).success.value
+      val userAnswers = basicUserAnswersWithVatInfo.set(HasTradingNamePage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -79,14 +80,14 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must save the answer and redirect to the next page when valid data is submitted" in {
+    "must save the answer and redirect to the next page when valid data is submitted with organisation name populated in the VAT details" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
@@ -98,10 +99,41 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
-        val expectedAnswers = emptyUserAnswersWithVatInfo.set(HasTradingNamePage, true).success.value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(HasTradingNamePage, true).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual HasTradingNamePage.navigate(waypoints, emptyUserAnswersWithVatInfo, expectedAnswers).url
+        redirectLocation(result).value mustEqual HasTradingNamePage.navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must save the answer and redirect to the next page when valid data is submitted with individual name populated in the VAT details" in {
+
+      val individualName = "Individual name"
+      val vatCustomerInfoWithIndividualName = vatCustomerInfo.copy(organisationName = None, individualName = Some(individualName))
+      val userAnswers = basicUserAnswersWithVatInfo.copy(vatInfo = Some(vatCustomerInfoWithIndividualName))
+
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, hasTradingNameRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+        val expectedAnswers = userAnswers.set(HasTradingNamePage, true).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual HasTradingNamePage.navigate(waypoints, userAnswers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }

@@ -18,7 +18,7 @@ package controllers.tradingNames
 
 import base.SpecBase
 import forms.tradingNames.AddTradingNameFormProvider
-import models.{Index, TradingName}
+import models.{Index, TradingName, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -66,18 +66,9 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET when the maximum number of trading names have already been added" in {
 
-      val userAnswers =
-        basicUserAnswersWithVatInfo
-          .set(TradingNamePage(Index(0)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(1)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(2)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(3)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(4)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(5)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(6)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(7)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(8)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(9)), TradingName("foo")).success.value
+      val userAnswers = (0 to 9).foldLeft(basicUserAnswersWithVatInfo) { (userAnswers: UserAnswers, index: Int) =>
+        userAnswers.set(TradingNamePage(Index(index)), TradingName("foo")).success.value
+      }
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -92,6 +83,27 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustBe OK
         contentAsString(result) mustBe view(form.fill(true), waypoints, list, canAddTradingNames = false)(request, messages(application)).toString
+      }
+    }
+
+    "must allow adding a trading name when just below the maximum number of trading names" in {
+      val userAnswers = (0 to 8).foldLeft(basicUserAnswersWithVatInfo) { case (userAnswers: UserAnswers, index: Int) =>
+        userAnswers.set(TradingNamePage(Index(index)), TradingName("foo")).success.value
+      }
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(userAnswers, waypoints, AddTradingNamePage())
+
+        val result = route(application, request).value
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true)(request, messages(application)).toString
       }
     }
 
