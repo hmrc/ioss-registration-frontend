@@ -23,10 +23,10 @@ import play.api.data.{Form, FormError}
 
 class TradingNameFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey  = "tradingNames.error.required"
-  val lengthKey    = "tradingNames.error.length"
-  val invalidKey   = "tradingNames.error.invalid"
-  val duplicateKey = "tradingNames.error.duplicate"
+  val requiredKey  = "tradingName.error.required"
+  val lengthKey    = "tradingName.error.length"
+  val invalidKey   = "tradingName.error.invalid"
+  val duplicateKey = "tradingName.error.duplicate"
   val maxLength = 100
   val index: Index = Index(0)
   val emptyExistingAnswers = Seq.empty[String]

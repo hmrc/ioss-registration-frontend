@@ -22,9 +22,10 @@ import journey.JourneyHelpers
 import models.{Index, TradingName}
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
-import pages.tradingNames.{AddTradingNamePage, DeleteTradingNamePage, HasTradingNamePage, TradingNamePage}
+import pages.tradingNames._
+import queries.tradingNames.AllTradingNames
 
-class TradingNameJourney extends AnyFreeSpec with JourneyHelpers with ModelGenerators {
+class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGenerators {
 
   private val companyNameA: TradingName = arbitraryTradingName.arbitrary.sample.value
   private val companyNameB: TradingName = arbitraryTradingName.arbitrary.sample.value
@@ -144,6 +145,76 @@ class TradingNameJourney extends AnyFreeSpec with JourneyHelpers with ModelGener
             answerMustEqual(TradingNamePage(Index(0)), companyNameB),
             answerMustEqual(TradingNamePage(Index(2)), companyNameC)
           )
+      }
+    }
+
+    "must be able to remove all original trading name answers" - {
+
+      "when the user is on the Check Your Answers page and they change their original answer of having a different UK trading name to No" in {
+
+        val initialise = journeyOf(
+          setUserAnswerTo(HasTradingNamePage, true),
+          setUserAnswerTo(TradingNamePage(Index(0)), companyNameA),
+          setUserAnswerTo(AddTradingNamePage(Some(Index(0))), true),
+          setUserAnswerTo(TradingNamePage(Index(1)), companyNameB),
+          setUserAnswerTo(AddTradingNamePage(Some(Index(1))), true),
+          setUserAnswerTo(TradingNamePage(Index(2)), companyNameC),
+          setUserAnswerTo(AddTradingNamePage(Some(Index(2))), true),
+          setUserAnswerTo(TradingNamePage(Index(3)), companyNameA),
+          setUserAnswerTo(AddTradingNamePage(Some(Index(3))), false),
+          goTo(CheckYourAnswersPage)
+        )
+
+        startingFrom(CheckYourAnswersPage)
+          .run(
+            initialise,
+            goToChangeAnswer(HasTradingNamePage),
+            submitAnswer(HasTradingNamePage, false),
+            pageMustBe(DeleteAllTradingNamesPage),
+            submitAnswer(DeleteAllTradingNamesPage, true),
+            removeAddToListItem(AllTradingNames()),
+            pageMustBe(CheckYourAnswersPage),
+            answersMustNotContain(TradingNamePage(Index(0))),
+            answersMustNotContain(TradingNamePage(Index(1))),
+            answersMustNotContain(TradingNamePage(Index(2))),
+            answersMustNotContain(TradingNamePage(Index(3)))
+          )
+      }
+    }
+
+    "must be able to retain all original trading name answers" - {
+
+      "when the user is on the Check Your Answers page and they change their original answer of having a different UK trading name to No" - {
+
+        "but answer no when asked if they want to remove all trading names from the scheme" in {
+
+          val initialise = journeyOf(
+            setUserAnswerTo(HasTradingNamePage, true),
+            setUserAnswerTo(TradingNamePage(Index(0)), companyNameA),
+            setUserAnswerTo(AddTradingNamePage(Some(Index(0))), true),
+            setUserAnswerTo(TradingNamePage(Index(1)), companyNameB),
+            setUserAnswerTo(AddTradingNamePage(Some(Index(1))), true),
+            setUserAnswerTo(TradingNamePage(Index(2)), companyNameC),
+            setUserAnswerTo(AddTradingNamePage(Some(Index(2))), true),
+            setUserAnswerTo(TradingNamePage(Index(3)), companyNameA),
+            setUserAnswerTo(AddTradingNamePage(Some(Index(3))), false),
+            goTo(CheckYourAnswersPage)
+          )
+
+          startingFrom(CheckYourAnswersPage)
+            .run(
+              initialise,
+              goToChangeAnswer(HasTradingNamePage),
+              submitAnswer(HasTradingNamePage, false),
+              pageMustBe(DeleteAllTradingNamesPage),
+              submitAnswer(DeleteAllTradingNamesPage, false),
+              pageMustBe(CheckYourAnswersPage),
+              answersMustContain(TradingNamePage(Index(0))),
+              answersMustContain(TradingNamePage(Index(1))),
+              answersMustContain(TradingNamePage(Index(2))),
+              answersMustContain(TradingNamePage(Index(3)))
+            )
+        }
       }
     }
   }

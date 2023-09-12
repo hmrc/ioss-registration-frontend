@@ -15,36 +15,40 @@
  *@
 
 @import controllers.tradingNames.routes
-@import viewmodels.InputWidth._
+@import components.ButtonGroup
+@import pages.tradingNames.DeleteAllTradingNamesPage
 
 @this(
         layout: templates.Layout,
         formHelper: FormWithCSRF,
         govukErrorSummary: GovukErrorSummary,
-        govukInput: GovukInput,
-        govukButton: GovukButton
+        govukRadios: GovukRadios,
+        button: ButtonGroup,
+        govukWarningText: GovukWarningText
 )
 
-@(form: Form[_], waypoints: Waypoints, index: Index)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
 
-    @layout(pageTitle = title(form, messages("tradingName.title"))) {
+    @layout(pageTitle = title(form, messages("deleteAllTradingNames.title"))) {
 
-        @formHelper(action = routes.TradingNameController.onSubmit(waypoints, index)) {
+        @formHelper(action = routes.DeleteAllTradingNamesController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
 
             @if(form.errors.nonEmpty) {
                 @govukErrorSummary(ErrorSummaryViewModel(form))
             }
 
-            @govukInput(
-                InputViewModel(
+            @govukRadios(
+                RadiosViewModel.yesNo(
                     field = form("value"),
-                    label = LabelViewModel(messages("tradingName.heading")).asPageHeading()
-                ).withWidth(Full)
-                        .withHint(HintViewModel("tradingName.hint"))
+                    legend = LegendViewModel(messages("deleteAllTradingNames.heading")).asPageHeading()
+                )
             )
 
-            @govukButton(
-                ButtonViewModel(messages("site.continue")).withAttribute("id", "continue")
-            )
+            @govukWarningText(WarningText(
+                iconFallbackText = Option(messages("site.warning")),
+                content = Text(messages("deleteAllTradingNames.warning"))
+            ))
+
+            @button("site.continue", DeleteAllTradingNamesPage.route(waypoints).url)
         }
     }

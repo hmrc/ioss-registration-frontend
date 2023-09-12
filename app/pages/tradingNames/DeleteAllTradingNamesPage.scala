@@ -17,32 +17,23 @@
 package pages.tradingNames
 
 import controllers.tradingNames.routes
-import models.{Index, UserAnswers}
+import models.UserAnswers
 import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
-import queries.tradingNames.AllTradingNames
 
-case object HasTradingNamePage extends QuestionPage[Boolean] {
+case object DeleteAllTradingNamesPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "hasTradingName"
+  override def toString: String = "deleteAllTradingNames"
 
-  override def route(waypoints: Waypoints): Call = routes.HasTradingNameController.onPageLoad(waypoints)
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    answers.get(this).map {
-      case true => TradingNamePage(Index(0))
-      case false => CheckYourAnswersPage // TODO to PreviousRegistrations
-    }.orRecover
+  override def route(waypoints: Waypoints): Call =
+    routes.DeleteAllTradingNamesController.onPageLoad(waypoints)
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
-    (answers.get(this), answers.get(AllTradingNames())) match {
-      case (Some(true), Some(tradingNames)) if tradingNames.nonEmpty => AddTradingNamePage()
-      case (Some(true), _) => TradingNamePage(Index(0))
-      case (Some(false), Some(tradingNames)) if tradingNames.nonEmpty => DeleteAllTradingNamesPage
-      case (Some(false), _) => CheckYourAnswersPage // TODO to PreviousRegistrations
+    answers.get(DeleteAllTradingNamesPage) match {
+      case Some(_) => CheckYourAnswersPage
       case _ => JourneyRecoveryPage
     }
 }

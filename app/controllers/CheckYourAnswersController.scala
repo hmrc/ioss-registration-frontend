@@ -51,18 +51,16 @@ class CheckYourAnswersController @Inject()(
         ).flatten
       )
 
-      val hasTradingNameSummaryRow = HasTradingNameSummary.row(request.userAnswers, waypoints, thisPage)
+      val maybeHasTradingNameSummaryRow = HasTradingNameSummary.row(request.userAnswers, waypoints, thisPage)
       val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
 
       val list = SummaryListViewModel(
         rows = Seq(
-          hasTradingNameSummaryRow,
-
-          hasTradingNameSummaryRow.map { sr =>
+          maybeHasTradingNameSummaryRow.map { hasTradingNameSummaryRow =>
             if (tradingNameSummaryRow.nonEmpty) {
-              sr.withCssClass("govuk-summary-list__row--no-border")
+              hasTradingNameSummaryRow.withCssClass("govuk-summary-list__row--no-border")
             } else {
-              sr
+              hasTradingNameSummaryRow
             }
           },
           tradingNameSummaryRow

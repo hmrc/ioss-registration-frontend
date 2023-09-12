@@ -19,7 +19,7 @@ import controllers.routes
 import models.UserAnswers
 import play.api.mvc.Call
 
-object CheckYourAnswersPage extends CheckAnswersPage with Terminus {
+object CheckYourAnswersPage extends CheckAnswersPage {
 
   override def isTheSamePage(other: Page): Boolean = other match {
     case CheckYourAnswersPage  => true
@@ -32,5 +32,5 @@ object CheckYourAnswersPage extends CheckAnswersPage with Terminus {
     routes.CheckYourAnswersController.onPageLoad()
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ??? // TODO
+    CheckYourAnswersPage // TODO - to ApplicationComplete when created
 }

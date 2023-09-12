@@ -28,12 +28,12 @@ class TradingNameFormProvider @Inject() extends Mappings {
 
   def apply(thisIndex: Index, existingAnswers: Seq[String]): Form[String] =
     Form(
-      "value" -> text("tradingNames.error.required")
+      "value" -> text("tradingName.error.required")
         .verifying(firstError(
-          maxLength(100, "tradingNames.error.length"),
-          notADuplicate(thisIndex, existingAnswers, "tradingNames.error.duplicate"),
-          regexp(commonTextPattern, "tradingNames.error.invalid"),
-          notContainStrings(tradingNameReservedWords, "tradingNames.error.invalid")
+          maxLength(100, "tradingName.error.length"),
+          notADuplicate(thisIndex, existingAnswers, "tradingName.error.duplicate"),
+          regexp(commonTextPattern, "tradingName.error.invalid"),
+          notContainStrings(tradingNameReservedWords, "tradingName.error.invalid")
         )),
     )
 }

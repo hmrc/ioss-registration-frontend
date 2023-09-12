@@ -28,6 +28,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.tradingNames.DeriveNumberOfTradingNames
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
+import utils.ItemsHelper.getDerivedItems
 import viewmodels.checkAnswers.TradingNameSummary
 import views.html.tradingNames.AddTradingNameView
 

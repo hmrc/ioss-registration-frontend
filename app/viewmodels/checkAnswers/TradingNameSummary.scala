@@ -32,7 +32,7 @@ import viewmodels.implicits._
 object TradingNameSummary {
 
   def addToListRows(answers: UserAnswers, waypoints: Waypoints, sourcePage: AddItemPage): Seq[ListItemWrapper] =
-    answers.get(AllTradingNames).getOrElse(List.empty).zipWithIndex.map {
+    answers.get(AllTradingNames()).getOrElse(List.empty).zipWithIndex.map {
       case (tradingName, index) =>
 
         ListItemWrapper(
@@ -48,7 +48,7 @@ object TradingNameSummary {
 
   def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)
                      (implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AllTradingNames).map {
+    answers.get(AllTradingNames()).map {
       tradingNames =>
 
         val value = tradingNames.map {
@@ -57,11 +57,11 @@ object TradingNameSummary {
         }.mkString("<br/>")
 
         SummaryListRowViewModel(
-          key = "tradingNames.checkYourAnswersLabel",
+          key = "tradingName.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
           actions = Seq(
             ActionItemViewModel("site.change", AddTradingNamePage().changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("tradingNames.change.hidden"))
+              .withVisuallyHiddenText(messages("tradingName.change.hidden"))
           )
         )
     }

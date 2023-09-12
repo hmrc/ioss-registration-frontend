@@ -272,3 +272,9 @@ addTradingName.addAnother.hint = You can add up to 10 trading names.
 deleteTradingName.title = Are you sure you want to remove {0}?
 deleteTradingName.heading = Are you sure you want to remove {0}?
 deleteTradingName.error.required = Select yes if you need to remove this trading name
+
+deleteAllTradingNames.title = Remove all your alternative trading names from this scheme?
+deleteAllTradingNames.heading = Remove all your alternative trading names from this scheme?
+deleteAllTradingNames.warning = This will delete all the trading names you have added.
+deleteAllTradingNames.error.required = Select yes if you want to remove all your alternative trading names from this scheme
+deleteAllTradingNames.change.hidden = Remove all your alternative trading names from this scheme

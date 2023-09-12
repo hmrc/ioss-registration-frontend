@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-package pages
+package forms.tradingNames
 
-trait Terminus
+import forms.mappings.Mappings
+import play.api.data.Form
+
+import javax.inject.Inject
+
+class DeleteAllTradingNamesFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("deleteAllTradingNames.error.required")
+    )
+}
