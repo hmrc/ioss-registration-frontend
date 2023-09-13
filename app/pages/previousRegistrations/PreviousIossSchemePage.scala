@@ -17,7 +17,6 @@
 package pages.previousRegistrations
 
 import models.{Index, UserAnswers}
-import pages.filters.RegisteredForIossInEuPage
 import pages.{Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call

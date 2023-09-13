@@ -360,6 +360,22 @@ previousIossNumber.error.length = PreviousIossNumber must be 100 characters or l
 previousIossNumber.change.hidden = PreviousIossNumber
 previousIossNumber.error.invalid = Enter a valid IOSS registration number
 previousIntermediaryNumber.error.invalid = Enter a valid intermediary identification number
+
+previousSchemeNumber.checkYourAnswersLabel = Registration number
+
+previousRegistrations.checkYourAnswersLabel = Countries registered in
+previousRegistrations.change.hidden = Countries registered in
+previousRegistrations.add.hidden = Countries registered in
+
+checkPreviousSchemeAnswers.title = Check your answers for {0}
+checkPreviousSchemeAnswers.heading = Check your answers for {0}
+checkPreviousSchemeAnswers.error.required = Select yes if you need to add another scheme registration for {0}
+checkPreviousSchemeAnswers.remove.hidden = Remove {0}
+checkPreviousSchemeAnswers.addAnother = Add another scheme registration from {0}?
+checkPreviousSchemeAnswers.maximumReached = You have added details for every scheme in {0}
+
+
+
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.hint = EU member states will only use these if they need to repay you.

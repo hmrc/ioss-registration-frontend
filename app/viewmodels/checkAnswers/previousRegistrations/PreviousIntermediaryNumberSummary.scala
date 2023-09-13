@@ -16,33 +16,29 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Country, Index, UserAnswers}
-import pages.Waypoints
-import pages.previousRegistrations.PreviousSchemePage
+import models.{Index, UserAnswers}
+import pages.previousRegistrations.PreviousIossNumberPage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object PreviousSchemeSummary  {
+object PreviousIntermediaryNumberSummary {
 
-  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, country: Country, waypoints: Waypoints)
-         (implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
+  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PreviousIossNumberPage(countryIndex, schemeIndex)).flatMap {
       answer =>
 
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"previousScheme.$answer"))
+        answer.previousIntermediaryNumber.map { previousIntermediaryNumber =>
+          SummaryListRowViewModel(
+            key = "previousIossNumber.intermediaryNumber.checkYourAnswersLabel",
+            value = ValueViewModel(HtmlFormat.escape(previousIntermediaryNumber).toString),
+            actions = Seq()
           )
-        )
+        }
 
-        SummaryListRowViewModel(
-          key     = "previousScheme.checkYourAnswersLabel",
-          value   = value,
-          actions = Seq()
-        )
     }
 }
+
+

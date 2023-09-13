@@ -16,33 +16,27 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Country, Index, UserAnswers}
+import models.{Index, UserAnswers}
 import pages.Waypoints
-import pages.previousRegistrations.PreviousSchemePage
+import pages.previousRegistrations.CheckPreviousSchemeAnswersPage
 import play.api.i18n.Messages
-import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object PreviousSchemeSummary  {
+object CheckPreviousSchemeAnswersSummary  {
 
-  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, country: Country, waypoints: Waypoints)
-         (implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
+  def row(answers: UserAnswers, waypoints: Waypoints, index: Index)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(CheckPreviousSchemeAnswersPage(index)).map {
       answer =>
 
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"previousScheme.$answer"))
-          )
-        )
-
         SummaryListRowViewModel(
-          key     = "previousScheme.checkYourAnswersLabel",
-          value   = value,
-          actions = Seq()
+          key     = "checkPreviousSchemeAnswers.checkYourAnswersLabel",
+          value   = ValueViewModel(answer.toString),
+          actions = Seq(
+            ActionItemViewModel("site.change", controllers.previousRegistrations.routes.CheckPreviousSchemeAnswersController.onPageLoad(waypoints, index).url)
+              .withVisuallyHiddenText(messages("checkPreviousSchemeAnswers.change.hidden"))
+          )
         )
     }
 }

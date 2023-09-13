@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package pages.previousRegistrations
+package queries.previousRegistration
 
-import models.{Index, UserAnswers}
-import pages.filters.RegisteredForIossInEuPage
-import pages.{Page, Waypoints}
-import play.api.mvc.Call
+import models.Index
+import play.api.libs.json.{JsObject, JsPath}
+import queries.Derivable
 
-case class PreviousOssNumberPage (countryIndex: Index, schemeIndex: Index) extends PreviousSchemeNumbersPage {
+case class DeriveNumberOfPreviousSchemes(index: Index) extends Derivable[List[JsObject], Int] {
+  override val derive: List[JsObject] => Int = _.size
 
-  override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousOssNumberController.onPageLoad(waypoints, Index(0), Index(0))
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    CheckPreviousSchemeAnswersPage(countryIndex)
-  }
-
+  override def path: JsPath = JsPath \ "previousRegistrations" \ index.position \ "previousSchemesDetails"
 }
+

@@ -16,33 +16,25 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Country, Index, UserAnswers}
-import pages.Waypoints
-import pages.previousRegistrations.PreviousSchemePage
+import models.{Index, UserAnswers}
+import pages.previousRegistrations.PreviousOssNumberPage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object PreviousSchemeSummary  {
+object PreviousSchemeNumberSummary {
 
-  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, country: Country, waypoints: Waypoints)
-         (implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
+  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PreviousOssNumberPage(countryIndex, schemeIndex)).map {
       answer =>
 
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"previousScheme.$answer"))
-          )
-        )
-
         SummaryListRowViewModel(
-          key     = "previousScheme.checkYourAnswersLabel",
-          value   = value,
+          key = "previousSchemeNumber.checkYourAnswersLabel",
+          value = ValueViewModel(HtmlFormat.escape(answer.previousSchemeNumber).toString),
           actions = Seq()
         )
     }
 }
+

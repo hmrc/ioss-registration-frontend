@@ -17,7 +17,6 @@
 package pages.previousRegistrations
 
 import models.{Index, UserAnswers}
-import pages.filters.RegisteredForIossInEuPage
 import pages.{Page, Waypoints}
 import play.api.mvc.Call
 
@@ -27,6 +26,6 @@ case class PreviousIossNumberPage(countryIndex: Index, schemeIndex: Index) exten
     controllers.previousRegistrations.routes.PreviousIossNumberController.onPageLoad(waypoints, Index(0), Index(0))
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    RegisteredForIossInEuPage //TODO CheckPreviousSchemeAnswers
+    CheckPreviousSchemeAnswersPage(countryIndex)
   }
 }

@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package pages.previousRegistrations
+package forms.previousRegistrations
 
-import models.{Index, UserAnswers}
-import pages.filters.RegisteredForIossInEuPage
-import pages.{Page, Waypoints}
-import play.api.mvc.Call
+import forms.mappings.Mappings
+import models.Country
+import play.api.data.Form
 
-case class PreviousOssNumberPage (countryIndex: Index, schemeIndex: Index) extends PreviousSchemeNumbersPage {
+import javax.inject.Inject
 
-  override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousOssNumberController.onPageLoad(waypoints, Index(0), Index(0))
+class CheckPreviousSchemeAnswersFormProvider @Inject() extends Mappings {
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    CheckPreviousSchemeAnswersPage(countryIndex)
-  }
-
+  def apply(country: Country): Form[Boolean] =
+    Form(
+      "value" -> boolean("checkPreviousSchemeAnswers.error.required", args = Seq(country.name))
+    )
 }

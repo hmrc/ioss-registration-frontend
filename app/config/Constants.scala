@@ -21,6 +21,7 @@ object Constants {
   val maxTradingNames: Int = 10
 
   val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
+  val maxSchemes: Int = 3
   val maxOssSchemes: Int = 2
   val maxIossSchemes: Int = 1
 
