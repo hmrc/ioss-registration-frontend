@@ -16,26 +16,18 @@
 
 package pages.previousRegistrations
 
-import models.{Index, PreviousSchemeType, UserAnswers}
+import models.{Index, UserAnswers}
 import pages.filters.RegisteredForIossInEuPage
-import pages.{Page, QuestionPage, Waypoints}
-import play.api.libs.json.JsPath
+import pages.{Page, Waypoints}
 import play.api.mvc.Call
 
-case class PreviousSchemeTypePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[PreviousSchemeType] {
-
-  override def path: JsPath = JsPath \ "previousRegistrations" \ countryIndex.position \ "previousSchemesDetails" \ schemeIndex.position \ toString
-
-  override def toString: String = "previousSchemeType"
+case class PreviousOssNumberPage (countryIndex: Index, schemeIndex: Index) extends PreviousSchemeNumbersPage {
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, Index(0), Index(0))
+    controllers.previousRegistrations.routes.PreviousOssNumberController.onPageLoad(waypoints, Index(0), Index(0))
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    if(answers.get(this).contains(PreviousSchemeType.OSS)) {
-      PreviousOssNumberPage(countryIndex, schemeIndex)//TODO PreviouOSSNumberPage
-    } else {
-      RegisteredForIossInEuPage //TODO PreviousIOSSNumberPage
-    }
+    RegisteredForIossInEuPage //TODO CheckPreviousSchemeAnswers
   }
+
 }

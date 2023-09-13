@@ -1,0 +1,60 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import viewmodels.InputWidth._
+@import models.previousRegistrations.PreviousSchemeHintText
+
+@this(
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukInput: GovukInput,
+    govukButton: GovukButton
+)
+
+@(form: Form[_], waypoints: Waypoints, countryIndex: Index, schemeIndex: Index, countryWithValidationDetails: CountryWithValidationDetails, previousSchemeHintText: PreviousSchemeHintText)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = title(form, messages("previousOssNumber.title", countryWithValidationDetails.country.name))) {
+
+    @formHelper(action = controllers.previousRegistrations.routes.PreviousOssNumberController.onSubmit(waypoints, countryIndex, schemeIndex)) {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
+
+        @govukInput(
+            InputViewModel(
+                field = form("value"),
+                label = LabelViewModel(messages("previousOssNumber.heading", countryWithValidationDetails.country.name)).asPageHeading()
+            )
+            .withWidth(Full)
+            .withHint(HintViewModel(
+                previousSchemeHintText match {
+                    case PreviousSchemeHintText.OssUnion =>
+                        messages("previousOssNumber.hint.union",  countryWithValidationDetails.country.code, countryWithValidationDetails.exampleVrn, countryWithValidationDetails.additionalMessage.getOrElse(""))
+                    case PreviousSchemeHintText.OssNonUnion =>
+                        messages("previousOssNumber.hint.nonunion")
+                    case PreviousSchemeHintText.Both =>
+                        messages("previousOssNumber.hint.default",  countryWithValidationDetails.country.code, countryWithValidationDetails.exampleVrn, countryWithValidationDetails.additionalMessage.getOrElse(""))
+                }
+            ))
+        )
+
+        @govukButton(
+            ButtonViewModel(messages("site.continue"))
+        )
+    }
+}
