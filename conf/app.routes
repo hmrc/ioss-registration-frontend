@@ -132,3 +132,7 @@ POST       /previous-oss-scheme-number/:countryIndex/:schemeIndex               
 GET        /previous-ioss-scheme/:countryIndex/:schemeIndex                     controllers.previousRegistrations.PreviousIossSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 POST       /previous-ioss-scheme/:countryIndex/:schemeIndex                     controllers.previousRegistrations.PreviousIossSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 
+
+GET        /previous-ioss-number/:countryIndex/:schemeIndex                     controllers.previousRegistrations.PreviousIossNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+POST       /previous-ioss-number/:countryIndex/:schemeIndex                     controllers.previousRegistrations.PreviousIossNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+
