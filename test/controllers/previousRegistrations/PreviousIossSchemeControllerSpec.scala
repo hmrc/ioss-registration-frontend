@@ -18,78 +18,73 @@ package controllers.previousRegistrations
 
 import base.SpecBase
 import controllers.routes
-import forms.previousRegistrations.PreviousOssNumberFormProvider
-import models.domain.PreviousSchemeNumbers
-import models.previousRegistrations.PreviousSchemeHintText
-import models.{Country, CountryWithValidationDetails, Index, PreviousScheme}
+import forms.previousRegistrations.PreviousIossSchemeFormProvider
+import models.{Country, Index, PreviousScheme, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, Waypoints}
-import pages.previousRegistrations.{PreviousEuCountryPage, PreviousOssNumberPage, PreviousSchemePage}
+import pages.previousRegistrations.{PreviousEuCountryPage, PreviousIossSchemePage, PreviousSchemePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
-import views.html.previousRegistrations.PreviousOssNumberView
+import views.html.previousRegistrations.PreviousIossSchemeView
 
 import scala.concurrent.Future
 
-class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
+class PreviousIossSchemeControllerSpec extends SpecBase with MockitoSugar {
 
   private val index = Index(0)
-  private val country = Country("SI", "Slovenia")
-  private val countryWithValidation = CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == "SI").value
-  private val formProvider = new PreviousOssNumberFormProvider()
-  private val form = formProvider(country, Seq.empty)
   private val waypoints: Waypoints = EmptyWaypoints
+  private val formProvider = new PreviousIossSchemeFormProvider()
+  private val form = formProvider()
 
-  private lazy val previousOssNumberRoute = controllers.previousRegistrations.routes.PreviousOssNumberController.onPageLoad(waypoints, index, index).url
+  private val country = Country.euCountries.head
+  private val baseAnswers = emptyUserAnswers.set(PreviousEuCountryPage(index), country).success.value
 
-  private val baseAnswers = basicUserAnswersWithVatInfo.set(PreviousEuCountryPage(index), country).success.value
+  private lazy val previousIossSchemeRoute = controllers.previousRegistrations.routes.PreviousIossSchemeController.onPageLoad(waypoints, index, index).url
 
-  "PreviousOssNumber Controller" - {
+  "PreviousIossScheme Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(baseAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, previousOssNumberRoute)
+        val request = FakeRequest(GET, previousIossSchemeRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[PreviousOssNumberView]
+        val view = application.injector.instanceOf[PreviousIossSchemeView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, waypoints, index, index, countryWithValidation,
-          PreviousSchemeHintText.Both)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, waypoints, index, index)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = baseAnswers.set(PreviousOssNumberPage(index, index), PreviousSchemeNumbers("answer", None)).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(PreviousIossSchemePage(index, index), true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, previousOssNumberRoute)
+        val request = FakeRequest(GET, previousIossSchemeRoute)
 
-        val view = application.injector.instanceOf[PreviousOssNumberView]
+        val view = application.injector.instanceOf[PreviousIossSchemeView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), waypoints, index, index, countryWithValidation,
-          PreviousSchemeHintText.Both)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(true), waypoints, index, index)(request, messages(application)).toString
       }
     }
 
-    "must redirect to the next page when valid data is submitted" - {
+    "must save the answer and redirect to the next page when valid data is submitted" - {
+      "and also sets previous scheme as with intermediary when true" in {
 
-      "when the ID starts with EU it sets to non-union" in {
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
@@ -101,16 +96,42 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           val request =
-            FakeRequest(POST, previousOssNumberRoute)
-              .withFormUrlEncodedBody(("value", "EU123456789"))
+            FakeRequest(POST, previousIossSchemeRoute)
+              .withFormUrlEncodedBody(("value", "true"))
 
           val result = route(application, request).value
           val expectedAnswers = baseAnswers
-            .set(PreviousOssNumberPage(index, index), PreviousSchemeNumbers("EU123456789", None)).success.value
-            .set(PreviousSchemePage(index, index), PreviousScheme.OSSNU).success.value
+            .set(PreviousIossSchemePage(index, index), true).success.value
+            .set(PreviousSchemePage(index, index), PreviousScheme.IOSSWI).success.value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+          redirectLocation(result).value mustEqual PreviousIossSchemePage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+        }
+      }
+
+      "and also sets previous scheme as without intermediary when false" in {
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        val application =
+          applicationBuilder(userAnswers = Some(baseAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousIossSchemeRoute)
+              .withFormUrlEncodedBody(("value", "false"))
+
+          val result = route(application, request).value
+          val expectedAnswers = baseAnswers
+            .set(PreviousIossSchemePage(index, index), false).success.value
+            .set(PreviousSchemePage(index, index), PreviousScheme.IOSSWOI).success.value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual PreviousIossSchemePage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
         }
       }
@@ -122,18 +143,17 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, previousOssNumberRoute)
+          FakeRequest(POST, previousIossSchemeRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[PreviousOssNumberView]
+        val view = application.injector.instanceOf[PreviousIossSchemeView]
 
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, waypoints, index, index, countryWithValidation,
-          PreviousSchemeHintText.Both)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, waypoints, index, index)(request, messages(application)).toString
       }
     }
 
@@ -142,7 +162,7 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, previousOssNumberRoute)
+        val request = FakeRequest(GET, previousIossSchemeRoute)
 
         val result = route(application, request).value
 
@@ -157,13 +177,12 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, previousOssNumberRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+          FakeRequest(POST, previousIossSchemeRoute)
+            .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }

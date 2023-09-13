@@ -336,6 +336,13 @@ previousOssNumber.hint.nonunion = This will start with EU, for example EU1234567
 previousOssNumber.error.required = Enter your registration number for {0}
 previousOssNumber.error.invalid = Enter a registration number in the correct format
 
+previousIossScheme.title = Did you use an intermediary?
+previousIossScheme.heading = Did you use an intermediary?
+previousIossScheme.checkYourAnswersLabel = previousIossScheme
+previousIossScheme.hint = An intermediary is someone you can appoint to administer and pay IOSS VAT.
+previousIossScheme.error.required = Select yes if this was with intermediary
+previousIossScheme.change.hidden = if this was with intermediary
+
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.hint = EU member states will only use these if they need to repay you.
