@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package config
+package queries.previousRegistration
 
-object Constants {
+import models.previousRegistrations.PreviousRegistrationDetailsWithOptionalVatNumber
+import play.api.libs.json.JsPath
+import queries.{Gettable, Settable}
 
-  val maxTradingNames: Int = 10
+case object AllPreviousRegistrationsWithOptionalVatNumberQuery extends Gettable[List[PreviousRegistrationDetailsWithOptionalVatNumber]]
+  with Settable[List[PreviousRegistrationDetailsWithOptionalVatNumber]] {
 
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-
+  override def path: JsPath = JsPath \ "previousRegistrations"
 }
+

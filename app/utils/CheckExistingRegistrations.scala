@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package config
+package utils
 
-object Constants {
+import logging.Logging
+import models.domain.{PreviousRegistration, PreviousRegistrationLegacy, PreviousRegistrationNew}
+import models.Country
 
-  val maxTradingNames: Int = 10
 
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+object CheckExistingRegistrations extends Logging {
 
+  def existingPreviousRegistration(country: Country, existingPreviousRegistration: Seq[PreviousRegistration]): Boolean = {
+    existingPreviousRegistration.exists {
+      case previousRegistrationNew: PreviousRegistrationNew => previousRegistrationNew.country == country
+      case previousRegistrationLegacy: PreviousRegistrationLegacy => previousRegistrationLegacy.country == country
+    }
+  }
 }

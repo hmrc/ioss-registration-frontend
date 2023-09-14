@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package config
+package queries.previousRegistration
 
-object Constants {
+import play.api.libs.json.{JsObject, JsPath}
+import queries.Derivable
 
-  val maxTradingNames: Int = 10
+case object DeriveNumberOfPreviousRegistrations extends Derivable[List[JsObject], Int] {
+  override val derive: List[JsObject] => Int = _.size
 
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-
+  override def path: JsPath = JsPath \ "previousRegistrations"
 }

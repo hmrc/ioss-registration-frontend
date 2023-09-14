@@ -16,8 +16,8 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Country, Index, UserAnswers}
-import pages.Waypoints
+
+import models.{Index, UserAnswers}
 import pages.previousRegistrations.PreviousSchemePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
@@ -26,10 +26,9 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object PreviousSchemeSummary  {
+object DeletePreviousSchemeSummary  {
 
-  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, country: Country, waypoints: Waypoints)
-         (implicit messages: Messages): Option[SummaryListRow] =
+  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
       answer =>
 
@@ -40,12 +39,9 @@ object PreviousSchemeSummary  {
         )
 
         SummaryListRowViewModel(
-          key     = "previousScheme.checkYourAnswersLabel",
-          value   = value,
-          actions = Seq(
-            ActionItemViewModel("site.remove", controllers.previousRegistrations.routes.DeletePreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex).url)
-              .withVisuallyHiddenText(messages("site.remove.hidden"))
-          )
+          key = "previousScheme.checkYourAnswersLabel",
+          value = value,
+          actions = Seq.empty
         )
     }
 }

@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package config
+package forms.previousRegistrations
 
-object Constants {
+import forms.mappings.Mappings
+import models.Country
+import play.api.data.Form
 
-  val maxTradingNames: Int = 10
+import javax.inject.Inject
 
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+class DeletePreviousSchemeFormProvider @Inject() extends Mappings {
 
+  def apply(country: Country): Form[Boolean] =
+    Form(
+      "value" -> boolean("deletePreviousScheme.error.required", args = Seq(country.name))
+    )
 }

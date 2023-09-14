@@ -34,7 +34,7 @@ case class CheckPreviousSchemeAnswersPage(index: Index) extends QuestionPage[Boo
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     (answers.get(CheckPreviousSchemeAnswersPage(index)), answers.get(DeriveNumberOfPreviousSchemes(index))) match {
       case (Some(true), Some(size)) => PreviousSchemePage(index, Index(size))
-      case (Some(false), _) => ??? //TODO AdDPreviousRegistration
+      case (Some(false), _) => PreviousSchemePage(index, index) //TODO AdDPreviousRegistration
       case _ => JourneyRecoveryPage
     }
 

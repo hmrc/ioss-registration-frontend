@@ -374,7 +374,14 @@ checkPreviousSchemeAnswers.remove.hidden = Remove {0}
 checkPreviousSchemeAnswers.addAnother = Add another scheme registration from {0}?
 checkPreviousSchemeAnswers.maximumReached = You have added details for every scheme in {0}
 
+deletePreviousRegistration.title = Are you sure you need to remove the deregistration for {0}?
+deletePreviousRegistration.heading = Are you sure you need to remove the deregistration for {0}?
+deletePreviousRegistration.error.required = Select yes if you are sure you need to remove the deregistration
 
+deletePreviousScheme.title = Remove this scheme for {0}?
+deletePreviousScheme.heading = Remove this scheme for {0}?
+deletePreviousScheme.paragraph = This will remove {0} from your previous registrations.
+deletePreviousScheme.error.required = Select yes if you want to remove this scheme for {0}
 
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
