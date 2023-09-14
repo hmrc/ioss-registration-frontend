@@ -18,9 +18,11 @@ package controllers
 
 import com.google.inject.Inject
 import controllers.actions.AuthenticatedControllerComponents
+import pages.EmptyWaypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.checkAnswers.BusinessContactDetailsSummary
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -35,8 +37,16 @@ class CheckYourAnswersController @Inject()(
   def onPageLoad(): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
 
+      val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(request.userAnswers, EmptyWaypoints)
+      val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(request.userAnswers, EmptyWaypoints)
+      val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(request.userAnswers, EmptyWaypoints)
+
       val list = SummaryListViewModel(
-        rows = Seq.empty
+        rows = Seq(
+          businessContactDetailsContactNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+          businessContactDetailsTelephoneSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+          businessContactDetailsEmailSummaryRow
+        ).flatten
       )
 
       Ok(view(list))

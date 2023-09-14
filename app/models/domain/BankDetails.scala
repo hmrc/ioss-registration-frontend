@@ -16,19 +16,15 @@
 
 package models
 
-import play.api.mvc.JavascriptLiteral
+import models.domain.ModelHelpers._
+import play.api.libs.json._
 
-sealed trait Mode
 
-case object CheckMode extends Mode
-case object NormalMode extends Mode
+case class BankDetails (accountName: String, bic: Option[Bic], iban: Iban)
 
-object Mode {
+object BankDetails {
+  implicit val format: OFormat[BankDetails] = Json.format[BankDetails]
 
-  implicit val jsLiteral: JavascriptLiteral[Mode] = new JavascriptLiteral[Mode] {
-    override def to(value: Mode): String = value match {
-      case NormalMode    => "NormalMode"
-      case CheckMode     => "CheckMode"
-    }
-  }
+  def apply(accountName: String, bic: Option[Bic], iban: Iban): BankDetails =
+    new BankDetails(normaliseSpaces(accountName), bic, iban)
 }

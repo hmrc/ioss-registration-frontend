@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package models
+package generators
 
-import play.api.mvc.JavascriptLiteral
+import org.scalacheck.Arbitrary
+import pages._
 
-sealed trait Mode
+trait PageGenerators {
+  implicit lazy val arbitraryBankDetailsPage: Arbitrary[BankDetailsPage.type] =
+    Arbitrary(BankDetailsPage)
 
-case object CheckMode extends Mode
-case object NormalMode extends Mode
+  implicit lazy val arbitraryCheckVatDetailsPage: Arbitrary[CheckVatDetailsPage.type] =
+    Arbitrary(CheckVatDetailsPage)
 
-object Mode {
-
-  implicit val jsLiteral: JavascriptLiteral[Mode] = new JavascriptLiteral[Mode] {
-    override def to(value: Mode): String = value match {
-      case NormalMode    => "NormalMode"
-      case CheckMode     => "CheckMode"
-    }
-  }
+  implicit lazy val arbitraryBusinessContactDetailsPage: Arbitrary[BusinessContactDetailsPage.type] =
+    Arbitrary(BusinessContactDetailsPage)
 }

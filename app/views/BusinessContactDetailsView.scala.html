@@ -1,0 +1,75 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import viewmodels.InputWidth._
+@import components.ButtonGroup
+
+@this(
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukInput: GovukInput,
+    button: ButtonGroup
+)
+
+@(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = title(form, messages("businessContactDetails.title"))) {
+
+    @formHelper(action = routes.BusinessContactDetailsController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
+
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("businessContactDetails.heading")</h1>
+        <p class="govuk-body govuk-!-margin-bottom-4">@messages("businessContactDetailsWithBta.p1")</p>
+        <p class="govuk-body govuk-!-margin-bottom-9">@Html(messages("businessContactDetailsWithBta.p2"))</p>
+
+        @govukInput(
+            InputViewModel(
+                field = form("fullName"),
+                label = LabelViewModel(messages("businessContactDetails.fullName")).withCssClass("govuk-label--m")
+            )
+            .withWidth(Full)
+            .withAutocomplete("name")
+            .withSpellcheck(on = false)
+        )
+
+        @govukInput(
+            InputViewModel(
+                field = form("telephoneNumber"),
+                label = LabelViewModel(messages("businessContactDetails.telephoneNumber")).withCssClass("govuk-label--m")
+            )
+            .withWidth(Fixed20)
+            .withInputType("tel")
+            .withInputMode("numeric")
+            .withAutocomplete("tel")
+        )
+
+        @govukInput(
+            InputViewModel(
+                field = form("emailAddress"),
+                label = LabelViewModel(messages("businessContactDetails.emailAddress")).withCssClass("govuk-label--m")
+            )
+            .withWidth(Full)
+            .withHint(HintViewModel(messages("businessContactDetails.emailHint")))
+            .asEmail()
+        )
+
+        @button("site.continue", routes.BusinessContactDetailsController.onPageLoad(waypoints).url, waypoints)
+    }
+}

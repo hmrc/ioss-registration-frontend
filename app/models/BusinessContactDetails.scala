@@ -16,19 +16,18 @@
 
 package models
 
-import play.api.mvc.JavascriptLiteral
+import play.api.libs.json._
+import domain.ModelHelpers._
 
-sealed trait Mode
+case class BusinessContactDetails (
+  fullName: String,
+  telephoneNumber: String,
+  emailAddress: String
+)
 
-case object CheckMode extends Mode
-case object NormalMode extends Mode
+object BusinessContactDetails {
+  implicit val format = Json.format[BusinessContactDetails]
 
-object Mode {
-
-  implicit val jsLiteral: JavascriptLiteral[Mode] = new JavascriptLiteral[Mode] {
-    override def to(value: Mode): String = value match {
-      case NormalMode    => "NormalMode"
-      case CheckMode     => "CheckMode"
-    }
-  }
+  def apply(fullName: String, telephoneNumber: String, emailAddress: String): BusinessContactDetails =
+    new BusinessContactDetails(normaliseSpaces(fullName), telephoneNumber, emailAddress)
 }

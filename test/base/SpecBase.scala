@@ -19,7 +19,7 @@ package base
 import controllers.actions._
 import generators.Generators
 import models.domain.VatCustomerInfo
-import models.{DesAddress, UserAnswers}
+import models.{BusinessContactDetails, DesAddress, UserAnswers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -51,6 +51,8 @@ trait SpecBase
   val stubClockAtArbitraryDate: Clock = Clock.fixed(arbitraryInstant, ZoneId.systemDefault())
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
+
+  val contactDetails: BusinessContactDetails = BusinessContactDetails("name", "0111 2223334", "email@example.com")
 
   val vatCustomerInfo: VatCustomerInfo =
     VatCustomerInfo(

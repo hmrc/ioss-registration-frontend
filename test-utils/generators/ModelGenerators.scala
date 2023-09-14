@@ -18,12 +18,101 @@ package generators
 
 import models._
 import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalatest.EitherValues
+import uk.gov.hmrc.domain.Vrn
 
-trait ModelGenerators {
+trait ModelGenerators extends EitherValues {
+
+implicit lazy val arbitraryBic: Arbitrary[Bic] = {
+    val asciiCodeForA = 65
+    val asciiCodeForN = 78
+    val asciiCodeForP = 80
+    val asciiCodeForZ = 90
+
+    Arbitrary {
+      for {
+        firstChars <- Gen.listOfN(6, Gen.alphaUpperChar).map(_.mkString)
+        char7      <- Gen.oneOf(Gen.alphaUpperChar, Gen.choose(2, 9))
+        char8 <- Gen.oneOf(
+          Gen.choose(asciiCodeForA, asciiCodeForN).map(_.toChar),
+          Gen.choose(asciiCodeForP, asciiCodeForZ).map(_.toChar),
+          Gen.choose(0, 9)
+        )
+        lastChars <- Gen.option(Gen.listOfN(3, Gen.oneOf(Gen.alphaUpperChar, Gen.numChar)).map(_.mkString))
+      } yield Bic(s"$firstChars$char7$char8${lastChars.getOrElse("")}").get
+    }
+  }
+  implicit lazy val arbitraryIban: Arbitrary[Iban] =
+    Arbitrary {
+      Gen.oneOf(
+        "GB94BARC10201530093459",
+        "GB33BUKB20201555555555",
+        "DE29100100100987654321",
+        "GB24BKEN10000031510604",
+        "GB27BOFI90212729823529",
+        "GB17BOFS80055100813796",
+        "GB92BARC20005275849855",
+        "GB66CITI18500812098709",
+        "GB15CLYD82663220400952",
+        "GB26MIDL40051512345674",
+        "GB76LOYD30949301273801",
+        "GB25NWBK60080600724890",
+        "GB60NAIA07011610909132",
+        "GB29RBOS83040210126939",
+        "GB79ABBY09012603367219",
+        "GB21SCBL60910417068859",
+        "GB42CPBK08005470328725"
+      ).map(v => Iban(v).value)
+    }
 
   implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
     Arbitrary {
-      Gen.oneOf(CheckVatDetails.values.toSeq)
+      Gen.oneOf(CheckVatDetails.values)
     }
+
+  implicit lazy val arbitraryBankDetails: Arbitrary[BankDetails] =
+    Arbitrary {
+      for {
+        accountName <- arbitrary[String]
+        bic         <- Gen.option(arbitrary[Bic])
+        iban        <- arbitrary[Iban]
+      } yield BankDetails(accountName, bic, iban)
+    }
+
+  implicit lazy val arbitraryCountry: Arbitrary[Country] =
+    Arbitrary {
+      Gen.oneOf(Country.euCountries)
+    }
+
+  implicit lazy val arbitraryBusinessContactDetails: Arbitrary[BusinessContactDetails] =
+    Arbitrary {
+      for {
+        fullName <- arbitrary[String]
+        telephoneNumber <- arbitrary[String]
+        emailAddress <- arbitrary[String]
+      } yield BusinessContactDetails(fullName, telephoneNumber, emailAddress)
+    }
+
+  implicit def arbitraryVrn: Arbitrary[Vrn] = Arbitrary {
+    for {
+      chars  <- Gen.listOfN(9, Gen.numChar)
+    } yield {
+      Vrn(chars.mkString(""))
+    }
+  }
+
+  def ukPostcode(): Gen[String] = (
+    for {
+      numberOfFirstLetters <- choose(1,2)
+      firstLetters <- listOfN(numberOfFirstLetters, Gen.alphaChar)
+      firstNumber <- Gen.numChar
+      numberOfMiddle <- choose(0,1)
+      middle <- listOfN(numberOfMiddle, Gen.alphaNumChar)
+      lastNumber <- Gen.numChar
+      lastLetters <- listOfN(2, Gen.alphaChar)
+
+    } yield firstLetters.mkString + firstNumber.toString + middle.mkString + lastNumber.toString + lastLetters.mkString
+    )
 }
