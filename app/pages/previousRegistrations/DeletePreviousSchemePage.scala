@@ -36,7 +36,7 @@ case class DeletePreviousSchemePage(countryIndex: Index) extends QuestionPage[Bo
       case (_, Some(numberOfSchemes)) if numberOfSchemes > 0 =>
         CheckPreviousSchemeAnswersPage(countryIndex)
       case (Some(numberOfCountries), _) if numberOfCountries > 0 =>
-        PreviouslyRegisteredPage//TODO AddPreviousRegistrationPage
+        AddPreviousRegistrationPage
       case _ =>
         PreviouslyRegisteredPage
     }

@@ -17,25 +17,25 @@
 package pages.previousRegistrations
 
 import models.{Index, UserAnswers}
+import pages.filters.RegisteredForIossInEuPage
 import pages.{JourneyRecoveryPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
-import queries.previousRegistration.DeriveNumberOfPreviousSchemes
+import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 
-case class CheckPreviousSchemeAnswersPage(index: Index) extends QuestionPage[Boolean] {
+case object AddPreviousRegistrationPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "checkPreviousSchemeAnswers"
+  override def toString: String = "addPreviousRegistration"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.CheckPreviousSchemeAnswersController.onPageLoad(waypoints, Index(0))
+    controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    (answers.get(CheckPreviousSchemeAnswersPage(index)), answers.get(DeriveNumberOfPreviousSchemes(index))) match {
-      case (Some(true), Some(size)) => PreviousSchemePage(index, Index(size))
-      case (Some(false), _) => AddPreviousRegistrationPage
-      case _ => JourneyRecoveryPage
+    (answers.get(AddPreviousRegistrationPage), answers.get(DeriveNumberOfPreviousRegistrations)) match {
+      case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
+      case (Some(false), _)         => RegisteredForIossInEuPage//TODO CommencementDateController
+      case _                        => JourneyRecoveryPage
     }
-
 }

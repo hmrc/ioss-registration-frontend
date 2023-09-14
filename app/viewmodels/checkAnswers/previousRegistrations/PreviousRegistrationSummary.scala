@@ -76,10 +76,10 @@ object PreviousRegistrationSummary {
             value = ValueViewModel(HtmlContent(value)),
             actions = Seq(
               if (sameListOfCountries) {
-                ActionItemViewModel("site.add", controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints).url)//TODO AddPreviousReg
+                ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
                   .withVisuallyHiddenText(messages("previousRegistrations.add.hidden"))
               } else {
-                ActionItemViewModel("site.change", controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints).url)//TODO AddPreviousReg
+                ActionItemViewModel("site.change", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
                   .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
               }
             )

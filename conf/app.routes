@@ -146,3 +146,6 @@ POST       /remove-deregistration/:index                                        
 
 GET         /remove-previous-scheme/:countryIndex/:schemeIndex                  controllers.previousRegistrations.DeletePreviousSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 POST        /remove-previous-scheme/:countryIndex/:schemeIndex                  controllers.previousRegistrations.DeletePreviousSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+
+GET        /previous-schemes-overview                                           controllers.previousRegistrations.AddPreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /previous-schemes-overview                                           controllers.previousRegistrations.AddPreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
