@@ -16,7 +16,7 @@
 
 package models
 
-import models.ModelHelpers.normaliseSpaces
+import models.domain.ModelHelpers.normaliseSpaces
 import play.api.libs.json._
 
 sealed trait Address

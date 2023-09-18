@@ -244,9 +244,9 @@ cannotRegisterNotNorwegianBasedBusiness.link = <a href="/business-account" class
 
 hasTradingName.title = Does your business trade using a name that is different from {0}?
 hasTradingName.heading = Does your business trade using a name that is different from {0}?
-hasTradingName.checkYourAnswersLabel = Have a different UK trading name
-hasTradingName.error.required = Select yes if you use a different trading name in the UK
-hasTradingName.change.hidden = if you have a different UK trading name
+hasTradingName.checkYourAnswersLabel = Have a different trading name
+hasTradingName.error.required = Select yes if you use a different trading name
+hasTradingName.change.hidden = if you have a different trading name
 
 tradingName.title = What is your UK trading name?
 tradingName.heading = What is your UK trading name?

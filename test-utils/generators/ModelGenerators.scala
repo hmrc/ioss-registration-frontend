@@ -16,8 +16,8 @@
 
 package generators
 
-import models.ModelHelpers.normaliseSpaces
 import models._
+import models.domain.ModelHelpers.normaliseSpaces
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
@@ -28,7 +28,7 @@ trait ModelGenerators {
 
   implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
     Arbitrary {
-      Gen.oneOf(CheckVatDetails.values.toSeq)
+      Gen.oneOf(CheckVatDetails.values)
     }
 
   implicit lazy val arbitraryDesAddress: Arbitrary[DesAddress] =
@@ -56,7 +56,7 @@ trait ModelGenerators {
     Arbitrary {
       for {
         name <- commonFieldString(maxFieldLength)
-      }  yield {
+      } yield {
         TradingName(name)
       }
     }

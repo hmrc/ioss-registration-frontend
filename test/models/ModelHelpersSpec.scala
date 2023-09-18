@@ -16,6 +16,7 @@
 
 package models
 
+import models.domain.ModelHelpers
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 

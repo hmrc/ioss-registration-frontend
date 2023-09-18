@@ -18,7 +18,6 @@ package controllers.tradingNames
 
 import base.SpecBase
 import forms.tradingNames.HasTradingNameFormProvider
-import models.domain.VatCustomerInfo
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
