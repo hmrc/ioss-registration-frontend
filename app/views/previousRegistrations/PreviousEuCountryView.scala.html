@@ -15,6 +15,7 @@
  *@
 
 @import viewmodels.InputWidth
+@import components.ButtonGroup
 
 @this(
     layout: templates.Layout,
@@ -22,7 +23,7 @@
     govukErrorSummary: GovukErrorSummary,
     govukInput: GovukInput,
     govukSelect: GovukSelect,
-    govukButton: GovukButton
+    button: ButtonGroup
 )
 
 @(form: Form[_], waypoints: Waypoints, index: Index)(implicit request: Request[_], messages: Messages)
@@ -45,8 +46,6 @@
             .withCssClass("autocomplete")
         )
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+        @button("site.continue",  controllers.previousRegistrations.routes.PreviousEuCountryController.onPageLoad(waypoints, index).url)
     }
 }

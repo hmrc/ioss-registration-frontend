@@ -49,7 +49,8 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
   private val previousScheme = PreviousSchemeDetails(PreviousScheme.OSSU, previousSchemeNumbers)
   private val previousRegistration = PreviousRegistrationDetails(country, List(previousScheme))
 
-  private lazy val deletePreviousRegistrationRoute = controllers.previousRegistrations.routes.DeletePreviousRegistrationController.onPageLoad(waypoints, index).url
+  private lazy val deletePreviousRegistrationRoute = controllers.previousRegistrations.routes.DeletePreviousRegistrationController.onPageLoad(
+    waypoints, index).url
 
   private val baseUserAnswers =
     basicUserAnswersWithVatInfo
@@ -69,14 +70,12 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
 //
 //        val view = application.injector.instanceOf[DeletePreviousRegistrationView]
 //
-//        println("result: " + result)
-//
 //        status(result) mustEqual OK
 //        contentAsString(result) mustEqual view(form, waypoints, index, previousRegistration.previousEuCountry.name)(request, messages(application)).toString
 //
 //      }
 //    }
-//
+
 //    "must delete a record and redirect to the next page when the user answers Yes" in {
 //
 //      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
@@ -149,7 +148,7 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
 //          boundForm, waypoints, index, previousRegistration.previousEuCountry.name)(request, messages(application)).toString
 //      }
 //    }
-//
+
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()

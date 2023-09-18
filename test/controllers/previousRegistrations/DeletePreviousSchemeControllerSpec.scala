@@ -81,7 +81,8 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
         val view = application.injector.instanceOf[DeletePreviousSchemeView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, waypoints, index, index, country, list, isLastPreviousScheme = true)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, waypoints, index, index,
+          country, list, isLastPreviousScheme = true)(request, messages(application)).toString
       }
     }
 

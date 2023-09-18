@@ -16,7 +16,7 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Country, Index, UserAnswers}
+import models.{Country, Index, PreviousScheme, UserAnswers}
 import pages.Waypoints
 import pages.previousRegistrations.PreviousSchemePage
 import play.api.i18n.Messages
@@ -28,10 +28,12 @@ import viewmodels.implicits._
 
 object PreviousSchemeSummary  {
 
-  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, country: Country, waypoints: Waypoints)
+  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, country: Country, existingPreviousSchemes: Seq[PreviousScheme], waypoints: Waypoints)
          (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
       answer =>
+
+        val isExistingScheme = existingPreviousSchemes.contains(answer)
 
         val value = ValueViewModel(
           HtmlContent(
@@ -42,10 +44,15 @@ object PreviousSchemeSummary  {
         SummaryListRowViewModel(
           key     = "previousScheme.checkYourAnswersLabel",
           value   = value,
-          actions = Seq(
-            ActionItemViewModel("site.remove", controllers.previousRegistrations.routes.DeletePreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex).url)
-              .withVisuallyHiddenText(messages("site.remove.hidden"))
-          )
+          actions = if (!isExistingScheme) {
+            Seq(
+              ActionItemViewModel("site.remove", controllers.previousRegistrations.routes.DeletePreviousSchemeController.onPageLoad(
+                waypoints, countryIndex, schemeIndex).url)
+                .withVisuallyHiddenText(messages("site.remove.hidden", country.name, HtmlFormat.escape(messages(s"previousScheme.$answer"))))
+            )
+          } else {
+            Seq.empty
+          }
         )
     }
 }

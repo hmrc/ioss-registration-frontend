@@ -93,7 +93,8 @@ class PreviousOssNumberController @Inject()(
             formWithErrors =>
               CountryWithValidationDetails.euCountriesWithVRNValidationRules.filter(_.country.code == country.code).head match {
                 case countryWithValidationDetails =>
-                  Future.successful(BadRequest(view(formWithErrors, waypoints, countryIndex, schemeIndex, countryWithValidationDetails, previousSchemeHintText)))
+                  Future.successful(BadRequest(view(
+                    formWithErrors, waypoints, countryIndex, schemeIndex, countryWithValidationDetails, previousSchemeHintText)))
               },
 
             value => {

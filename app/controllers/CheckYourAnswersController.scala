@@ -24,6 +24,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.VatRegistrationDetailsSummary
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary, HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -59,6 +60,8 @@ class CheckYourAnswersController @Inject()(
       val bankDetailsAccountNameSummaryRow = BankDetailsSummary.rowAccountName(request.userAnswers, waypoints, thisPage)
       val bankDetailsBicSummaryRow = BankDetailsSummary.rowBIC(request.userAnswers, waypoints, thisPage)
       val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(request.userAnswers, waypoints, thisPage)
+      val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(request.userAnswers, waypoints, thisPage)
+      val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(request.userAnswers, Seq.empty, waypoints)
 
       val list = SummaryListViewModel(
         rows = Seq(
@@ -75,7 +78,15 @@ class CheckYourAnswersController @Inject()(
           businessContactDetailsEmailSummaryRow,
           bankDetailsAccountNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
           bankDetailsBicSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
-          bankDetailsIbanSummaryRow
+          bankDetailsIbanSummaryRow,
+          previouslyRegisteredSummaryRow.map { sr =>
+            if (previousRegistrationSummaryRow.isDefined) {
+              sr.withCssClass("govuk-summary-list__row--no-border")
+            } else {
+              sr
+            }
+          },
+          previousRegistrationSummaryRow,
         ).flatten
       )
 

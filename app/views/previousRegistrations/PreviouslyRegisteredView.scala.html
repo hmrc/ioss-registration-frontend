@@ -14,12 +14,14 @@
  * limitations under the License.
  *@
 
+@import components.ButtonGroup
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
-    govukButton: GovukButton
+    button: ButtonGroup
 )
 
 @(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
@@ -39,8 +41,6 @@
             ).withHint(HintViewModel(messages("previouslyRegistered.hint")))
         )
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+        @button("site.continue",  controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints).url)
     }
 }

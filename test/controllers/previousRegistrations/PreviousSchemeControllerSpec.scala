@@ -82,7 +82,7 @@ class PreviousSchemeControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must save the answer and redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 

@@ -87,7 +87,7 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" - {
+    "must save the answer and redirect to the next page when valid data is submitted" - {
 
       "when the ID starts with EU it sets to non-union" in {
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
@@ -108,6 +108,32 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
           val expectedAnswers = baseAnswers
             .set(PreviousOssNumberPage(index, index), PreviousSchemeNumbers("EU123456789", None)).success.value
             .set(PreviousSchemePage(index, index), PreviousScheme.OSSNU).success.value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+        }
+      }
+
+      "when the ID doesn't start with EU it sets to union" in {
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        val application =
+          applicationBuilder(userAnswers = Some(baseAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousOssNumberRoute)
+              .withFormUrlEncodedBody(("value", "SI12345678"))
+
+          val result = route(application, request).value
+          val expectedAnswers = baseAnswers
+            .set(PreviousOssNumberPage(index, index), PreviousSchemeNumbers("SI12345678", None)).success.value
+            .set(PreviousSchemePage(index, index), PreviousScheme.OSSU).success.value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url

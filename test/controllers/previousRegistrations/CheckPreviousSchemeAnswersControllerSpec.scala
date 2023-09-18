@@ -77,7 +77,7 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
         val view = application.injector.instanceOf[CheckPreviousSchemeAnswersView]
         val lists = Seq(SummaryListViewModel(
           Seq(
-            PreviousSchemeSummary.row(baseUserAnswers, index, index, country, waypoints),
+            PreviousSchemeSummary.row(baseUserAnswers, index, index, country, Seq.empty, waypoints),
             PreviousSchemeNumberSummary.row(baseUserAnswers, index, index)
           ).flatten
         ))
@@ -142,7 +142,7 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
           implicit val msgs: Messages = messages(application)
           val list = Seq(SummaryListViewModel(
             Seq(
-              PreviousSchemeSummary.row(baseUserAnswers, index, index, country, waypoints),
+              PreviousSchemeSummary.row(baseUserAnswers, index, index, country, Seq.empty, waypoints),
               PreviousSchemeNumberSummary.row(baseUserAnswers, index, index)
             ).flatten
           ))

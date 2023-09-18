@@ -32,11 +32,7 @@ import utils.CheckExistingRegistrations.existingPreviousRegistration
 
 object PreviousRegistrationSummary {
 
-  def row(
-           answers: UserAnswers,
-           existingPreviousRegistrations: Seq[PreviousRegistration],
-           waypoints: Waypoints)
-         (implicit messages: Messages): Seq[ListItemWrapper] =
+  def row(answers: UserAnswers, existingPreviousRegistrations: Seq[PreviousRegistration], waypoints: Waypoints): Seq[ListItemWrapper] =
     answers.get(AllPreviousRegistrationsWithOptionalVatNumberQuery).getOrElse(List.empty).zipWithIndex.map {
       case (details, index) =>
         ListItemWrapper(

@@ -149,3 +149,6 @@ POST        /remove-previous-scheme/:countryIndex/:schemeIndex                  
 
 GET        /previous-schemes-overview                                           controllers.previousRegistrations.AddPreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST       /previous-schemes-overview                                           controllers.previousRegistrations.AddPreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /cannot-delete-previous-registrations                                controllers.previousRegistrations.CannotRemoveExistingPreviousRegistrationsController.onPageLoad()
+
