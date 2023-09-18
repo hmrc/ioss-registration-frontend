@@ -18,7 +18,6 @@ package models.domain
 
 import scala.annotation.tailrec
 
-
 object ModelHelpers {
 
   def normaliseSpaces(string: String): String = {

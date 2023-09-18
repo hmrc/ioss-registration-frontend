@@ -18,11 +18,11 @@ package generators
 
 import models.Index
 import org.scalacheck.Arbitrary
+import pages._
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
 
 trait PageGenerators {
-
   implicit lazy val arbitraryDeleteAllTradingNamesPage: Arbitrary[DeleteAllTradingNamesPage.type] =
     Arbitrary(DeleteAllTradingNamesPage)
 
@@ -35,4 +35,6 @@ trait PageGenerators {
   implicit lazy val arbitraryCheckVatDetailsPage: Arbitrary[CheckVatDetailsPage.type] =
     Arbitrary(CheckVatDetailsPage)
 
+  implicit lazy val arbitraryBusinessContactDetailsPage: Arbitrary[BusinessContactDetailsPage.type] =
+    Arbitrary(BusinessContactDetailsPage)
 }

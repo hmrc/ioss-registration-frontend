@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(govukButton: GovukButton)
-@(continueMessage: String, continueUrl: String = "", waypoints: Waypoints)(implicit messages: Messages)
-<div class="govuk-button-group">
-    @govukButton(
-        ButtonViewModel(messages(continueMessage)).withAttribute(("id", "continue"))
-    )
+package models
 
-    <a id="saveProgress" role="button" href="" class="govuk-button govuk-button--secondary" data-module="govuk-button">
-    @messages("saveProgress.button")
-    </a>
-</div>
+import play.api.libs.json._
+import domain.ModelHelpers._
+
+case class BusinessContactDetails (
+  fullName: String,
+  telephoneNumber: String,
+  emailAddress: String
+)
+
+object BusinessContactDetails {
+  implicit val format = Json.format[BusinessContactDetails]
+
+  def apply(fullName: String, telephoneNumber: String, emailAddress: String): BusinessContactDetails =
+    new BusinessContactDetails(normaliseSpaces(fullName), telephoneNumber, emailAddress)
+}

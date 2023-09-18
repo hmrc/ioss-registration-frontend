@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(govukButton: GovukButton)
-@(continueMessage: String, continueUrl: String = "", waypoints: Waypoints)(implicit messages: Messages)
-<div class="govuk-button-group">
-    @govukButton(
-        ButtonViewModel(messages(continueMessage)).withAttribute(("id", "continue"))
-    )
+package pages
 
-    <a id="saveProgress" role="button" href="" class="govuk-button govuk-button--secondary" data-module="govuk-button">
-    @messages("saveProgress.button")
-    </a>
-</div>
+import controllers.routes
+import models.{BusinessContactDetails, UserAnswers}
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
+
+case object BusinessContactDetailsPage extends QuestionPage[BusinessContactDetails] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "businessContactDetails"
+
+  override def route(waypoints: Waypoints): Call =
+    routes.BusinessContactDetailsController.onPageLoad(waypoints)
+
+  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+      BankDetailsPage
+}

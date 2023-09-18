@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package forms.validation
+package pages
 
-object Validation {
+import controllers.routes
+import models.BankDetails
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-  val commonTextPattern = """^(?!^[’'"])(?:[A-Za-z0-9À-ÿ \!\)\(.,_/’'"&-]|[’'"](?=[A-Za-z0-9À-ÿ \!\)\(.,_/’'"&-]))*[A-Za-z0-9À-ÿ \!\)\(.,_/’'"&-](?<![’'"]$)$"""
+case object BankDetailsPage extends QuestionPage[BankDetails] {
 
+  override def path: JsPath = JsPath \ toString
 
+  override def toString: String = "bankDetails"
+
+  override def route(waypoints: Waypoints): Call =
+    routes.BankDetailsController.onPageLoad(waypoints)
 }
