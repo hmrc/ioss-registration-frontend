@@ -19,6 +19,5 @@ package pages
 trait AddToListQuestionPage {
   self: Page =>
 
-  val section: AddToListSection
   val addItemWaypoint: Waypoint
 }

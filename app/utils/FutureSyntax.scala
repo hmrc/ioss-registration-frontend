@@ -24,5 +24,4 @@ object FutureSyntax {
 
     def toFuture: Future[A] = Future.successful(a)
   }
-
 }

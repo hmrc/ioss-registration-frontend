@@ -18,8 +18,8 @@ package base
 
 import controllers.actions._
 import generators.Generators
+import models.UserAnswers
 import models.domain.VatCustomerInfo
-import models.{DesAddress, UserAnswers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -55,7 +55,7 @@ trait SpecBase
   val vatCustomerInfo: VatCustomerInfo =
     VatCustomerInfo(
       registrationDate = LocalDate.now(stubClockAtArbitraryDate),
-      desAddress = DesAddress("Line1", None, None, None, None, Some("AA11 1AA"), "GB"),
+      desAddress = arbitraryDesAddress.arbitrary.sample.value,
       partOfVatGroup = false,
       organisationName = Some("Company name"),
       individualName = None,

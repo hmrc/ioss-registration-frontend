@@ -1,0 +1,86 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import controllers.checkVatDetails.routes
+@import viewmodels.{CheckVatDetailsViewModel, LegendSize}
+
+@this(
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukRadios: GovukRadios,
+        govukButton: GovukButton
+)
+
+@(form: Form[_], waypoints: Waypoints, viewModel: CheckVatDetailsViewModel)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = title(form, messages("checkVatDetails.title"))) {
+
+    @formHelper(action = routes.CheckVatDetailsController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
+        }
+
+        <h1 class="govuk-heading-l">@messages("checkVatDetails.heading")</h1>
+
+        <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+            @(viewModel.organisationName, viewModel.individualName) match {
+                case (Some(organisationName), _) => {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key govuk-!-width-one-half">@messages("checkVatDetails.organisationName")</dt>
+                        <dd class="govuk-summary-list__value govuk-!-width-one-half">@organisationName</dd>
+                    </div>
+                }
+                case (_, Some(individualName)) => {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key govuk-!-width-one-half">@messages("checkVatDetails.individualName")</dt>
+                        <dd class="govuk-summary-list__value govuk-!-width-one-half">@individualName</dd>
+                    </div>
+                }
+            }
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key govuk-!-width-one-half">@messages("checkVatDetails.vrn")</dt>
+                <dd class="govuk-summary-list__value govuk-!-width-one-half">@viewModel.vrn</dd>
+            </div>
+
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key govuk-!-width-one-half">@messages("checkVatDetails.address")</dt>
+                <dd class="govuk-summary-list__value govuk-!-width-one-half">@viewModel.formattedAddress</dd>
+            </div>
+
+
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key govuk-!-width-one-half">@messages("checkVatDetails.partOfVatGroup")</dt>
+                <dd class="govuk-summary-list__value govuk-!-width-one-half">@viewModel.partOfVatGroup</dd>
+            </div>
+
+        </dl>
+
+
+        @govukRadios(
+            RadiosViewModel(
+                field = form("value"),
+                legend = LegendViewModel(messages("checkVatDetails.question")).withSize(LegendSize.Medium),
+                items = CheckVatDetails.options
+            )
+        )
+
+        @govukButton(
+            ButtonViewModel(messages("site.continue")).withAttribute("id", "continue")
+        )
+    }
+}

@@ -45,7 +45,7 @@ case class NonEmptyWaypoints(waypoints: NonEmptyList[Waypoint]) extends Waypoint
 
   override def recalibrate(currentPage: Page, targetPage: Page): Waypoints =
     (currentPage, targetPage) match {
-      case (a: AddToListQuestionPage, b: AddToListQuestionPage) if a.section == b.section =>
+      case (a: AddToListQuestionPage, b: AddToListQuestionPage) =>
         this
 
       case (_, targetPage: AddToListQuestionPage) =>

@@ -21,7 +21,7 @@ import models.UserAnswers
 import play.api.mvc.Call
 
 object JourneyRecoveryPage extends Page {
-  //TODO
+
   override def route(waypoints: Waypoints): Call =
     routes.JourneyRecoveryController.onPageLoad()
 

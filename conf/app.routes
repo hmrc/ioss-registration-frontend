@@ -13,7 +13,7 @@ GET         /refresh-session-unauthenticated                     controllers.Kee
 
 GET         /there-is-a-problem                                  controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                                  controllers.CheckYourAnswersController.onPageLoad
+GET         /check-your-answers                                  controllers.CheckYourAnswersController.onPageLoad()
 
 GET         /identity-problem                                    controllers.auth.IdentityVerificationController.identityError(continueUrl: String)
 GET         /identity-complete                                   controllers.auth.IdentityVerificationController.handleIvFailure(continueUrl: String, journeyId: Option[String])
@@ -79,16 +79,32 @@ POST        /register-to-use-service                             controllers.fil
 
 GET         /cannot-register-no-ni-or-norway-business            controllers.filters.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-# Next section
-GET         /confirm-vat-details                                 controllers.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /confirm-vat-details                                 controllers.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+# VAT details section
+GET         /confirm-vat-details                                 controllers.checkVatDetails.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /confirm-vat-details                                 controllers.checkVatDetails.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /register-different-business                         controllers.UseOtherAccountController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /register-different-business                         controllers.checkVatDetails.UseOtherAccountController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /update-vat-details                                  controllers.UpdateVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /update-vat-details                                  controllers.checkVatDetails.UpdateVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /expired-vrn-date                                    controllers.ExpiredVrnDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /cannot-register-no-ni-protocol                      controllers.CannotRegisterNoNiProtocolController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /cannot-register-not-norwegian-based-business        controllers.CannotRegisterNotNorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+# Trading name section
+GET         /have-uk-trading-name                                controllers.tradingNames.HasTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /have-uk-trading-name                                controllers.tradingNames.HasTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /uk-trading-name/:index                              controllers.tradingNames.TradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /uk-trading-name/:index                              controllers.tradingNames.TradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
+GET         /add-uk-trading-name                                 controllers.tradingNames.AddTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /add-uk-trading-name                                 controllers.tradingNames.AddTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /remove-uk-trading-name/:index                       controllers.tradingNames.DeleteTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /remove-uk-trading-name/:index                       controllers.tradingNames.DeleteTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
+GET         /remove-all-trading-names                            controllers.tradingNames.DeleteAllTradingNamesController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /remove-all-trading-names                            controllers.tradingNames.DeleteAllTradingNamesController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

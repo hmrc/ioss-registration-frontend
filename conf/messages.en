@@ -39,8 +39,13 @@ error.number = Please enter a valid number
 error.required = Please enter a value
 error.summary.title = There is a problem
 
+saveProgress.button = Save and come back later
+
 checkYourAnswers.title = Check Your Answers
 checkYourAnswers.heading = Check Your Answers
+checkYourAnswers.details.heading = One Stop Shop details
+checkYourAnswers.info.p1 = By registering for this scheme, you confirm that the information you are providing is correct and complete.
+checkYourAnswers.info.p2 = After registering, do not click the Back button or refresh the page.
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
@@ -204,6 +209,14 @@ checkVatDetails.yes = Yes
 checkVatDetails.detailsIncorrect = Yes, but some of my VAT details are incorrect
 checkVatDetails.wrongAccount = No, I want to register a different business
 
+vatRegistrationDetails.checkYourAnswers.heading = VAT registration details
+vatRegistrationDetails.checkYourAnswers.organisationName = Business name
+vatRegistrationDetails.checkYourAnswers.individualName = Name
+vatRegistrationDetails.checkYourAnswers.partOfVatGroup = Part of a VAT group
+vatRegistrationDetails.checkYourAnswers.vatRegistrationDate = UK VAT registration date
+vatRegistrationDetails.checkYourAnswers.businessAddress = Business address
+vatRegistrationDetails.checkYourAnswers.manageVatBTA = <a class="govuk-link" href="/business-account">Manage your VAT registration in your BTA account</a>
+
 updateVatDetails.title = Update your VAT details
 updateVatDetails.heading = Update your VAT details
 updateVatDetails.guidance = Sign into your <a href="https://www.gov.uk/guidance/sign-in-to-your-hmrc-business-tax-account" class="govuk-link" rel="noreferrer noopener" target="_blank">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.
@@ -228,3 +241,40 @@ cannotRegisterNotNorwegianBasedBusiness.title = You cannot register for this ser
 cannotRegisterNotNorwegianBasedBusiness.heading = You cannot register for this service
 cannotRegisterNotNorwegianBasedBusiness.p1 = To register as a Norwegian trader, your business trading address must be in Norway.
 cannotRegisterNotNorwegianBasedBusiness.link = <a href="/business-account" class="govuk-link">Return to Business Tax Account</a>
+
+hasTradingName.title = Does your business trade using a name that is different from {0}?
+hasTradingName.heading = Does your business trade using a name that is different from {0}?
+hasTradingName.checkYourAnswersLabel = Have a different trading name
+hasTradingName.error.required = Select yes if you use a different trading name
+hasTradingName.change.hidden = if you have a different trading name
+
+tradingName.title = What is your UK trading name?
+tradingName.heading = What is your UK trading name?
+tradingName.hint = You cannot include ‘limited’, ‘Ltd’, ‘limited liability partnership’, ‘LLP’, ‘public limited company’ or ‘plc’.
+tradingName.checkYourAnswersLabel = Other trading names
+tradingName.error.required = Enter your UK trading name
+tradingName.error.length = Trading name must be 100 characters or less
+tradingName.error.duplicate = You have entered this trading name already. Enter a different one.
+tradingName.error.invalid = Trading name must only include letters, numbers, hyphens, spaces and apostrophes
+tradingName.change.hidden = your UK trading name
+
+addTradingName.title.singular = You have added one UK trading name
+addTradingName.title.plural = You have added {0} UK trading names
+addTradingName.heading.singular = You have added one UK trading name
+addTradingName.heading.plural = You have added {0} UK trading names
+addTradingName.maximumReached = You have added the maximum number of trading names.
+addTradingName.error.required = Select yes if you need to add another UK trading name
+addTradingName.change.hidden = Change {0}
+addTradingName.remove.hidden = Remove {0}
+addTradingName.addAnother = Add another trading name?
+addTradingName.addAnother.hint = You can add up to 10 trading names.
+
+deleteTradingName.title = Are you sure you want to remove {0}?
+deleteTradingName.heading = Are you sure you want to remove {0}?
+deleteTradingName.error.required = Select yes if you need to remove this trading name
+
+deleteAllTradingNames.title = Remove all your alternative trading names from this scheme?
+deleteAllTradingNames.heading = Remove all your alternative trading names from this scheme?
+deleteAllTradingNames.warning = This will delete all the trading names you have added.
+deleteAllTradingNames.error.required = Select yes if you want to remove all your alternative trading names from this scheme
+deleteAllTradingNames.change.hidden = Remove all your alternative trading names from this scheme

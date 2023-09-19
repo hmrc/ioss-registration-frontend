@@ -16,6 +16,7 @@
 
 package models
 
+import models.domain.ModelHelpers.normaliseSpaces
 import play.api.libs.json._
 
 sealed trait Address
@@ -39,11 +40,28 @@ case class DesAddress(
                        line4: Option[String],
                        line5: Option[String],
                        postCode: Option[String],
-                       countryCode: String,
+                       countryCode: String
                      ) extends Address
 
 object DesAddress {
 
   implicit val format: OFormat[DesAddress] = Json.format[DesAddress]
 
+  def apply(
+             line1: String,
+             line2: Option[String],
+             line3: Option[String],
+             line4: Option[String],
+             line5: Option[String],
+             postCode: Option[String],
+             countryCode: String
+           ): DesAddress = new DesAddress(
+    normaliseSpaces(line1),
+    normaliseSpaces(line2),
+    normaliseSpaces(line3),
+    normaliseSpaces(line4),
+    normaliseSpaces(line5),
+    normaliseSpaces(postCode),
+    countryCode
+  )
 }
