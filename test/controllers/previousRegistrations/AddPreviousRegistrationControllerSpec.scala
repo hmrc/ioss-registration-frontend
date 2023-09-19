@@ -17,7 +17,6 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import controllers.routes
 import forms.previousRegistrations.AddPreviousRegistrationFormProvider
 import models.domain.PreviousSchemeNumbers
@@ -57,7 +56,6 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
       .set(PreviousEuCountryPage(Index(0)), Country.euCountries.head).success.value
       .set(PreviousSchemePage(Index(0), Index(0)), PreviousScheme.OSSU).success.value
 
-  private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
 
   "AddPreviousRegistration Controller" - {
 
@@ -116,10 +114,10 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
             .withFormUrlEncodedBody(("value","true"))
 
         val result = route(application, request).value
-        val expectedAnswers = baseAnswers.set(AddPreviousRegistrationPage, true).success.value
+        val expectedAnswers = baseAnswers.set(AddPreviousRegistrationPage(), true).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual AddPreviousRegistrationPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        redirectLocation(result).value mustEqual AddPreviousRegistrationPage().navigate(waypoints, emptyUserAnswers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -189,5 +187,6 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
+
   }
 }

@@ -19,8 +19,8 @@ package queries.previousRegistration
 import play.api.libs.json.{JsObject, JsPath}
 import queries.Derivable
 
-case object DeriveNumberOfPreviousRegistrations extends Derivable[List[JsObject], Int] {
-  override val derive: List[JsObject] => Int = _.size
+case object DeriveNumberOfPreviousRegistrations extends Derivable[Seq[JsObject], Int] {
+  override val derive: Seq[JsObject] => Int = _.size
 
   override def path: JsPath = JsPath \ "previousRegistrations"
 }

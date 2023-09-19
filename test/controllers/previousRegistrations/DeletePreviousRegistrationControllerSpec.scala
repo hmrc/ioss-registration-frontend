@@ -27,12 +27,12 @@ import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, Waypoints}
-import pages.previousRegistrations.{DeletePreviousRegistrationPage, PreviousEuCountryPage, PreviousOssNumberPage, PreviousSchemePage}
+import pages.previousRegistrations._
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.previousRegistration.PreviousRegistrationQuery
-import repositories.{AuthenticatedUserAnswersRepository}
+import repositories.AuthenticatedUserAnswersRepository
 import views.html.previousRegistrations.DeletePreviousRegistrationView
 
 import scala.concurrent.Future
@@ -59,95 +59,95 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
 
   "DeletePreviousRegistration Controller" - {
 
-//    "must return OK and the correct view for a GET" in {
-//
-//      val application = applicationBuilder(userAnswers = Some(baseUserAnswers)).build()
-//
-//      running(application) {
-//        val request = FakeRequest(GET, deletePreviousRegistrationRoute)
-//
-//        val result = route(application, request).value
-//
-//        val view = application.injector.instanceOf[DeletePreviousRegistrationView]
-//
-//        status(result) mustEqual OK
-//        contentAsString(result) mustEqual view(form, waypoints, index, previousRegistration.previousEuCountry.name)(request, messages(application)).toString
-//
-//      }
-//    }
+    "must return OK and the correct view for a GET" in {
 
-//    "must delete a record and redirect to the next page when the user answers Yes" in {
-//
-//      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-//
-//      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-//
-//      val application =
-//        applicationBuilder(userAnswers = Some(baseUserAnswers))
-//          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-//          .build()
-//
-//      running(application) {
-//        val request =
-//          FakeRequest(POST, deletePreviousRegistrationRoute)
-//            .withFormUrlEncodedBody(("value", "true"))
-//
-//        val result = route(application, request).value
-//        val expectedAnswers =
-//          baseUserAnswers
-//            .remove(PreviousRegistrationQuery(index)).success.value
-//
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual DeletePreviousRegistrationPage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
-//        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-//      }
-//
-//    }
-//
-//    "must not delete a record and redirect to the next page when the user answers No" in {
-//
-//      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-//
-//      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-//
-//      val application =
-//        applicationBuilder(userAnswers = Some(baseUserAnswers))
-//          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-//          .build()
-//
-//      running(application) {
-//        val request =
-//          FakeRequest(POST, deletePreviousRegistrationRoute)
-//            .withFormUrlEncodedBody(("value", "false"))
-//
-//        val result = route(application, request).value
-//
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual DeletePreviousRegistrationPage(index).navigate(waypoints, emptyUserAnswers, baseUserAnswers).url
-//        verify(mockSessionRepository, never()).set(any())
-//      }
-//    }
-//
-//    "must return a Bad Request and errors when invalid data is submitted" in {
-//
-//      val application = applicationBuilder(userAnswers = Some(baseUserAnswers)).build()
-//
-//      running(application) {
-//        val request =
-//          FakeRequest(POST, deletePreviousRegistrationRoute)
-//            .withFormUrlEncodedBody(("value", ""))
-//
-//        val boundForm = form.bind(Map("value" -> ""))
-//
-//        val view = application.injector.instanceOf[DeletePreviousRegistrationView]
-//
-//        val result = route(application, request).value
-//
-//        status(result) mustEqual BAD_REQUEST
-//        contentAsString(result) mustEqual view(
-//          boundForm, waypoints, index, previousRegistration.previousEuCountry.name)(request, messages(application)).toString
-//      }
-//    }
+      val application = applicationBuilder(userAnswers = Some(baseUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, deletePreviousRegistrationRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[DeletePreviousRegistrationView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, waypoints, index, previousRegistration.previousEuCountry.name)(request, messages(application)).toString
+
+      }
+    }
+
+    "must delete a record and redirect to the next page when the user answers Yes" in {
+
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(baseUserAnswers))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, deletePreviousRegistrationRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+        val expectedAnswers =
+          baseUserAnswers
+            .remove(PreviousRegistrationQuery(index)).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual DeletePreviousRegistrationPage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+
+    }
+
+    "must not delete a record and redirect to the next page when the user answers No" in {
+
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(baseUserAnswers))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, deletePreviousRegistrationRoute)
+            .withFormUrlEncodedBody(("value", "false"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual DeletePreviousRegistrationPage(index).navigate(waypoints, emptyUserAnswers, baseUserAnswers).url
+        verify(mockSessionRepository, never()).set(any())
+      }
+    }
+
+    "must return a Bad Request and errors when invalid data is submitted" in {
+
+      val application = applicationBuilder(userAnswers = Some(baseUserAnswers)).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, deletePreviousRegistrationRoute)
+            .withFormUrlEncodedBody(("value", ""))
+
+        val boundForm = form.bind(Map("value" -> ""))
+
+        val view = application.injector.instanceOf[DeletePreviousRegistrationView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) mustEqual view(
+          boundForm, waypoints, index, previousRegistration.previousEuCountry.name)(request, messages(application)).toString
+      }
+    }
 
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
 

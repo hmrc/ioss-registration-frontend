@@ -392,7 +392,7 @@ addPreviousRegistration.error.required = Select yes if you need to add another d
 addPreviousRegistration.change.hidden = if you have registered in {0}
 addPreviousRegistration.remove.hidden = Remove registration details in {0}
 addPreviousRegistration.addAnother = Add another registration?
-addPreviousRegistration.addAnother.hint = You must tell us about all previous and current registrations from all One Stop Shop schemes.
+addPreviousRegistration.addAnother.hint = You must tell us about all previous and current registrations from all OSS and IOSS schemes.
 
 cannotRemoveExistingPreviousRegistrations.title = You cannot delete previous OSS or IOSS registrations that you''ve already added
 cannotRemoveExistingPreviousRegistrations.heading = You cannot delete previous OSS or IOSS registrations that you''ve already added

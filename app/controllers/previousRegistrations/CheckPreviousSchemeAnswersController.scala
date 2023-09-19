@@ -101,9 +101,9 @@ class CheckPreviousSchemeAnswersController @Inject()(
 
             value =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckPreviousSchemeAnswersPage(index), value))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckPreviousSchemeAnswersPage(Some(Index(0))), value))
                 _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(CheckPreviousSchemeAnswersPage(index).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+              } yield Redirect(CheckPreviousSchemeAnswersPage(Some(Index(0))).navigate(waypoints, request.userAnswers, updatedAnswers).route)
           )
         }.getOrElse(Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())))
       }

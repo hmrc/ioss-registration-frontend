@@ -26,7 +26,7 @@ case class PreviousOssNumberPage (countryIndex: Index, schemeIndex: Index) exten
     controllers.previousRegistrations.routes.PreviousOssNumberController.onPageLoad(waypoints, Index(0), Index(0))
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    CheckPreviousSchemeAnswersPage(countryIndex)
+    CheckPreviousSchemeAnswersPage(Some(countryIndex))
   }
 
 }

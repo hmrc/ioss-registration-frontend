@@ -20,8 +20,8 @@ import models.Index
 import play.api.libs.json.{JsObject, JsPath}
 import queries.Derivable
 
-case class DeriveNumberOfPreviousSchemes(index: Index) extends Derivable[List[JsObject], Int] {
-  override val derive: List[JsObject] => Int = _.size
+case class DeriveNumberOfPreviousSchemes(index: Index) extends Derivable[Seq[JsObject], Int] {
+  override val derive: Seq[JsObject] => Int = _.size
 
   override def path: JsPath = JsPath \ "previousRegistrations" \ index.position \ "previousSchemesDetails"
 }

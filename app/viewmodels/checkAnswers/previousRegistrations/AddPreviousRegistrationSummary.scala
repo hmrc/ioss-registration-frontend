@@ -27,7 +27,7 @@ import viewmodels.implicits._
 object AddPreviousRegistrationSummary  {
 
   def row(answers: UserAnswers, waypoints: Waypoints)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AddPreviousRegistrationPage).map {
+    answers.get(AddPreviousRegistrationPage()).map {
       answer =>
 
         val value = if (answer) "site.yes" else "site.no"

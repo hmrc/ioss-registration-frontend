@@ -60,14 +60,13 @@ class PreviousIossNumberController @Inject()(
           }
 
           Future.successful(Ok(view(
-            preparedForm,waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country))))
+            preparedForm, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country))))
         }
       }
   }
 
   def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-
       getPreviousCountry(waypoints, countryIndex) { country =>
 
         getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>

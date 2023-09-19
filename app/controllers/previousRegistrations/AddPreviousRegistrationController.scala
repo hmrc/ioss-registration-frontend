@@ -72,9 +72,9 @@ class AddPreviousRegistrationController @Inject()(
 
             value =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(AddPreviousRegistrationPage, value))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(AddPreviousRegistrationPage(), value))
                 _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(AddPreviousRegistrationPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+              } yield Redirect(AddPreviousRegistrationPage().navigate(waypoints, request.userAnswers, updatedAnswers).route)
           )
       }
   }

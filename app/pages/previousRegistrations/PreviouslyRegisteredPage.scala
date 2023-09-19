@@ -17,10 +17,10 @@
 package pages.previousRegistrations
 
 import models.{Index, UserAnswers}
-import pages.filters.RegisteredForIossInEuPage
-import pages.{JourneyRecoveryPage, Page, QuestionPage, Waypoints}
+import pages.{CheckYourAnswersPage, JourneyRecoveryPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 
 case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
 
@@ -32,9 +32,11 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
     controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    answers.get(this).map {
-      case true => PreviousEuCountryPage(Index(0))
-      case false => RegisteredForIossInEuPage //TODO taxRegisteredInEu
-      case _ => JourneyRecoveryPage
-    }.orRecover
+    (answers.get(PreviouslyRegisteredPage), answers.get(DeriveNumberOfPreviousRegistrations)) match {
+      case (Some(true), Some(size)) if size > 0   => CheckPreviousSchemeAnswersPage()
+      case (Some(true), _)                        => PreviousEuCountryPage(Index(0))
+      case (Some(false), Some(size)) if size > 0  => DeletePreviousRegistrationPage(Index(0))
+      case (Some(false), _)                       => CheckYourAnswersPage
+      case _                                      => JourneyRecoveryPage
+    }
 }

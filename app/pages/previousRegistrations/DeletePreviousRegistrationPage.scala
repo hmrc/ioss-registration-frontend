@@ -28,7 +28,7 @@ case class DeletePreviousRegistrationPage(index: Index) extends Page {
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     answers.get(DeriveNumberOfPreviousRegistrations) match {
-      case Some(n) if n > 0 => AddPreviousRegistrationPage
+      case Some(n) if n > 0 => AddPreviousRegistrationPage()
       case _                => PreviouslyRegisteredPage
     }
   }

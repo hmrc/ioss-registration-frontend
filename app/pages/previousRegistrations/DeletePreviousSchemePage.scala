@@ -34,9 +34,9 @@ case class DeletePreviousSchemePage(countryIndex: Index) extends QuestionPage[Bo
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     (answers.get(DeriveNumberOfPreviousRegistrations), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
       case (_, Some(numberOfSchemes)) if numberOfSchemes > 0 =>
-        CheckPreviousSchemeAnswersPage(countryIndex)
+        CheckPreviousSchemeAnswersPage(Some(countryIndex))
       case (Some(numberOfCountries), _) if numberOfCountries > 0 =>
-        AddPreviousRegistrationPage
+        AddPreviousRegistrationPage()
       case _ =>
         PreviouslyRegisteredPage
     }

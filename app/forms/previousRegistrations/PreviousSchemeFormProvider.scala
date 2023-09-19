@@ -17,18 +17,15 @@
 package forms.previousRegistrations
 
 import forms.mappings.Mappings
+import models.PreviousScheme
 import play.api.data.Form
 
 import javax.inject.Inject
 
 class PreviousSchemeFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[Int] =
+  def apply(): Form[PreviousScheme] =
     Form(
-      "value" -> int(
-        "previousScheme.error.required",
-        "previousScheme.error.wholeNumber",
-        "previousScheme.error.nonNumeric")
-          .verifying(inRange(0, Int.MaxValue, "previousScheme.error.outOfRange"))
+      "value" -> enumerable[PreviousScheme]("previousSchemePage.error.required")
     )
 }

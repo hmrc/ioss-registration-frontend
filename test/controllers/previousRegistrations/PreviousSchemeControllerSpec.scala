@@ -19,7 +19,7 @@ package controllers.previousRegistrations
 import base.SpecBase
 import controllers.routes
 import forms.previousRegistrations.PreviousSchemeTypeFormProvider
-import models.{Country, Index, PreviousSchemeType, UserAnswers}
+import models.{Country, Index, PreviousScheme, PreviousSchemeType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{times, verify, when}
@@ -29,7 +29,7 @@ import pages.previousRegistrations.{PreviousEuCountryPage, PreviousSchemeTypePag
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{AuthenticatedUserAnswersRepository}
+import repositories.AuthenticatedUserAnswersRepository
 import views.html.previousRegistrations.PreviousSchemeView
 
 import scala.concurrent.Future
@@ -37,14 +37,17 @@ import scala.concurrent.Future
 class PreviousSchemeControllerSpec extends SpecBase with MockitoSugar {
 
   private val index = Index(0)
-  private val formProvider = new PreviousSchemeTypeFormProvider()
-  private val form = formProvider()
-  private val waypoints: Waypoints = EmptyWaypoints
 
   private val country = Country.euCountries.head
   private val baseAnswers = emptyUserAnswers.set(PreviousEuCountryPage(index), country).success.value
 
-  lazy val previousSchemeRoute = controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, index, index).url
+  private val formProvider = new PreviousSchemeTypeFormProvider()
+  private val form = formProvider(country.name, PreviousScheme.values, index)
+
+  private val waypoints: Waypoints = EmptyWaypoints
+
+
+  private lazy val previousSchemeRoute = controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, index, index).url
 
   "PreviousScheme Controller" - {
 
@@ -66,7 +69,7 @@ class PreviousSchemeControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(PreviousSchemeTypePage(index, index), PreviousSchemeType.values.head).success.value
+      val userAnswers = baseAnswers.set(PreviousSchemeTypePage(index, index), PreviousSchemeType.values.head).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 

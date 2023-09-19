@@ -16,24 +16,29 @@
 
 package forms.previousRegistrations
 
-import forms.behaviours.IntFieldBehaviours
+import forms.behaviours.StringFieldBehaviours
 import models.{Country, Index}
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.data.FormError
 
-class PreviousEuCountryFormProviderSpec extends IntFieldBehaviours {
+class PreviousEuCountryFormProviderSpec extends StringFieldBehaviours {
 
   val requiredKey = "previousEuCountry.error.required"
   val index = Index(0)
   val emptyExistingAnswers = Seq.empty[Country]
 
   val form = new PreviousEuCountryFormProvider()(index, emptyExistingAnswers)
-  val maxLength = 100
 
   ".value" - {
 
     val fieldName = "value"
 
+
+    behave like fieldThatBindsValidData(
+      form,
+      fieldName,
+      arbitrary[Country].map(_.code)
+    )
 
     behave like mandatoryField(
       form,

@@ -22,7 +22,7 @@ import forms.previousRegistrations.PreviousOssNumberFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.PreviousSchemeHintText
 import models.requests.AuthenticatedDataRequest
-import models.{CountryWithValidationDetails, Index, PreviousScheme}
+import models.{Country, CountryWithValidationDetails, Index, PreviousScheme}
 import pages.Waypoints
 import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -103,14 +103,20 @@ class PreviousOssNumberController @Inject()(
               } else {
                 PreviousScheme.OSSU
               }
-              saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)
+              saveAndRedirect(countryIndex, schemeIndex, value, country, previousScheme, waypoints)
             }
           )
       }
   }
 
-  private def saveAndRedirect(countryIndex: Index, schemeIndex: Index, registrationNumber: String, previousScheme: PreviousScheme, waypoints: Waypoints)
-                             (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
+  private def saveAndRedirect(
+                               countryIndex: Index,
+                               schemeIndex: Index,
+                               registrationNumber: String,
+                               country: Country,
+                               previousScheme: PreviousScheme,
+                               waypoints: Waypoints
+                             )(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(
         PreviousOssNumberPage(countryIndex, schemeIndex),
