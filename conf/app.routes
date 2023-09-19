@@ -39,9 +39,6 @@ GET         /provider-unsupported                                controllers.aut
 GET         /credential-unsupported                              controllers.auth.AuthController.insufficientEnrolments()
 GET         /account/role-unsupported                            controllers.auth.AuthController.unsupportedCredentialRole()
 
-GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
-
 GET         /on-sign-in                                          controllers.auth.AuthController.onSignIn()
 
 GET         /unauthorised                                        controllers.UnauthorisedController.onPageLoad()
@@ -112,6 +109,15 @@ POST        /remove-uk-trading-name/:index                       controllers.tra
 GET         /remove-all-trading-names                            controllers.tradingNames.DeleteAllTradingNamesController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /remove-all-trading-names                            controllers.tradingNames.DeleteAllTradingNamesController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
+# EU details section
+GET         /tax-in-eu                                           controllers.euDetails.TaxRegisteredInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /tax-in-eu                                           controllers.euDetails.TaxRegisteredInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+# Business contact details section
+GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+# Bank details section
 GET         /bank-details                                        controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /bank-details                                        controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 

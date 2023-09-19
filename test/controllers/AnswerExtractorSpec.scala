@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import models.UserAnswers
 import models.requests.AuthenticatedDataRequest
-import pages.{EmptyWaypoints, QuestionPage, Waypoints}
+import pages.{QuestionPage, Waypoints}
 import play.api.libs.json.{JsPath, Json}
 import play.api.mvc.Results.{Ok, Redirect}
 import play.api.mvc.{AnyContent, Call, Result}
@@ -30,8 +30,6 @@ import utils.FutureSyntax.FutureOps
 import scala.concurrent.Future
 
 class AnswerExtractorSpec extends SpecBase {
-
-  private val waypoints: Waypoints = EmptyWaypoints
 
   private object TestPage extends QuestionPage[Int] {
     override def path: JsPath = JsPath \ "test"

@@ -56,8 +56,8 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[HasTradingNameView]
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, waypoints, registeredCompanyName)(request, messages(application)).toString
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, registeredCompanyName)(request, messages(application)).toString
       }
     }
 
@@ -74,8 +74,8 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true), waypoints, registeredCompanyName)(request, messages(application)).toString
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form.fill(true), waypoints, registeredCompanyName)(request, messages(application)).toString
       }
     }
 
@@ -100,8 +100,8 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         val expectedAnswers = basicUserAnswersWithVatInfo.set(HasTradingNamePage, true).success.value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual HasTradingNamePage.navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe HasTradingNamePage.navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -131,8 +131,8 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         val expectedAnswers = userAnswers.set(HasTradingNamePage, true).success.value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual HasTradingNamePage.navigate(waypoints, userAnswers, expectedAnswers).url
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe HasTradingNamePage.navigate(waypoints, userAnswers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -152,8 +152,8 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, waypoints, registeredCompanyName)(request, messages(application)).toString
+        status(result) mustBe BAD_REQUEST
+        contentAsString(result) mustBe view(boundForm, waypoints, registeredCompanyName)(request, messages(application)).toString
       }
     }
 
@@ -166,8 +166,8 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
 
@@ -182,8 +182,8 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
   }

@@ -14,95 +14,77 @@
  * limitations under the License.
  */
 
-package controllers.tradingNames
+package controllers.euDetails
 
 import base.SpecBase
-import forms.tradingNames.DeleteAllTradingNamesFormProvider
-import models.{Index, UserAnswers}
+import forms.euDetails.TaxRegisteredInEuFormProvider
+import models.UserAnswers
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.tradingNames.{DeleteAllTradingNamesPage, HasTradingNamePage, TradingNamePage}
+import pages.euDetails.TaxRegisteredInEuPage
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import queries.tradingNames.AllTradingNames
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
-import views.html.DeleteAllTradingNamesView
+import views.html.euDetails.TaxRegisteredInEuView
 
-class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
-
-  val formProvider = new DeleteAllTradingNamesFormProvider()
-  val form: Form[Boolean] = formProvider()
+class TaxRegisteredInEuControllerSpec extends SpecBase with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
-  private val companyName = arbitraryTradingName.arbitrary.sample.value
 
-  private val answers: UserAnswers = basicUserAnswersWithVatInfo
-    .set(TradingNamePage(Index(0)), companyName).success.value
-    .set(TradingNamePage(Index(1)), companyName).success.value
+  val formProvider = new TaxRegisteredInEuFormProvider()
+  val form: Form[Boolean] = formProvider()
 
-  lazy val deleteAllTradingNamesRoute: String = routes.DeleteAllTradingNamesController.onPageLoad(waypoints).url
+  lazy val taxRegisteredInEuRoute: String = routes.TaxRegisteredInEuController.onPageLoad(waypoints).url
 
-  "DeleteAllTradingNames Controller" - {
+  "TaxRegisteredInEu Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
-        val request = FakeRequest(GET, deleteAllTradingNamesRoute)
+        val request = FakeRequest(GET, taxRegisteredInEuRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[DeleteAllTradingNamesView]
+        val view = application.injector.instanceOf[TaxRegisteredInEuView]
 
         status(result) mustBe OK
         contentAsString(result) mustBe view(form, waypoints)(request, messages(application)).toString
       }
     }
 
-    "must remove all trading names and redirect to the next page when the user answers Yes" in {
+    "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val userAnswers = UserAnswers(userAnswersId).set(TaxRegisteredInEuPage, true).success.value
 
-      when(mockSessionRepository.set(any())) thenReturn true.toFuture
-
-      val application =
-        applicationBuilder(userAnswers = Some(answers))
-          .overrides(
-            bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
-          )
-          .build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, deleteAllTradingNamesRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+        val request = FakeRequest(GET, taxRegisteredInEuRoute)
+
+        val view = application.injector.instanceOf[TaxRegisteredInEuView]
 
         val result = route(application, request).value
 
-        val expectedAnswers = answers
-          .set(DeleteAllTradingNamesPage, true).success.value
-          .remove(AllTradingNames()).success.value
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe DeleteAllTradingNamesPage.navigate(waypoints, answers, expectedAnswers).url
-        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form.fill(true), waypoints)(request, messages(application)).toString
       }
     }
 
-    "must not remove all trading names and redirect to the next page when the user answers No" in {
+    "must save and redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
-        applicationBuilder(userAnswers = Some(answers))
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
@@ -110,33 +92,30 @@ class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteAllTradingNamesRoute)
-            .withFormUrlEncodedBody(("value", "false"))
+          FakeRequest(POST, taxRegisteredInEuRoute)
+            .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
-
-        val expectedAnswers = answers
-          .set(DeleteAllTradingNamesPage, false).success.value
-          .set(HasTradingNamePage, true).success.value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(TaxRegisteredInEuPage, true).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe DeleteAllTradingNamesPage.navigate(waypoints, answers, expectedAnswers).url
+        redirectLocation(result).value mustBe TaxRegisteredInEuPage.navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(answers)).build()
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteAllTradingNamesRoute)
+          FakeRequest(POST, taxRegisteredInEuRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[DeleteAllTradingNamesView]
+        val view = application.injector.instanceOf[TaxRegisteredInEuView]
 
         val result = route(application, request).value
 
@@ -150,7 +129,7 @@ class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, deleteAllTradingNamesRoute)
+        val request = FakeRequest(GET, taxRegisteredInEuRoute)
 
         val result = route(application, request).value
 
@@ -165,7 +144,7 @@ class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteAllTradingNamesRoute)
+          FakeRequest(POST, taxRegisteredInEuRoute)
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
