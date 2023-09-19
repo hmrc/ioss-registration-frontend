@@ -16,9 +16,8 @@
 
 package viewmodels.checkAnswers
 
-import controllers.routes
 import models.UserAnswers
-import pages.{BusinessContactDetailsPage, Waypoints}
+import pages.{BusinessContactDetailsPage, CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
@@ -28,7 +27,7 @@ import viewmodels.implicits._
 
 object BusinessContactDetailsSummary  {
 
-  def rowContactName(answers: UserAnswers, waypoints: Waypoints)(implicit messages: Messages): Option[SummaryListRow] =
+  def rowContactName(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(BusinessContactDetailsPage).map {
       answer =>
 
@@ -38,13 +37,13 @@ object BusinessContactDetailsSummary  {
           key     = "businessContactDetails.fullName",
           value   = ValueViewModel(HtmlContent(value)),
           actions = Seq(
-            ActionItemViewModel("site.change", routes.BusinessContactDetailsController.onPageLoad(waypoints).url)
+            ActionItemViewModel("site.change", BusinessContactDetailsPage.changeLink(waypoints, sourcePage).url)
               .withVisuallyHiddenText(messages("businessContactDetails.change.hidden"))
           )
         )
     }
 
-  def rowTelephoneNumber(answers: UserAnswers, waypoints: Waypoints)(implicit messages: Messages): Option[SummaryListRow] =
+  def rowTelephoneNumber(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(BusinessContactDetailsPage).map {
       answer =>
 
@@ -54,13 +53,13 @@ object BusinessContactDetailsSummary  {
           key     = "businessContactDetails.telephoneNumber",
           value   = ValueViewModel(HtmlContent(value)),
           actions = Seq(
-            ActionItemViewModel("site.change", routes.BusinessContactDetailsController.onPageLoad(waypoints).url)
+            ActionItemViewModel("site.change", BusinessContactDetailsPage.changeLink(waypoints, sourcePage).url)
               .withVisuallyHiddenText(messages("businessContactDetails.change.hidden"))
           )
         )
     }
 
-  def rowEmailAddress(answers: UserAnswers, waypoints: Waypoints)(implicit messages: Messages): Option[SummaryListRow] =
+  def rowEmailAddress(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(BusinessContactDetailsPage).map {
       answer =>
 
@@ -70,7 +69,7 @@ object BusinessContactDetailsSummary  {
           key     = "businessContactDetails.emailAddress",
           value   = ValueViewModel(HtmlContent(value)),
           actions = Seq(
-            ActionItemViewModel("site.change", routes.BusinessContactDetailsController.onPageLoad(waypoints).url)
+            ActionItemViewModel("site.change", BusinessContactDetailsPage.changeLink(waypoints, sourcePage).url)
               .withVisuallyHiddenText(messages("businessContactDetails.change.hidden"))
 
           )

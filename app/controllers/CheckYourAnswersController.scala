@@ -38,10 +38,6 @@ class CheckYourAnswersController @Inject()(
   def onPageLoad(): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
 
-      val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(request.userAnswers, EmptyWaypoints)
-      val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(request.userAnswers, EmptyWaypoints)
-      val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(request.userAnswers, EmptyWaypoints)
-
       val thisPage = CheckYourAnswersPage
       val waypoints = EmptyWaypoints
 
@@ -57,6 +53,9 @@ class CheckYourAnswersController @Inject()(
 
       val maybeHasTradingNameSummaryRow = HasTradingNameSummary.row(request.userAnswers, waypoints, thisPage)
       val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
+      val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(request.userAnswers, EmptyWaypoints, thisPage)
+      val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(request.userAnswers, EmptyWaypoints, thisPage)
+      val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(request.userAnswers, EmptyWaypoints, thisPage)
 
       val list = SummaryListViewModel(
         rows = Seq(
