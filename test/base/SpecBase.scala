@@ -18,7 +18,7 @@ package base
 
 import controllers.actions._
 import generators.Generators
-import models.UserAnswers
+import models.{BusinessContactDetails, UserAnswers}
 import models.domain.VatCustomerInfo
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
@@ -51,6 +51,8 @@ trait SpecBase
   val stubClockAtArbitraryDate: Clock = Clock.fixed(arbitraryInstant, ZoneId.systemDefault())
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
+
+  val contactDetails: BusinessContactDetails = BusinessContactDetails("name", "0111 2223334", "email@example.com")
 
   val vatCustomerInfo: VatCustomerInfo =
     VatCustomerInfo(

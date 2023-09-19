@@ -16,9 +16,10 @@
 
 package generators
 
-import models.CheckVatDetails
+import models._
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
+import pages._
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
 import play.api.libs.json.{JsValue, Json}
@@ -54,6 +55,14 @@ trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
       for {
         page <- arbitrary[CheckVatDetailsPage.type]
         value <- arbitrary[CheckVatDetails].map(Json.toJson(_))
+      } yield (page, value)
+    }
+
+  implicit lazy val arbitraryBusinessContactDetailsUserAnswersEntry: Arbitrary[(BusinessContactDetailsPage.type, JsValue)] =
+    Arbitrary {
+      for {
+        page  <- arbitrary[BusinessContactDetailsPage.type]
+        value <- arbitrary[BusinessContactDetails].map(Json.toJson(_))
       } yield (page, value)
     }
 }

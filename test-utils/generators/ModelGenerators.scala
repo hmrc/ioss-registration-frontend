@@ -21,8 +21,10 @@ import models.domain.ModelHelpers.normaliseSpaces
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalatest.EitherValues
+import uk.gov.hmrc.domain.Vrn
 
-trait ModelGenerators {
+trait ModelGenerators extends EitherValues {
 
   private val maxFieldLength: Int = 35
 
@@ -80,4 +82,38 @@ trait ModelGenerators {
     Gen.const(' '),
     Gen.const('\'')
   )
+
+  implicit lazy val arbitraryCountry: Arbitrary[Country] =
+    Arbitrary {
+      Gen.oneOf(Country.euCountries)
+    }
+
+  implicit lazy val arbitraryBusinessContactDetails: Arbitrary[BusinessContactDetails] =
+    Arbitrary {
+      for {
+        fullName <- arbitrary[String]
+        telephoneNumber <- arbitrary[String]
+        emailAddress <- arbitrary[String]
+      } yield BusinessContactDetails(fullName, telephoneNumber, emailAddress)
+    }
+
+  implicit def arbitraryVrn: Arbitrary[Vrn] = Arbitrary {
+    for {
+      chars  <- Gen.listOfN(9, Gen.numChar)
+    } yield {
+      Vrn(chars.mkString(""))
+    }
+  }
+
+  def ukPostcode(): Gen[String] =
+    for {
+      numberOfFirstLetters <- choose(1,2)
+      firstLetters <- listOfN(numberOfFirstLetters, Gen.alphaChar)
+      firstNumber <- Gen.numChar
+      numberOfMiddle <- choose(0,1)
+      middle <- listOfN(numberOfMiddle, Gen.alphaNumChar)
+      lastNumber <- Gen.numChar
+      lastLetters <- listOfN(2, Gen.alphaChar)
+    } yield firstLetters.mkString + firstNumber.toString + middle.mkString + lastNumber.toString + lastLetters.mkString
+
 }

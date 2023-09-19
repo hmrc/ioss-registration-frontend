@@ -196,6 +196,27 @@ cannotRegisterNoNiOrNorwayBusiness.title = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.heading = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a Northern Irish or Norwegian business.
 
+businessContactDetails.title = Business contact details
+businessContactDetails.heading = Business contact details
+businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.
+businessContactDetailsWithBta.p2 = We''ll only contact you by email or through your business tax account.
+businessContactDetails.fullName = Contact name or business department
+businessContactDetails.telephoneNumber = Telephone number
+businessContactDetails.emailAddress = Email address
+businessContactDetails.emailHint = We''ll send you an email to confirm this is correct.
+businessContactDetails.checkYourAnswersLabel = Your contact details
+businessContactDetails.error.fullName.required = Enter your full name or business department
+businessContactDetails.error.telephoneNumber.required = Enter your business telephone number
+businessContactDetails.error.emailAddress.required = Enter your business email address
+businessContactDetails.error.fullName.length = Full name or business department must be 100 characters or less
+businessContactDetails.error.fullName.invalid = Full name or business department must only include letters, numbers, hyphens, spaces and apostrophes
+businessContactDetails.error.telephoneNumber.length = Telephone number must be 20 characters or less
+businessContactDetails.error.telephoneNumber.invalid = Enter a telephone number in the correct format, like 01642 123 456, 07777777777 or +33 1 23 45 67 88
+businessContactDetails.error.emailAddress.length = Email address must be 50 characters or less
+businessContactDetails.error.emailAddress.invalid = Enter an email address in the correct format, like yourname@example.com
+businessContactDetails.fullName.change.hidden = Full name
+businessContactDetails.change.hidden = your business contact details
+
 checkVatDetails.title = Confirm VAT details for your business
 checkVatDetails.heading = Confirm VAT details for your business
 checkVatDetails.error.required = Select if you want to register this business for the Import One Stop Shop Union scheme

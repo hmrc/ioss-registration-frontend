@@ -20,21 +20,25 @@ import models.UserAnswers
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.TryValues
+
 import pages.QuestionPage
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
+
+import pages._
+
 import play.api.libs.json.{JsValue, Json}
 
 trait UserAnswersGenerator extends TryValues {
   self: Generators =>
 
   val generators: Seq[Gen[(QuestionPage[_], JsValue)]] =
-      arbitrary[(DeleteAllTradingNamesPage.type, JsValue)] ::
+    arbitrary[(DeleteAllTradingNamesPage.type, JsValue)] ::
       arbitrary[(AddTradingNamePage, JsValue)] ::
       arbitrary[(TradingNamePage, JsValue)] ::
       arbitrary[(CheckVatDetailsPage.type, JsValue)] ::
+      arbitrary[(BusinessContactDetailsPage.type, JsValue)] ::
       Nil
-
 
   implicit lazy val arbitraryUserData: Arbitrary[UserAnswers] = {
 
@@ -56,5 +60,4 @@ trait UserAnswersGenerator extends TryValues {
       )
     }
   }
-
 }
