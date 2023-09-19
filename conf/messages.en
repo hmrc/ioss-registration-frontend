@@ -398,6 +398,12 @@ cannotRemoveExistingPreviousRegistrations.title = You cannot delete previous OSS
 cannotRemoveExistingPreviousRegistrations.heading = You cannot delete previous OSS or IOSS registrations that you''ve already added
 
 saveProgress.button = Save and come back later
+
+deleteAllPreviousRegistrations.title = Remove all your previous registrations information from this scheme?
+deleteAllPreviousRegistrations.heading = Remove all your previous registrations information from this scheme?
+deleteAllPreviousRegistrations.warning = This will delete all your previous registrations you have added.
+deleteAllPreviousRegistrations.error.required = Select yes if you want to remove all your previous registrations from this scheme
+deleteAllPreviousRegistrations.change.hidden = Remove all your previous registrations information from this scheme
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.hint = EU member states will only use these if they need to repay you.

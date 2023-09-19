@@ -21,6 +21,8 @@ import pages.{Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
+import scala.util.Try
+
 case class PreviousSchemeTypePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[PreviousSchemeType] {
 
   override def path: JsPath = JsPath \ "previousRegistrations" \ countryIndex.position \ "previousSchemesDetails" \ schemeIndex.position \ toString
@@ -36,5 +38,15 @@ case class PreviousSchemeTypePage(countryIndex: Index, schemeIndex: Index) exten
     } else {
       PreviousIossSchemePage(countryIndex, schemeIndex)
     }
+  }
+
+  override def cleanup(value: Option[PreviousSchemeType], userAnswers: UserAnswers): Try[UserAnswers] = {
+
+    for {
+      updatedAnswers <- userAnswers.remove(PreviousIossNumberPage(countryIndex, schemeIndex))
+      updateAnswers2 <- updatedAnswers.remove(PreviousIossSchemePage(countryIndex, schemeIndex))
+      updateAnswers3 <- updateAnswers2.remove(PreviousSchemePage(countryIndex, schemeIndex))
+
+    } yield updateAnswers3
   }
 }

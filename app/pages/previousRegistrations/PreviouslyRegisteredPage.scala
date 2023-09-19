@@ -17,7 +17,8 @@
 package pages.previousRegistrations
 
 import models.{Index, UserAnswers}
-import pages.{CheckYourAnswersPage, JourneyRecoveryPage, Page, QuestionPage, Waypoints}
+import pages.filters.RegisteredForIossInEuPage
+import pages.{DeleteAllPreviousRegistrationsPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
@@ -30,13 +31,20 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
 
   override def route(waypoints: Waypoints): Call =
     controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints)
-
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    (answers.get(PreviouslyRegisteredPage), answers.get(DeriveNumberOfPreviousRegistrations)) match {
+    answers.get(this).map {
+      case true => PreviousEuCountryPage(Index(0))
+      case false => RegisteredForIossInEuPage //TODO registered-for-vat-in-EU
+      case _ => JourneyRecoveryPage
+    }.orRecover
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
+  (answers.get(PreviouslyRegisteredPage), answers.get(DeriveNumberOfPreviousRegistrations)) match {
       case (Some(true), Some(size)) if size > 0   => CheckPreviousSchemeAnswersPage()
       case (Some(true), _)                        => PreviousEuCountryPage(Index(0))
-      case (Some(false), Some(size)) if size > 0  => DeletePreviousRegistrationPage(Index(0))
-      case (Some(false), _)                       => CheckYourAnswersPage
+      case (Some(false), Some(size)) if size > 0  => DeleteAllPreviousRegistrationsPage
+      case (Some(false), _)                       => CheckPreviousSchemeAnswersPage()
       case _                                      => JourneyRecoveryPage
     }
+
 }

@@ -152,3 +152,5 @@ POST       /previous-schemes-overview                                           
 
 GET        /cannot-delete-previous-registrations                                controllers.previousRegistrations.CannotRemoveExistingPreviousRegistrationsController.onPageLoad()
 
+GET         /check-remove-all-previous-registrations                            controllers.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /check-remove-all-previous-registrations                            controllers.DeleteAllPreviousRegistrationsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
