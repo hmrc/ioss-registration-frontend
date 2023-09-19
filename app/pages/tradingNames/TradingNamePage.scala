@@ -21,6 +21,9 @@ import models.{Index, NormalMode, TradingName, UserAnswers}
 import pages.{AddToListQuestionPage, Page, QuestionPage, Waypoint, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import queries.tradingNames.AllTradingNames
+
+import scala.util.Try
 
 case class TradingNamePage(index: Index) extends QuestionPage[TradingName] with AddToListQuestionPage {
 
@@ -35,4 +38,12 @@ case class TradingNamePage(index: Index) extends QuestionPage[TradingName] with 
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     AddTradingNamePage(Some(index))
+
+  override def cleanup(value: Option[TradingName], userAnswers: UserAnswers): Try[UserAnswers] = {
+    if (userAnswers.get(AllTradingNames()).exists(_.isEmpty)) {
+      userAnswers.remove(AllTradingNames())
+    } else {
+      super.cleanup(value, userAnswers)
+    }
+  }
 }

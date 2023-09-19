@@ -20,7 +20,7 @@ import models.CheckVatDetails
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import pages.checkVatDetails.CheckVatDetailsPage
-import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, DeleteTradingNamePage, TradingNamePage}
+import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
 import play.api.libs.json.{JsValue, Json}
 
 trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {

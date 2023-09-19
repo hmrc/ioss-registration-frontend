@@ -18,7 +18,7 @@ package controllers.tradingNames
 
 import base.SpecBase
 import forms.tradingNames.TradingNameFormProvider
-import models.{Index, TradingName}
+import models.{Index, TradingName, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Gen
@@ -163,10 +163,11 @@ class TradingNameControllerSpec extends SpecBase with MockitoSugar {
     "must return NOT_FOUND for a GET with an index of position 10 or greater" in {
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
+      val highIndex = Gen.choose(10, Int.MaxValue).map(Index(_)).sample.value
 
       running(application) {
 
-        val request = FakeRequest(GET, tradingNameHighIndexRoute)
+        val request = FakeRequest(GET, routes.TradingNameController.onPageLoad(waypoints, highIndex).url)
 
         val result = route(application, request).value
 
@@ -176,18 +177,9 @@ class TradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must return NOT_FOUND for a POST with an index of position 10 or greater" in {
 
-      val answers =
-        basicUserAnswersWithVatInfo
-          .set(TradingNamePage(Index(0)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(1)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(2)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(3)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(4)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(5)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(6)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(7)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(8)), TradingName("foo")).success.value
-          .set(TradingNamePage(Index(9)), TradingName("foo")).success.value
+      val answers = (0 to 9).foldLeft(basicUserAnswersWithVatInfo) { (userAnswers: UserAnswers, index: Int) =>
+        userAnswers.set(TradingNamePage(Index(index)), TradingName("foo")).success.value
+      }
 
       val application = applicationBuilder(userAnswers = Some(answers)).build()
 
