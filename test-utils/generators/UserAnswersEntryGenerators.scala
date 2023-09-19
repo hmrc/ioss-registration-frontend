@@ -16,7 +16,7 @@
 
 package generators
 
-import models.{CheckVatDetails, _}
+import models._
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import pages._

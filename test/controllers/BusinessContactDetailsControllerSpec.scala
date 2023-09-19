@@ -112,7 +112,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
             val expectedAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
 
             status(result) mustEqual SEE_OTHER
-            redirectLocation(result).value mustEqual routes.BankDetailsController.onPageLoad(EmptyWaypoints).url
+            redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
             verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }
@@ -167,7 +167,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url // TODO -> Change to BankDetailsController when created
         }
       }
     }

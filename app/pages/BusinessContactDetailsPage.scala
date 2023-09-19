@@ -31,5 +31,5 @@ case object BusinessContactDetailsPage extends QuestionPage[BusinessContactDetai
     routes.BusinessContactDetailsController.onPageLoad(waypoints)
 
   override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-      BankDetailsPage
+    JourneyRecoveryPage // TODO -> Change to BankDetailsPage when created
 }

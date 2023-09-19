@@ -39,9 +39,6 @@ GET         /provider-unsupported                                controllers.aut
 GET         /credential-unsupported                              controllers.auth.AuthController.insufficientEnrolments()
 GET         /account/role-unsupported                            controllers.auth.AuthController.unsupportedCredentialRole()
 
-GET         /bank-details                                        controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /bank-details                                        controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
-
 GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 

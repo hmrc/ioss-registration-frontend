@@ -33,11 +33,11 @@ trait UserAnswersGenerator extends TryValues {
   self: Generators =>
 
   val generators: Seq[Gen[(QuestionPage[_], JsValue)]] =
-    arbitrary[(BankDetailsPage.type, JsValue)] ::
-      arbitrary[(DeleteAllTradingNamesPage.type, JsValue)] ::
+    arbitrary[(DeleteAllTradingNamesPage.type, JsValue)] ::
       arbitrary[(AddTradingNamePage, JsValue)] ::
       arbitrary[(TradingNamePage, JsValue)] ::
       arbitrary[(CheckVatDetailsPage.type, JsValue)] ::
+      arbitrary[(BusinessContactDetailsPage.type, JsValue)] ::
       Nil
 
   implicit lazy val arbitraryUserData: Arbitrary[UserAnswers] = {
@@ -46,12 +46,12 @@ trait UserAnswersGenerator extends TryValues {
 
     Arbitrary {
       for {
-        id      <- nonEmptyString
-        data    <- generators match {
+        id <- nonEmptyString
+        data <- generators match {
           case Nil => Gen.const(Map[QuestionPage[_], JsValue]())
-          case _   => Gen.mapOf(oneOf(generators))
+          case _ => Gen.mapOf(oneOf(generators))
         }
-      } yield UserAnswers (
+      } yield UserAnswers(
         id = id,
         data = data.foldLeft(Json.obj()) {
           case (obj, (path, value)) =>

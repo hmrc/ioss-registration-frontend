@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Validation.Validation.{commonTextPattern, emailPattern, telephonePattern}
+import forms.validation.Validation.{commonTextPattern, emailPattern, telephonePattern}
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 

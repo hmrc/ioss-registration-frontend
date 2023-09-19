@@ -23,14 +23,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.VatRegistrationDetailsSummary
-import viewmodels.checkAnswers.{HasTradingNameSummary, TradingNameSummary}
-
-import pages.EmptyWaypoints
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.BusinessContactDetailsSummary
-
+import viewmodels.checkAnswers.{BusinessContactDetailsSummary, HasTradingNameSummary, TradingNameSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 

@@ -31,9 +31,9 @@ class BusinessContactDetailsPageSpec extends SpecBase with PageBehaviours {
     beRemovable[BusinessContactDetails](BusinessContactDetailsPage)
 
     "must navigate in Normal mode" - {
-      "to Bank Details" in {
+      "to Journey Recovery Page" in { // TODO -> Change to BankDetailsPage when created
         BusinessContactDetailsPage.navigate(EmptyWaypoints, emptyUserAnswers, emptyUserAnswers)
-          .mustEqual(PageAndWaypoints(BankDetailsPage, EmptyWaypoints))
+          .mustEqual(PageAndWaypoints(JourneyRecoveryPage, EmptyWaypoints))
       }
     }
   }

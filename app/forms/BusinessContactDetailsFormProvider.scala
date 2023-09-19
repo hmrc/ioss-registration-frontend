@@ -16,13 +16,13 @@
 
 package forms
 
-import forms.Validation.Validation.{commonTextPattern, emailPattern, telephonePattern}
-
-import javax.inject.Inject
 import forms.mappings.Mappings
+import forms.validation.Validation.{commonTextPattern, emailPattern, telephonePattern}
+import models.BusinessContactDetails
 import play.api.data.Form
 import play.api.data.Forms._
-import models.BusinessContactDetails
+
+import javax.inject.Inject
 
 class BusinessContactDetailsFormProvider @Inject() extends Mappings {
 
