@@ -25,10 +25,10 @@ class EuCountryFormProviderSpec extends StringFieldBehaviours {
 
   private val requiredKey = "euCountry.error.required"
   private val emptyExistingAnswers = Seq.empty[Country]
-  private val index: Index = Index(0)
+  private val countryIndex: Index = Index(0)
 
 
-  val form = new EuCountryFormProvider()(index, emptyExistingAnswers)
+  val form = new EuCountryFormProvider()(countryIndex, emptyExistingAnswers)
 
   ".value" - {
 
@@ -60,7 +60,7 @@ class EuCountryFormProviderSpec extends StringFieldBehaviours {
     "must fail to bind when given a duplicate value" in {
       val existingAnswers = Seq(Country.euCountries.head, Country.euCountries.tail.head)
       val answer = Country.euCountries.tail.head
-      val form = new EuCountryFormProvider()(index, existingAnswers)
+      val form = new EuCountryFormProvider()(countryIndex, existingAnswers)
 
       val result = form.bind(Map(fieldName -> answer.code)).apply(fieldName)
       result.errors must contain only FormError(fieldName, "euCountry.error.duplicate")

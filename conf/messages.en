@@ -292,7 +292,15 @@ euCountry.title = Enter an EU country where your business is registered for tax
 euCountry.heading = Enter an EU country where your business is registered for tax
 euCountry.checkYourAnswersLabel = Country of tax registration
 euCountry.error.required = Select an EU country where your business is registered for tax
-euCountry.error.duplicate = You selected this country already. Select a different one.
+euCountry.error.duplicate = You selected this country already. Select a different one
+
+sellsGoodsToEuConsumerMethod.title = How does your business sell goods in {0}
+sellsGoodsToEuConsumerMethod.heading = How does your business sell goods in {0}
+sellsGoodsToEuConsumerMethod.fixedEstablishment = Fixed establishment
+sellsGoodsToEuConsumerMethod.dispatchWarehouse = Dispatch warehouse
+sellsGoodsToEuConsumerMethod.checkYourAnswersLabel = How your business sells goods
+sellsGoodsToEuConsumerMethod.error.required = Select how your business sells goods in {0}
+sellsGoodsToEuConsumerMethod.change.hidden = SellsGoodsToEuConsumerMethod
 
 businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details

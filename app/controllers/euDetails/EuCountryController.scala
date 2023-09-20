@@ -41,33 +41,33 @@ class EuCountryController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
 
-  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
 
-      val form = formProvider(index, request.userAnswers.get(AllEuDetailsQuery).getOrElse(Seq.empty).map(_.euCountry))
+      val form = formProvider(countryIndex, request.userAnswers.get(AllEuDetailsQuery).getOrElse(Seq.empty).map(_.euCountry))
 
-      val preparedForm = request.userAnswers.get(EuCountryPage(index)) match {
+      val preparedForm = request.userAnswers.get(EuCountryPage(countryIndex)) match {
         case None => form
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, waypoints, index))
+      Ok(view(preparedForm, waypoints, countryIndex))
   }
 
-  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
 
-      val form = formProvider(index, request.userAnswers.get(AllEuDetailsQuery).getOrElse(Seq.empty).map(_.euCountry))
+      val form = formProvider(countryIndex, request.userAnswers.get(AllEuDetailsQuery).getOrElse(Seq.empty).map(_.euCountry))
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          BadRequest(view(formWithErrors, waypoints, index)).toFuture,
+          BadRequest(view(formWithErrors, waypoints, countryIndex)).toFuture,
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(EuCountryPage(index), value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(EuCountryPage(countryIndex), value))
             _ <- cc.sessionRepository.set(updatedAnswers)
-          } yield Redirect(EuCountryPage(index).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+          } yield Redirect(EuCountryPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
       )
   }
 }

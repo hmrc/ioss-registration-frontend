@@ -116,6 +116,9 @@ POST        /tax-in-eu                                           controllers.euD
 GET         /eu-tax/:index                                       controllers.euDetails.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /eu-tax/:index                                       controllers.euDetails.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
+GET         /how-do-you-operate/:index                           controllers.euDetails.SellsGoodsToEuConsumerMethodController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /how-do-you-operate/:index                           controllers.euDetails.SellsGoodsToEuConsumerMethodController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
 # Business contact details section
 GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

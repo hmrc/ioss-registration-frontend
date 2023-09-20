@@ -15,39 +15,36 @@
  *@
 
 @import controllers.euDetails.routes
+@import models.euDetails.EuConsumerSalesMethod
 @import pages.CheckYourAnswersPage
-@import viewmodels.InputWidth
 @import views.html.components.ButtonGroup
 
 @this(
         layout: templates.Layout,
         formHelper: FormWithCSRF,
         govukErrorSummary: GovukErrorSummary,
-        govukSelect: GovukSelect,
+        govukRadios: GovukRadios,
         button: ButtonGroup
 )
 
-@(form: Form[_], waypoints: Waypoints, countryIndex: Index)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, countryIndex: Index, country: Country)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("euCountry.title"))) {
+@layout(pageTitle = title(form, messages("sellsGoodsToEuConsumerMethod.title", country.name))) {
 
-    @formHelper(action = routes.EuCountryController.onSubmit(waypoints, countryIndex)) {
+    @formHelper(action = routes.SellsGoodsToEuConsumerMethodController.onSubmit(waypoints, countryIndex), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
+            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        @govukSelect(
-            SelectViewModel(
+        @govukRadios(
+            RadiosViewModel(
                 field = form("value"),
-                items = Country.euCountrySelectItems,
-                label = LabelViewModel(messages("euCountry.heading")).asPageHeading()
+                legend = LegendViewModel(messages("sellsGoodsToEuConsumerMethod.heading", country.name)).asPageHeading(),
+                items = EuConsumerSalesMethod.options
             )
-            .withCssClass(InputWidth.Fixed20.toString)
-            .withCssClass("autocomplete")
         )
-
-        @* TODO *@
+        @*TODO*@
         @button("site.continue", CheckYourAnswersPage.route(waypoints).url)
     }
 }

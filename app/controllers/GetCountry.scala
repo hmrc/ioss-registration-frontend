@@ -18,8 +18,9 @@ package controllers
 
 import models.requests.AuthenticatedDataRequest
 import models.{Country, Index}
-import pages.Waypoints
 import pages.previousRegistrations.PreviousEuCountryPage
+import pages.euDetails.EuCountryPage
+import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Result}
 import utils.FutureSyntax.FutureOps
@@ -28,6 +29,13 @@ import scala.concurrent.Future
 
 trait GetCountry {
 
+  def getCountry(waypoints: Waypoints, countryIndex: Index)
+                (block: Country => Future[Result])
+                (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] =
+    request.userAnswers.get(EuCountryPage(countryIndex)).map {
+      country =>
+        block(country)
+    }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints)).toFuture)
 
   def getPreviousCountry(waypoints: Waypoints, index: Index)
                         (block: Country => Future[Result])
@@ -35,5 +43,5 @@ trait GetCountry {
     request.userAnswers.get(PreviousEuCountryPage(index)).map {
       country =>
         block(country)
-    }.getOrElse(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()).toFuture)
+    }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints)).toFuture)
 }
