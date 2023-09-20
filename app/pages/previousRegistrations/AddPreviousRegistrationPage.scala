@@ -18,7 +18,7 @@ package pages.previousRegistrations
 
 import models.{Index, UserAnswers}
 import pages.filters.RegisteredForIossInEuPage
-import pages.{AddItemPage, JourneyRecoveryPage, Page, QuestionPage, Waypoints}
+import pages.{AddItemPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
@@ -41,11 +41,18 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
     controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    (answers.get(this), answers.get(DeriveNumberOfPreviousRegistrations)) match {
-      case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
-      case (Some(false), _)         => RegisteredForIossInEuPage//TODO RegisteredForVAT
-      case _                        => JourneyRecoveryPage
-    }
+    answers.get(this).map {
+      case true =>
+        index.map(i => PreviousEuCountryPage(Index(i.position + 1)))
+          .getOrElse(
+            answers
+              .get(deriveNumberOfItems)
+              .map(n => PreviousEuCountryPage(Index(n)))
+              .orRecover
+          )
+      case false =>
+        RegisteredForIossInEuPage//TODO RegisteredForVATJourneyRecoveryPage
+    }.orRecover
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfPreviousRegistrations
 }

@@ -26,7 +26,7 @@ import pages.checkVatDetails.CheckVatDetailsPage
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
 
 import pages._
-
+import pages.previousRegistrations._
 import play.api.libs.json.{JsValue, Json}
 
 trait UserAnswersGenerator extends TryValues {
@@ -38,6 +38,15 @@ trait UserAnswersGenerator extends TryValues {
       arbitrary[(TradingNamePage, JsValue)] ::
       arbitrary[(CheckVatDetailsPage.type, JsValue)] ::
       arbitrary[(BusinessContactDetailsPage.type, JsValue)] ::
+      arbitrary[(DeleteAllPreviousRegistrationsPage.type, JsValue)] ::
+      arbitrary[(PreviousSchemePage, JsValue)] ::
+      arbitrary[(PreviousSchemeTypePage, JsValue)] ::
+      arbitrary[(PreviousSchemeNumbersPage, JsValue)] ::
+      arbitrary[(PreviousIossSchemePage, JsValue)] ::
+      arbitrary[(PreviouslyRegisteredPage.type, JsValue)] ::
+      arbitrary[(PreviousOssNumberPage, JsValue)] ::
+      arbitrary[(PreviousEuCountryPage, JsValue)] ::
+      arbitrary[(PreviousEuCountryPage, JsValue)] ::
       Nil
 
   implicit lazy val arbitraryUserData: Arbitrary[UserAnswers] = {

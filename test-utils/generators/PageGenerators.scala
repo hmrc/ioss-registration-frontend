@@ -21,6 +21,7 @@ import org.scalacheck.Arbitrary
 import pages._
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
+import pages.previousRegistrations._
 
 trait PageGenerators {
   implicit lazy val arbitraryDeleteAllTradingNamesPage: Arbitrary[DeleteAllTradingNamesPage.type] =
@@ -37,4 +38,35 @@ trait PageGenerators {
 
   implicit lazy val arbitraryBusinessContactDetailsPage: Arbitrary[BusinessContactDetailsPage.type] =
     Arbitrary(BusinessContactDetailsPage)
+
+  implicit lazy val arbitraryDeleteAllPreviousRegistrationsPage: Arbitrary[DeleteAllPreviousRegistrationsPage.type] =
+    Arbitrary(DeleteAllPreviousRegistrationsPage)
+
+  implicit lazy val arbitraryAddPreviousRegistrationPage: Arbitrary[AddPreviousRegistrationPage.type] =
+    Arbitrary(AddPreviousRegistrationPage)
+
+  implicit lazy val arbitraryDeletePreviousSchemePage: Arbitrary[DeletePreviousSchemePage.type] =
+    Arbitrary(DeletePreviousSchemePage)
+
+  implicit lazy val arbitraryPreviousEuCountryPage: Arbitrary[PreviousEuCountryPage] =
+    Arbitrary(PreviousEuCountryPage(Index(0)))
+
+  implicit lazy val arbitraryPreviousIossSchemePage: Arbitrary[PreviousIossSchemePage] =
+    Arbitrary(PreviousIossSchemePage(Index(0), Index(0)))
+
+  implicit lazy val arbitraryPreviouslyRegisteredPage: Arbitrary[PreviouslyRegisteredPage.type] =
+    Arbitrary(PreviouslyRegisteredPage)
+
+  implicit lazy val arbitraryPreviousEuVatNumberPage: Arbitrary[PreviousOssNumberPage] =
+    Arbitrary(PreviousOssNumberPage(Index(0), Index(0)))
+
+  implicit lazy val arbitraryPreviousIossNumberPage: Arbitrary[PreviousSchemeNumbersPage] =
+    Arbitrary(PreviousIossNumberPage(Index(0), Index(0)))
+
+  implicit lazy val arbitraryPreviousSchemePage: Arbitrary[PreviousSchemePage] =
+    Arbitrary(PreviousSchemePage(Index(0), Index(0)))
+
+  implicit lazy val arbitraryPreviousSchemeTypePage: Arbitrary[PreviousSchemeTypePage] =
+    Arbitrary(PreviousSchemeTypePage(Index(0), Index(0)))
+
 }

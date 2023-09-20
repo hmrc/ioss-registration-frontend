@@ -17,7 +17,7 @@
 package pages.previousRegistrations
 
 import models.{Index, UserAnswers}
-import pages.{AddItemPage, JourneyRecoveryPage, Page, QuestionPage, Waypoints}
+import pages.{AddItemPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
@@ -39,10 +39,17 @@ case class CheckPreviousSchemeAnswersPage(override val index: Option[Index] = No
     controllers.previousRegistrations.routes.CheckPreviousSchemeAnswersController.onPageLoad(waypoints, Index(0))
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    (answers.get(this), answers.get(DeriveNumberOfPreviousSchemes(Index(0)))) match {
-      case (Some(true), Some(size)) => PreviousSchemePage(Index(1), Index(size))
-      case (Some(false), _) => AddPreviousRegistrationPage()
-      case _ => JourneyRecoveryPage
-    }
+    answers.get(this).map {
+      case true =>
+        index.map(i => PreviousSchemePage(Index(0),Index(i.position + 1)))
+          .getOrElse(
+            answers
+              .get(deriveNumberOfItems)
+              .map(n => PreviousSchemePage(Index(0), Index(n)))
+              .orRecover
+          )
+      case false =>
+        AddPreviousRegistrationPage()
+    }.orRecover
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfPreviousSchemes(Index(0))
 }

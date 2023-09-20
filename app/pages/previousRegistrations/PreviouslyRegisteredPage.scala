@@ -35,7 +35,6 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
     answers.get(this).map {
       case true => PreviousEuCountryPage(Index(0))
       case false => RegisteredForIossInEuPage //TODO registered-for-vat-in-EU
-      case _ => JourneyRecoveryPage
     }.orRecover
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =

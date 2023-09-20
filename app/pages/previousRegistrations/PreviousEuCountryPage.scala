@@ -28,7 +28,7 @@ case class PreviousEuCountryPage(index: Index) extends QuestionPage[Country] {
   override def toString: String = "previousEuCountry"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousEuCountryController.onPageLoad(waypoints, Index(0))
+    controllers.previousRegistrations.routes.PreviousEuCountryController.onPageLoad(waypoints, index)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     PreviousSchemePage(index, Index(0))

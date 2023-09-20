@@ -29,7 +29,7 @@ case class DeletePreviousSchemePage(countryIndex: Index) extends QuestionPage[Bo
   override def toString: String = "deletePreviousScheme"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.DeletePreviousRegistrationController.onPageLoad(waypoints,Index(0))
+    controllers.previousRegistrations.routes.DeletePreviousRegistrationController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     (answers.get(DeriveNumberOfPreviousRegistrations), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {

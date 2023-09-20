@@ -28,6 +28,6 @@ case class PreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends Q
   override def toString: String = "previousScheme"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, Index(0), Index(0))
+    controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
 }

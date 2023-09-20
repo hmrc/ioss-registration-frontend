@@ -23,7 +23,7 @@ import play.api.mvc.Call
 case class PreviousOssNumberPage (countryIndex: Index, schemeIndex: Index) extends PreviousSchemeNumbersPage {
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousOssNumberController.onPageLoad(waypoints, Index(0), Index(0))
+    controllers.previousRegistrations.routes.PreviousOssNumberController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     CheckPreviousSchemeAnswersPage(Some(countryIndex))

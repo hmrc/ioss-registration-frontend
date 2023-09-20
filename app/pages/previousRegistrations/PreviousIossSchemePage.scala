@@ -28,7 +28,7 @@ case class PreviousIossSchemePage(countryIndex: Index, schemeIndex: Index) exten
   override def toString: String = "withIntermediary"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousIossSchemeController.onPageLoad(waypoints, Index(0), Index(0))
+    controllers.previousRegistrations.routes.PreviousIossSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     PreviousIossNumberPage(countryIndex, schemeIndex)

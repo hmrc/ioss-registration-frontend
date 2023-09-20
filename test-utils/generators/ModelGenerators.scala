@@ -120,12 +120,12 @@ trait ModelGenerators extends EitherValues {
 
   implicit lazy val arbitraryPreviousScheme: Arbitrary[PreviousScheme] =
     Arbitrary {
-      Gen.oneOf(PreviousScheme.values.toSeq)
+      Gen.oneOf(PreviousScheme.values)
     }
 
   implicit lazy val arbitraryPreviousSchemeType: Arbitrary[PreviousSchemeType] =
     Arbitrary {
-      Gen.oneOf(PreviousSchemeType.values.toSeq)
+      Gen.oneOf(PreviousSchemeType.values)
     }
 
   implicit lazy val arbitraryPreviousIossSchemeDetails: Arbitrary[PreviousSchemeNumbers] =

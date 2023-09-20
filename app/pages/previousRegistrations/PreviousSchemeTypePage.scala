@@ -30,7 +30,7 @@ case class PreviousSchemeTypePage(countryIndex: Index, schemeIndex: Index) exten
   override def toString: String = "previousSchemeType"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, Index(0), Index(0))
+    controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     if(answers.get(this).contains(PreviousSchemeType.OSS)) {
