@@ -17,27 +17,20 @@
 package pages.euDetails
 
 import controllers.euDetails.routes
-import models.{Index, UserAnswers}
-import pages.{CheckYourAnswersPage, NonEmptyWaypoints, Page, QuestionPage, RecoveryOps, Waypoints}
+import models.{Country, Index, UserAnswers}
+import pages.{CheckYourAnswersPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case object TaxRegisteredInEuPage extends QuestionPage[Boolean] {
+case class EuCountryPage(index: Index) extends QuestionPage[Country] {
 
-  override def path: JsPath = JsPath \ toString
+  override def path: JsPath = JsPath \ "euDetails" \ index.position \ toString
 
-  override def toString: String = "taxRegisteredInEu"
+  override def toString: String = "euCountry"
 
   override def route(waypoints: Waypoints): Call =
-    routes.TaxRegisteredInEuController.onPageLoad(waypoints)
+    routes.EuCountryController.onPageLoad(waypoints, index)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    answers.get(this).map {
-      case true => EuCountryPage(Index(0))
-      case false => CheckYourAnswersPage // TODO -> to Website Page when created
-    }.orRecover
-
-  // TODO
-//  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, originalAnswers: UserAnswers, updatedAnswers: UserAnswers): Page = ???
-
+    CheckYourAnswersPage // TODO -> SellsGoodsToEuConsumerMethodPage when created
 }

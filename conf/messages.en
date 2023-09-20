@@ -288,6 +288,12 @@ taxRegisteredInEu.checkYourAnswersLabel = Registered for VAT in EU countries
 taxRegisteredInEu.error.required = Select yes if your business registered for VAT in EU countries
 taxRegisteredInEu.change.hidden = if registered for VAT in EU countries
 
+euCountry.title = Enter an EU country where your business is registered for tax
+euCountry.heading = Enter an EU country where your business is registered for tax
+euCountry.checkYourAnswersLabel = Country of tax registration
+euCountry.error.required = Select an EU country where your business is registered for tax
+euCountry.error.duplicate = You selected this country already. Select a different one.
+
 businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details
 businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.

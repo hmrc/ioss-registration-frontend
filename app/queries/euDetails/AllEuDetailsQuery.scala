@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package config
+package queries.euDetails
 
-object Constants {
+import models.euDetails.EuDetails
+import play.api.libs.json.JsPath
+import queries.{Gettable, Settable}
 
-  val maxTradingNames: Int = 10
+case object AllEuDetailsQuery extends Gettable[List[EuDetails]] with Settable[List[EuDetails]] {
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-
+  override def path: JsPath = JsPath \ "euDetails"
 }

@@ -17,11 +17,12 @@
 package controllers.euDetails
 
 import base.SpecBase
-import forms.euDetails.TaxRegisteredInEuFormProvider
+import forms.euDetails.EuCountryFormProvider
+import models.{Country, Index}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.euDetails.TaxRegisteredInEuPage
+import pages.euDetails.EuCountryPage
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
@@ -29,54 +30,56 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
-import views.html.euDetails.TaxRegisteredInEuView
+import views.html.euDetails.EuCountryView
 
-class TaxRegisteredInEuControllerSpec extends SpecBase with MockitoSugar {
-
+class EuCountryControllerSpec extends SpecBase with MockitoSugar {
+  
   private val waypoints: Waypoints = EmptyWaypoints
+  private val country: Country = Country.euCountries.head
+  private val index: Index = Index(0)
 
-  val formProvider = new TaxRegisteredInEuFormProvider()
-  val form: Form[Boolean] = formProvider()
+  val formProvider = new EuCountryFormProvider()
+  val form: Form[Country] = formProvider(index, Seq.empty)
 
-  lazy val taxRegisteredInEuRoute: String = routes.TaxRegisteredInEuController.onPageLoad(waypoints).url
+  lazy val euCountryRoute: String = routes.EuCountryController.onPageLoad(waypoints, index).url
 
-  "TaxRegisteredInEu Controller" - {
+  "EuCountry Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
-        val request = FakeRequest(GET, taxRegisteredInEuRoute)
+        val request = FakeRequest(GET, euCountryRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[TaxRegisteredInEuView]
+        val view = application.injector.instanceOf[EuCountryView]
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form, waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form, waypoints, index)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = basicUserAnswersWithVatInfo.set(TaxRegisteredInEuPage, true).success.value
+      val userAnswers = basicUserAnswersWithVatInfo.set(EuCountryPage(index), country).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, taxRegisteredInEuRoute)
+        val request = FakeRequest(GET, euCountryRoute)
 
-        val view = application.injector.instanceOf[TaxRegisteredInEuView]
+        val view = application.injector.instanceOf[EuCountryView]
 
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form.fill(true), waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form.fill(country), waypoints, index)(request, messages(application)).toString
       }
     }
 
-    "must save and redirect to the next page when valid data is submitted" in {
+    "must save the answer and redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
@@ -91,14 +94,15 @@ class TaxRegisteredInEuControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, taxRegisteredInEuRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+          FakeRequest(POST, euCountryRoute)
+            .withFormUrlEncodedBody(("value", country.code))
 
         val result = route(application, request).value
-        val expectedAnswers = basicUserAnswersWithVatInfo.set(TaxRegisteredInEuPage, true).success.value
+
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(EuCountryPage(index), country).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe TaxRegisteredInEuPage.navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
+        redirectLocation(result).value mustBe EuCountryPage(index).navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -109,17 +113,17 @@ class TaxRegisteredInEuControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, taxRegisteredInEuRoute)
+          FakeRequest(POST, euCountryRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[TaxRegisteredInEuView]
+        val view = application.injector.instanceOf[EuCountryView]
 
         val result = route(application, request).value
 
         status(result) mustBe BAD_REQUEST
-        contentAsString(result) mustBe view(boundForm, waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(boundForm, waypoints, index)(request, messages(application)).toString
       }
     }
 
@@ -128,7 +132,7 @@ class TaxRegisteredInEuControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, taxRegisteredInEuRoute)
+        val request = FakeRequest(GET, euCountryRoute)
 
         val result = route(application, request).value
 
@@ -143,8 +147,8 @@ class TaxRegisteredInEuControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, taxRegisteredInEuRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+          FakeRequest(POST, euCountryRoute)
+            .withFormUrlEncodedBody(("value", "answer"))
 
         val result = route(application, request).value
 

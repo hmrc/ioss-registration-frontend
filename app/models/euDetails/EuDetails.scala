@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package config
+package models.euDetails
 
-object Constants {
+import models.Country
+import play.api.libs.json.{Json, OFormat}
 
-  val maxTradingNames: Int = 10
+case class EuDetails(
+                      euCountry: Country
+                    )
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+object EuDetails {
 
+  implicit val format: OFormat[EuDetails] = Json.format[EuDetails]
 }

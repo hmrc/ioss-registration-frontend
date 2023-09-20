@@ -19,7 +19,8 @@ package pages.tradingNames
 import controllers.tradingNames.routes
 import models.{Index, UserAnswers}
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.{JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
+import pages.euDetails.TaxRegisteredInEuPage
+import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.tradingNames.AllTradingNames

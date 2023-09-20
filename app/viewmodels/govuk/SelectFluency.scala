@@ -79,3 +79,4 @@ trait SelectFluency {
       item copy (attributes = item.attributes + attribute)
   }
 }
+

@@ -113,6 +113,9 @@ POST        /remove-all-trading-names                            controllers.tra
 GET         /tax-in-eu                                           controllers.euDetails.TaxRegisteredInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /tax-in-eu                                           controllers.euDetails.TaxRegisteredInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
+GET         /eu-tax/:index                                       controllers.euDetails.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /eu-tax/:index                                       controllers.euDetails.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
 # Business contact details section
 GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
