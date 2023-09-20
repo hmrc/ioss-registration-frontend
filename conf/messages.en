@@ -303,7 +303,7 @@ deleteAllTradingNames.change.hidden = Remove all your alternative trading names 
 previouslyRegistered.title = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
 previouslyRegistered.heading = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
 previouslyRegistered.hint = This includes One Stop Shop (OSS) schemes.
-previouslyRegistered.checkYourAnswersLabel = previouslyRegistered
+previouslyRegistered.checkYourAnswersLabel = Other One Stop Shop registrations
 previouslyRegistered.error.required = Select yes if your business has ever registered for an Import One Stop Shop scheme in an EU country
 previouslyRegistered.change.hidden = if your business has ever registered for an Import One Stop Shop scheme in an EU country
 
