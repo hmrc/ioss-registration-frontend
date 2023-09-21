@@ -30,6 +30,11 @@ sealed trait Waypoints {
   def recalibrate(currentPage: Page, targetPage: Page): Waypoints
 }
 
+object NonEmptyWaypoints {
+  def apply(head: Waypoint, tail: List[Waypoint]): NonEmptyWaypoints =
+    NonEmptyWaypoints(NonEmptyList(head, tail))
+}
+
 case class NonEmptyWaypoints(waypoints: NonEmptyList[Waypoint]) extends Waypoints {
 
   val next: Waypoint = waypoints.head

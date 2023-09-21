@@ -103,12 +103,20 @@ trait JourneyHelpers extends Matchers with TryValues with OptionValues {
 
   def answersMustContain[A](gettable: Gettable[A])(implicit reads: Reads[A], position: Position): JourneyStep[Unit] =
     getAnswers.map { answers =>
-      answers.get(gettable) mustBe defined
+      // With clue is equivalent to adding an assertion message in JUnit.
+      // Only shows on failure, and in this case adds context to the message.
+      // AddWebsitePage(Some(Index(2))) was found when expected not to be - None was not defined
+      // versus just
+      // None was not defined
+      withClue(s"$gettable was not found - ") {
+        answers.get(gettable) mustBe defined
+      }
     }
 
   def answersMustNotContain[A](gettable: Gettable[A])(implicit reads: Reads[A], position: Position): JourneyStep[Unit] =
     getAnswers.map { answers =>
       answers.get(gettable) must not be defined
+
     }
 
   def answerMustEqual[A](gettable: Gettable[A], expectedAnswer: A)(implicit reads: Reads[A], position: Position): JourneyStep[Unit] =
@@ -118,18 +126,18 @@ trait JourneyHelpers extends Matchers with TryValues with OptionValues {
 
   def submitAnswer[A](page: Page with Settable[A], value: A)(implicit writes: Writes[A], position: Position): JourneyStep[Unit] = {
     for {
-      _               <- pageMustBe(page)
+      _ <- pageMustBe(page)
       originalAnswers <- getAnswers
-      _               <- setUserAnswerTo(page, value)
-      _               <- next(originalAnswers)
+      _ <- setUserAnswerTo(page, value)
+      _ <- next(originalAnswers)
     } yield ()
   }
 
   def removeAddToListItem[A](settable: Settable[A]): JourneyStep[Unit] = {
     for {
       originalAnswers <- getAnswers
-      _               <- remove(settable)
-      _               <- next(originalAnswers)
+      _ <- remove(settable)
+      _ <- next(originalAnswers)
     } yield ()
   }
 
@@ -146,6 +154,6 @@ trait JourneyHelpers extends Matchers with TryValues with OptionValues {
   def goToChangeAnswer(page: Page): JourneyStep[Unit] =
     for {
       currentPage <- getPage
-      _           <- goToChangeAnswer(page, currentPage.asInstanceOf[WaypointPage])
+      _ <- goToChangeAnswer(page, currentPage.asInstanceOf[WaypointPage])
     } yield ()
 }

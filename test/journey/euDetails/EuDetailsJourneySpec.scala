@@ -24,6 +24,7 @@ import org.scalacheck.Gen
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
 import pages.euDetails._
+import pages.website.WebsitePage
 import queries.euDetails.{AllEuDetailsRawQuery, EuDetailsQuery}
 
 class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGenerators with Generators {
@@ -62,21 +63,31 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
     goTo(CheckYourAnswersPage)
   )
 
+
+  "must go directly to add website page if not registered for VAT in any EU countries" in {
+    startingFrom(TaxRegisteredInEuPage)
+      .run(
+        submitAnswer(TaxRegisteredInEuPage, false),
+        pageMustBe(WebsitePage(Index(0)))
+      )
+  }
+
+
   s"must be asked for as many as necessary upto the maximum of $maxCountries EU countries" in {
 
     def generateEuDetails: Seq[JourneyStep[Unit]] = {
       (0 until maxCountries).foldLeft(Seq.empty[JourneyStep[Unit]]) {
         case (journeySteps: Seq[JourneyStep[Unit]], index: Int) =>
           journeySteps :+
-        submitAnswer(EuCountryPage(Index(index)), country) :+
-        submitAnswer(SellsGoodsToEuConsumerMethodPage(Index(index)), EuConsumerSalesMethod.FixedEstablishment) :+
-        submitAnswer(RegistrationTypePage(Index(index)), RegistrationType.VatNumber) :+
-        submitAnswer(EuVatNumberPage(Index(index)), euVatNumber) :+
-        submitAnswer(FixedEstablishmentTradingNamePage(Index(index)), Gen.oneOf(tradingNames).sample.value) :+
-        submitAnswer(FixedEstablishmentAddressPage(Index(index)), arbitraryInternationalAddress.arbitrary.sample.value) :+
-        pageMustBe(CheckEuDetailsAnswersPage(Index(index))) :+
-        goTo(AddEuDetailsPage(Some(Index(index)))) :+
-        submitAnswer(AddEuDetailsPage(Some(Index(index))), true)
+            submitAnswer(EuCountryPage(Index(index)), country) :+
+            submitAnswer(SellsGoodsToEuConsumerMethodPage(Index(index)), EuConsumerSalesMethod.FixedEstablishment) :+
+            submitAnswer(RegistrationTypePage(Index(index)), RegistrationType.VatNumber) :+
+            submitAnswer(EuVatNumberPage(Index(index)), euVatNumber) :+
+            submitAnswer(FixedEstablishmentTradingNamePage(Index(index)), Gen.oneOf(tradingNames).sample.value) :+
+            submitAnswer(FixedEstablishmentAddressPage(Index(index)), arbitraryInternationalAddress.arbitrary.sample.value) :+
+            pageMustBe(CheckEuDetailsAnswersPage(Index(index))) :+
+            goTo(AddEuDetailsPage(Some(Index(index)))) :+
+            submitAnswer(AddEuDetailsPage(Some(Index(index))), true)
       }
     }
 
@@ -84,7 +95,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
       .run(
         submitAnswer(TaxRegisteredInEuPage, true) +:
           generateEuDetails :+
-          pageMustBe(CheckYourAnswersPage): _* // TODO -> to Websites
+          pageMustBe(WebsitePage(Index(0))): _*
       )
   }
 

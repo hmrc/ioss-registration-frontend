@@ -14,17 +14,32 @@
  * limitations under the License.
  */
 
-package config
+package forms
 
-object Constants {
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+class DeleteWebsiteFormProviderSpec extends BooleanFieldBehaviours {
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+  val requiredKey = "deleteWebsite.error.required"
+  val invalidKey = "error.boolean"
 
+  val form = new DeleteWebsiteFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package config
+package forms
 
-object Constants {
+import forms.mappings.Mappings
+import forms.validation.Validation.websitePattern
+import models.Index
+import play.api.data.Form
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+import javax.inject.Inject
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+class WebsiteFormProvider @Inject() extends Mappings {
 
+  def apply(thisIndex: Index, existingAnswers: Seq[String]): Form[String] =
+    Form(
+      "value" -> text("website.error.required")
+        .verifying(firstError(
+          maxLength(250, "website.error.length"),
+          notADuplicate(thisIndex, existingAnswers, "website.error.duplicate"),
+          regexp(websitePattern, "website.error.invalid")))
+    )
 }

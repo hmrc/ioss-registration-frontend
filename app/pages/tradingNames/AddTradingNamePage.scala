@@ -46,19 +46,19 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
     answers.get(this).map {
       case true =>
         index
-        .map { i =>
-          if (i.position + 1 < config.Constants.maxTradingNames) {
-            TradingNamePage(Index(i.position + 1))
-          } else {
-            PreviouslyRegisteredPage
+          .map { i =>
+            if (i.position + 1 < config.Constants.maxTradingNames) {
+              TradingNamePage(Index(i.position + 1))
+            } else {
+              PreviouslyRegisteredPage
+            }
           }
-        }
-        .getOrElse {
-          answers
-            .get(deriveNumberOfItems)
-            .map(n => TradingNamePage(Index(n)))
-            .orRecover
-        }
+          .getOrElse {
+            answers
+              .get(deriveNumberOfItems)
+              .map(n => TradingNamePage(Index(n)))
+              .orRecover
+          }
 
       case false =>
         PreviouslyRegisteredPage

@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package config
+package models
 
-object Constants {
+import play.api.libs.json.{Json, OFormat}
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+case class Website(site: String)
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-
+object Website {
+  implicit lazy val format: OFormat[Website] = Json.format[Website]
 }
