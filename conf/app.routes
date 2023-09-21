@@ -124,6 +124,9 @@ GET         /cannot-register-need-to-operate-as-fe               controllers.euD
 GET         /registration-type/:index                            controllers.euDetails.RegistrationTypeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /registration-type/:index                            controllers.euDetails.RegistrationTypeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
+GET         /eu-vat-number/:index                                controllers.euDetails.EuVatNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /eu-vat-number/:index                                controllers.euDetails.EuVatNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
 # Business contact details section
 GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

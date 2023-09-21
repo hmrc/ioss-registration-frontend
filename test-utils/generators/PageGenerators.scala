@@ -20,11 +20,14 @@ import models.Index
 import org.scalacheck.Arbitrary
 import pages._
 import pages.checkVatDetails.CheckVatDetailsPage
-import pages.euDetails.{EuCountryPage, RegistrationTypePage, SellsGoodsToEuConsumerMethodPage, TaxRegisteredInEuPage}
+import pages.euDetails._
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
 import pages.previousRegistrations._
 
 trait PageGenerators {
+
+  implicit lazy val arbitraryEuVatNumberPage: Arbitrary[EuVatNumberPage] =
+    Arbitrary(EuVatNumberPage(Index(0)))
 
   implicit lazy val arbitraryRegistrationTypePage: Arbitrary[RegistrationTypePage] =
     Arbitrary(RegistrationTypePage(Index(0)))

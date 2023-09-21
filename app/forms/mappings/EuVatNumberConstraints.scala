@@ -19,16 +19,7 @@ package forms.mappings
 import models.CountryWithValidationDetails
 import play.api.data.validation.{Constraint, Invalid, Valid}
 
-
 trait EuVatNumberConstraints {
-
-  private def getCountryVatRegex(countryCode: String): String =
-    CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == countryCode)
-    match {
-      case Some(countryWithValidationDetails) =>
-        countryWithValidationDetails.vrnRegex
-      case _ => throw new Exception("invalid country code")
-    }
 
   def validateEuVatNumber(countryCode: String, errorKey: String): Constraint[String] = {
 
@@ -39,9 +30,16 @@ trait EuVatNumberConstraints {
         } else {
           Invalid(errorKey)
         }
-
     }
   }
+
+  private def getCountryVatRegex(countryCode: String): String =
+    CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == countryCode)
+    match {
+      case Some(countryWithValidationDetails) =>
+        countryWithValidationDetails.vrnRegex
+      case _ => throw new Exception("invalid country code")
+    }
 
   private def matchesCountryRegex(input: String, countryCode: String): Boolean = {
     val regex = getCountryVatRegex(countryCode)

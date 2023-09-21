@@ -1,0 +1,58 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import controllers.euDetails.routes
+@import pages.euDetails.EuVatNumberPage
+@import viewmodels.InputWidth._
+@import views.html.components.ButtonGroup
+
+@this(
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukInput: GovukInput,
+        button: ButtonGroup
+)
+
+@(form: Form[_], waypoints: Waypoints, countryIndex: Index, countryWithValidationDetails: CountryWithValidationDetails)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = title(form, messages("euVatNumber.title", countryWithValidationDetails.country.name))) {
+
+    @formHelper(action = routes.EuVatNumberController.onSubmit(waypoints, countryIndex)) {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
+
+        @govukInput(
+            InputViewModel(
+                field = form("value"),
+                label = LabelViewModel(messages("euVatNumber.heading", countryWithValidationDetails.country.name)).asPageHeading()
+            )
+            .withWidth(Fixed10)
+            .withHint(HintViewModel(HtmlContent(Html(
+                messages(
+                "euVatNumber.hint",
+                countryWithValidationDetails.country.code,
+                countryWithValidationDetails.exampleVrn,
+                countryWithValidationDetails.additionalMessage.getOrElse("")
+                )
+            ))))
+        )
+
+        @button("site.continue", EuVatNumberPage(countryIndex).route(waypoints).url)
+    }
+}

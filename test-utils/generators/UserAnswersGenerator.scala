@@ -21,7 +21,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.TryValues
 import pages.QuestionPage
-import pages.euDetails.{EuCountryPage, RegistrationTypePage, SellsGoodsToEuConsumerMethodPage, TaxRegisteredInEuPage}
+import pages.euDetails.{EuCountryPage, EuVatNumberPage, RegistrationTypePage, SellsGoodsToEuConsumerMethodPage, TaxRegisteredInEuPage}
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
 import pages._
@@ -32,7 +32,8 @@ trait UserAnswersGenerator extends TryValues {
   self: Generators =>
 
   val generators: Seq[Gen[(QuestionPage[_], JsValue)]] = {
-    arbitrary[(RegistrationTypePage, JsValue)] ::
+      arbitrary[(EuVatNumberPage, JsValue)] ::
+      arbitrary[(RegistrationTypePage, JsValue)] ::
       arbitrary[(SellsGoodsToEuConsumerMethodPage, JsValue)] ::
       arbitrary[(EuCountryPage, JsValue)] ::
       arbitrary[(TaxRegisteredInEuPage.type, JsValue)] ::
