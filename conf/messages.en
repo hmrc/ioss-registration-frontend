@@ -302,6 +302,10 @@ sellsGoodsToEuConsumerMethod.checkYourAnswersLabel = How your business sells goo
 sellsGoodsToEuConsumerMethod.error.required = Select how your business sells goods in {0}
 sellsGoodsToEuConsumerMethod.change.hidden = SellsGoodsToEuConsumerMethod
 
+cannotRegisterFixedEstablishmentOperationOnly.title = You need to operate as a fixed establishment
+cannotRegisterFixedEstablishmentOperationOnly.heading = You need to operate as a fixed establishment
+cannotRegisterFixedEstablishmentOperationOnly.p = Sign into your <a href="/business-account" class="govuk-link">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.
+
 businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details
 businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.

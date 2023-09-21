@@ -35,6 +35,6 @@ case class SellsGoodsToEuConsumerMethodPage(countryIndex: Index) extends Questio
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
       case EuConsumerSalesMethod.FixedEstablishment => CheckYourAnswersPage // TODO -> to Registration type
-      case EuConsumerSalesMethod.DispatchWarehouse => CheckYourAnswersPage // TODO -> Dispatch warehouse kick out page
+      case EuConsumerSalesMethod.DispatchWarehouse => CannotRegisterFixedEstablishmentOperationOnlyPage
     }.orRecover
 }
