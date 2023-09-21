@@ -23,7 +23,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.VatRegistrationDetailsSummary
-import viewmodels.checkAnswers.{BusinessContactDetailsSummary, HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary, HasTradingNameSummary, TradingNameSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 
@@ -53,9 +53,12 @@ class CheckYourAnswersController @Inject()(
 
       val maybeHasTradingNameSummaryRow = HasTradingNameSummary.row(request.userAnswers, waypoints, thisPage)
       val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
-      val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(request.userAnswers, EmptyWaypoints, thisPage)
-      val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(request.userAnswers, EmptyWaypoints, thisPage)
-      val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(request.userAnswers, EmptyWaypoints, thisPage)
+      val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(request.userAnswers, waypoints, thisPage)
+      val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(request.userAnswers, waypoints, thisPage)
+      val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(request.userAnswers, waypoints, thisPage)
+      val bankDetailsAccountNameSummaryRow = BankDetailsSummary.rowAccountName(request.userAnswers, waypoints, thisPage)
+      val bankDetailsBicSummaryRow = BankDetailsSummary.rowBIC(request.userAnswers, waypoints, thisPage)
+      val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(request.userAnswers, waypoints, thisPage)
 
       val list = SummaryListViewModel(
         rows = Seq(
@@ -69,10 +72,15 @@ class CheckYourAnswersController @Inject()(
           tradingNameSummaryRow,
           businessContactDetailsContactNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
           businessContactDetailsTelephoneSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
-          businessContactDetailsEmailSummaryRow
+          businessContactDetailsEmailSummaryRow,
+          bankDetailsAccountNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+          bankDetailsBicSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+          bankDetailsIbanSummaryRow
         ).flatten
       )
 
       Ok(view(vatRegistrationDetailsList, list))
   }
+
+
 }

@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package pages
+package models
 
-import controllers.routes
-import models.{BusinessContactDetails, UserAnswers}
-import play.api.libs.json.JsPath
-import play.api.mvc.Call
+import play.api.libs.json._
+import models.domain.ModelHelpers.normaliseSpaces
 
-case object BusinessContactDetailsPage extends QuestionPage[BusinessContactDetails] {
+case class BankDetails(accountName: String, bic: Option[Bic], iban: Iban)
 
-  override def path: JsPath = JsPath \ toString
+object BankDetails {
+  implicit val format: OFormat[BankDetails] = Json.format[BankDetails]
 
-  override def toString: String = "businessContactDetails"
+  def apply(accountName: String, bic: Option[Bic], iban: Iban): BankDetails =
+    new BankDetails(normaliseSpaces(accountName), bic, iban)
 
-  override def route(waypoints: Waypoints): Call =
-    routes.BusinessContactDetailsController.onPageLoad(waypoints)
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    BankDetailsPage
 }

@@ -52,7 +52,6 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       getData
   }
 
-
 }
 
 case class DefaultAuthenticatedControllerComponents @Inject()(

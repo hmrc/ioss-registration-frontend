@@ -111,3 +111,6 @@ POST        /remove-uk-trading-name/:index                       controllers.tra
 
 GET         /remove-all-trading-names                            controllers.tradingNames.DeleteAllTradingNamesController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /remove-all-trading-names                            controllers.tradingNames.DeleteAllTradingNamesController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /bank-details                                        controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /bank-details                                        controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

@@ -24,7 +24,7 @@ object ModelHelpers {
 
     @tailrec
     def removeDoubleSpaces(string: String): String = {
-      if (!string.contains("  ")) {
+      if(!string.contains("  ")) {
         string
       } else {
         removeDoubleSpaces(string.replaceAll("[ ]{2}", " "))
