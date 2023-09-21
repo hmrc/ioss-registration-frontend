@@ -19,7 +19,7 @@ package pages.tradingNames
 import controllers.tradingNames.routes
 import models.{Index, UserAnswers}
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.{AddItemPage, CheckYourAnswersPage, Page, QuestionPage, Waypoints}
+import pages.{AddItemPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable

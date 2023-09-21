@@ -15,7 +15,6 @@
  *@
 
 @import components.ButtonGroup
-@import viewmodels.InputWidth._
 @import viewmodels.LegendSize
 
 @this(
@@ -36,7 +35,7 @@
         @govukErrorSummary(ErrorSummaryViewModel(form))
     }
 
-    <h1 class="govuk-heading-xl">@messages("checkPreviousSchemeAnswers.heading", country.name)</h1>
+    <h1 class="govuk-heading-l">@messages("checkPreviousSchemeAnswers.heading", country.name)</h1>
 
     @for(list <- lists) {
         @govukSummaryList(list)

@@ -35,7 +35,7 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        <h1 class="govuk-heading-xl">@messages("deletePreviousScheme.heading", country.name)</h1>
+        <h1 class="govuk-heading-l">@messages("deletePreviousScheme.heading", country.name)</h1>
 
         @if(isLastPreviousScheme) {
             <p class="govuk-body">@messages("deletePreviousScheme.paragraph", country.name)</p>
