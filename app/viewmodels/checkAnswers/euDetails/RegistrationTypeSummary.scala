@@ -14,30 +14,36 @@
  * limitations under the License.
  */
 
-package viewmodels.checkAnswers
+package viewmodels.checkAnswers.euDetails
 
-import models.UserAnswers
-import pages.tradingNames.HasTradingNamePage
+import models.{Index, UserAnswers}
+import pages.euDetails.RegistrationTypePage
 import pages.{CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
+import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object HasTradingNameSummary  {
+object RegistrationTypeSummary  {
 
-  def row(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(HasTradingNamePage).map {
+  def row(answers: UserAnswers, waypoints: Waypoints, countryIndex: Index, pageSource: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(RegistrationTypePage(countryIndex)).map {
       answer =>
 
-        val value = if (answer) "site.yes" else "site.no"
+        val value = ValueViewModel(
+          HtmlContent(
+            HtmlFormat.escape(messages(s"registrationType.$answer"))
+          )
+        )
 
         SummaryListRowViewModel(
-          key     = "hasTradingName.checkYourAnswersLabel",
-          value   = ValueViewModel(value),
+          key     = "registrationType.checkYourAnswersLabel",
+          value   = value,
           actions = Seq(
-            ActionItemViewModel("site.change", HasTradingNamePage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("hasTradingName.change.hidden"))
+            ActionItemViewModel("site.change", RegistrationTypePage(countryIndex).changeLink(waypoints, pageSource).url)
+              .withVisuallyHiddenText(messages("registrationType.change.hidden"))
           )
         )
     }

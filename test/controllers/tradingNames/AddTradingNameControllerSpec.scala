@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
-import viewmodels.checkAnswers.TradingNameSummary
+import viewmodels.checkAnswers.tradingName.TradingNameSummary
 import views.html.tradingNames.AddTradingNameView
 
 class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {

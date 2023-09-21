@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package viewmodels.checkAnswers
+package viewmodels.checkAnswers.euDetails
 
 import models.{Index, UserAnswers}
 import pages.euDetails.SellsGoodsToEuConsumerMethodPage

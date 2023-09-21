@@ -306,6 +306,14 @@ cannotRegisterFixedEstablishmentOperationOnly.title = You need to operate as a f
 cannotRegisterFixedEstablishmentOperationOnly.heading = You need to operate as a fixed establishment
 cannotRegisterFixedEstablishmentOperationOnly.p = Sign into your <a href="/business-account" class="govuk-link">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.
 
+registrationType.title = What sort of registration do you have in {0}
+registrationType.heading = What sort of registration do you have in {0}
+registrationType.vatNumber = VAT number
+registrationType.taxId = Tax ID number
+registrationType.checkYourAnswersLabel = Registration type
+registrationType.error.required = Select a registration type
+registrationType.change.hidden = Your registration type
+
 businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details
 businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.

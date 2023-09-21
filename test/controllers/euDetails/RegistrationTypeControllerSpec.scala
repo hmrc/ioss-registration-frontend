@@ -17,13 +17,13 @@
 package controllers.euDetails
 
 import base.SpecBase
-import forms.euDetails.SellsGoodsToEuConsumerMethodFormProvider
-import models.euDetails.EuConsumerSalesMethod
+import forms.euDetails.RegistrationTypeFormProvider
+import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import models.{Country, Index}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.euDetails.{EuCountryPage, SellsGoodsToEuConsumerMethodPage, TaxRegisteredInEuPage}
+import pages.euDetails.{EuCountryPage, RegistrationTypePage, SellsGoodsToEuConsumerMethodPage, TaxRegisteredInEuPage}
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
@@ -31,35 +31,36 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
-import views.html.euDetails.SellsGoodsToEuConsumerMethodView
+import views.html.euDetails.RegistrationTypeView
 
-class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSugar {
+class RegistrationTypeControllerSpec extends SpecBase with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
-  private val countryIndex: Index = Index(0)
   private val country: Country = arbitraryCountry.arbitrary.sample.value
+  private val countryIndex: Index = Index(0)
 
-  val formProvider = new SellsGoodsToEuConsumerMethodFormProvider()
-  val form: Form[EuConsumerSalesMethod] = formProvider(country)
+  val formProvider = new RegistrationTypeFormProvider()
+  val form: Form[RegistrationType] = formProvider(country)
 
   private val answers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
+    .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
 
-  lazy val sellsGoodsToEuConsumerMethodRoute: String = routes.SellsGoodsToEuConsumerMethodController.onPageLoad(waypoints, countryIndex).url
+  lazy val registrationTypeRoute: String = routes.RegistrationTypeController.onPageLoad(waypoints, countryIndex).url
 
-  "SellsGoodsToEuConsumerMethod Controller" - {
+  "RegistrationType Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, sellsGoodsToEuConsumerMethodRoute)
+        val request = FakeRequest(GET, registrationTypeRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[SellsGoodsToEuConsumerMethodView]
+        val view = application.injector.instanceOf[RegistrationTypeView]
 
         status(result) mustBe OK
         contentAsString(result) mustBe view(form, waypoints, countryIndex, country)(request, messages(application)).toString
@@ -68,21 +69,19 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = answers.set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+      val userAnswers = answers.set(RegistrationTypePage(countryIndex), RegistrationType.VatNumber).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, sellsGoodsToEuConsumerMethodRoute)
+        val request = FakeRequest(GET, registrationTypeRoute)
 
-        val view = application.injector.instanceOf[SellsGoodsToEuConsumerMethodView]
+        val view = application.injector.instanceOf[RegistrationTypeView]
 
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(
-          form.fill(EuConsumerSalesMethod.FixedEstablishment), waypoints, countryIndex, country
-        )(request, messages(application)).toString
+        contentAsString(result) mustBe view(form.fill(RegistrationType.VatNumber), waypoints, countryIndex, country)(request, messages(application)).toString
       }
     }
 
@@ -101,16 +100,14 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request =
-          FakeRequest(POST, sellsGoodsToEuConsumerMethodRoute)
-            .withFormUrlEncodedBody(("value", EuConsumerSalesMethod.values.head.toString))
+          FakeRequest(POST, registrationTypeRoute)
+            .withFormUrlEncodedBody(("value", RegistrationType.values.head.toString))
 
         val result = route(application, request).value
-        val expectedAnswers = answers
-          .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+        val expectedAnswers = answers.set(RegistrationTypePage(countryIndex), RegistrationType.VatNumber).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe SellsGoodsToEuConsumerMethodPage(countryIndex)
-          .navigate(waypoints, answers, expectedAnswers).url
+        redirectLocation(result).value mustBe RegistrationTypePage(countryIndex).navigate(waypoints, answers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -121,12 +118,12 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request =
-          FakeRequest(POST, sellsGoodsToEuConsumerMethodRoute)
+          FakeRequest(POST, registrationTypeRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[SellsGoodsToEuConsumerMethodView]
+        val view = application.injector.instanceOf[RegistrationTypeView]
 
         val result = route(application, request).value
 
@@ -140,7 +137,7 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, sellsGoodsToEuConsumerMethodRoute)
+        val request = FakeRequest(GET, registrationTypeRoute)
 
         val result = route(application, request).value
 
@@ -155,7 +152,7 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request =
-          FakeRequest(POST, sellsGoodsToEuConsumerMethodRoute)
+          FakeRequest(POST, registrationTypeRoute)
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value

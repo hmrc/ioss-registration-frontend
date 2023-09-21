@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package viewmodels.checkAnswers
+package viewmodels.checkAnswers.tradingName
 
 import models.{Index, UserAnswers}
 import pages.tradingNames.{AddTradingNamePage, DeleteTradingNamePage, TradingNamePage}

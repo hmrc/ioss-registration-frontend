@@ -18,6 +18,7 @@ package generators
 
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
+import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import models.domain.PreviousSchemeNumbers
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
@@ -89,6 +90,16 @@ trait ModelGenerators extends EitherValues {
       Gen.oneOf(Country.euCountries)
     }
 
+  implicit lazy val arbitraryEuConsumerSalesMethod: Arbitrary[EuConsumerSalesMethod] =
+    Arbitrary {
+      Gen.oneOf(EuConsumerSalesMethod.values)
+    }
+
+  implicit lazy val arbitraryRegistrationType: Arbitrary[RegistrationType] =
+    Arbitrary {
+      Gen.oneOf(RegistrationType.values)
+    }
+
   implicit lazy val arbitraryBusinessContactDetails: Arbitrary[BusinessContactDetails] =
     Arbitrary {
       for {
@@ -132,8 +143,6 @@ trait ModelGenerators extends EitherValues {
     Arbitrary {
       PreviousSchemeNumbers("12345667", Some("test"))
     }
-
-
 
   implicit lazy val arbitraryBic: Arbitrary[Bic] = {
     val asciiCodeForA = 65

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package viewmodels.checkAnswers
+package viewmodels.checkAnswers.euDetails
 
 import models.UserAnswers
 import pages.euDetails.TaxRegisteredInEuPage
