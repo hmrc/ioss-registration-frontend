@@ -35,7 +35,7 @@ case class RegistrationTypePage(countryIndex: Index) extends QuestionPage[Regist
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
       case RegistrationType.VatNumber => EuVatNumberPage(countryIndex)
-      case RegistrationType.TaxId => CheckYourAnswersPage // TODO -> Enter Tax ID page
+      case RegistrationType.TaxId => EuTaxReferencePage(countryIndex)
     }.orRecover
 
   // TODO

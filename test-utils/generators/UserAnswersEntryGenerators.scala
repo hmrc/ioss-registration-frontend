@@ -21,13 +21,21 @@ import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import pages.BusinessContactDetailsPage
-import pages.euDetails.{EuCountryPage, EuVatNumberPage, RegistrationTypePage, SellsGoodsToEuConsumerMethodPage, TaxRegisteredInEuPage}
 import pages.checkVatDetails.CheckVatDetailsPage
+import pages.euDetails._
 import pages.previousRegistrations._
 import pages.tradingNames.{AddTradingNamePage, DeleteAllTradingNamesPage, TradingNamePage}
 import play.api.libs.json.{JsValue, Json}
 
 trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
+
+  implicit lazy val arbitraryEuTaxReferenceUserAnswersEntry: Arbitrary[(EuTaxReferencePage, JsValue)] =
+    Arbitrary {
+      for {
+        page <- arbitrary[EuTaxReferencePage]
+        value <- arbitrary[String].suchThat(_.nonEmpty).map(Json.toJson(_))
+      } yield (page, value)
+    }
 
   implicit lazy val arbitraryEuVatNumberUserAnswersEntry: Arbitrary[(EuVatNumberPage, JsValue)] =
     Arbitrary {

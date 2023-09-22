@@ -322,6 +322,14 @@ euVatNumber.error.required = Enter your VAT registration number for {0}
 euVatNumber.error.invalid = Enter a registration number in the correct format
 euVatNumber.change.hidden = VAT registration number
 
+euTaxReference.title = What is your business tax identification number in {0}?
+euTaxReference.heading = What is your business tax identification number in {0}?
+euTaxReference.checkYourAnswersLabel = Tax identification number
+euTaxReference.error.required = Enter your business''s tax identification number in {0}
+euTaxReference.error.length = Tax identification number must be 20 characters or less
+euTaxReference.error.format = Tax identification number must only include letters, numbers and spaces
+euTaxReference.change.hidden = your tax identification number
+
 businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details
 businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.

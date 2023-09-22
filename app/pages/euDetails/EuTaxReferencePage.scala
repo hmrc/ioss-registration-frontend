@@ -22,17 +22,17 @@ import pages.{CheckYourAnswersPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case class EuVatNumberPage(countryIndex: Index) extends QuestionPage[String] {
+case class EuTaxReferencePage(countryIndex: Index) extends QuestionPage[String] {
 
   override def path: JsPath = JsPath \ "euDetails" \ countryIndex.position \ toString
 
-  override def toString: String = "euVatNumber"
+  override def toString: String = "euTaxReference"
 
   override def route(waypoints: Waypoints): Call =
-    routes.EuVatNumberController.onPageLoad(waypoints, countryIndex)
+    routes.EuTaxReferenceController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    CheckYourAnswersPage // TODO -> to FixedEstablishmentTradingName
+    CheckYourAnswersPage // TODO -> to FixedEstablishmentTradingNamePage
 
   // TODO
 //  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = super.nextPageCheckMode(waypoints, answers)

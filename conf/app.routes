@@ -127,6 +127,9 @@ POST        /registration-type/:index                            controllers.euD
 GET         /eu-vat-number/:index                                controllers.euDetails.EuVatNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /eu-vat-number/:index                                controllers.euDetails.EuVatNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
+GET         /eu-tax-number/:index                                controllers.euDetails.EuTaxReferenceController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /eu-tax-number/:index                                controllers.euDetails.EuTaxReferenceController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
 # Business contact details section
 GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
