@@ -27,7 +27,7 @@ import viewmodels.implicits._
 object CheckPreviousSchemeAnswersSummary  {
 
   def row(answers: UserAnswers, waypoints: Waypoints, index: Index)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(CheckPreviousSchemeAnswersPage(Some(Index(0)))).map {
+    answers.get(CheckPreviousSchemeAnswersPage(index)).map {
       answer =>
 
         SummaryListRowViewModel(

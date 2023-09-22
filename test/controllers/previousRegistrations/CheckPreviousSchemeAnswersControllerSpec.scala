@@ -43,7 +43,6 @@ import scala.concurrent.Future
 class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryListFluency with MockitoSugar with BeforeAndAfterEach{
 
   private val index = Index(0)
-  private val someIndex = Some(Index(0))
   private val waypoints: Waypoints = EmptyWaypoints
   private val country = Country.euCountries.head
   private val formProvider = new CheckPreviousSchemeAnswersFormProvider()
@@ -120,10 +119,10 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
               .withFormUrlEncodedBody(("value", "true"))
 
           val result = route(application, request).value
-          val expectedAnswers = baseUserAnswers.set(CheckPreviousSchemeAnswersPage(someIndex), true).success.value
+          val expectedAnswers = baseUserAnswers.set(CheckPreviousSchemeAnswersPage(index), true).success.value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual CheckPreviousSchemeAnswersPage(someIndex).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+          redirectLocation(result).value mustEqual CheckPreviousSchemeAnswersPage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
         }
       }

@@ -17,11 +17,12 @@
 package viewmodels.checkAnswers.previousRegistrations
 
 import models.{Index, UserAnswers}
-import models.domain.{PreviousRegistration, PreviousRegistrationNew, PreviousRegistrationLegacy}
-import pages.Waypoints
+import models.domain.{PreviousRegistration, PreviousRegistrationLegacy, PreviousRegistrationNew}
+import pages.previousRegistrations._
+import pages.{AddItemPage, CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import queries.previousRegistration.{AllPreviousRegistrationsQuery, AllPreviousRegistrationsWithOptionalVatNumberQuery}
+import queries.previousRegistration._
 import viewmodels.ListItemWrapper
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
@@ -32,14 +33,14 @@ import utils.CheckExistingRegistrations.existingPreviousRegistration
 
 object PreviousRegistrationSummary {
 
-  def row(answers: UserAnswers, existingPreviousRegistrations: Seq[PreviousRegistration], waypoints: Waypoints): Seq[ListItemWrapper] =
+  def row(answers: UserAnswers, existingPreviousRegistrations: Seq[PreviousRegistration], waypoints: Waypoints, sourcePage: AddItemPage): Seq[ListItemWrapper] =
     answers.get(AllPreviousRegistrationsWithOptionalVatNumberQuery).getOrElse(List.empty).zipWithIndex.map {
       case (details, index) =>
         ListItemWrapper(
           ListItem(
             name = HtmlFormat.escape(details.previousEuCountry.name).toString,
-            changeUrl = controllers.previousRegistrations.routes.CheckPreviousSchemeAnswersController.onPageLoad(waypoints, Index(index)).url,
-            removeUrl = controllers.previousRegistrations.routes.DeletePreviousRegistrationController.onPageLoad(waypoints, Index(index)).url
+            changeUrl = CheckPreviousSchemeAnswersPage(Index(index)).changeLink(waypoints, sourcePage).url,
+            removeUrl = DeletePreviousRegistrationPage(Index(index)).route(waypoints).url
           ),
           !existingPreviousRegistration(details.previousEuCountry, existingPreviousRegistrations)
         )
@@ -48,7 +49,8 @@ object PreviousRegistrationSummary {
   def checkAnswersRow(
                        answers: UserAnswers,
                        existingPreviousRegistrations: Seq[PreviousRegistration],
-                       waypoints: Waypoints
+                       waypoints: Waypoints,
+                       sourcePage: CheckAnswersPage
                      )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllPreviousRegistrationsQuery).map {
       previousRegistrations =>
@@ -75,7 +77,7 @@ object PreviousRegistrationSummary {
                 ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
                   .withVisuallyHiddenText(messages("previousRegistrations.add.hidden"))
               } else {
-                ActionItemViewModel("site.change", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
+                ActionItemViewModel("site.change", AddPreviousRegistrationPage().changeLink(waypoints, sourcePage).url)
                   .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
               }
             )

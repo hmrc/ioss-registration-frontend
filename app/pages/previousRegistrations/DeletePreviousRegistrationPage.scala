@@ -16,20 +16,28 @@
 
 package pages.previousRegistrations
 
+import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
-import pages.{Page, Waypoints}
+import pages.{NonEmptyWaypoints, Page, Waypoints}
 import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 
 case class DeletePreviousRegistrationPage(index: Index) extends Page {
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.DeletePreviousRegistrationController.onPageLoad(waypoints, index)
+    routes.DeletePreviousRegistrationController.onPageLoad(waypoints, index)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     answers.get(DeriveNumberOfPreviousRegistrations) match {
       case Some(n) if n > 0 => AddPreviousRegistrationPage()
       case _                => PreviouslyRegisteredPage
+    }
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    answers.get(DeriveNumberOfPreviousRegistrations) match {
+      case Some(n) if n > 0 => AddPreviousRegistrationPage()
+      case _ => PreviouslyRegisteredPage
     }
   }
 }

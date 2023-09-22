@@ -16,8 +16,9 @@
 
 package pages.previousRegistrations
 
+import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
@@ -28,9 +29,13 @@ case class PreviousIossSchemePage(countryIndex: Index, schemeIndex: Index) exten
   override def toString: String = "withIntermediary"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousIossSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
+    routes.PreviousIossSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    PreviousIossNumberPage(countryIndex, schemeIndex)
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
     PreviousIossNumberPage(countryIndex, schemeIndex)
   }
 }

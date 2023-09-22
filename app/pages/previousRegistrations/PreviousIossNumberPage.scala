@@ -16,16 +16,21 @@
 
 package pages.previousRegistrations
 
+import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
-import pages.{Page, Waypoints}
+import pages.{NonEmptyWaypoints, Page, Waypoints}
 import play.api.mvc.Call
 
 case class PreviousIossNumberPage(countryIndex: Index, schemeIndex: Index) extends PreviousSchemeNumbersPage {
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousIossNumberController.onPageLoad(waypoints, countryIndex, schemeIndex)
+    routes.PreviousIossNumberController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    CheckPreviousSchemeAnswersPage(Some(countryIndex))
+    CheckPreviousSchemeAnswersPage(countryIndex)
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    CheckPreviousSchemeAnswersPage(countryIndex)
   }
 }

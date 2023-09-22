@@ -16,6 +16,7 @@
 
 package pages.previousRegistrations
 
+import controllers.previousRegistrations.routes
 import models.{Index, PreviousScheme}
 import pages.{QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
@@ -28,6 +29,6 @@ case class PreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends Q
   override def toString: String = "previousScheme"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
+    routes.PreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
 }

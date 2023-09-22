@@ -18,17 +18,19 @@ package controllers
 
 import controllers.actions._
 import forms.DeleteAllPreviousRegistrationsFormProvider
-import models.requests.AuthenticatedDataRequest
 import pages.{DeleteAllPreviousRegistrationsPage, Waypoints}
 import pages.previousRegistrations.PreviouslyRegisteredPage
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
+import utils.ItemsHelper.determineRemoveAllItemsAndRedirect
 import views.html.DeleteAllPreviousRegistrationsView
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class DeleteAllPreviousRegistrationsController @Inject()(
                                                           override val messagesApi: MessagesApi,
@@ -37,18 +39,14 @@ class DeleteAllPreviousRegistrationsController @Inject()(
                                                           view: DeleteAllPreviousRegistrationsView
                                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  private val form = formProvider()
+
   protected val controllerComponents: MessagesControllerComponents = cc
 
+  val form: Form[Boolean] = formProvider()
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(DeleteAllPreviousRegistrationsPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
-      Ok(view(preparedForm, waypoints))
+      Ok(view(form, waypoints))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
@@ -56,27 +54,12 @@ class DeleteAllPreviousRegistrationsController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
+          BadRequest(view(formWithErrors, waypoints)).toFuture,
 
         value =>
 
-          determineRemoveAllPreviousRegistrationsAndRedirect(waypoints, value)
+          determineRemoveAllItemsAndRedirect(waypoints, value, cc, AllPreviousRegistrationsQuery, PreviouslyRegisteredPage, DeleteAllPreviousRegistrationsPage)
       )
   }
 
-  private def determineRemoveAllPreviousRegistrationsAndRedirect(
-                                                                  waypoints: Waypoints,
-                                                                  value: Boolean
-                                                                )(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
-    val removeAllPreviousRegistrations = if(value) {
-      request.userAnswers.remove(AllPreviousRegistrationsQuery)
-    } else {
-      request.userAnswers.set(PreviouslyRegisteredPage, true)
-    }
-    for {
-      updatedAnswers <- Future.fromTry(removeAllPreviousRegistrations)
-      calculatedAnswers <- Future.fromTry(updatedAnswers.set(DeleteAllPreviousRegistrationsPage, value))
-      _ <- cc.sessionRepository.set(calculatedAnswers)
-    } yield Redirect(DeleteAllPreviousRegistrationsPage.navigate(waypoints, request.userAnswers, calculatedAnswers).route)
-  }
 }

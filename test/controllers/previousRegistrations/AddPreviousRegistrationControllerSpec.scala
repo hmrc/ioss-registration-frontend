@@ -70,7 +70,7 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[AddPreviousRegistrationView]
         implicit val msgs: Messages = messages(application)
-        val list = PreviousRegistrationSummary.row(baseAnswers, Seq.empty, waypoints)
+        val list = PreviousRegistrationSummary.row(baseAnswers, Seq.empty, waypoints, AddPreviousRegistrationPage())
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, waypoints, list, canAddCountries = true)(request, implicitly).toString
@@ -88,7 +88,7 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[AddPreviousRegistrationView]
         implicit val msgs: Messages = messages(application)
-        val list = PreviousRegistrationSummary.row(incompleteAnswers, Seq.empty, waypoints)
+        val list = PreviousRegistrationSummary.row(incompleteAnswers, Seq.empty, waypoints, AddPreviousRegistrationPage())
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
@@ -135,7 +135,7 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[AddPreviousRegistrationView]
         implicit val msgs: Messages = messages(application)
-        val list = PreviousRegistrationSummary.row(baseAnswers, Seq.empty, waypoints)
+        val list = PreviousRegistrationSummary.row(baseAnswers, Seq.empty, waypoints, AddPreviousRegistrationPage())
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST

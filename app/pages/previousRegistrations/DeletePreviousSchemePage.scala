@@ -16,8 +16,9 @@
 
 package pages.previousRegistrations
 
+import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousRegistration.{DeriveNumberOfPreviousRegistrations, DeriveNumberOfPreviousSchemes}
@@ -29,12 +30,23 @@ case class DeletePreviousSchemePage(countryIndex: Index) extends QuestionPage[Bo
   override def toString: String = "deletePreviousScheme"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.DeletePreviousRegistrationController.onPageLoad(waypoints, countryIndex)
+    routes.DeletePreviousRegistrationController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     (answers.get(DeriveNumberOfPreviousRegistrations), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
       case (_, Some(numberOfSchemes)) if numberOfSchemes > 0 =>
-        CheckPreviousSchemeAnswersPage(Some(countryIndex))
+        CheckPreviousSchemeAnswersPage(countryIndex)
+      case (Some(numberOfCountries), _) if numberOfCountries > 0 =>
+        AddPreviousRegistrationPage()
+      case _ =>
+        PreviouslyRegisteredPage
+    }
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    (answers.get(DeriveNumberOfPreviousRegistrations), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
+      case (_, Some(numberOfSchemes)) if numberOfSchemes > 0 =>
+        CheckPreviousSchemeAnswersPage(countryIndex)
       case (Some(numberOfCountries), _) if numberOfCountries > 0 =>
         AddPreviousRegistrationPage()
       case _ =>

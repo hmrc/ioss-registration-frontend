@@ -16,11 +16,11 @@
 
 package pages
 
-import models.{CheckMode, Index, NormalMode}
+import models.{CheckMode, NormalMode}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import pages.previousRegistrations.{AddPreviousRegistrationPage, CheckPreviousSchemeAnswersPage}
+import pages.previousRegistrations.AddPreviousRegistrationPage
 import pages.tradingNames.AddTradingNamePage
 
 class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
@@ -47,15 +47,6 @@ class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
 
   "must return Add Previous Registration when given it's Check mode waypoint" in {
     Waypoint.fromString("change-previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(CheckMode)
-  }
-
-  "must return Check Previous Scheme Answers when given it's Normal mode waypoint" in {
-
-    Waypoint.fromString("previous-scheme-answers").value mustBe CheckPreviousSchemeAnswersPage(Some(Index(0))).waypoint(NormalMode)
-  }
-
-  "must return Check Previous Scheme Answers given it's Check mode waypoint" in {
-    Waypoint.fromString("change-previous-scheme-answers").value mustBe CheckPreviousSchemeAnswersPage(Some(Index(0))).waypoint(CheckMode)
   }
 
   "must return check your answers when given its waypoint" in {

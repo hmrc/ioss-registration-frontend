@@ -16,10 +16,12 @@
 
 package pages.previousRegistrations
 
+import controllers.previousRegistrations.routes
 import models.{Country, Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+
 
 case class PreviousEuCountryPage(index: Index) extends QuestionPage[Country] {
 
@@ -28,9 +30,12 @@ case class PreviousEuCountryPage(index: Index) extends QuestionPage[Country] {
   override def toString: String = "previousEuCountry"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.PreviousEuCountryController.onPageLoad(waypoints, index)
+    routes.PreviousEuCountryController.onPageLoad(waypoints, index)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    PreviousSchemePage(index, Index(0))
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     PreviousSchemePage(index, Index(0))
 
 }

@@ -16,9 +16,10 @@
 
 package pages.previousRegistrations
 
+import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
 import pages.filters.RegisteredForIossInEuPage
-import pages.{AddItemPage, Page, QuestionPage, Waypoints}
+import pages.{AddItemPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
@@ -30,29 +31,33 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
     case _: AddPreviousRegistrationPage => true
     case _ => false
   }
+
+  override val normalModeUrlFragment: String = "previous-schemes-overview"
+  override val checkModeUrlFragment: String = "change-previous-schemes-overview"
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "addPreviousRegistration"
 
-  override val normalModeUrlFragment: String = "previous-schemes-overview"
-  override val checkModeUrlFragment: String = "change-previous-schemes-overview"
-
   override def route(waypoints: Waypoints): Call =
-    controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints)
+    routes.AddPreviousRegistrationController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    answers.get(this).map {
-      case true =>
-        index.map(i => PreviousEuCountryPage(Index(i.position + 1)))
-          .getOrElse(
-            answers
-              .get(deriveNumberOfItems)
-              .map(n => PreviousEuCountryPage(Index(n)))
-              .orRecover
-          )
-      case false =>
-        RegisteredForIossInEuPage//TODO RegisteredForVATJourneyRecoveryPage
-    }.orRecover
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    (answers.get(AddPreviousRegistrationPage()), answers.get(DeriveNumberOfPreviousRegistrations)) match {
+      case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
+      case (Some(false), _) => RegisteredForIossInEuPage //TODO RegisteredForVATJourneyRecoveryPage
+      case _ => JourneyRecoveryPage
+    }
+  }
+
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    (answers.get(AddPreviousRegistrationPage()), answers.get(DeriveNumberOfPreviousRegistrations)) match {
+      case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
+      case (Some(false), _) => RegisteredForIossInEuPage //TODO RegisteredForVATJourneyRecoveryPage
+      case _ => JourneyRecoveryPage
+    }
+  }
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfPreviousRegistrations
+
 }
