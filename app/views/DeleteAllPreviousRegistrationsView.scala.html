@@ -14,15 +14,17 @@
  * limitations under the License.
  *@
 
+@import controllers.routes
 @import views.html.components.ButtonGroup
+@import pages.DeleteAllPreviousRegistrationsPage
 
 @this(
-layout: templates.Layout,
-formHelper: FormWithCSRF,
-govukErrorSummary: GovukErrorSummary,
-govukRadios: GovukRadios,
-button: ButtonGroup,
-govukWarningText: GovukWarningText
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukRadios: GovukRadios,
+    button: ButtonGroup,
+    govukWarningText: GovukWarningText
 )
 
 
@@ -48,7 +50,7 @@ govukWarningText: GovukWarningText
             content = Text(messages("deleteAllPreviousRegistrations.warning"))
         ))
 
-        @button("site.continue", routes.DeleteAllPreviousRegistrationsController.onPageLoad().url)
+        @button("site.continue", DeleteAllPreviousRegistrationsPage.route(waypoints).url)
 
     }
 }

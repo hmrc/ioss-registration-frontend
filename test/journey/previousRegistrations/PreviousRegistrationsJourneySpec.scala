@@ -21,8 +21,10 @@ import journey.JourneyHelpers
 import models.domain.PreviousSchemeNumbers
 import models.{Country, Index, PreviousSchemeType}
 import org.scalatest.freespec.AnyFreeSpec
+import pages.{CheckYourAnswersPage, DeleteAllPreviousRegistrationsPage}
 import pages.filters.RegisteredForIossInEuPage
 import pages.previousRegistrations._
+import queries.previousRegistration.PreviousRegistrationQuery
 
 
 class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGenerators {
@@ -276,6 +278,62 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
           submitAnswer(AddPreviousRegistrationPage(), false),
           pageMustBe(RegisteredForIossInEuPage)
         )
+    }
+
+    "must be able to remove all original previous registration answers" - {
+      "when the user is on the Check Your Answers page and they change their original answer of having a Previous registration to No" in {
+
+        val initialise = journeyOf(
+          setUserAnswerTo(PreviouslyRegisteredPage, true),
+          setUserAnswerTo(PreviousEuCountryPage(index), country),
+          setUserAnswerTo(PreviousSchemeTypePage(index, index), iossScheme),
+          setUserAnswerTo(PreviousIossSchemePage(index, index), false),
+          setUserAnswerTo(PreviousIossNumberPage(index, index), schemeNumber),
+          goTo(CheckYourAnswersPage)
+        )
+
+        startingFrom(CheckYourAnswersPage)
+          .run(
+            initialise,
+            goToChangeAnswer(PreviouslyRegisteredPage),
+            submitAnswer(PreviouslyRegisteredPage, false),
+            pageMustBe(DeleteAllPreviousRegistrationsPage),
+            submitAnswer(DeleteAllPreviousRegistrationsPage, true),
+            removeAddToListItem(PreviousRegistrationQuery(index)),
+            pageMustBe(CheckYourAnswersPage),
+            answersMustNotContain(PreviousSchemeTypePage(index, index))
+          )
+      }
+    }
+
+    "must be able to retain all original previous registration answers" - {
+
+      "when the user is on the Check Your Answers page and they change their original answer of having a previous registration to No" - {
+
+        "but answer no when asked if they want to remove all previous registration from the scheme" in {
+
+          val initialise = journeyOf(
+            setUserAnswerTo(PreviouslyRegisteredPage, true),
+            setUserAnswerTo(PreviousEuCountryPage(index), country),
+            setUserAnswerTo(PreviousSchemeTypePage(index, index), iossScheme),
+            setUserAnswerTo(PreviousIossSchemePage(index, index), false),
+            setUserAnswerTo(PreviousIossNumberPage(index, index), schemeNumber),
+            goTo(CheckYourAnswersPage)
+          )
+
+          startingFrom(CheckYourAnswersPage)
+            .run(
+              initialise,
+              goToChangeAnswer(PreviouslyRegisteredPage),
+              submitAnswer(PreviouslyRegisteredPage, false),
+              pageMustBe(DeleteAllPreviousRegistrationsPage),
+              submitAnswer(DeleteAllPreviousRegistrationsPage, false),
+              removeAddToListItem(PreviousRegistrationQuery(index)),
+              pageMustBe(CheckYourAnswersPage),
+              answersMustNotContain(PreviousSchemeTypePage(index, index))
+            )
+        }
+      }
     }
 
   }
