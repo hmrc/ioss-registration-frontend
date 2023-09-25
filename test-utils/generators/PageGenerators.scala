@@ -26,6 +26,9 @@ import pages.previousRegistrations._
 
 trait PageGenerators {
 
+  implicit lazy val arbitraryFixedEstablishmentAddress: Arbitrary[FixedEstablishmentAddressPage] =
+    Arbitrary(FixedEstablishmentAddressPage(Index(0)))
+
   implicit lazy val arbitraryFixedEstablishmentTradingNamePage: Arbitrary[FixedEstablishmentTradingNamePage] =
     Arbitrary(FixedEstablishmentTradingNamePage(Index(0)))
 

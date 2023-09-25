@@ -56,6 +56,25 @@ trait ModelGenerators extends EitherValues {
       )
     }
 
+  implicit lazy val arbitraryInternationalAddress: Arbitrary[InternationalAddress] =
+    Arbitrary {
+      for {
+        line1 <- commonFieldString(maxFieldLength)
+        line2 <- Gen.option(commonFieldString(maxFieldLength))
+        townOrCity <- commonFieldString(maxFieldLength)
+        stateOrRegion <- Gen.option(commonFieldString(maxFieldLength))
+        postCode <- Gen.option(arbitrary[String])
+        country <- Gen.oneOf(Country.internationalCountries)
+      } yield InternationalAddress(
+        normaliseSpaces(line1),
+        normaliseSpaces(line2),
+        normaliseSpaces(townOrCity),
+        normaliseSpaces(stateOrRegion),
+        normaliseSpaces(postCode),
+        country
+      )
+    }
+
   implicit lazy val arbitraryTradingName: Arbitrary[TradingName] =
     Arbitrary {
       for {
