@@ -32,7 +32,7 @@
 
     @layout(pageTitle = title(form, messages("deleteAllPreviousRegistrations.title"))) {
 
-        @formHelper(action = routes.DeleteAllPreviousRegistrationsController.onSubmit(), Symbol("autoComplete") -> "off") {
+        @formHelper(action = routes.DeleteAllPreviousRegistrationsController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
