@@ -17,33 +17,26 @@
 package viewmodels.checkAnswers.euDetails
 
 import models.{Index, UserAnswers}
-import pages.euDetails.RegistrationTypePage
+import pages.euDetails.FixedEstablishmentTradingNamePage
 import pages.{CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object RegistrationTypeSummary  {
+object FixedEstablishmentTradingNameSummary  {
 
   def row(answers: UserAnswers, waypoints: Waypoints, countryIndex: Index, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(RegistrationTypePage(countryIndex)).map {
+    answers.get(FixedEstablishmentTradingNamePage(countryIndex)).map {
       answer =>
 
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"registrationType.$answer"))
-          )
-        )
-
         SummaryListRowViewModel(
-          key     = "registrationType.checkYourAnswersLabel",
-          value   = value,
+          key     = "fixedEstablishmentTradingName.checkYourAnswersLabel",
+          value   = ValueViewModel(HtmlFormat.escape(answer).toString),
           actions = Seq(
-            ActionItemViewModel("site.change", RegistrationTypePage(countryIndex).changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("registrationType.change.hidden"))
+            ActionItemViewModel("site.change", FixedEstablishmentTradingNamePage(countryIndex).changeLink(waypoints, sourcePage).url)
+              .withVisuallyHiddenText(messages("fixedEstablishmentTradingName.change.hidden"))
           )
         )
     }

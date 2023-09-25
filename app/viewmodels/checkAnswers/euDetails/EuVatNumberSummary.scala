@@ -27,7 +27,7 @@ import viewmodels.implicits._
 
 object EuVatNumberSummary  {
 
-  def row(answers: UserAnswers, waypoints: Waypoints, countryIndex: Index, pageSource: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(answers: UserAnswers, waypoints: Waypoints, countryIndex: Index, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(EuVatNumberPage(countryIndex)).map {
       answer =>
 
@@ -35,7 +35,7 @@ object EuVatNumberSummary  {
           key     = "euVatNumber.checkYourAnswersLabel",
           value   = ValueViewModel(HtmlFormat.escape(answer).toString),
           actions = Seq(
-            ActionItemViewModel("site.change", EuVatNumberPage(countryIndex).changeLink(waypoints, pageSource).url)
+            ActionItemViewModel("site.change", EuVatNumberPage(countryIndex).changeLink(waypoints, sourcePage).url)
               .withVisuallyHiddenText(messages("euVatNumber.change.hidden"))
           )
         )

@@ -330,6 +330,14 @@ euTaxReference.error.length = Tax identification number must be 20 characters or
 euTaxReference.error.format = Tax identification number must only include letters, numbers and spaces
 euTaxReference.change.hidden = your tax identification number
 
+fixedEstablishmentTradingName.title = What is your trading name in {0}?
+fixedEstablishmentTradingName.heading = What is your trading name in {0}?
+fixedEstablishmentTradingName.checkYourAnswersLabel = Trading name
+fixedEstablishmentTradingName.error.required = Enter your trading name in {0}
+fixedEstablishmentTradingName.error.length = Trading name must be 40 characters or less
+fixedEstablishmentTradingName.error.invalid = Trading name must only include letters, numbers, hyphens, spaces and apostrophes
+fixedEstablishmentTradingName.change.hidden = trading name
+
 businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details
 businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.

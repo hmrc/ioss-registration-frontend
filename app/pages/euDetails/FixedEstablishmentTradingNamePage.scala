@@ -17,26 +17,22 @@
 package pages.euDetails
 
 import controllers.euDetails.routes
-import models.euDetails.RegistrationType
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{CheckYourAnswersPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case class RegistrationTypePage(countryIndex: Index) extends QuestionPage[RegistrationType] {
+case class FixedEstablishmentTradingNamePage(countryIndex: Index) extends QuestionPage[String] {
 
   override def path: JsPath = JsPath \ "euDetails" \ countryIndex.position \ toString
 
-  override def toString: String = "registrationType"
+  override def toString: String = "fixedEstablishmentTradingName"
 
   override def route(waypoints: Waypoints): Call =
-    routes.RegistrationTypeController.onPageLoad(waypoints, countryIndex)
+    routes.FixedEstablishmentTradingNameController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    answers.get(this).map {
-      case RegistrationType.VatNumber => EuVatNumberPage(countryIndex)
-      case RegistrationType.TaxId => EuTaxReferencePage(countryIndex)
-    }.orRecover
+    CheckYourAnswersPage // TODO -> to FixedEstablishmentAddressPage
 
   // TODO
 //  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = super.nextPageCheckMode(waypoints, answers)
