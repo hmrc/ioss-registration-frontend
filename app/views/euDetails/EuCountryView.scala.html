@@ -15,7 +15,7 @@
  *@
 
 @import controllers.euDetails.routes
-@import pages.CheckYourAnswersPage
+@import pages.euDetails.EuCountryPage
 @import viewmodels.InputWidth
 @import views.html.components.ButtonGroup
 
@@ -47,7 +47,6 @@
             .withCssClass("autocomplete")
         )
 
-        @* TODO *@
-        @button("site.continue", CheckYourAnswersPage.route(waypoints).url)
+        @button("site.continue", EuCountryPage(countryIndex).route(waypoints).url)
     }
 }

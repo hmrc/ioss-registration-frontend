@@ -136,6 +136,9 @@ POST        /eu-trading-name/:index                              controllers.euD
 GET         /eu-fixed-establishment-address/:index               controllers.euDetails.FixedEstablishmentAddressController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /eu-fixed-establishment-address/:index               controllers.euDetails.FixedEstablishmentAddressController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
+GET         /check-tax-details/:index                            controllers.euDetails.CheckEuDetailsAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /check-tax-details/:index                            controllers.euDetails.CheckEuDetailsAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
 # Business contact details section
 GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

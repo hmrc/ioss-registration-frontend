@@ -16,7 +16,7 @@
 
 @import controllers.euDetails.routes
 @import models.euDetails.EuConsumerSalesMethod
-@import pages.CheckYourAnswersPage
+@import pages.euDetails.SellsGoodsToEuConsumerMethodPage
 @import views.html.components.ButtonGroup
 
 @this(
@@ -44,7 +44,7 @@
                 items = EuConsumerSalesMethod.options
             )
         )
-        @*TODO*@
-        @button("site.continue", CheckYourAnswersPage.route(waypoints).url)
+
+        @button("site.continue", SellsGoodsToEuConsumerMethodPage(countryIndex).route(waypoints).url)
     }
 }

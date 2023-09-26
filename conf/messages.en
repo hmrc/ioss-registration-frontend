@@ -284,7 +284,7 @@ deleteAllTradingNames.change.hidden = Remove all your alternative trading names 
 
 taxRegisteredInEu.title = Is your business registered for VAT in EU countries?
 taxRegisteredInEu.heading = Is your business registered for VAT in EU countries?
-taxRegisteredInEu.checkYourAnswersLabel = Registered for VAT in EU countries
+taxRegisteredInEu.checkYourAnswersLabel = VAT registered
 taxRegisteredInEu.error.required = Select yes if your business registered for VAT in EU countries
 taxRegisteredInEu.change.hidden = if registered for VAT in EU countries
 
@@ -310,14 +310,14 @@ registrationType.title = What sort of registration do you have in {0}
 registrationType.heading = What sort of registration do you have in {0}
 registrationType.vatNumber = VAT number
 registrationType.taxId = Tax ID number
-registrationType.checkYourAnswersLabel = Registration type
+registrationType.checkYourAnswersLabel = Tax registration type
 registrationType.error.required = Select a registration type
 registrationType.change.hidden = Your registration type
 
 euVatNumber.title = What is your VAT registration number for {0}?
 euVatNumber.heading = What is your VAT registration number for {0}?
 euVatNumber.hint = This is the 9 characters after the country code ''{0}'', for example {0}{1}{2}. <br>You can find it on your VAT registration confirmation.
-euVatNumber.checkYourAnswersLabel = VAT registration number
+euVatNumber.checkYourAnswersLabel = VAT number
 euVatNumber.error.required = Enter your VAT registration number for {0}
 euVatNumber.error.invalid = Enter a registration number in the correct format
 euVatNumber.change.hidden = VAT registration number
@@ -359,6 +359,9 @@ fixedEstablishmentAddress.error.stateOrRegion.format = State or region must only
 fixedEstablishmentAddress.error.postCode.length = Postcode must be 40 characters or less
 fixedEstablishmentAddress.error.postCode.invalid = Postcode must only include letters, numbers and spaces
 fixedEstablishmentAddress.change.hidden = fixed establishment address
+
+checkEuDetailsAnswers.title = Check your answers for {0}
+checkEuDetailsAnswers.heading = Check your answers for {0}
 
 businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details

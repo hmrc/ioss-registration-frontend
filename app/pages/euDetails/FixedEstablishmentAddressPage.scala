@@ -18,7 +18,7 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Index, InternationalAddress, UserAnswers}
-import pages.{CheckYourAnswersPage, Page, QuestionPage, Waypoints}
+import pages.{Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
@@ -32,7 +32,7 @@ case class FixedEstablishmentAddressPage(countryIndex: Index) extends QuestionPa
     routes.FixedEstablishmentAddressController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    CheckYourAnswersPage // TODO -> to CheckEuDetailsAnswersPage
+    CheckEuDetailsAnswersPage(countryIndex)
 
   // TODO
 //  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = super.nextPageCheckMode(waypoints, answers)
