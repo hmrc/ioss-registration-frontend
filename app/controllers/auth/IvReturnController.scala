@@ -39,39 +39,39 @@ class IvReturnController @Inject()(
                                     ivFailedView: IvFailedView
                                   ) extends FrontendBaseController with I18nSupport {
 
-  def error: Action[AnyContent] = Action {
+  def error(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
-      Ok(errorView())
+      Ok(errorView(continueUrl))
   }
 
-  def incomplete(): Action[AnyContent] = Action {
+  def incomplete(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
-      Ok(incompleteView())
+      Ok(incompleteView(continueUrl))
   }
 
-  def insufficientEvidence(): Action[AnyContent] = Action {
+  def insufficientEvidence(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
-      Ok(insufficientEvidenceView())
+      Ok(insufficientEvidenceView(continueUrl))
   }
 
-  def lockedOut(): Action[AnyContent] = Action {
+  def lockedOut(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
-      Ok(ivLockedOutView())
+      Ok(ivLockedOutView(continueUrl))
   }
 
-  def preconditionFailed(): Action[AnyContent] = Action {
+  def preconditionFailed(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
-      Ok(ivPreconditionFailedView())
+      Ok(ivPreconditionFailedView(continueUrl))
   }
 
-  def technicalIssue(): Action[AnyContent] = Action {
+  def technicalIssue(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
-      Ok(ivTechnicalIssueView())
+      Ok(ivTechnicalIssueView(continueUrl))
   }
 
-  def timeout(): Action[AnyContent] = Action {
+  def timeout(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
-      Ok(ivTimeoutView())
+      Ok(ivTimeoutView(continueUrl))
   }
 
   def userAborted(continueUrl: String): Action[AnyContent] = Action {
@@ -79,9 +79,9 @@ class IvReturnController @Inject()(
       Ok(ivUserAbortedView(continueUrl))
   }
 
-  def notEnoughEvidenceSources(): Action[AnyContent] = Action {
+  def notEnoughEvidenceSources(continueUrl: String): Action[AnyContent] = Action {
     implicit request =>
-      Ok(ivNotEnoughEvidenceView())
+      Ok(ivNotEnoughEvidenceView(continueUrl))
   }
 
   def failedMatching(continueUrl: String): Action[AnyContent] = Action {

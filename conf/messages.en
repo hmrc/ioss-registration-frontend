@@ -93,6 +93,7 @@ ivFailedIdentityVerification.p = We could not confirm your identity
 
 ivError.title = Sorry, there is a problem with the service
 ivError.heading = Sorry, there is a problem with the service
+ivError.p = Try again later.
 
 ivIncomplete.title = Sorry, there is a problem with the service
 ivIncomplete.heading = Sorry, there is a problem with the service
@@ -112,9 +113,11 @@ ivPreconditionFailed.p = Try again later.
 
 ivTechnicalIssue.title = Sorry, there is a problem with the service
 ivTechnicalIssue.heading = Sorry, there is a problem with the service
+ivTechnicalIssue.p = Try again later.
 
 ivTimeout.title = Sorry, there is a problem with the service
 ivTimeout.heading = Sorry, there is a problem with the service
+ivTimeout.p = Try again later.
 
 ivUserAborted.title = Sorry, there is a problem with the service
 ivUserAborted.heading = Sorry, there is a problem with the service
