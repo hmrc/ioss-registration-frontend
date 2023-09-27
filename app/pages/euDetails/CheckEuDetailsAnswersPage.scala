@@ -45,7 +45,7 @@ object CheckEuDetailsAnswersPage {
 
     s match {
       case pattern(indexDisplay) =>
-        Some(CheckEuDetailsAnswersPage(Index(indexDisplay.toInt -1)).waypoint)
+        Some(CheckEuDetailsAnswersPage(Index(indexDisplay.toInt - 1)).waypoint)
 
       case _ => None
     }

@@ -1,0 +1,74 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import controllers.euDetails.routes
+@import viewmodels.LegendSize
+@import views.html.components.ButtonGroup
+
+@this(
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukRadios: GovukRadios,
+        button: ButtonGroup,
+        govukSummaryList: GovukSummaryList,
+)
+
+@(form: Form[_], waypoints: Waypoints, euDetails: SummaryList, canAddEuDetails: Boolean)(implicit request: Request[_], messages: Messages)
+
+@titleText = @{
+    euDetails.rows.size match {
+        case 1 => messages("addEuDetails.title.singular")
+        case i => messages("addEuDetails.title.plural", i)
+    }
+}
+
+@headingText = @{
+    euDetails.rows.size match {
+        case 1 => messages("addEuDetails.heading.singular")
+        case i => messages("addEuDetails.heading.plural", i)
+    }
+}
+@layout(pageTitle = title(form, titleText)) {
+
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummaryViewModel(form))
+    }
+
+    <h1 class="govuk-heading-l">@headingText</h1>
+
+    @govukSummaryList(euDetails)
+
+    @formHelper(action = routes.AddEuDetailsController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
+
+        @if(canAddEuDetails) {
+
+            @govukRadios(
+                RadiosViewModel.yesNo(
+                    field = form("value"),
+                    legend = LegendViewModel(
+                        HtmlContent(Html("""<h2 class="govuk-fieldset__heading">""" + messages("addEuDetails.addAnother") + "</h2>"))
+                    ).withSize(LegendSize.Medium)
+                ).withHint(HintViewModel(messages("addEuDetails.addAnother.hint")))
+            )
+        } else {
+            <p class="govuk-body">@messages("addEuDetails.maximumReached")</p>
+            <input type="hidden" name="value" id="value" value="false"/>
+        }
+
+        @button("site.continue", routes.AddEuDetailsController.onPageLoad(waypoints).url)
+    }
+}

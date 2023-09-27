@@ -75,8 +75,8 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
             TaxRegisteredInEuSummary.row(answers, waypoints, CheckEuDetailsAnswersPage(countryIndex))).flatten
         )
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(waypoints, countryIndex, country, list)(request, messages(application)).toString
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(waypoints, countryIndex, country, list)(request, messages(application)).toString
       }
     }
 
@@ -88,8 +88,8 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
         val request = FakeRequest(GET, routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex).url)
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
 
@@ -106,8 +106,8 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
         val request = FakeRequest(POST, routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex).url)
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, answers, answers).url
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, answers, answers).url
       }
     }
   }

@@ -139,6 +139,9 @@ POST        /eu-fixed-establishment-address/:index               controllers.euD
 GET         /check-tax-details/:index                            controllers.euDetails.CheckEuDetailsAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /check-tax-details/:index                            controllers.euDetails.CheckEuDetailsAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
+GET         /add-tax-details                                     controllers.euDetails.AddEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /add-tax-details                                     controllers.euDetails.AddEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
 # Business contact details section
 GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
