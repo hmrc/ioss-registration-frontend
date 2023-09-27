@@ -27,7 +27,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
-import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage, Waypoints}
+import pages._
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -286,6 +286,57 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
               }
             }
           }
+
+          "and they are NOT a Non Established Taxable Person" - {
+            "and they are a single Market" in {
+              //Allow registration smi = true netp = false
+            }
+
+            "and they are not a single market" - {
+              "must redirect to the Cannot Register Non Established Taxable Person" in {
+                //return kick out smi = false netp = false
+                val updatedVatInfo = vatCustomerInfo
+                  .copy(singleMarketIndicator = false)
+                  .copy(overseasIndicator = false)
+
+                val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
+
+
+                val application = appBuilder(answers = Some(answers)).build()
+
+                when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
+                when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
+
+                running(application) {
+
+                  val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                  val result = route(application, request).value
+
+                  status(result) mustBe SEE_OTHER
+                  redirectLocation(result).value mustBe CannotRegisterNonEstablishedTaxablePersonPage.route(waypoints).url
+                  verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+                }
+
+              }
+            }
+
+            "but their are PPOB is in Norway" in {
+              // allow registration smi = false netp = false + norway
+            }
+          }
+
+          "and they are NOT a Non Established Taxable Person" - {
+            "and they are a single Market" - {
+              "must redirect to the Cannot Register Non Established Taxable Person" in {
+                //return kick out smi = true netp = true
+              }
+            }
+
+            "they are NOT a single market but there PPOB is norway" in {
+              // allow registration smi = false netp = true + norway
+            }
+          }
+
         }
 
         "and we cannot find their VAT details" - {

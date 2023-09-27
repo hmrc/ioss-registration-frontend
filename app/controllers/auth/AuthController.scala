@@ -24,7 +24,7 @@ import models.domain.VatCustomerInfo
 import models.{UserAnswers, VatApiCallResult}
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
-import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage}
+import pages._
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.VatApiCallResultQuery
@@ -62,11 +62,14 @@ class AuthController @Inject()(
             case Right(vatInfo) if checkVrnExpired(vatInfo) =>
               Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
             case Right(vatInfo) => checkNiOrNorwayAndRedirect(vatInfo, answers)
+            case Right(vatInfo) => checkNonEstablishedTaxablePersonAndRedirect(vatInfo, answers)
             case _ =>
               saveAndRedirect(answers, None)
           }
       }
   }
+
+
 
   private def checkNiOrNorwayAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Future[Result] = {
     (vatInfo.singleMarketIndicator, answers.get(BusinessBasedInNiPage)) match {
@@ -76,6 +79,20 @@ class AuthController @Inject()(
       case _ => Redirect(CannotRegisterNotNorwegianBasedBusinessPage.route(EmptyWaypoints).url).toFuture
     }
   }
+
+  private def checkNonEstablishedTaxablePersonAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Future[Result] = {
+    (vatInfo.singleMarketIndicator, vatInfo.overseasIndicator, checkCountryCode(vatInfo)) match {
+      case (true, false, false) => saveAndRedirect(answers, Some(vatInfo))
+      case (true, true, false) => Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
+      case (false, false, false) => Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
+      case (false, false, true) => saveAndRedirect(answers, Some(vatInfo))
+      case (false, true, true) => saveAndRedirect(answers, Some(vatInfo))
+      case _ => Redirect (CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
+    }
+  }
+
+  private def checkCountryCode(vatInfo: VatCustomerInfo): Boolean =
+    vatInfo.desAddress.countryCode.contains("NO")
 
   private def checkVrnExpired(vatInfo: VatCustomerInfo): Boolean =
     vatInfo.deregistrationDecisionDate.exists(!_.isAfter(LocalDate.now(clock)))
