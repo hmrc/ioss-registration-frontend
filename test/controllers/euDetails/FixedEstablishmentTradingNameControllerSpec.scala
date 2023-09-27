@@ -19,7 +19,7 @@ package controllers.euDetails
 import base.SpecBase
 import forms.euDetails.FixedEstablishmentTradingNameFormProvider
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Country, Index}
+import models.{Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -42,12 +42,12 @@ class FixedEstablishmentTradingNameControllerSpec extends SpecBase with MockitoS
   val formProvider = new FixedEstablishmentTradingNameFormProvider()
   val form: Form[String] = formProvider(country)
 
-  private val answers = basicUserAnswersWithVatInfo
+  private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
     .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
     .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
-    .set(EuTaxReferencePage(countryIndex), "TAX_ID").success.value
+    .set(EuTaxReferencePage(countryIndex), arbitraryEuTaxReference.sample.value).success.value
 
   lazy val fixedEstablishmentTradingNameRoute: String = routes.FixedEstablishmentTradingNameController.onPageLoad(waypoints, countryIndex).url
 

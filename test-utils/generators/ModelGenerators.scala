@@ -18,7 +18,7 @@ package generators
 
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.domain.PreviousSchemeNumbers
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
@@ -29,6 +29,7 @@ import uk.gov.hmrc.domain.Vrn
 trait ModelGenerators extends EitherValues {
 
   private val maxFieldLength: Int = 35
+  private val maxEuTaxReferenceLength: Int = 20
 
   implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
     Arbitrary {
@@ -119,6 +120,37 @@ trait ModelGenerators extends EitherValues {
       Gen.oneOf(RegistrationType.values)
     }
 
+  implicit lazy val arbitraryEuTaxReference: Gen[String] = {
+      Gen.listOfN(maxEuTaxReferenceLength, Gen.alphaNumChar).map(_.mkString)
+  }
+
+  implicit lazy val arbitraryEuVatNumber: Gen[String] =
+    for {
+      countryCode <- Gen.oneOf(Country.euCountries.map(_.code))
+      matchedCountryRule = CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == countryCode).head
+    } yield s"$countryCode${matchedCountryRule.exampleVrn}"
+
+  implicit lazy val arbitraryEuDetails: Arbitrary[EuDetails] =
+    Arbitrary {
+      for {
+        country <- arbitraryCountry.arbitrary
+        sellsGoodsToEUConsumerMethod <- Gen.option(arbitraryEuConsumerSalesMethod.arbitrary)
+        registrationType <- Gen.option(arbitraryRegistrationType.arbitrary)
+        euVatNumber <- Gen.option(arbitraryEuVatNumber)
+        euTaxReference <- Gen.option(arbitraryEuTaxReference)
+        fixedEstablishmentTradingName <- Gen.option(arbitrary[String])
+        fixedEstablishmentAddress <- Gen.option(arbitraryInternationalAddress.arbitrary)
+      } yield EuDetails(
+        country,
+        sellsGoodsToEUConsumerMethod,
+        registrationType,
+        euVatNumber,
+        euTaxReference,
+        fixedEstablishmentTradingName,
+        fixedEstablishmentAddress
+      )
+    }
+
   implicit lazy val arbitraryBusinessContactDetails: Arbitrary[BusinessContactDetails] =
     Arbitrary {
       for {
@@ -205,5 +237,4 @@ trait ModelGenerators extends EitherValues {
         "GB42CPBK08005470328725"
       ).map(v => Iban(v).right.get)
     }
-
 }

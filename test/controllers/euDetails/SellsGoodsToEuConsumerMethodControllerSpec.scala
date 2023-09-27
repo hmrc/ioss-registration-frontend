@@ -19,7 +19,7 @@ package controllers.euDetails
 import base.SpecBase
 import forms.euDetails.SellsGoodsToEuConsumerMethodFormProvider
 import models.euDetails.EuConsumerSalesMethod
-import models.{Country, Index}
+import models.{Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -42,7 +42,7 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
   val formProvider = new SellsGoodsToEuConsumerMethodFormProvider()
   val form: Form[EuConsumerSalesMethod] = formProvider(country)
 
-  private val answers = basicUserAnswersWithVatInfo
+  private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
 

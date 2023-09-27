@@ -18,25 +18,40 @@ package controllers.euDetails
 
 import base.SpecBase
 import forms.euDetails.AddEuDetailsFormProvider
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.{Country, Index, UserAnswers}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.euDetails.AddEuDetailsPage
+import pages.euDetails._
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
+import viewmodels.checkAnswers.euDetails.EuDetailsSummary
 import views.html.euDetails.AddEuDetailsView
 
 class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
-  
+  private val countryIndex: Index = Index(0)
+  private val country: Country = arbitraryCountry.arbitrary.sample.value
+
   val formProvider = new AddEuDetailsFormProvider()
   val form: Form[Boolean] = formProvider()
+
+  private val answers: UserAnswers = basicUserAnswersWithVatInfo
+    .set(TaxRegisteredInEuPage, true).success.value
+    .set(EuCountryPage(countryIndex), country).success.value
+    .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
+    .set(EuTaxReferencePage(countryIndex), "123456789").success.value
+    .set(FixedEstablishmentTradingNamePage(countryIndex), "Trading name").success.value
+    .set(FixedEstablishmentAddressPage(countryIndex), arbitraryInternationalAddress.arbitrary.sample.value).success.value
 
   lazy val addEuDetailsRoute: String = routes.AddEuDetailsController.onPageLoad(waypoints).url
 
@@ -44,38 +59,70 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
+      val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
+        implicit val msgs: Messages = messages(application)
+
         val request = FakeRequest(GET, addEuDetailsRoute)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[AddEuDetailsView]
 
+        val list = EuDetailsSummary.countryAndVatNumberList(answers, waypoints, AddEuDetailsPage())
+
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form, waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form, waypoints, list, canAddEuDetails = true)(request, messages(application)).toString
       }
     }
 
-    "must populate the view correctly on a GET when the question has previously been answered" in {
+    "must return OK and the correct view for a GET when the maximum number of eu registrations have already been added" in {
 
-      val userAnswers = basicUserAnswersWithVatInfo.set(AddEuDetailsPage, true).success.value
+      val userAnswers = (0 to Country.euCountries.size).foldLeft(answers) { (userAnswers: UserAnswers, index: Int) =>
+        userAnswers.set(EuCountryPage(Index(index)), country).success.value
+      }
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
+        implicit val msgs: Messages = messages(application)
+
         val request = FakeRequest(GET, addEuDetailsRoute)
 
         val view = application.injector.instanceOf[AddEuDetailsView]
 
+        val list = EuDetailsSummary.countryAndVatNumberList(userAnswers, waypoints, AddEuDetailsPage())
+
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form.fill(true), waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form.fill(true), waypoints, list, canAddEuDetails = false)(request, messages(application)).toString
       }
     }
 
+    "must allow adding an eu registration when just below the maximum number of eu registrations" in {
+      val userAnswers = (0 until(Country.euCountries.size - 1)).foldLeft(answers) { case (userAnswers: UserAnswers, index: Int) =>
+        userAnswers.set(EuCountryPage(Index(index)), country).success.value
+      }
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        implicit val msgs: Messages = messages(application)
+
+        val request = FakeRequest(GET, addEuDetailsRoute)
+
+        val view = application.injector.instanceOf[AddEuDetailsView]
+
+        val list = EuDetailsSummary.countryAndVatNumberList(userAnswers, waypoints, AddEuDetailsPage())
+
+        val result = route(application, request).value
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddEuDetails = true)(request, messages(application)).toString
+      }
+    }
     "must save redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
@@ -83,7 +130,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
-        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+        applicationBuilder(userAnswers = Some(answers))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
@@ -95,18 +142,21 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
-        val expectedAnswers = basicUserAnswersWithVatInfo.set(AddEuDetailsPage, true).success.value
+        val expectedAnswers = answers.set(AddEuDetailsPage(), true).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe AddEuDetailsPage.navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
+        redirectLocation(result).value mustBe AddEuDetailsPage().navigate(waypoints, answers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
+      val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
+        implicit val msgs: Messages = messages(application)
+
         val request =
           FakeRequest(POST, addEuDetailsRoute)
             .withFormUrlEncodedBody(("value", ""))
@@ -117,8 +167,10 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
+        val list = EuDetailsSummary.countryAndVatNumberList(answers, waypoints, AddEuDetailsPage())
+
         status(result) mustBe BAD_REQUEST
-        contentAsString(result) mustBe view(boundForm, waypoints)(request, messages(application)).toString
+        contentAsString(result) mustBe view(boundForm, waypoints, list, canAddEuDetails = true)(request, messages(application)).toString
       }
     }
 

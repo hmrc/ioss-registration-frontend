@@ -18,7 +18,7 @@ package controllers.euDetails
 
 import base.SpecBase
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Country, Index}
+import models.{Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -41,7 +41,7 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
   private val countryIndex: Index = Index(0)
   private val country: Country = arbitraryCountry.arbitrary.sample.value
 
-  private val answers = basicUserAnswersWithVatInfo
+  private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
     .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value

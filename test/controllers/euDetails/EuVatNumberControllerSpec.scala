@@ -19,7 +19,7 @@ package controllers.euDetails
 import base.SpecBase
 import forms.euDetails.EuVatNumberFormProvider
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Country, CountryWithValidationDetails, Index}
+import models.{Country, CountryWithValidationDetails, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -33,19 +33,19 @@ import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
 import views.html.euDetails.EuVatNumberView
 
-
 class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
   private val countryIndex: Index = Index(0)
-  private val country: Country = Country("LV", "Latvia")
+  private val euVatNumber: String = arbitraryEuVatNumber.sample.value
+  private val countryCode: String = euVatNumber.substring(0, 2)
+  private val country: Country = Country(countryCode, Country.euCountries.find(_.code == countryCode).head.name)
   private val countryWithValidation = CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == country.code).value
-  private val euVatNumber: String = s"${country.code}12345678901"
 
   val formProvider = new EuVatNumberFormProvider()
   val form: Form[String] = formProvider(country)
 
-  private val answers = basicUserAnswersWithVatInfo
+  private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
     .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
@@ -90,6 +90,9 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must save and redirect to the next page when valid data is submitted" in {
+
+      println("CountryCode: " + countryCode)
+      println("EuVatNumber: " + euVatNumber)
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 

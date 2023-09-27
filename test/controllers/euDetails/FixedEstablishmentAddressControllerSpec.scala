@@ -19,7 +19,7 @@ package controllers.euDetails
 import base.SpecBase
 import forms.euDetails.FixedEstablishmentAddressFormProvider
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Country, Index, InternationalAddress}
+import models.{Country, Index, InternationalAddress, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -43,7 +43,7 @@ class FixedEstablishmentAddressControllerSpec extends SpecBase with MockitoSugar
   val formProvider = new FixedEstablishmentAddressFormProvider()
   val form: Form[InternationalAddress] = formProvider(country)
 
-  private val answers = basicUserAnswersWithVatInfo
+  private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
     .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value

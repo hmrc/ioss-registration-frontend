@@ -40,7 +40,8 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
   val formProvider = new AddTradingNameFormProvider()
   val form: Form[Boolean] = formProvider()
-  private val baseAnswers = basicUserAnswersWithVatInfo.set(TradingNamePage(Index(0)), TradingName("foo")).success.value
+
+  private val answers = basicUserAnswersWithVatInfo.set(TradingNamePage(Index(0)), TradingName("foo")).success.value
 
   lazy val addTradingNameRoute: String = routes.AddTradingNameController.onPageLoad(waypoints).url
 
@@ -48,7 +49,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(baseAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
         val request = FakeRequest(GET, addTradingNameRoute)
@@ -57,7 +58,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[AddTradingNameView]
 
-        val list = TradingNameSummary.addToListRows(baseAnswers, waypoints, AddTradingNamePage())
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
 
         status(result) mustBe OK
         contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true)(request, messages(application)).toString
@@ -66,7 +67,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET when the maximum number of trading names have already been added" in {
 
-      val userAnswers = (0 to 9).foldLeft(basicUserAnswersWithVatInfo) { (userAnswers: UserAnswers, index: Int) =>
+      val userAnswers = (0 to 9).foldLeft(answers) { (userAnswers: UserAnswers, index: Int) =>
         userAnswers.set(TradingNamePage(Index(index)), TradingName("foo")).success.value
       }
 
@@ -87,7 +88,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must allow adding a trading name when just below the maximum number of trading names" in {
-      val userAnswers = (0 to 8).foldLeft(basicUserAnswersWithVatInfo) { case (userAnswers: UserAnswers, index: Int) =>
+      val userAnswers = (0 to 8).foldLeft(answers) { case (userAnswers: UserAnswers, index: Int) =>
         userAnswers.set(TradingNamePage(Index(index)), TradingName("foo")).success.value
       }
 
@@ -114,7 +115,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
-        applicationBuilder(userAnswers = Some(baseAnswers))
+        applicationBuilder(userAnswers = Some(answers))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
@@ -126,17 +127,17 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
-        val expectedAnswers = baseAnswers.set(AddTradingNamePage(Some(index)), true).success.value
+        val expectedAnswers = answers.set(AddTradingNamePage(Some(index)), true).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe AddTradingNamePage(Some(index)).navigate(waypoints, baseAnswers, expectedAnswers).url
+        redirectLocation(result).value mustBe AddTradingNamePage(Some(index)).navigate(waypoints, answers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(baseAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
         val request =
@@ -147,7 +148,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[AddTradingNameView]
 
-        val list = TradingNameSummary.addToListRows(baseAnswers, waypoints, AddTradingNamePage())
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
 
         val result = route(application, request).value
 

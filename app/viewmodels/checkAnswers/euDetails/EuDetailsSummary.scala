@@ -24,27 +24,32 @@ import play.twirl.api.HtmlFormat
 import queries.euDetails.AllEuDetailsQuery
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
-import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
-import viewmodels.ListItemWrapper
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
 object EuDetailsSummary {
 
-//  def addToListRows(answers: UserAnswers, waypoints: Waypoints, sourcePage: AddItemPage): Seq[ListItemWrapper] =
-//    answers.get(AllEuDetailsQuery).getOrElse(List.empty).zipWithIndex.map {
-//      case (euDetails, countryIndex) =>
-//
-//        ListItemWrapper(
-//          ListItem(
-//            name = HtmlFormat.escape(euDetails.euCountry.name).toString,
-//            changeUrl = CheckEuDetailsAnswersPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url,
-//            removeUrl = ???
-//          ),
-//          removeButtonEnabled = true
-//        )
-//    }
+  def countryAndVatNumberList(answers: UserAnswers, waypoints: Waypoints, sourcePage: AddItemPage)
+                             (implicit messages: Messages): SummaryList =
+    SummaryList(
+      answers.get(AllEuDetailsQuery).getOrElse(List.empty).zipWithIndex.map {
+        case (euDetails, countryIndex) =>
 
+          val value = euDetails.euVatNumber.getOrElse("") + euDetails.euTaxReference.getOrElse("")
+
+          SummaryListRowViewModel(
+            key = euDetails.euCountry.name,
+            value = ValueViewModel(HtmlContent(value)),
+            actions = Seq(
+              ActionItemViewModel("site.change", CheckEuDetailsAnswersPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url)
+                .withVisuallyHiddenText(messages("change.euDetails.hidden", euDetails.euCountry.name)),
+              ActionItemViewModel("site.remove", CheckEuDetailsAnswersPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url) // TODO
+                .withVisuallyHiddenText(messages("euDetails.remove.hidden", euDetails.euCountry.name))
+            ),
+            actionClasses = "govuk-!-width-one-third"
+          )
+      }
+    )
 
   def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)
                      (implicit messages: Messages): Option[SummaryListRow] =
@@ -65,28 +70,4 @@ object EuDetailsSummary {
           )
         )
     }
-
-  def countryAndVatNumberList(answers: UserAnswers, waypoints: Waypoints, sourcePage: AddItemPage)
-                             (implicit messages: Messages): SummaryList = {
-
-    SummaryList(
-      answers.get(AllEuDetailsQuery).getOrElse(List.empty).zipWithIndex.map {
-        case (euDetails, countryIndex) =>
-
-          val value = euDetails.euVatNumber.getOrElse("") + euDetails.euTaxReference.getOrElse("")
-
-          SummaryListRowViewModel(
-            key = euDetails.euCountry.name,
-            value = ValueViewModel(HtmlContent(value)),
-            actions = Seq(
-              ActionItemViewModel("site.change", CheckEuDetailsAnswersPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("change.euDetails.hidden", euDetails.euCountry.name)),
-              ActionItemViewModel("site.remove", ???)
-                .withVisuallyHiddenText(messages("euDetails.remove.hidden", euDetails.euCountry.name))
-            ),
-            actionClasses = "govuk-!-width-one-third"
-          )
-      }
-    )
-  }
 }

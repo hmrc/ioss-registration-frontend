@@ -20,7 +20,7 @@ import models.{CheckMode, Index, NormalMode}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import pages.euDetails.CheckEuDetailsAnswersPage
+import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.previousRegistrations.AddPreviousRegistrationPage
 import pages.tradingNames.AddTradingNamePage
 
@@ -39,6 +39,16 @@ class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
   "must return Check EU Details Answers when given it's waypoint" in {
 
     Waypoint.fromString("check-tax-details-1").value mustBe CheckEuDetailsAnswersPage(Index(0)).waypoint
+  }
+
+  "must return Add EU Details when given it's Normal mode waypoint" in {
+
+    Waypoint.fromString("add-tax-details").value mustBe AddEuDetailsPage().waypoint(NormalMode)
+  }
+
+  "must return Add EU Details when given it's Check mode waypoint" in {
+
+    Waypoint.fromString("change-add-tax-details").value mustBe AddEuDetailsPage().waypoint(CheckMode)
   }
 
   "must return Check Your Answers when given its waypoint" in {

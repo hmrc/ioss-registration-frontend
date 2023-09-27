@@ -18,7 +18,7 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Index, UserAnswers}
-import pages.{CheckAnswersPage, CheckYourAnswersPage, Page, Waypoint, Waypoints}
+import pages.{CheckAnswersPage, Page, Waypoint, Waypoints}
 import play.api.mvc.Call
 
 final case class CheckEuDetailsAnswersPage(countryIndex: Index) extends CheckAnswersPage {
@@ -34,14 +34,14 @@ final case class CheckEuDetailsAnswersPage(countryIndex: Index) extends CheckAns
     routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    CheckYourAnswersPage // TODO -> to Websites
+    AddEuDetailsPage(Some(countryIndex)) // TODO -> to Websites
 }
 
 object CheckEuDetailsAnswersPage {
 
   def waypointFromString(s: String): Option[Waypoint] = {
 
-    val pattern = """check-tax-details-(\d{1,3})""".r.anchored
+    val pattern = """check-tax-details-(\d{1,3})""".r.anchored // TODO -> Check /d{1,3}
 
     s match {
       case pattern(indexDisplay) =>
