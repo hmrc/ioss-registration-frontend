@@ -15,13 +15,13 @@
  *@
 
 @this(
-layout: templates.Layout,
-govukButton: GovukButton
+    layout: templates.Layout,
+    govukButton: GovukButton
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("cannotRemoveExistingPreviousRegistrations.title")), showBackLink = true) {
 
-<h1 class="govuk-heading-l">@messages("cannotRemoveExistingPreviousRegistrations.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("cannotRemoveExistingPreviousRegistrations.heading")</h1>
 }
