@@ -14,57 +14,64 @@
  * limitations under the License.
  */
 
-package controllers.tradingNames
+package controllers.euDetails
 
 import base.SpecBase
-import forms.tradingNames.DeleteTradingNameFormProvider
-import models.{Index, TradingName}
+import forms.euDetails.DeleteEuDetailsFormProvider
+import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.{Country, Index}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.tradingNames.{DeleteTradingNamePage, TradingNamePage}
+import pages.euDetails._
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import queries.euDetails.EuDetailsQuery
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
-import views.html.tradingNames.DeleteTradingNameView
+import views.html.euDetails.DeleteEuDetailsView
 
-class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
-
-  val formProvider = new DeleteTradingNameFormProvider()
-  val form: Form[Boolean] = formProvider()
+class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
-  private val index: Index = Index(0)
+  private val countryIndex: Index = Index(0)
+  private val country: Country = arbitraryCountry.arbitrary.sample.value
 
-  private val tradingName: TradingName = TradingName("tradingNames")
+  val formProvider = new DeleteEuDetailsFormProvider()
+  val form: Form[Boolean] = formProvider(country)
 
-  lazy val deleteTradingNameRoute: String = routes.DeleteTradingNameController.onPageLoad(waypoints, index).url
+  private val answers = basicUserAnswersWithVatInfo
+    .set(TaxRegisteredInEuPage, true).success.value
+    .set(EuCountryPage(countryIndex), country).success.value
+    .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
+    .set(EuTaxReferencePage(countryIndex), arbitraryEuTaxReference.sample.value).success.value
+    .set(FixedEstablishmentTradingNamePage(countryIndex), "Trading name").success.value
+    .set(FixedEstablishmentAddressPage(countryIndex), arbitraryInternationalAddress.arbitrary.sample.value).success.value
 
-  private val answers = basicUserAnswersWithVatInfo.set(TradingNamePage(index), tradingName).success.value
+  lazy val deleteEuDetailsRoute: String = routes.DeleteEuDetailsController.onPageLoad(waypoints, countryIndex).url
 
-
-  "DeleteTradingName Controller" - {
+  "DeleteEuDetails Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, deleteTradingNameRoute)
+        val request = FakeRequest(GET, deleteEuDetailsRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[DeleteTradingNameView]
+        val view = application.injector.instanceOf[DeleteEuDetailsView]
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form, waypoints, index, tradingName)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form, waypoints, countryIndex, country)(request, messages(application)).toString
       }
     }
-
+    
     "must delete a record and redirect to the next page when the user answers Yes" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
@@ -80,19 +87,20 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteTradingNameRoute)
+          FakeRequest(POST, deleteEuDetailsRoute)
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
-        val expectedAnswers = answers.remove(TradingNamePage(index)).success.value
+        val expectedAnswers = answers.remove(EuDetailsQuery(countryIndex)).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe DeleteTradingNamePage(index).navigate(waypoints, answers, expectedAnswers).url
+        redirectLocation(result).value mustBe
+          DeleteEuDetailsPage(countryIndex).navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 
-    "must not delete a record, then redirect to the next page when the user answers No" in {
+    "must not delete a record and redirect to the next page when the user answers No" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
@@ -107,13 +115,14 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteTradingNameRoute)
+          FakeRequest(POST, deleteEuDetailsRoute)
             .withFormUrlEncodedBody(("value", "false"))
 
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe DeleteTradingNamePage(index).navigate(waypoints, answers, answers).url
+        redirectLocation(result).value mustBe
+          DeleteEuDetailsPage(countryIndex).navigate(waypoints, answers, answers).url
         verifyNoInteractions(mockSessionRepository)
       }
     }
@@ -124,17 +133,17 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteTradingNameRoute)
+          FakeRequest(POST, deleteEuDetailsRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[DeleteTradingNameView]
+        val view = application.injector.instanceOf[DeleteEuDetailsView]
 
         val result = route(application, request).value
 
         status(result) mustBe BAD_REQUEST
-        contentAsString(result) mustBe view(boundForm, waypoints, index, tradingName)(request, messages(application)).toString
+        contentAsString(result) mustBe view(boundForm, waypoints, countryIndex, country)(request, messages(application)).toString
       }
     }
 
@@ -143,7 +152,7 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, deleteTradingNameRoute)
+        val request = FakeRequest(GET, deleteEuDetailsRoute)
 
         val result = route(application, request).value
 
@@ -152,12 +161,12 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if the trading name is not found" in {
+    "must redirect to Journey Recovery for a GET if the EU registration is not found" in {
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
-        val request = FakeRequest(GET, deleteTradingNameRoute)
+        val request = FakeRequest(GET, deleteEuDetailsRoute)
 
         val result = route(application, request).value
 
@@ -172,7 +181,7 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteTradingNameRoute)
+          FakeRequest(POST, deleteEuDetailsRoute)
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value

@@ -17,7 +17,7 @@
 package viewmodels.checkAnswers.euDetails
 
 import models.{Index, UserAnswers}
-import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
+import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage, DeleteEuDetailsPage}
 import pages.{AddItemPage, CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
@@ -43,7 +43,7 @@ object EuDetailsSummary {
             actions = Seq(
               ActionItemViewModel("site.change", CheckEuDetailsAnswersPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url)
                 .withVisuallyHiddenText(messages("change.euDetails.hidden", euDetails.euCountry.name)),
-              ActionItemViewModel("site.remove", CheckEuDetailsAnswersPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url) // TODO
+              ActionItemViewModel("site.remove", DeleteEuDetailsPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url)
                 .withVisuallyHiddenText(messages("euDetails.remove.hidden", euDetails.euCountry.name))
             ),
             actionClasses = "govuk-!-width-one-third"

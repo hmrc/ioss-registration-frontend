@@ -142,6 +142,9 @@ POST        /check-tax-details/:index                            controllers.euD
 GET         /add-tax-details                                     controllers.euDetails.AddEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /add-tax-details                                     controllers.euDetails.AddEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
+GET         /remove-tax-details/:index                           controllers.euDetails.DeleteEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /remove-tax-details/:index                           controllers.euDetails.DeleteEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
 # Business contact details section
 GET         /business-contact-details                            controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                            controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
@@ -150,6 +153,7 @@ POST        /business-contact-details                            controllers.Bus
 GET         /bank-details                                        controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /bank-details                                        controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
+# Previously registered details section
 GET        /previous-oss                                         controllers.previousRegistrations.PreviouslyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST       /previous-oss                                         controllers.previousRegistrations.PreviouslyRegisteredController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
