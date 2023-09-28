@@ -61,15 +61,13 @@ class AuthController @Inject()(
           registrationConnector.getVatCustomerInfo().flatMap {
             case Right(vatInfo) if checkVrnExpired(vatInfo) =>
               Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
+            case Right(vatInfo) if isNETP(vatInfo) => Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
             case Right(vatInfo) => checkNiOrNorwayAndRedirect(vatInfo, answers)
-            case Right(vatInfo) => checkNonEstablishedTaxablePersonAndRedirect(vatInfo, answers)
             case _ =>
               saveAndRedirect(answers, None)
           }
       }
   }
-
-
 
   private def checkNiOrNorwayAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Future[Result] = {
     (vatInfo.singleMarketIndicator, answers.get(BusinessBasedInNiPage)) match {
@@ -80,19 +78,16 @@ class AuthController @Inject()(
     }
   }
 
-  private def checkNonEstablishedTaxablePersonAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Future[Result] = {
-    (vatInfo.singleMarketIndicator, vatInfo.overseasIndicator, checkCountryCode(vatInfo)) match {
-      case (true, false, false) => saveAndRedirect(answers, Some(vatInfo))
-      case (true, true, false) => Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
-      case (false, false, false) => Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
-      case (false, false, true) => saveAndRedirect(answers, Some(vatInfo))
-      case (false, true, true) => saveAndRedirect(answers, Some(vatInfo))
-      case _ => Redirect (CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
+  private def isNETP(vatInfo: VatCustomerInfo): Boolean = {
+    (vatInfo.singleMarketIndicator, vatInfo.overseasIndicator, vatInfo.desAddress.countryCode.contains("NO")) match {
+      case (true, false, false) => false
+      case (true, true, false) => true
+      case (false, false, false) => true
+      case (false, false, true) => false
+      case (false, true, true) => false
+      case _ => false
     }
   }
-
-  private def checkCountryCode(vatInfo: VatCustomerInfo): Boolean =
-    vatInfo.desAddress.countryCode.contains("NO")
 
   private def checkVrnExpired(vatInfo: VatCustomerInfo): Boolean =
     vatInfo.deregistrationDecisionDate.exists(!_.isAfter(LocalDate.now(clock)))
