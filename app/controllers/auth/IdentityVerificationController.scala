@@ -61,28 +61,28 @@ class IdentityVerificationController @Inject()(
           ivConnector.getJourneyStatus(id).flatMap {
             case Some(result: IdentityVerificationResult) =>
               result match {
-                case InsufficientEvidence       => handleInsufficientEvidence()
+                case InsufficientEvidence       => handleInsufficientEvidence(continueUrl)
                 case Success                    => Redirect(continueUrl).toFuture
-                case Incomplete                 => Redirect(authRoutes.IvReturnController.incomplete().url).toFuture
+                case Incomplete                 => Redirect(authRoutes.IvReturnController.incomplete(continueUrl).url).toFuture
                 case FailedMatching             => Redirect(authRoutes.IvReturnController.failedMatching(continueUrl).url).toFuture
                 case FailedIdentityVerification => Redirect(authRoutes.IvReturnController.failed(continueUrl).url).toFuture
                 case UserAborted                => Redirect(authRoutes.IvReturnController.userAborted(continueUrl).url).toFuture
-                case LockedOut                  => Redirect(authRoutes.IvReturnController.lockedOut().url).toFuture
-                case PrecondFailed              => Redirect(authRoutes.IvReturnController.preconditionFailed().url).toFuture
-                case TechnicalIssue             => Redirect(authRoutes.IvReturnController.technicalIssue().url).toFuture
-                case TimeOut                    => Redirect(authRoutes.IvReturnController.timeout().url).toFuture
+                case LockedOut                  => Redirect(authRoutes.IvReturnController.lockedOut(continueUrl).url).toFuture
+                case PrecondFailed              => Redirect(authRoutes.IvReturnController.preconditionFailed(continueUrl).url).toFuture
+                case TechnicalIssue             => Redirect(authRoutes.IvReturnController.technicalIssue(continueUrl).url).toFuture
+                case TimeOut                    => Redirect(authRoutes.IvReturnController.timeout(continueUrl).url).toFuture
               }
             case _ =>
-              Redirect(authRoutes.IvReturnController.error().url).toFuture
+              Redirect(authRoutes.IvReturnController.error(continueUrl).url).toFuture
           }
       }.getOrElse {
         Redirect(authRoutes.IdentityVerificationController.identityError(continueUrl).url).toFuture
       }
   }
 
-  private def handleInsufficientEvidence()(implicit hc: HeaderCarrier): Future[Result] =
+  private def handleInsufficientEvidence(continueUrl: String)(implicit hc: HeaderCarrier): Future[Result] =
     ivConnector.getDisabledEvidenceSource().map {
-      case list if allSourcesDisabled(list) => Redirect(authRoutes.IvReturnController.notEnoughEvidenceSources().url)
-      case _                                => Redirect(authRoutes.IvReturnController.insufficientEvidence().url)
+      case list if allSourcesDisabled(list) => Redirect(authRoutes.IvReturnController.notEnoughEvidenceSources(continueUrl).url)
+      case _                                => Redirect(authRoutes.IvReturnController.insufficientEvidence(continueUrl).url)
     }
 }

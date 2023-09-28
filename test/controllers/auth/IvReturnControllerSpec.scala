@@ -35,14 +35,14 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.error().url)
+          val request = FakeRequest(GET, authRoutes.IvReturnController.error(continueUrl).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[IvErrorView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
         }
       }
     }
@@ -54,14 +54,14 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.incomplete().url)
+          val request = FakeRequest(GET, authRoutes.IvReturnController.incomplete(continueUrl).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[IvIncompleteView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
         }
       }
     }
@@ -73,14 +73,14 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.insufficientEvidence().url)
+          val request = FakeRequest(GET, authRoutes.IvReturnController.insufficientEvidence(continueUrl).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[InsufficientEvidenceView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
         }
       }
     }
@@ -92,14 +92,14 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.lockedOut().url)
+          val request = FakeRequest(GET, authRoutes.IvReturnController.lockedOut(continueUrl).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[IvLockedOutView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
         }
       }
     }
@@ -111,14 +111,14 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.preconditionFailed().url)
+          val request = FakeRequest(GET, authRoutes.IvReturnController.preconditionFailed(continueUrl).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[IvPreconditionFailedView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
         }
       }
     }
@@ -130,14 +130,14 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.technicalIssue().url)
+          val request = FakeRequest(GET, authRoutes.IvReturnController.technicalIssue(continueUrl).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[IvTechnicalIssueView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
         }
       }
     }
@@ -149,14 +149,14 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.timeout().url)
+          val request = FakeRequest(GET, authRoutes.IvReturnController.timeout(continueUrl).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[IvTimeoutView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
         }
       }
     }
@@ -187,14 +187,14 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.notEnoughEvidenceSources().url)
+          val request = FakeRequest(GET, authRoutes.IvReturnController.notEnoughEvidenceSources(continueUrl).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[IvNotEnoughEvidenceView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
         }
       }
     }

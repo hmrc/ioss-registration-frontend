@@ -18,11 +18,15 @@
         layout: templates.Layout
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(continueUrl: String)(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("ivInsufficientEvidence.title")), showBackLink = false) {
 
         <h1 class="govuk-heading-l">@messages("ivInsufficientEvidence.heading")</h1>
 
         <p class="govuk-body">@messages("ivInsufficientEvidence.p")</p>
+
+        <a href="@continueUrl" class="govuk-button" data-module="govuk-button" role="button" draggable="false">
+            @messages("site.tryAgain")
+        </a>
     }

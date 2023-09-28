@@ -96,7 +96,7 @@ class IdentityVerificationControllerSpec extends SpecBase with MockitoSugar with
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.IvReturnController.incomplete().url
+          redirectLocation(result).value mustBe authRoutes.IvReturnController.incomplete(continueUrl).url
         }
       }
 
@@ -144,7 +144,7 @@ class IdentityVerificationControllerSpec extends SpecBase with MockitoSugar with
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.IvReturnController.notEnoughEvidenceSources().url
+          redirectLocation(result).value mustBe authRoutes.IvReturnController.notEnoughEvidenceSources(continueUrl).url
         }
       }
 
@@ -161,7 +161,7 @@ class IdentityVerificationControllerSpec extends SpecBase with MockitoSugar with
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.IvReturnController.insufficientEvidence().url
+          redirectLocation(result).value mustBe authRoutes.IvReturnController.insufficientEvidence(continueUrl).url
         }
       }
 
@@ -176,7 +176,7 @@ class IdentityVerificationControllerSpec extends SpecBase with MockitoSugar with
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.IvReturnController.lockedOut().url
+          redirectLocation(result).value mustBe authRoutes.IvReturnController.lockedOut(continueUrl).url
         }
       }
 
@@ -206,7 +206,7 @@ class IdentityVerificationControllerSpec extends SpecBase with MockitoSugar with
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.IvReturnController.timeout().url
+          redirectLocation(result).value mustBe authRoutes.IvReturnController.timeout(continueUrl).url
         }
       }
 
@@ -221,7 +221,7 @@ class IdentityVerificationControllerSpec extends SpecBase with MockitoSugar with
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.IvReturnController.technicalIssue().url
+          redirectLocation(result).value mustBe authRoutes.IvReturnController.technicalIssue(continueUrl).url
         }
       }
 
@@ -236,7 +236,7 @@ class IdentityVerificationControllerSpec extends SpecBase with MockitoSugar with
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.IvReturnController.preconditionFailed().url
+          redirectLocation(result).value mustBe authRoutes.IvReturnController.preconditionFailed(continueUrl).url
         }
       }
 
@@ -251,7 +251,7 @@ class IdentityVerificationControllerSpec extends SpecBase with MockitoSugar with
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.IvReturnController.error().url
+          redirectLocation(result).value mustBe authRoutes.IvReturnController.error(continueUrl).url
         }
       }
 

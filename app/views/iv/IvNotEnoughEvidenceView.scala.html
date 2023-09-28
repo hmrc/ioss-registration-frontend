@@ -18,7 +18,7 @@
         layout: templates.Layout
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(continueUrl: String)(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("ivNotEnoughEvidenceSources.title")), showBackLink = false) {
 
@@ -28,5 +28,7 @@
 
         <p class="govuk-body">@messages("ivNotEnoughEvidenceSources.p2")</p>
 
-        <a href="https://www.gov.uk" class="govuk-link">@messages("site.govuk")</a>
+        <a href="@continueUrl" class="govuk-button" data-module="govuk-button" role="button" draggable="false">
+            @messages("site.tryAgain")
+        </a>
     }
