@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.previousRegistrations
 
 import base.SpecBase
-import forms.DeleteAllPreviousRegistrationsFormProvider
+import forms.previousRegistrations.DeleteAllPreviousRegistrationsFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.{Country, Index}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{DeleteAllPreviousRegistrationsPage, EmptyWaypoints, Waypoints}
-import pages.previousRegistrations.{PreviousEuCountryPage, PreviousOssNumberPage, PreviouslyRegisteredPage}
+import pages.previousRegistrations.{DeleteAllPreviousRegistrationsPage, PreviousEuCountryPage, PreviousOssNumberPage, PreviouslyRegisteredPage}
+import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import repositories.AuthenticatedUserAnswersRepository
-import views.html.DeleteAllPreviousRegistrationsView
+import views.html.previousRegistrations.DeleteAllPreviousRegistrationsView
 
 import scala.concurrent.Future
 
@@ -149,7 +149,7 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
       }
     }
 
@@ -165,7 +165,7 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
       }
     }
   }

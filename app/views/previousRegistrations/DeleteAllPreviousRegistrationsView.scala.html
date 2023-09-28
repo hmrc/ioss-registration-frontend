@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import controllers.routes
+@import controllers.previousRegistrations.routes
+@import pages.previousRegistrations.DeleteAllPreviousRegistrationsPage
 @import views.html.components.ButtonGroup
-@import pages.DeleteAllPreviousRegistrationsPage
 
 @this(
     layout: templates.Layout,
@@ -26,7 +26,6 @@
     button: ButtonGroup,
     govukWarningText: GovukWarningText
 )
-
 
 @(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
 

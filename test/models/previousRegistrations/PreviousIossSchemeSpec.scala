@@ -14,50 +14,51 @@
  * limitations under the License.
  */
 
-package models
+package models.previousRegistrations
 
+import models.PreviousScheme
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
+import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.OptionValues
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.libs.json.{JsError, Json, JsString}
+import play.api.libs.json.{JsError, JsString, Json}
 
-class PreviousSchemeTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues {
+class PreviousIossSchemeSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues {
 
-  "PreviousSchemeType" - {
+  "PreviousIossScheme" - {
 
     "must deserialise valid values" in {
 
-      val gen = Gen.oneOf(PreviousSchemeType.values.toSeq)
+      val gen = Gen.oneOf(PreviousScheme.iossValues.toSeq)
 
       forAll(gen) {
-        previousSchemeType =>
+        previousIossScheme =>
 
-          JsString(previousSchemeType.toString).validate[PreviousSchemeType].asOpt.value mustEqual previousSchemeType
+          JsString(previousIossScheme.toString).validate[PreviousScheme].asOpt.value mustEqual previousIossScheme
       }
     }
 
     "must fail to deserialise invalid values" in {
 
-      val gen = arbitrary[String] suchThat (!PreviousSchemeType.values.map(_.toString).contains(_))
+      val gen = arbitrary[String] suchThat (!PreviousScheme.iossValues.map(_.toString).contains(_))
 
       forAll(gen) {
         invalidValue =>
 
-          JsString(invalidValue).validate[PreviousSchemeType] mustEqual JsError("error.invalid")
+          JsString(invalidValue).validate[PreviousScheme] mustEqual JsError("error.invalid")
       }
     }
 
     "must serialise" in {
 
-      val gen = Gen.oneOf(PreviousSchemeType.values.toSeq)
+      val gen = Gen.oneOf(PreviousScheme.iossValues.toSeq)
 
       forAll(gen) {
-        previousSchemeType =>
+        previousIossScheme =>
 
-          Json.toJson(previousSchemeType) mustEqual JsString(previousSchemeType.toString)
+          Json.toJson(previousIossScheme) mustEqual JsString(previousIossScheme.toString)
       }
     }
   }

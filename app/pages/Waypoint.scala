@@ -33,10 +33,10 @@ object Waypoint {
     Map(
       AddTradingNamePage().normalModeUrlFragment -> AddTradingNamePage().waypoint(NormalMode),
       AddTradingNamePage().checkModeUrlFragment -> AddTradingNamePage().waypoint(CheckMode),
-      AddEuDetailsPage().normalModeUrlFragment -> AddEuDetailsPage().waypoint(NormalMode),
-      AddEuDetailsPage().checkModeUrlFragment -> AddEuDetailsPage().waypoint(CheckMode),
       AddPreviousRegistrationPage().normalModeUrlFragment -> AddPreviousRegistrationPage().waypoint(NormalMode),
       AddPreviousRegistrationPage().checkModeUrlFragment -> AddPreviousRegistrationPage().waypoint(CheckMode),
+      AddEuDetailsPage().normalModeUrlFragment -> AddEuDetailsPage().waypoint(NormalMode),
+      AddEuDetailsPage().checkModeUrlFragment -> AddEuDetailsPage().waypoint(CheckMode),
       // Continue journey
       CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint
     )

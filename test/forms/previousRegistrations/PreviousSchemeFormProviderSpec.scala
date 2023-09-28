@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package forms
+package forms.previousRegistrations
 
-import forms.behaviours.BooleanFieldBehaviours
+import forms.behaviours.OptionFieldBehaviours
+import models.PreviousScheme
 import play.api.data.FormError
 
-class DeleteAllPreviousRegistrationsFormProviderSpec extends BooleanFieldBehaviours {
+class PreviousSchemeFormProviderSpec extends OptionFieldBehaviours {
 
-  val requiredKey = "deleteAllPreviousRegistrations.error.required"
-  val invalidKey = "error.boolean"
-
-  val form = new DeleteAllPreviousRegistrationsFormProvider()()
+  val form = new PreviousSchemeFormProvider()()
 
   ".value" - {
 
     val fieldName = "value"
+    val requiredKey = "previousSchemePage.error.required"
 
-    behave like booleanField(
+    behave like optionsField[PreviousScheme](
       form,
       fieldName,
-      invalidError = FormError(fieldName, invalidKey)
+      validValues  = PreviousScheme.values,
+      invalidError = FormError(fieldName, "error.invalid")
     )
 
     behave like mandatoryField(

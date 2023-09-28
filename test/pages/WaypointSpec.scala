@@ -36,6 +36,15 @@ class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
     Waypoint.fromString("change-add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(CheckMode)
   }
 
+  "must return Add Previous Registration when given it's Normal mode waypoint" in {
+
+    Waypoint.fromString("previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(NormalMode)
+  }
+
+  "must return Add Previous Registration when given it's Check mode waypoint" in {
+    Waypoint.fromString("change-previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(CheckMode)
+  }
+
   "must return Check EU Details Answers when given it's waypoint" in {
 
     Waypoint.fromString("check-tax-details-1").value mustBe CheckEuDetailsAnswersPage(Index(0)).waypoint
@@ -53,19 +62,6 @@ class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
 
   "must return Check Your Answers when given its waypoint" in {
 
-    Waypoint.fromString("check-your-answers").value mustBe CheckYourAnswersPage.waypoint
-  }
-
-  "must return Add Previous Registration when given it's Normal mode waypoint" in {
-
-    Waypoint.fromString("previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(NormalMode)
-  }
-
-  "must return Add Previous Registration when given it's Check mode waypoint" in {
-    Waypoint.fromString("change-previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(CheckMode)
-  }
-
-  "must return check your answers when given its waypoint" in {
     Waypoint.fromString("check-your-answers").value mustBe CheckYourAnswersPage.waypoint
   }
 }

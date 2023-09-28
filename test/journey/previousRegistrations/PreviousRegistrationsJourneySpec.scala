@@ -21,7 +21,8 @@ import journey.JourneyHelpers
 import models.domain.PreviousSchemeNumbers
 import models.{Country, Index, PreviousSchemeType}
 import org.scalatest.freespec.AnyFreeSpec
-import pages.{CheckYourAnswersPage, DeleteAllPreviousRegistrationsPage}
+import pages.CheckYourAnswersPage
+import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.RegisteredForIossInEuPage
 import pages.previousRegistrations._
 import queries.previousRegistration.PreviousRegistrationQuery
@@ -43,7 +44,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, false),
-            pageMustBe(RegisteredForIossInEuPage)//TODO registered-for-vat-in-EU
+            pageMustBe(TaxRegisteredInEuPage)
         )
     }
 
@@ -276,7 +277,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
           submitAnswer(PreviousIossNumberPage(index, index), schemeNumber),
           submitAnswer(CheckPreviousSchemeAnswersPage(index), false),
           submitAnswer(AddPreviousRegistrationPage(), false),
-          pageMustBe(RegisteredForIossInEuPage)
+          pageMustBe(TaxRegisteredInEuPage)
         )
     }
 

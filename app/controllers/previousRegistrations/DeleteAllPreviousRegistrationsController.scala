@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.previousRegistrations
 
 import controllers.actions._
-import forms.DeleteAllPreviousRegistrationsFormProvider
-import pages.{DeleteAllPreviousRegistrationsPage, Waypoints}
-import pages.previousRegistrations.PreviouslyRegisteredPage
+import forms.previousRegistrations.DeleteAllPreviousRegistrationsFormProvider
+import pages.Waypoints
+import pages.previousRegistrations.{DeleteAllPreviousRegistrationsPage, PreviouslyRegisteredPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -27,7 +27,7 @@ import queries.previousRegistration.AllPreviousRegistrationsQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import utils.ItemsHelper.determineRemoveAllItemsAndRedirect
-import views.html.DeleteAllPreviousRegistrationsView
+import views.html.previousRegistrations.DeleteAllPreviousRegistrationsView
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext

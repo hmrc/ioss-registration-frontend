@@ -22,7 +22,6 @@ import journey.JourneyHelpers
 import models.{Index, TradingName}
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
-import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames._
 import queries.tradingNames.AllTradingNames

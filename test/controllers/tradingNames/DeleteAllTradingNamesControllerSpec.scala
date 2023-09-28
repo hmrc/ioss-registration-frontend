@@ -31,7 +31,7 @@ import play.api.test.Helpers._
 import queries.tradingNames.AllTradingNames
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
-import views.html.DeleteAllTradingNamesView
+import views.html.tradingNames.DeleteAllTradingNamesView
 
 class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
 

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package pages
+package pages.previousRegistrations
 
+import controllers.previousRegistrations.routes
 import models.UserAnswers
+import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
@@ -27,7 +29,7 @@ case object DeleteAllPreviousRegistrationsPage extends QuestionPage[Boolean] {
   override def toString: String = "deleteAllPreviousRegistrations"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.routes.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints)
+    routes.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints)
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     answers.get(DeleteAllPreviousRegistrationsPage) match {
