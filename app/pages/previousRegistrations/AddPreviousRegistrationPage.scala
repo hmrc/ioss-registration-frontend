@@ -53,7 +53,7 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
     (answers.get(AddPreviousRegistrationPage()), answers.get(DeriveNumberOfPreviousRegistrations)) match {
       case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
-      case (Some(false), _) => RegisteredForIossInEuPage //TODO RegisteredForVATJourneyRecoveryPage
+      case (Some(false), _) => RegisteredForIossInEuPage //TODO registered-for-vat-in-EU
       case _ => JourneyRecoveryPage
     }
   }
