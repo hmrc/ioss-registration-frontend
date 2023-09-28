@@ -94,7 +94,8 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
             goTo(DeleteTradingNamePage(Index(1))),
             removeAddToListItem(TradingNamePage(Index(1))),
             pageMustBe(AddTradingNamePage()),
-            answersMustNotContain(TradingNamePage(Index(2)))
+            answersMustNotContain(TradingNamePage(Index(2))),
+            answerMustEqual(TradingNamePage(Index(1)), companyNameC)
           )
       }
     }
