@@ -18,7 +18,8 @@ package pages.tradingNames
 
 import controllers.tradingNames.routes
 import models.{Index, UserAnswers}
-import pages.{AddItemPage, CheckYourAnswersPage, Page, QuestionPage, Waypoints}
+import pages.previousRegistrations.PreviouslyRegisteredPage
+import pages.{AddItemPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
@@ -54,7 +55,7 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
         }
 
       case false =>
-        CheckYourAnswersPage // TODO Change to prev reg page when created
+        PreviouslyRegisteredPage
     }.orRecover
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfTradingNames

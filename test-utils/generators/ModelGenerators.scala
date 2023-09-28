@@ -18,6 +18,7 @@ package generators
 
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
+import models.domain.PreviousSchemeNumbers
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
@@ -115,6 +116,22 @@ trait ModelGenerators extends EitherValues {
       lastNumber <- Gen.numChar
       lastLetters <- listOfN(2, Gen.alphaChar)
     } yield firstLetters.mkString + firstNumber.toString + middle.mkString + lastNumber.toString + lastLetters.mkString
+
+
+  implicit lazy val arbitraryPreviousScheme: Arbitrary[PreviousScheme] =
+    Arbitrary {
+      Gen.oneOf(PreviousScheme.values)
+    }
+
+  implicit lazy val arbitraryPreviousSchemeType: Arbitrary[PreviousSchemeType] =
+    Arbitrary {
+      Gen.oneOf(PreviousSchemeType.values)
+    }
+
+  implicit lazy val arbitraryPreviousIossSchemeDetails: Arbitrary[PreviousSchemeNumbers] =
+    Arbitrary {
+      PreviousSchemeNumbers("12345667", Some("test"))
+    }
 
 
 

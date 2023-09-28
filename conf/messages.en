@@ -303,6 +303,110 @@ deleteAllTradingNames.warning = This will delete all the trading names you have 
 deleteAllTradingNames.error.required = Select yes if you want to remove all your alternative trading names from this scheme
 deleteAllTradingNames.change.hidden = Remove all your alternative trading names from this scheme
 
+previouslyRegistered.title = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
+previouslyRegistered.heading = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
+previouslyRegistered.hint = This includes One Stop Shop (OSS) schemes.
+previouslyRegistered.checkYourAnswersLabel = Other One Stop Shop registrations
+previouslyRegistered.error.required = Select yes if your business has ever registered for an Import One Stop Shop scheme in an EU country
+previouslyRegistered.change.hidden = if your business has ever registered for an Import One Stop Shop scheme in an EU country
+
+previousEuCountry.title = Which country did your business register in?
+previousEuCountry.heading = Which country did your business register in?
+previousEuCountry.error.required = Select an EU country
+previousEuCountry.error.duplicate = You selected this EU country already. Select a different one.
+
+previousScheme.title = Which scheme did your business register for?
+previousScheme.heading = Which scheme did your business register for?
+previousScheme.ossu = One Stop Shop Union
+previousScheme.ossnu = One Stop Shop non-Union
+previousScheme.iosswoi = Import One Stop Shop without intermediary
+previousScheme.iosswi = Import One Stop Shop with intermediary
+previousScheme.oss = One Stop Shop (OSS)
+previousScheme.ioss = Import One Stop Shop (IOSS)
+previousScheme.checkYourAnswersLabel = Scheme
+previousScheme.error.required = Select which scheme did your business register for
+previousScheme.change.hidden = which scheme did your business register for
+previousScheme.oss.exceed.error = Cannot select another OSS registration for {0}
+previousScheme.oss.schemes.exceed.error = Cannot select another {0} OSS registration for {1}
+previousScheme.ioss.exceed.error = Cannot select another IOSS registration for {0}
+previousScheme.remove.hidden = Remove tax details for {0} {1} scheme
+
+previousOssNumber.title = Enter your registration number for {0}?
+previousOssNumber.heading = Enter your registration number for {0}?
+previousOssNumber.hint.default = This will start with {0} or EU, for example {0}{1}{2}
+previousOssNumber.hint.union = This will start with {0}, for example {0}{1}{2}
+previousOssNumber.hint.nonunion = This will start with EU, for example EU123456789
+previousOssNumber.error.required = Enter your registration number for {0}
+previousOssNumber.error.invalid = Enter a registration number in the correct format
+
+previousIossScheme.title = Did you use an intermediary?
+previousIossScheme.heading = Did you use an intermediary?
+previousIossScheme.checkYourAnswersLabel = previousIossScheme
+previousIossScheme.hint = An intermediary is someone you can appoint to administer and pay IOSS VAT.
+previousIossScheme.error.required = Select yes if this was with intermediary
+previousIossScheme.change.hidden = if this was with intermediary
+
+previousIossNumber.title = Enter your IOSS registration number for {0}
+previousIossNumber.titleWithIntermediary = Enter your IOSS registration numbers for {0}
+previousIossNumber.heading = Enter your IOSS registration number for {0}
+previousIossNumber.headingWithIntermediary = Enter your IOSS registration numbers for {0}
+previousIossNumber.iossNumber = IOSS number
+previousIossNumber.iossNumber.hint = {0}
+previousIossNumber.intermediaryNumber = Intermediary identification number
+previousIossNumber.intermediaryNumber.hint = {0}
+previousIossNumber.intermediaryNumber.checkYourAnswersLabel = Intermediary number
+previousIossNumber.checkYourAnswersLabel = Registration number
+previousIossNumber.error.previousScheme.required = Enter your scheme number
+previousIossNumber.error.schemeNumber.required = Enter your IOSS registration number
+previousIossNumber.error.intermediaryNumber.required = Enter your intermediary number
+previousIossNumber.error.length = PreviousIossNumber must be 100 characters or less
+previousIossNumber.change.hidden = PreviousIossNumber
+previousIossNumber.error.invalid = Enter a valid IOSS registration number
+previousIntermediaryNumber.error.invalid = Enter a valid intermediary identification number
+
+previousSchemeNumber.checkYourAnswersLabel = Registration number
+
+previousRegistrations.checkYourAnswersLabel = Countries registered in
+previousRegistrations.change.hidden = Countries registered in
+previousRegistrations.add.hidden = Countries registered in
+
+checkPreviousSchemeAnswers.title = Check your answers for {0}
+checkPreviousSchemeAnswers.heading = Check your answers for {0}
+checkPreviousSchemeAnswers.error.required = Select yes if you need to add another scheme registration for {0}
+checkPreviousSchemeAnswers.remove.hidden = Remove {0}
+checkPreviousSchemeAnswers.addAnother = Add another scheme registration from {0}?
+checkPreviousSchemeAnswers.maximumReached = You have added details for every scheme in {0}
+
+deletePreviousRegistration.title = Are you sure you need to remove the deregistration for {0}?
+deletePreviousRegistration.heading = Are you sure you need to remove the deregistration for {0}?
+deletePreviousRegistration.error.required = Select yes if you are sure you need to remove the deregistration
+
+deletePreviousScheme.title = Remove this scheme for {0}?
+deletePreviousScheme.heading = Remove this scheme for {0}?
+deletePreviousScheme.paragraph = This will remove {0} from your previous registrations.
+deletePreviousScheme.error.required = Select yes if you want to remove this scheme for {0}
+
+addPreviousRegistration.title.singular = You added registration details for one country
+addPreviousRegistration.heading.singular = You added registration details for one country
+addPreviousRegistration.title = You added registration details for {0} countries
+addPreviousRegistration.heading = You added registration details for {0} countries
+addPreviousRegistration.maximumReached = You have added details for every country
+addPreviousRegistration.error.required = Select yes if you need to add another deregistration
+addPreviousRegistration.change.hidden = if you have registered in {0}
+addPreviousRegistration.remove.hidden = Remove registration details in {0}
+addPreviousRegistration.addAnother = Add another registration?
+addPreviousRegistration.addAnother.hint = You must tell us about all previous and current registrations from all OSS and IOSS schemes.
+
+cannotRemoveExistingPreviousRegistrations.title = You cannot delete previous OSS or IOSS registrations that you''ve already added
+cannotRemoveExistingPreviousRegistrations.heading = You cannot delete previous OSS or IOSS registrations that you''ve already added
+
+saveProgress.button = Save and come back later
+
+deleteAllPreviousRegistrations.title = Remove all your previous registrations information from this scheme?
+deleteAllPreviousRegistrations.heading = Remove all your previous registrations information from this scheme?
+deleteAllPreviousRegistrations.warning = This will delete all your previous registrations you have added.
+deleteAllPreviousRegistrations.error.required = Select yes if you want to remove all your previous registrations from this scheme
+deleteAllPreviousRegistrations.change.hidden = Remove all your previous registrations information from this scheme
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.hint = EU member states will only use these if they need to repay you.

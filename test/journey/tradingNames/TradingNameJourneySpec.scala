@@ -22,6 +22,7 @@ import journey.JourneyHelpers
 import models.{Index, TradingName}
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
+import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames._
 import queries.tradingNames.AllTradingNames
 
@@ -58,7 +59,7 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
           submitAnswer(AddTradingNamePage(Some(Index(8))), true),
           submitAnswer(TradingNamePage(Index(9)), companyNameB),
           submitAnswer(AddTradingNamePage(Some(Index(9))), false),
-          pageMustBe(CheckYourAnswersPage) // TODO change to prev reg when created
+          pageMustBe(PreviouslyRegisteredPage)
         )
     }
 

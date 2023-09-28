@@ -18,6 +18,7 @@ package pages
 
 import models.{CheckMode, Mode, NormalMode}
 import pages.tradingNames.AddTradingNamePage
+import pages.previousRegistrations.AddPreviousRegistrationPage
 
 case class Waypoint(
                      page: WaypointPage,
@@ -31,7 +32,10 @@ object Waypoint {
     Map(
       AddTradingNamePage().normalModeUrlFragment -> AddTradingNamePage().waypoint(NormalMode),
       AddTradingNamePage().checkModeUrlFragment -> AddTradingNamePage().waypoint(CheckMode),
+      AddPreviousRegistrationPage().normalModeUrlFragment -> AddPreviousRegistrationPage().waypoint(NormalMode),
+      AddPreviousRegistrationPage().checkModeUrlFragment -> AddPreviousRegistrationPage().waypoint(CheckMode),
       // Continue journey
+      CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint,
       CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint
     )
 
