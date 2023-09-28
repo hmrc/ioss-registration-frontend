@@ -23,7 +23,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.VatRegistrationDetailsSummary
-import viewmodels.checkAnswers.euDetails.TaxRegisteredInEuSummary
+import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
@@ -57,6 +57,7 @@ class CheckYourAnswersController @Inject()(
       val maybeHasTradingNameSummaryRow = HasTradingNameSummary.row(request.userAnswers, waypoints, thisPage)
       val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
       val maybeTaxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, thisPage)
+      val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
       val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(request.userAnswers, waypoints, thisPage)
       val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(request.userAnswers, waypoints, thisPage)
       val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(request.userAnswers, waypoints, thisPage)
@@ -76,7 +77,14 @@ class CheckYourAnswersController @Inject()(
             }
           },
           tradingNameSummaryRow,
-          maybeTaxRegisteredInEuSummaryRow, // TODO
+          maybeTaxRegisteredInEuSummaryRow.map { taxRegisteredInEuSummaryRow =>
+            if (euDetailsSummaryRow.nonEmpty) {
+              taxRegisteredInEuSummaryRow.withCssClass("govuk-summary-list__row--no-border")
+            } else {
+              taxRegisteredInEuSummaryRow
+            }
+          },
+          euDetailsSummaryRow,
           businessContactDetailsContactNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
           businessContactDetailsTelephoneSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
           businessContactDetailsEmailSummaryRow,

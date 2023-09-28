@@ -17,40 +17,29 @@
 package pages.euDetails
 
 import controllers.euDetails.routes
-import models.{Index, UserAnswers}
-import pages.{CheckAnswersPage, NonEmptyWaypoints, Page, Waypoint, Waypoints}
+import models.UserAnswers
+import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
+import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-final case class CheckEuDetailsAnswersPage(countryIndex: Index) extends CheckAnswersPage {
+case object DeleteAllEuDetailsPage extends QuestionPage[Boolean] {
 
-  override def isTheSamePage(other: Page): Boolean = other match {
-    case p: CheckEuDetailsAnswersPage => p.countryIndex == this.countryIndex
-    case _ => false
-  }
+  override def path: JsPath = JsPath \ toString
 
-  override val urlFragment: String = s"check-tax-details-${countryIndex.display}"
+  override def toString: String = "deleteAllEuDetails"
 
   override def route(waypoints: Waypoints): Call =
-    routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex)
+    routes.DeleteAllEuDetailsController.onPageLoad(waypoints)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    AddEuDetailsPage(Some(countryIndex))
+    answers.get(this) match {
+      case Some(_) => TaxRegisteredInEuPage
+      case _ => JourneyRecoveryPage
+    }
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
-    AddEuDetailsPage(Some(countryIndex))
-}
-
-object CheckEuDetailsAnswersPage {
-
-  def waypointFromString(s: String): Option[Waypoint] = {
-
-    val pattern = """check-tax-details-(\d{1,3})""".r.anchored
-
-    s match {
-      case pattern(indexDisplay) =>
-        Some(CheckEuDetailsAnswersPage(Index(indexDisplay.toInt - 1)).waypoint)
-
-      case _ => None
+    answers.get(this) match {
+      case Some(_) => CheckYourAnswersPage
+      case _ => JourneyRecoveryPage
     }
-  }
 }

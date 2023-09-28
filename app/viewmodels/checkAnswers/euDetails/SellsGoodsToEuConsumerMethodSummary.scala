@@ -26,6 +26,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
+// TODO - REMOVE?
 object SellsGoodsToEuConsumerMethodSummary  {
 
   def row(answers: UserAnswers, waypoints: Waypoints, countryIndex: Index,  sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =

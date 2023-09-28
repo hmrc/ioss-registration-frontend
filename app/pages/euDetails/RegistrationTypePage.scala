@@ -19,9 +19,10 @@ package pages.euDetails
 import controllers.euDetails.routes
 import models.euDetails.RegistrationType
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import queries.euDetails.DeriveNumberOfEuRegistrations
 
 import scala.util.Try
 
@@ -39,9 +40,6 @@ case class RegistrationTypePage(countryIndex: Index) extends QuestionPage[Regist
       case RegistrationType.VatNumber => EuVatNumberPage(countryIndex)
       case RegistrationType.TaxId => EuTaxReferencePage(countryIndex)
     }.orRecover
-
-  // TODO
-//  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = super.nextPageCheckMode(waypoints, answers)
 
   override def cleanup(value: Option[RegistrationType], userAnswers: UserAnswers): Try[UserAnswers] = {
     value match {

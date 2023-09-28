@@ -17,11 +17,11 @@
 package controllers.euDetails
 
 import base.SpecBase
-import forms.euDetails.DeleteEuDetailsFormProvider
+import forms.euDetails.DeleteAllEuDetailsFormProvider
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Country, Index, UserAnswers}
+import models.{Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.euDetails._
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
@@ -29,50 +29,56 @@ import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import queries.euDetails.EuDetailsQuery
+import queries.euDetails.AllEuDetailsQuery
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
-import views.html.euDetails.DeleteEuDetailsView
+import views.html.euDetails.DeleteAllEuDetailsView
 
-class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
-
+class DeleteAllEuDetailsControllerSpec extends SpecBase with MockitoSugar {
+  
   private val waypoints: Waypoints = EmptyWaypoints
-  private val countryIndex: Index = Index(0)
-  private val country: Country = arbitraryCountry.arbitrary.sample.value
-
-  val formProvider = new DeleteEuDetailsFormProvider()
-  val form: Form[Boolean] = formProvider(country)
-
+  private val countryIndex1: Index = Index(0)
+  private val countryIndex2: Index = Index(1)
+  
+  val formProvider = new DeleteAllEuDetailsFormProvider()
+  val form: Form[Boolean] = formProvider()
+  
   private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
-    .set(EuCountryPage(countryIndex), country).success.value
-    .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
-    .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
-    .set(EuTaxReferencePage(countryIndex), arbitraryEuTaxReference.sample.value).success.value
-    .set(FixedEstablishmentTradingNamePage(countryIndex), "Trading name").success.value
-    .set(FixedEstablishmentAddressPage(countryIndex), arbitraryInternationalAddress.arbitrary.sample.value).success.value
+    .set(EuCountryPage(countryIndex1), arbitraryCountry.arbitrary.sample.value).success.value
+    .set(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(RegistrationTypePage(countryIndex1), RegistrationType.TaxId).success.value
+    .set(EuTaxReferencePage(countryIndex1), arbitraryEuTaxReference.sample.value).success.value
+    .set(FixedEstablishmentTradingNamePage(countryIndex1), "Trading name one").success.value
+    .set(FixedEstablishmentAddressPage(countryIndex1), arbitraryInternationalAddress.arbitrary.sample.value).success.value
+    .set(EuCountryPage(countryIndex2), arbitraryCountry.arbitrary.sample.value).success.value
+    .set(SellsGoodsToEuConsumerMethodPage(countryIndex2), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(RegistrationTypePage(countryIndex2), RegistrationType.TaxId).success.value
+    .set(EuTaxReferencePage(countryIndex2), arbitraryEuTaxReference.sample.value).success.value
+    .set(FixedEstablishmentTradingNamePage(countryIndex2), "Trading name two").success.value
+    .set(FixedEstablishmentAddressPage(countryIndex2), arbitraryInternationalAddress.arbitrary.sample.value).success.value
 
-  lazy val deleteEuDetailsRoute: String = routes.DeleteEuDetailsController.onPageLoad(waypoints, countryIndex).url
+  lazy val deleteAllEuDetailsRoute: String = routes.DeleteAllEuDetailsController.onPageLoad(waypoints).url
 
-  "DeleteEuDetails Controller" - {
+  "DeleteAllEuDetails Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, deleteEuDetailsRoute)
+        val request = FakeRequest(GET, deleteAllEuDetailsRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[DeleteEuDetailsView]
+        val view = application.injector.instanceOf[DeleteAllEuDetailsView]
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form, waypoints, countryIndex, country)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form, waypoints)(request, messages(application)).toString
       }
     }
     
-    "must delete a record and then redirect to the next page when the user answers Yes" in {
+    "must delete all EU registrations and redirect to the next page when the user answers Yes" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
@@ -87,20 +93,21 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteEuDetailsRoute)
+          FakeRequest(POST, deleteAllEuDetailsRoute)
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
-        val expectedAnswers = answers.remove(EuDetailsQuery(countryIndex)).success.value
+        val expectedAnswers = answers
+          .set(DeleteAllEuDetailsPage, true).success.value
+          .remove(AllEuDetailsQuery).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe
-          DeleteEuDetailsPage(countryIndex).navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).url
+        redirectLocation(result).value mustBe DeleteAllEuDetailsPage.navigate(waypoints, answers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 
-    "must not delete a record and then redirect to the next page when the user answers No" in {
+    "must not delete all EU registrations and then redirect to the next page when the user answers No" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
@@ -115,15 +122,17 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteEuDetailsRoute)
+          FakeRequest(POST, deleteAllEuDetailsRoute)
             .withFormUrlEncodedBody(("value", "false"))
 
         val result = route(application, request).value
+        val expectedAnswers = answers
+          .set(DeleteAllEuDetailsPage, false).success.value
+          .set(TaxRegisteredInEuPage, true).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe
-          DeleteEuDetailsPage(countryIndex).navigate(waypoints, answers, answers).url
-        verifyNoInteractions(mockSessionRepository)
+        redirectLocation(result).value mustBe DeleteAllEuDetailsPage.navigate(waypoints, answers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
 
@@ -133,17 +142,17 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteEuDetailsRoute)
+          FakeRequest(POST, deleteAllEuDetailsRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[DeleteEuDetailsView]
+        val view = application.injector.instanceOf[DeleteAllEuDetailsView]
 
         val result = route(application, request).value
 
         status(result) mustBe BAD_REQUEST
-        contentAsString(result) mustBe view(boundForm, waypoints, countryIndex, country)(request, messages(application)).toString
+        contentAsString(result) mustBe view(boundForm, waypoints)(request, messages(application)).toString
       }
     }
 
@@ -152,21 +161,7 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, deleteEuDetailsRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if the EU registration is not found" in {
-
-      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
-
-      running(application) {
-        val request = FakeRequest(GET, deleteEuDetailsRoute)
+        val request = FakeRequest(GET, deleteAllEuDetailsRoute)
 
         val result = route(application, request).value
 
@@ -181,7 +176,7 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, deleteEuDetailsRoute)
+          FakeRequest(POST, deleteAllEuDetailsRoute)
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value

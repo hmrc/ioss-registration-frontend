@@ -284,7 +284,8 @@ deleteAllTradingNames.change.hidden = Remove all your alternative trading names 
 
 taxRegisteredInEu.title = Is your business registered for VAT in EU countries?
 taxRegisteredInEu.heading = Is your business registered for VAT in EU countries?
-taxRegisteredInEu.checkYourAnswersLabel = VAT registered
+taxRegisteredInEu.checkYourAnswersLabel = Registered for tax in other EU countries
+taxRegisteredInEu.mini.checkYourAnswersLabel = VAT Registered
 taxRegisteredInEu.error.required = Select yes if your business registered for VAT in EU countries
 taxRegisteredInEu.change.hidden = if registered for VAT in EU countries
 
@@ -383,6 +384,12 @@ change.euDetails.hidden = Change VAT registration number for {0}
 deleteEuDetails.title = Are you sure you need to remove the tax details for {0}?
 deleteEuDetails.heading = Are you sure you need to remove the tax details for {0}?
 deleteEuDetails.error.required = Select yes if you need to remove the tax details for {0}
+
+deleteAllEuDetails.title = Remove all your EU tax information from this scheme?
+deleteAllEuDetails.heading = Remove all your EU tax information from this scheme?
+deleteAllEuDetails.warning = This will delete all the countries you have added tax information for.
+deleteAllEuDetails.error.required = Select yes if you want to remove all the countries you have added tax information for from this scheme
+deleteAllEuDetails.change.hidden = Remove all the countries you have added tax information for from this scheme
 
 businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details

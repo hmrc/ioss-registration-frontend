@@ -18,9 +18,10 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import queries.euDetails.DeriveNumberOfEuRegistrations
 
 case class FixedEstablishmentTradingNamePage(countryIndex: Index) extends QuestionPage[String] {
 
@@ -33,7 +34,4 @@ case class FixedEstablishmentTradingNamePage(countryIndex: Index) extends Questi
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     FixedEstablishmentAddressPage(countryIndex)
-
-  // TODO
-//  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = super.nextPageCheckMode(waypoints, answers)
 }

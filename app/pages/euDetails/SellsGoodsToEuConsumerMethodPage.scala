@@ -19,9 +19,10 @@ package pages.euDetails
 import controllers.euDetails.routes
 import models.euDetails.EuConsumerSalesMethod
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import queries.euDetails.DeriveNumberOfEuRegistrations
 
 case class SellsGoodsToEuConsumerMethodPage(countryIndex: Index) extends QuestionPage[EuConsumerSalesMethod] {
 
@@ -37,7 +38,4 @@ case class SellsGoodsToEuConsumerMethodPage(countryIndex: Index) extends Questio
       case EuConsumerSalesMethod.FixedEstablishment => RegistrationTypePage(countryIndex)
       case EuConsumerSalesMethod.DispatchWarehouse => CannotRegisterFixedEstablishmentOperationOnlyPage
     }.orRecover
-
-  // TODO
-//  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = super.nextPageCheckMode(waypoints, answers)
 }

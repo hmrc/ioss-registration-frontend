@@ -34,7 +34,7 @@
  @formHelper(action = routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex)) {
 
   @govukSummaryList(list)
-  @*TODO*@
+
   @button("site.continue", CheckEuDetailsAnswersPage(countryIndex).route(waypoints).url)
  }
 }

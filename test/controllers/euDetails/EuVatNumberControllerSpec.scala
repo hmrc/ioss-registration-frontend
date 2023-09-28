@@ -91,9 +91,6 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
 
     "must save and redirect to the next page when valid data is submitted" in {
 
-      println("CountryCode: " + countryCode)
-      println("EuVatNumber: " + euVatNumber)
-
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
