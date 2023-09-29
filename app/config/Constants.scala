@@ -20,7 +20,7 @@ object Constants {
 
   val maxTradingNames: Int = 10
 
-  val tradingNameReservedWords = Set("limited", "ltd", "llp", "plc")
+  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
   val maxSchemes: Int = 3
   val lastSchemeForCountry: Int = 1
   val maxOssSchemes: Int = 2

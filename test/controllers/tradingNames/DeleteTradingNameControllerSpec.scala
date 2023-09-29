@@ -44,14 +44,14 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val deleteTradingNameRoute: String = routes.DeleteTradingNameController.onPageLoad(waypoints, index).url
 
-  private val baseUserAnswers = basicUserAnswersWithVatInfo.set(TradingNamePage(index), tradingName).success.value
+  private val answers = basicUserAnswersWithVatInfo.set(TradingNamePage(index), tradingName).success.value
 
 
   "DeleteTradingName Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(baseUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
         val request = FakeRequest(GET, deleteTradingNameRoute)
@@ -72,7 +72,7 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
-        applicationBuilder(userAnswers = Some(baseUserAnswers))
+        applicationBuilder(userAnswers = Some(answers))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
@@ -84,10 +84,10 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
-        val expectedAnswers = baseUserAnswers.remove(TradingNamePage(index)).success.value
+        val expectedAnswers = answers.remove(TradingNamePage(index)).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe DeleteTradingNamePage(index).navigate(waypoints, baseUserAnswers, expectedAnswers).url
+        redirectLocation(result).value mustBe DeleteTradingNamePage(index).navigate(waypoints, answers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -99,7 +99,7 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
-        applicationBuilder(userAnswers = Some(baseUserAnswers))
+        applicationBuilder(userAnswers = Some(answers))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
           )
@@ -113,14 +113,14 @@ class DeleteTradingNameControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe DeleteTradingNamePage(index).navigate(waypoints, baseUserAnswers, baseUserAnswers).url
+        redirectLocation(result).value mustBe DeleteTradingNamePage(index).navigate(waypoints, answers, answers).url
         verifyNoInteractions(mockSessionRepository)
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(baseUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
         val request =

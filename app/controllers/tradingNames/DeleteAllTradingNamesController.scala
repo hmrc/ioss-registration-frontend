@@ -27,7 +27,7 @@ import queries.tradingNames.AllTradingNames
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import utils.ItemsHelper.determineRemoveAllItemsAndRedirect
-import views.html.DeleteAllTradingNamesView
+import views.html.tradingNames.DeleteAllTradingNamesView
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext

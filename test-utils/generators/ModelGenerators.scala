@@ -18,6 +18,7 @@ package generators
 
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
+import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.domain.PreviousSchemeNumbers
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
@@ -28,6 +29,7 @@ import uk.gov.hmrc.domain.Vrn
 trait ModelGenerators extends EitherValues {
 
   private val maxFieldLength: Int = 35
+  private val maxEuTaxReferenceLength: Int = 20
 
   implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
     Arbitrary {
@@ -50,6 +52,25 @@ trait ModelGenerators extends EitherValues {
         normaliseSpaces(line3),
         normaliseSpaces(line4),
         normaliseSpaces(line5),
+        normaliseSpaces(postCode),
+        country
+      )
+    }
+
+  implicit lazy val arbitraryInternationalAddress: Arbitrary[InternationalAddress] =
+    Arbitrary {
+      for {
+        line1 <- commonFieldString(maxFieldLength)
+        line2 <- Gen.option(commonFieldString(maxFieldLength))
+        townOrCity <- commonFieldString(maxFieldLength)
+        stateOrRegion <- Gen.option(commonFieldString(maxFieldLength))
+        postCode <- Gen.option(arbitrary[String])
+        country <- Gen.oneOf(Country.internationalCountries)
+      } yield InternationalAddress(
+        normaliseSpaces(line1),
+        normaliseSpaces(line2),
+        normaliseSpaces(townOrCity),
+        normaliseSpaces(stateOrRegion),
         normaliseSpaces(postCode),
         country
       )
@@ -87,6 +108,47 @@ trait ModelGenerators extends EitherValues {
   implicit lazy val arbitraryCountry: Arbitrary[Country] =
     Arbitrary {
       Gen.oneOf(Country.euCountries)
+    }
+
+  implicit lazy val arbitraryEuConsumerSalesMethod: Arbitrary[EuConsumerSalesMethod] =
+    Arbitrary {
+      Gen.oneOf(EuConsumerSalesMethod.values)
+    }
+
+  implicit lazy val arbitraryRegistrationType: Arbitrary[RegistrationType] =
+    Arbitrary {
+      Gen.oneOf(RegistrationType.values)
+    }
+
+  implicit lazy val arbitraryEuTaxReference: Gen[String] = {
+      Gen.listOfN(maxEuTaxReferenceLength, Gen.alphaNumChar).map(_.mkString)
+  }
+
+  implicit lazy val arbitraryEuVatNumber: Gen[String] =
+    for {
+      countryCode <- Gen.oneOf(Country.euCountries.map(_.code))
+      matchedCountryRule = CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == countryCode).head
+    } yield s"$countryCode${matchedCountryRule.exampleVrn}"
+
+  implicit lazy val arbitraryEuDetails: Arbitrary[EuDetails] =
+    Arbitrary {
+      for {
+        country <- arbitraryCountry.arbitrary
+        sellsGoodsToEUConsumerMethod <- Gen.option(arbitraryEuConsumerSalesMethod.arbitrary)
+        registrationType <- Gen.option(arbitraryRegistrationType.arbitrary)
+        euVatNumber <- Gen.option(arbitraryEuVatNumber)
+        euTaxReference <- Gen.option(arbitraryEuTaxReference)
+        fixedEstablishmentTradingName <- Gen.option(arbitrary[String])
+        fixedEstablishmentAddress <- Gen.option(arbitraryInternationalAddress.arbitrary)
+      } yield EuDetails(
+        country,
+        sellsGoodsToEUConsumerMethod,
+        registrationType,
+        euVatNumber,
+        euTaxReference,
+        fixedEstablishmentTradingName,
+        fixedEstablishmentAddress
+      )
     }
 
   implicit lazy val arbitraryBusinessContactDetails: Arbitrary[BusinessContactDetails] =
@@ -133,8 +195,6 @@ trait ModelGenerators extends EitherValues {
       PreviousSchemeNumbers("12345667", Some("test"))
     }
 
-
-
   implicit lazy val arbitraryBic: Arbitrary[Bic] = {
     val asciiCodeForA = 65
     val asciiCodeForN = 78
@@ -177,5 +237,4 @@ trait ModelGenerators extends EitherValues {
         "GB42CPBK08005470328725"
       ).map(v => Iban(v).right.get)
     }
-
 }

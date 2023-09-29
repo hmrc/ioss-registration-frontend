@@ -199,27 +199,6 @@ cannotRegisterNoNiOrNorwayBusiness.title = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.heading = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a Northern Irish or Norwegian business.
 
-businessContactDetails.title = Business contact details
-businessContactDetails.heading = Business contact details
-businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.
-businessContactDetailsWithBta.p2 = We''ll only contact you by email or through your business tax account.
-businessContactDetails.fullName = Contact name or business department
-businessContactDetails.telephoneNumber = Telephone number
-businessContactDetails.emailAddress = Email address
-businessContactDetails.emailHint = We''ll send you an email to confirm this is correct.
-businessContactDetails.checkYourAnswersLabel = Your contact details
-businessContactDetails.error.fullName.required = Enter your full name or business department
-businessContactDetails.error.telephoneNumber.required = Enter your business telephone number
-businessContactDetails.error.emailAddress.required = Enter your business email address
-businessContactDetails.error.fullName.length = Full name or business department must be 100 characters or less
-businessContactDetails.error.fullName.invalid = Full name or business department must only include letters, numbers, hyphens, spaces and apostrophes
-businessContactDetails.error.telephoneNumber.length = Telephone number must be 20 characters or less
-businessContactDetails.error.telephoneNumber.invalid = Enter a telephone number in the correct format, like 01642 123 456, 07777777777 or +33 1 23 45 67 88
-businessContactDetails.error.emailAddress.length = Email address must be 50 characters or less
-businessContactDetails.error.emailAddress.invalid = Enter an email address in the correct format, like yourname@example.com
-businessContactDetails.fullName.change.hidden = Full name
-businessContactDetails.change.hidden = your business contact details
-
 checkVatDetails.title = Confirm VAT details for your business
 checkVatDetails.heading = Confirm VAT details for your business
 checkVatDetails.error.required = Select if you want to register this business for the Import One Stop Shop Union scheme
@@ -302,6 +281,136 @@ deleteAllTradingNames.heading = Remove all your alternative trading names from t
 deleteAllTradingNames.warning = This will delete all the trading names you have added.
 deleteAllTradingNames.error.required = Select yes if you want to remove all your alternative trading names from this scheme
 deleteAllTradingNames.change.hidden = Remove all your alternative trading names from this scheme
+
+taxRegisteredInEu.title = Is your business registered for VAT in EU countries?
+taxRegisteredInEu.heading = Is your business registered for VAT in EU countries?
+taxRegisteredInEu.checkYourAnswersLabel = Registered for tax in other EU countries
+taxRegisteredInEu.mini.checkYourAnswersLabel = VAT Registered
+taxRegisteredInEu.error.required = Select yes if your business registered for VAT in EU countries
+taxRegisteredInEu.change.hidden = if registered for VAT in EU countries
+
+euCountry.title = Enter an EU country where your business is registered for tax
+euCountry.heading = Enter an EU country where your business is registered for tax
+euCountry.checkYourAnswersLabel = Country of tax registration
+euCountry.error.required = Select an EU country where your business is registered for tax
+euCountry.error.duplicate = You selected this country already. Select a different one
+
+sellsGoodsToEuConsumerMethod.title = How does your business sell goods in {0}
+sellsGoodsToEuConsumerMethod.heading = How does your business sell goods in {0}
+sellsGoodsToEuConsumerMethod.fixedEstablishment = Fixed establishment
+sellsGoodsToEuConsumerMethod.dispatchWarehouse = Dispatch warehouse
+sellsGoodsToEuConsumerMethod.checkYourAnswersLabel = How your business sells goods
+sellsGoodsToEuConsumerMethod.error.required = Select how your business sells goods in {0}
+sellsGoodsToEuConsumerMethod.change.hidden = SellsGoodsToEuConsumerMethod
+
+cannotRegisterFixedEstablishmentOperationOnly.title = You need to operate as a fixed establishment
+cannotRegisterFixedEstablishmentOperationOnly.heading = You need to operate as a fixed establishment
+cannotRegisterFixedEstablishmentOperationOnly.p = Sign into your <a href="/business-account" class="govuk-link">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.
+
+registrationType.title = What sort of registration do you have in {0}
+registrationType.heading = What sort of registration do you have in {0}
+registrationType.vatNumber = VAT number
+registrationType.taxId = Tax ID number
+registrationType.checkYourAnswersLabel = Tax registration type
+registrationType.error.required = Select a registration type
+registrationType.change.hidden = Your registration type
+
+euVatNumber.title = What is your VAT registration number for {0}?
+euVatNumber.heading = What is your VAT registration number for {0}?
+euVatNumber.hint = This will start with {0}, for example {0}{1}{2}
+euVatNumber.checkYourAnswersLabel = VAT number
+euVatNumber.error.required = Enter your VAT registration number for {0}
+euVatNumber.error.invalid = Enter a registration number in the correct format
+euVatNumber.change.hidden = VAT registration number
+
+euTaxReference.title = What is your business tax identification number in {0}?
+euTaxReference.heading = What is your business tax identification number in {0}?
+euTaxReference.checkYourAnswersLabel = Tax identification number
+euTaxReference.error.required = Enter your business''s tax identification number in {0}
+euTaxReference.error.length = Tax identification number must be 20 characters or less
+euTaxReference.error.format = Tax identification number must only include letters, numbers and spaces
+euTaxReference.change.hidden = your tax identification number
+
+fixedEstablishmentTradingName.title = What is your trading name in {0}?
+fixedEstablishmentTradingName.heading = What is your trading name in {0}?
+fixedEstablishmentTradingName.checkYourAnswersLabel = Trading name
+fixedEstablishmentTradingName.error.required = Enter your trading name in {0}
+fixedEstablishmentTradingName.error.length = Trading name must be 40 characters or less
+fixedEstablishmentTradingName.error.invalid = Trading name must only include letters, numbers, hyphens, spaces and apostrophes
+fixedEstablishmentTradingName.change.hidden = trading name
+
+fixedEstablishmentAddress.title = What is the fixed establishment address in {0}
+fixedEstablishmentAddress.heading = What is the fixed establishment address in {0}
+fixedEstablishmentAddress.line1 = Address line 1
+fixedEstablishmentAddress.line2 = Address line 2 (optional)
+fixedEstablishmentAddress.townOrCity = Town or city
+fixedEstablishmentAddress.stateOrRegion = Region or state (optional)
+fixedEstablishmentAddress.postCode = Postcode (optional)
+fixedEstablishmentAddress.checkYourAnswersLabel = Address
+fixedEstablishmentAddress.error.line1.required = Enter address line 1
+fixedEstablishmentAddress.error.townOrCity.required = Enter the town or city
+fixedEstablishmentAddress.error.line1.length = Address line 1 must be 35 characters or less
+fixedEstablishmentAddress.error.line1.format = Address line 1 must only include letters, numbers, hyphens, spaces and apostrophes
+fixedEstablishmentAddress.error.line2.length = Address line 2 must be 35 characters or less
+fixedEstablishmentAddress.error.line2.format = Address line 2 must only include letters, numbers, hyphens, spaces and apostrophes
+fixedEstablishmentAddress.error.townOrCity.length = Town or city must be 35 characters or less
+fixedEstablishmentAddress.error.townOrCity.format = Town or city must only include letters, numbers, hyphens, spaces and apostrophes
+fixedEstablishmentAddress.error.stateOrRegion.length = State or region must be 35 characters or less
+fixedEstablishmentAddress.error.stateOrRegion.format = State or region must only include letters, numbers, hyphens, spaces and apostrophes
+fixedEstablishmentAddress.error.postCode.length = Postcode must be 40 characters or less
+fixedEstablishmentAddress.error.postCode.invalid = Postcode must only include letters, numbers and spaces
+fixedEstablishmentAddress.change.hidden = fixed establishment address
+
+checkEuDetailsAnswers.title = Check your answers for {0}
+checkEuDetailsAnswers.heading = Check your answers for {0}
+
+addEuDetails.title.singular = You added tax details for one EU country
+addEuDetails.title.plural = You added tax details for {0} EU country
+addEuDetails.heading.singular = You added tax details for one EU countries
+addEuDetails.heading.plural = You added tax details for {0} EU countries
+addEuDetails.maximumReached = You have added details for every EU country
+addEuDetails.error.required = Select yes if you need to add VAT details for another EU country
+addEuDetails.change.hidden = Change tax details for {0}
+addEuDetails.remove.hidden = Remove tax details for {0}
+addEuDetails.addAnother = Add tax details for another EU country?
+addEuDetails.addAnother.hint = You must tell us your tax details for all EU countries.
+
+euDetails.checkYourAnswersLabel = EU tax details added
+euDetails.change.hidden = EU tax registration details added
+euDetails.remove.hidden = Remove tax details for {0}
+
+change.euDetails.hidden = Change VAT registration number for {0}
+
+deleteEuDetails.title = Are you sure you need to remove the tax details for {0}?
+deleteEuDetails.heading = Are you sure you need to remove the tax details for {0}?
+deleteEuDetails.error.required = Select yes if you need to remove the tax details for {0}
+
+deleteAllEuDetails.title = Remove all your EU tax information from this scheme?
+deleteAllEuDetails.heading = Remove all your EU tax information from this scheme?
+deleteAllEuDetails.warning = This will delete all the countries you have added tax information for.
+deleteAllEuDetails.error.required = Select yes if you want to remove all the countries you have added tax information for from this scheme
+deleteAllEuDetails.change.hidden = Remove all the countries you have added tax information for from this scheme
+
+businessContactDetails.title = Business contact details
+businessContactDetails.heading = Business contact details
+businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.
+businessContactDetailsWithBta.p2 = We''ll only contact you by email or through your business tax account.
+businessContactDetails.fullName = Contact name or business department
+businessContactDetails.telephoneNumber = Telephone number
+businessContactDetails.emailAddress = Email address
+businessContactDetails.emailHint = We''ll send you an email to confirm this is correct.
+businessContactDetails.checkYourAnswersLabel = Your contact details
+businessContactDetails.error.fullName.required = Enter your full name or business department
+businessContactDetails.error.telephoneNumber.required = Enter your business telephone number
+businessContactDetails.error.emailAddress.required = Enter your business email address
+businessContactDetails.error.fullName.length = Full name or business department must be 100 characters or less
+businessContactDetails.error.fullName.invalid = Full name or business department must only include letters, numbers, hyphens, spaces and apostrophes
+businessContactDetails.error.telephoneNumber.length = Telephone number must be 20 characters or less
+businessContactDetails.error.telephoneNumber.invalid = Enter a telephone number in the correct format, like 01642 123 456, 07777777777 or +33 1 23 45 67 88
+businessContactDetails.error.emailAddress.length = Email address must be 50 characters or less
+businessContactDetails.error.emailAddress.invalid = Enter an email address in the correct format, like yourname@example.com
+businessContactDetails.fullName.change.hidden = Full name
+businessContactDetails.change.hidden = your business contact details
 
 previouslyRegistered.title = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
 previouslyRegistered.heading = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
@@ -407,6 +516,7 @@ deleteAllPreviousRegistrations.heading = Remove all your previous registrations 
 deleteAllPreviousRegistrations.warning = This will delete all your previous registrations you have added.
 deleteAllPreviousRegistrations.error.required = Select yes if you want to remove all your previous registrations from this scheme
 deleteAllPreviousRegistrations.change.hidden = Remove all your previous registrations information from this scheme
+
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
 bankDetails.hint = EU member states will only use these if they need to repay you.

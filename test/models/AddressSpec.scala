@@ -79,5 +79,60 @@ class AddressSpec extends AnyFreeSpec with Matchers {
         )
       }
     }
+
+    "must serialise / deserialise from and to a International address" - {
+
+      "with all optional fields present" in {
+
+        val address: Address = InternationalAddress("line 1", Some("line 2"), "town or city", Some("state or region"), Some("post code"), Country("DE", "Germany"))
+
+        val expectedJson = Json.obj(
+          "line1" -> "line 1",
+          "line2" -> "line 2",
+          "townOrCity" -> "town or city",
+          "stateOrRegion" -> "state or region",
+          "postCode" -> "post code",
+          "country" -> Country("DE", "Germany")
+        )
+
+        Json.toJson(address) mustBe expectedJson
+        expectedJson.validate[Address] mustBe JsSuccess(address)
+      }
+
+      "with all optional fields missing" in {
+
+        val address: Address = InternationalAddress("line 1", None, "town or city", None, None, Country("FR", "France"))
+
+        val expectedJson = Json.obj(
+          "line1" -> "line 1",
+          "townOrCity" -> "town or city",
+          "country" -> Country("FR", "France")
+        )
+
+        Json.toJson(address) mustBe expectedJson
+        expectedJson.validate[Address] mustBe JsSuccess(address)
+      }
+
+      "excluding trailing and leading whitespace and double spaces" in {
+        val expectedJson = Json.obj(
+          "line1" -> "  line   1",
+          "line2" -> " line     2",
+          "townOrCity" -> " town    or   city  ",
+          "stateOrRegion" -> "  region   or    state ",
+          "postCode" -> "postcode",
+          "country" -> Country("EE", "Estonia")
+        )
+
+        expectedJson.as[InternationalAddress] mustBe InternationalAddress(
+          "line 1",
+          Some("line 2"),
+          "town or city",
+          Some("region or state"),
+          Some("postcode"),
+          Country("EE", "Estonia")
+        )
+      }
+    }
+
   }
 }

@@ -30,9 +30,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.tradingNames.AllTradingNames
 import repositories.AuthenticatedUserAnswersRepository
-import views.html.DeleteAllTradingNamesView
-
-import scala.concurrent.Future
+import utils.FutureSyntax.FutureOps
+import views.html.tradingNames.DeleteAllTradingNamesView
 
 class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
 
@@ -70,7 +69,7 @@ class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
         applicationBuilder(userAnswers = Some(answers))
@@ -100,7 +99,7 @@ class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       val application =
         applicationBuilder(userAnswers = Some(answers))

@@ -18,8 +18,8 @@ package pages.tradingNames
 
 import controllers.tradingNames.routes
 import models.{Index, UserAnswers}
-import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.{AddItemPage, Page, QuestionPage, Waypoints}
+import pages.previousRegistrations.PreviouslyRegisteredPage
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
@@ -46,7 +46,13 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
     answers.get(this).map {
       case true =>
         index
-        .map(i => TradingNamePage(Index(i.position + 1)))
+        .map { i =>
+          if (i.position + 1 < config.Constants.maxTradingNames) {
+            TradingNamePage(Index(i.position + 1))
+          } else {
+            PreviouslyRegisteredPage
+          }
+        }
         .getOrElse {
           answers
             .get(deriveNumberOfItems)

@@ -17,6 +17,7 @@
 package pages
 
 import models.{CheckMode, Mode, NormalMode}
+import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.tradingNames.AddTradingNamePage
 import pages.previousRegistrations.AddPreviousRegistrationPage
 
@@ -34,11 +35,13 @@ object Waypoint {
       AddTradingNamePage().checkModeUrlFragment -> AddTradingNamePage().waypoint(CheckMode),
       AddPreviousRegistrationPage().normalModeUrlFragment -> AddPreviousRegistrationPage().waypoint(NormalMode),
       AddPreviousRegistrationPage().checkModeUrlFragment -> AddPreviousRegistrationPage().waypoint(CheckMode),
+      AddEuDetailsPage().normalModeUrlFragment -> AddEuDetailsPage().waypoint(NormalMode),
+      AddEuDetailsPage().checkModeUrlFragment -> AddEuDetailsPage().waypoint(CheckMode),
       // Continue journey
-      CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint,
       CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint
     )
 
   def fromString(s: String): Option[Waypoint] =
     fragments.get(s)
+      .orElse(CheckEuDetailsAnswersPage.waypointFromString(s))
 }

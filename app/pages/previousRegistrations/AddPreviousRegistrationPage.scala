@@ -18,7 +18,7 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
-import pages.filters.RegisteredForIossInEuPage
+import pages.euDetails.TaxRegisteredInEuPage
 import pages.{AddItemPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
@@ -44,7 +44,7 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     (answers.get(AddPreviousRegistrationPage()), answers.get(DeriveNumberOfPreviousRegistrations)) match {
       case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
-      case (Some(false), _) => RegisteredForIossInEuPage //TODO registered-for-vat-in-EU
+      case (Some(false), _) => TaxRegisteredInEuPage
       case _ => JourneyRecoveryPage
     }
   }
@@ -53,7 +53,7 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
     (answers.get(AddPreviousRegistrationPage()), answers.get(DeriveNumberOfPreviousRegistrations)) match {
       case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
-      case (Some(false), _) => RegisteredForIossInEuPage //TODO registered-for-vat-in-EU
+      case (Some(false), _) => TaxRegisteredInEuPage
       case _ => JourneyRecoveryPage
     }
   }
