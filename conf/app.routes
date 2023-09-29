@@ -147,8 +147,8 @@ POST        /previous-schemes-overview                                    contro
 
 GET         /cannot-delete-previous-registrations                         controllers.previousRegistrations.CannotRemoveExistingPreviousRegistrationsController.onPageLoad()
 
-GET         /check-remove-all-previous-registrations                      controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /check-remove-all-previous-registrations                      controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /remove-all-previous-registrations                            controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /remove-all-previous-registrations                            controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 # EU details section
 GET         /tax-in-eu                                                    controllers.euDetails.TaxRegisteredInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
