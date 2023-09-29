@@ -20,6 +20,7 @@ import generators.{Generators, ModelGenerators}
 import journey.JourneyHelpers
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import models.{Country, Index}
+import org.scalacheck.Gen
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
 import pages.euDetails._
@@ -27,6 +28,7 @@ import queries.euDetails.{AllEuDetailsRawQuery, EuDetailsQuery}
 
 class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGenerators with Generators {
 
+  private val maxCountries: Int = Country.euCountries.size
   private val countryIndex1: Index = Index(0)
   private val countryIndex2: Index = Index(1)
 
@@ -36,6 +38,9 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
 
   private val tradingName = stringsWithMaxLength(40).sample.value
   private val tradingName2 = stringsWithMaxLength(40).sample.value
+  private val tradingName3 = stringsWithMaxLength(40).sample.value
+  private val tradingNames: Seq[String] = Seq(tradingName, tradingName2, tradingName3)
+
   private val euTaxReference = stringsWithMaxLength(20).sample.value
 
   private val initialise = journeyOf(
@@ -56,6 +61,32 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
     setUserAnswerTo(AddEuDetailsPage(Some(countryIndex2)), false),
     goTo(CheckYourAnswersPage)
   )
+
+  s"must be asked for as many as necessary upto the maximum of $maxCountries EU countries" in {
+
+    def generateEuDetails: Seq[JourneyStep[Unit]] = {
+      (0 until maxCountries).foldLeft(Seq.empty[JourneyStep[Unit]]) {
+        case (journeySteps: Seq[JourneyStep[Unit]], index: Int) =>
+          journeySteps :+
+        submitAnswer(EuCountryPage(Index(index)), country) :+
+        submitAnswer(SellsGoodsToEuConsumerMethodPage(Index(index)), EuConsumerSalesMethod.FixedEstablishment) :+
+        submitAnswer(RegistrationTypePage(Index(index)), RegistrationType.VatNumber) :+
+        submitAnswer(EuVatNumberPage(Index(index)), euVatNumber) :+
+        submitAnswer(FixedEstablishmentTradingNamePage(Index(index)), Gen.oneOf(tradingNames).sample.value) :+
+        submitAnswer(FixedEstablishmentAddressPage(Index(index)), arbitraryInternationalAddress.arbitrary.sample.value) :+
+        pageMustBe(CheckEuDetailsAnswersPage(Index(index))) :+
+        goTo(AddEuDetailsPage(Some(Index(index)))) :+
+        submitAnswer(AddEuDetailsPage(Some(Index(index))), true)
+      }
+    }
+
+    startingFrom(TaxRegisteredInEuPage)
+      .run(
+        submitAnswer(TaxRegisteredInEuPage, true) +:
+          generateEuDetails :+
+          pageMustBe(CheckYourAnswersPage): _* // TODO -> to Websites
+      )
+  }
 
   "users with one or more EU registration" - {
 
@@ -135,7 +166,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
             pageMustBe(CheckEuDetailsAnswersPage(countryIndex1)),
             goTo(AddEuDetailsPage(Some(countryIndex1))),
             submitAnswer(AddEuDetailsPage(Some(countryIndex1)), true),
-            submitAnswer(EuCountryPage(countryIndex2), arbitraryCountry.arbitrary.sample.value),
+            submitAnswer(EuCountryPage(countryIndex2), country),
             submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex2), EuConsumerSalesMethod.FixedEstablishment),
             submitAnswer(RegistrationTypePage(countryIndex2), RegistrationType.TaxId),
             submitAnswer(EuTaxReferencePage(countryIndex2), euTaxReference),

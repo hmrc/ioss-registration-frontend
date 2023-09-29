@@ -46,7 +46,13 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
     answers.get(this).map {
       case true =>
         index
-        .map(i => TradingNamePage(Index(i.position + 1)))
+        .map { i =>
+          if (i.position + 1 < config.Constants.maxTradingNames) {
+            TradingNamePage(Index(i.position + 1))
+          } else {
+            PreviouslyRegisteredPage
+          }
+        }
         .getOrElse {
           answers
             .get(deriveNumberOfItems)

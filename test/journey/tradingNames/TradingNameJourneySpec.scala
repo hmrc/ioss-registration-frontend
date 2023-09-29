@@ -20,6 +20,7 @@ import config.Constants.maxTradingNames
 import generators.ModelGenerators
 import journey.JourneyHelpers
 import models.{Index, TradingName}
+import org.scalacheck.Gen
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
@@ -32,35 +33,27 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
   private val companyNameB: TradingName = arbitraryTradingName.arbitrary.sample.value
   private val companyNameC: TradingName = arbitraryTradingName.arbitrary.sample.value
 
+  private val companyNames: Seq[TradingName] = Seq(companyNameA, companyNameB, companyNameC)
+
   "users with one or more trading names" - {
 
     s"must be asked for as many as necessary upto the maximum of $maxTradingNames" in {
 
+      def generateTradingNames: Seq[JourneyStep[Unit]] = {
+        (0 until config.Constants.maxTradingNames).foldLeft(Seq.empty[JourneyStep[Unit]]) {
+          case (journeySteps: Seq[JourneyStep[Unit]], index: Int) =>
+            journeySteps :+
+            submitAnswer(TradingNamePage(Index(index)), Gen.oneOf(companyNames).sample.value) :+
+            submitAnswer(AddTradingNamePage(Some(Index(index))), true)
+        }
+      }
+
       startingFrom(HasTradingNamePage)
         .run(
-          submitAnswer(HasTradingNamePage, true),
-          submitAnswer(TradingNamePage(Index(0)), companyNameA),
-          submitAnswer(AddTradingNamePage(Some(Index(0))), true),
-          submitAnswer(TradingNamePage(Index(1)), companyNameB),
-          submitAnswer(AddTradingNamePage(Some(Index(1))), true),
-          submitAnswer(TradingNamePage(Index(2)), companyNameC),
-          submitAnswer(AddTradingNamePage(Some(Index(2))), true),
-          submitAnswer(TradingNamePage(Index(3)), companyNameB),
-          submitAnswer(AddTradingNamePage(Some(Index(3))), true),
-          submitAnswer(TradingNamePage(Index(4)), companyNameA),
-          submitAnswer(AddTradingNamePage(Some(Index(4))), true),
-          submitAnswer(TradingNamePage(Index(5)), companyNameC),
-          submitAnswer(AddTradingNamePage(Some(Index(5))), true),
-          submitAnswer(TradingNamePage(Index(6)), companyNameC),
-          submitAnswer(AddTradingNamePage(Some(Index(6))), true),
-          submitAnswer(TradingNamePage(Index(7)), companyNameB),
-          submitAnswer(AddTradingNamePage(Some(Index(7))), true),
-          submitAnswer(TradingNamePage(Index(8)), companyNameA),
-          submitAnswer(AddTradingNamePage(Some(Index(8))), true),
-          submitAnswer(TradingNamePage(Index(9)), companyNameB),
-          submitAnswer(AddTradingNamePage(Some(Index(9))), false),
-          pageMustBe(PreviouslyRegisteredPage)
-        )
+          submitAnswer(HasTradingNamePage, true) +:
+          generateTradingNames :+
+          pageMustBe(PreviouslyRegisteredPage): _*
+      )
     }
 
     "must be able to remove them" - {
