@@ -23,7 +23,6 @@ import models.{Country, Index, PreviousSchemeType}
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
 import pages.euDetails.TaxRegisteredInEuPage
-import pages.filters.RegisteredForIossInEuPage
 import pages.previousRegistrations._
 import queries.previousRegistration.PreviousRegistrationQuery
 
