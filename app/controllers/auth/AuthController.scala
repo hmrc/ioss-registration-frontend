@@ -61,30 +61,39 @@ class AuthController @Inject()(
           registrationConnector.getVatCustomerInfo().flatMap {
             case Right(vatInfo) if checkVrnExpired(vatInfo) =>
               Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
-            case Right(vatInfo) if isNETP(vatInfo) => Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
-            case Right(vatInfo) => checkNiOrNorwayAndRedirect(vatInfo, answers)
+            case Right(vatInfo) if isNETP(vatInfo) =>
+                Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
+            case Right(vatInfo) if checkNiOrNorwayAndRedirect(vatInfo, answers) =>
+                checkNiORNorwayAndRedirect(answers)
+            case Right(vatInfo) =>
+                saveAndRedirect(answers, Some(vatInfo))
             case _ =>
               saveAndRedirect(answers, None)
           }
       }
   }
 
-  private def checkNiOrNorwayAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Future[Result] = {
+  private def checkNiOrNorwayAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Boolean = {
     (vatInfo.singleMarketIndicator, answers.get(BusinessBasedInNiPage)) match {
-      case (true, Some(true)) => saveAndRedirect(answers, Some(vatInfo))
-      case (_, Some(true)) => Redirect(CannotRegisterNoNiProtocolPage.route(EmptyWaypoints).url).toFuture
-      case _ if isNorwegianBasedBusiness(answers, vatInfo) => saveAndRedirect(answers, Some(vatInfo))
-      case _ => Redirect(CannotRegisterNotNorwegianBasedBusinessPage.route(EmptyWaypoints).url).toFuture
+      case (true, Some(true)) => false
+      case (_, Some(true)) => true
+      case _ if isNorwegianBasedBusiness(answers, vatInfo) => false
+      case _ => true
+    }
+  }
+
+  private def checkNiORNorwayAndRedirect(answers: UserAnswers): Future[Result] = {
+    if(answers.get(BusinessBasedInNiPage).contains(true)) {
+      Redirect(CannotRegisterNoNiProtocolPage.route(EmptyWaypoints).url).toFuture
+    } else {
+      Redirect(CannotRegisterNotNorwegianBasedBusinessPage.route(EmptyWaypoints).url).toFuture
     }
   }
 
   private def isNETP(vatInfo: VatCustomerInfo): Boolean = {
     (vatInfo.singleMarketIndicator, vatInfo.overseasIndicator, vatInfo.desAddress.countryCode.contains("NO")) match {
-      case (true, false, false) => false
       case (true, true, false) => true
       case (false, false, false) => true
-      case (false, false, true) => false
-      case (false, true, true) => false
       case _ => false
     }
   }
