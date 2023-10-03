@@ -353,11 +353,10 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
               }
             }
 
-            "when the user is not Non Established Taxable Person or single market" - {
+            "when the user is Non Established Taxable Person or single market" - {
               "must redirect to the Cannot Register Non Established Taxable Person Page" in {
                 val updatedVatInfo = vatCustomerInfo
-                  .copy(singleMarketIndicator = false)
-                  .copy(overseasIndicator = false)
+                  .copy(overseasIndicator = true)
 
                 val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
                   .set(BusinessBasedInNiPage, true).success.value

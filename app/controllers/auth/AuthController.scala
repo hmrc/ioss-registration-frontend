@@ -61,10 +61,10 @@ class AuthController @Inject()(
           registrationConnector.getVatCustomerInfo().flatMap {
             case Right(vatInfo) if checkVrnExpired(vatInfo) =>
               Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
-            case Right(vatInfo) if isNETP(vatInfo) =>
-                Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
             case Right(vatInfo) if checkNiOrNorwayAndRedirect(vatInfo, answers) =>
                 checkNiORNorwayAndRedirect(answers)
+            case Right(vatInfo) if isNETP(vatInfo) =>
+              Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
             case Right(vatInfo) =>
                 saveAndRedirect(answers, Some(vatInfo))
             case _ =>
