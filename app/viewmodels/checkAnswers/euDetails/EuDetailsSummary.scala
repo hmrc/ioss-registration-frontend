@@ -43,7 +43,7 @@ object EuDetailsSummary {
             actions = Seq(
               ActionItemViewModel("site.change", CheckEuDetailsAnswersPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url)
                 .withVisuallyHiddenText(messages("change.euDetails.hidden", euDetails.euCountry.name)),
-              ActionItemViewModel("site.remove", DeleteEuDetailsPage(Index(countryIndex)).changeLink(waypoints, sourcePage).url)
+              ActionItemViewModel("site.remove", DeleteEuDetailsPage(Index(countryIndex)).route(waypoints).url)
                 .withVisuallyHiddenText(messages("euDetails.remove.hidden", euDetails.euCountry.name))
             ),
             actionClasses = "govuk-!-width-one-third"
