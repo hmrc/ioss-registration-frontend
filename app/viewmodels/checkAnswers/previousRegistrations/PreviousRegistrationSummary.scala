@@ -17,7 +17,7 @@
 package viewmodels.checkAnswers.previousRegistrations
 
 import models.{Index, UserAnswers}
-import models.domain.{PreviousRegistration, PreviousRegistrationLegacy, PreviousRegistrationNew}
+import models.domain.PreviousRegistration
 import pages.previousRegistrations._
 import pages.{AddItemPage, CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
@@ -63,8 +63,7 @@ object PreviousRegistrationSummary {
         val currentAnswerCountries = previousRegistrations.map(_.previousEuCountry)
 
         val existingCountries = existingPreviousRegistrations.map {
-          case previousRegistrationNew: PreviousRegistrationNew => previousRegistrationNew.country
-          case previousRegistrationLegacy: PreviousRegistrationLegacy => previousRegistrationLegacy.country
+          previousRegistration: PreviousRegistration => previousRegistration.country
         }
 
         val sameListOfCountries: Boolean = currentAnswerCountries.sortBy(_.code) == existingCountries.sortBy(_.code)
