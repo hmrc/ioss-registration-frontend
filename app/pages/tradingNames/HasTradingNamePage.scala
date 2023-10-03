@@ -39,7 +39,7 @@ case object HasTradingNamePage extends QuestionPage[Boolean] {
     }.orRecover
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
-    (answers.get(this), answers.get(AllTradingNames())) match {
+    (answers.get(this), answers.get(AllTradingNames)) match {
       case (Some(true), Some(tradingNames)) if tradingNames.nonEmpty => AddTradingNamePage()
       case (Some(true), _) => TradingNamePage(Index(0))
       case (Some(false), Some(tradingNames)) if tradingNames.nonEmpty => DeleteAllTradingNamesPage

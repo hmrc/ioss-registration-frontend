@@ -14,6 +14,7 @@ GET         /refresh-session-unauthenticated                              contro
 GET         /there-is-a-problem                                           controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
 GET         /check-your-answers                                           controllers.CheckYourAnswersController.onPageLoad()
+POST        /check-your-answers/:incompletePrompt                         controllers.CheckYourAnswersController.onSubmit(incompletePrompt: Boolean)
 
 GET         /identity-problem                                             controllers.auth.IdentityVerificationController.identityError(continueUrl: String)
 GET         /identity-complete                                            controllers.auth.IdentityVerificationController.handleIvFailure(continueUrl: String, journeyId: Option[String])
@@ -45,11 +46,15 @@ GET         /unauthorised                                                 contro
 
 GET         /registration-service-error                                   controllers.VatApiDownController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
+GET         /error-submitting-registration                                controllers.ErrorSubmittingRegistrationController.onPageLoad()
+
 GET         /answers-deleted                                              controllers.AnswersDeletedController.onPageLoad()
 
 # Filter questions section
 GET         /ioss-registered                                              controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /ioss-registered                                              controllers.filters.RegisteredForIossInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /account-restore-error                                        controllers.ProblemWithAccountController.onPageLoad()
 
 GET         /cannot-register-already-registered                           controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 

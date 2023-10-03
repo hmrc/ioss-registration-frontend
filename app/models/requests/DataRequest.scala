@@ -17,6 +17,7 @@
 package models.requests
 
 import models.UserAnswers
+import models.domain.Registration
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
@@ -35,6 +36,7 @@ case class AuthenticatedDataRequest[A](
                                         request: Request[A],
                                         credentials: Credentials,
                                         vrn: Vrn,
+                                        registration: Option[Registration],
                                         userAnswers: UserAnswers
                                       ) extends WrappedRequest[A](request) {
 

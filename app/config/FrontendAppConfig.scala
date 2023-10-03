@@ -62,6 +62,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
     "cy" -> Lang("cy")
   )
 
+  val coreValidationUrl: Service = configuration.get[Service]("microservice.services.core-validation")
+  
   val timeout: Int   = configuration.get[Int]("timeout-dialog.timeout")
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 

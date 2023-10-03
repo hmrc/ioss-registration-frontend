@@ -43,7 +43,7 @@ saveProgress.button = Save and come back later
 
 checkYourAnswers.title = Check Your Answers
 checkYourAnswers.heading = Check Your Answers
-checkYourAnswers.details.heading = One Stop Shop details
+checkYourAnswers.details.heading = Import One Stop Shop details
 checkYourAnswers.info.p1 = By registering for this scheme, you confirm that the information you are providing is correct and complete.
 checkYourAnswers.info.p2 = After registering, do not click the Back button or refresh the page.
 
@@ -251,7 +251,7 @@ cannotRegisterNonEstablishedTaxablePerson.p1 = If you believe this is an error, 
 
 hasTradingName.title = Does your business trade using a name that is different from {0}?
 hasTradingName.heading = Does your business trade using a name that is different from {0}?
-hasTradingName.checkYourAnswersLabel = Have a different trading name
+hasTradingName.checkYourAnswersLabel = Have a different UK trading name
 hasTradingName.error.required = Select yes if you use a different trading name
 hasTradingName.change.hidden = if you have a different trading name
 
