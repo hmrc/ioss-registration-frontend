@@ -28,7 +28,8 @@ case class VatCustomerInfo(
                             organisationName: Option[String],
                             individualName: Option[String],
                             singleMarketIndicator: Boolean,
-                            deregistrationDecisionDate: Option[LocalDate]
+                            deregistrationDecisionDate: Option[LocalDate],
+                            overseasIndicator: Boolean
                           )
 
 object VatCustomerInfo {

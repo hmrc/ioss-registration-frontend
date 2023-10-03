@@ -93,6 +93,8 @@ GET         /cannot-register-no-ni-protocol                               contro
 
 GET         /cannot-register-not-norwegian-based-business                 controllers.CannotRegisterNotNorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
+GET         /cannot-register-non-established-taxable-person      controllers.CannotRegisterNonEstablishedTaxablePersonController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
 # Trading name section
 GET         /have-uk-trading-name                                         controllers.tradingNames.HasTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /have-uk-trading-name                                         controllers.tradingNames.HasTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

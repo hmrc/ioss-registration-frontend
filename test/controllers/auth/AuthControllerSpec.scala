@@ -27,7 +27,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
-import pages.{CannotRegisterNoNiProtocolPage, CannotRegisterNotNorwegianBasedBusinessPage, EmptyWaypoints, ExpiredVrnDatePage, VatApiDownPage, Waypoints}
+import pages._
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -146,7 +146,9 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             "must redirect to the Cannot Register No Ni Protocol page" in {
 
-              val updatedVatInfo = vatCustomerInfo.copy(singleMarketIndicator = false)
+              val updatedVatInfo = vatCustomerInfo
+                .copy(singleMarketIndicator = false)
+                .copy(overseasIndicator = true)
 
               val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
                 .set(BusinessBasedInNiPage, true).success.value
@@ -229,7 +231,9 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 "must redirect to the Cannot Register Not Norwegian Based Business page" in {
 
-                  val updatedVatInfo = vatCustomerInfo.copy(singleMarketIndicator = false)
+                  val updatedVatInfo = vatCustomerInfo
+                    .copy(singleMarketIndicator = false)
+                    .copy(overseasIndicator = true)
 
                   val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
                     .set(BusinessBasedInNiPage, false).success.value
@@ -286,6 +290,131 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
               }
             }
           }
+
+          "and the user is a Non Established Taxable Person" - {
+            "but the user is a single market" - {
+              "must redirect to the Cannot Register Non Established Taxable Person Page" in {
+                val updatedVatInfo = vatCustomerInfo
+                  .copy(singleMarketIndicator = true)
+                  .copy(overseasIndicator = true)
+
+                val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
+                  .set(BusinessBasedInNiPage, true).success.value
+
+                val application = appBuilder(answers = Some(answers)).build()
+
+                when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
+                when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
+
+                running(application) {
+
+                  val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                  val result = route(application, request).value
+
+                  status(result) mustBe SEE_OTHER
+                  redirectLocation(result).value mustBe CannotRegisterNonEstablishedTaxablePersonPage.route(waypoints).url
+                  verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+                }
+              }
+            }
+
+            "but the user business is based in Norway" - {
+              "must then redirect to the next page" in {
+
+                val desAddress = arbitraryDesAddress.arbitrary.sample.value.copy(countryCode = "NO")
+
+                val updatedVatInfo = vatCustomerInfo
+                  .copy(
+                    singleMarketIndicator = false,
+                    overseasIndicator = true,
+                    desAddress = desAddress
+                  )
+
+                val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
+                  .set(BusinessBasedInNiPage, false).success.value
+                  .set(NorwegianBasedBusinessPage, true).success.value
+
+                val application = appBuilder(answers = Some(answers)).build()
+
+                when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
+                when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+                running(application) {
+
+                  val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                  val result = route(application, request).value
+
+                  val expectedAnswers = answers.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+                  status(result) mustBe SEE_OTHER
+                  redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+                  verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+                }
+              }
+            }
+
+            "when the user is Non Established Taxable Person or single market" - {
+              "must redirect to the Cannot Register Non Established Taxable Person Page" in {
+                val updatedVatInfo = vatCustomerInfo
+                  .copy(overseasIndicator = true)
+
+                val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
+                  .set(BusinessBasedInNiPage, true).success.value
+
+                val application = appBuilder(answers = Some(answers)).build()
+
+                when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
+                when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
+
+                running(application) {
+
+                  val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                  val result = route(application, request).value
+
+                  status(result) mustBe SEE_OTHER
+                  redirectLocation(result).value mustBe CannotRegisterNonEstablishedTaxablePersonPage.route(waypoints).url
+                  verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+                }
+              }
+
+              "but the user business is based in Norway" - {
+                "must then redirect to the next page" in {
+
+                  val desAddress = arbitraryDesAddress.arbitrary.sample.value.copy(countryCode = "NO")
+
+                  val updatedVatInfo = vatCustomerInfo
+                    .copy(
+                      singleMarketIndicator = false,
+                      overseasIndicator = false,
+                      desAddress = desAddress
+                    )
+
+                  val answers = emptyUserAnswersWithVatInfo.copy(vatInfo = Some(updatedVatInfo))
+                    .set(BusinessBasedInNiPage, false).success.value
+                    .set(NorwegianBasedBusinessPage, true).success.value
+
+                  val application = appBuilder(answers = Some(answers)).build()
+
+                  when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
+                  when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+                  running(application) {
+
+                    val request = FakeRequest(GET, authRoutes.AuthController.onSignIn().url)
+                    val result = route(application, request).value
+
+                    val expectedAnswers = answers.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+                    status(result) mustBe SEE_OTHER
+                    redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+                    verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
+                  }
+                }
+              }
+            }
+
+          }
+
         }
 
         "and we cannot find their VAT details" - {

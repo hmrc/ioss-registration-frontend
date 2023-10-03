@@ -62,7 +62,8 @@ trait SpecBase
       organisationName = Some("Company name"),
       individualName = None,
       singleMarketIndicator = true,
-      deregistrationDecisionDate = None
+      deregistrationDecisionDate = None,
+      overseasIndicator = false
     )
 
   val vrn: Vrn = Vrn("123456789")
