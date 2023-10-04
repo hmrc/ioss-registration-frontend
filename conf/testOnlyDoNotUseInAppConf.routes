@@ -11,3 +11,5 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+GET      /pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/test-only/get-passcodes    @controllers.test.TestOnlyEmailPasscodeController.testOnlyGetPasscodes()
+GET      /pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/test-only/get-status       @controllers.test.TestOnlyEmailPasscodeController.testOnlyGetEmailVerificationStatus()

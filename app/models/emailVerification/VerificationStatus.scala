@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package config
+package models.emailVerification
 
-object Constants {
+import play.api.libs.json.{Json, OFormat}
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+case class VerificationStatus(emails: Seq[EmailStatus]) {
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+  def toVerificationStatus: VerificationStatus = VerificationStatus(emails = this.emails)
+}
 
-  val emailVerificationMaxEmails: Int = 10
+object VerificationStatus {
+
+  implicit val format: OFormat[VerificationStatus] = Json.format[VerificationStatus]
+}
+
+case class EmailStatus(emailAddress: String, verified: Boolean, locked: Boolean)
+
+object EmailStatus {
+
+  implicit val format: OFormat[EmailStatus] = Json.format[EmailStatus]
 }

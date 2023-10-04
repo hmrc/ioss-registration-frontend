@@ -196,9 +196,12 @@ POST        /bank-details                                                 contro
 
 GET         /website-address/:index                                       controllers.website.WebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /website-address/:index                                       controllers.website.WebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-                                                                         
+
 GET         /add-website-address                                          controllers.website.AddWebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /add-website-address                                          controllers.website.AddWebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
-                                                                         
+
 GET         /remove-website-address/:index                                controllers.website.DeleteWebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /remove-website-address/:index                                controllers.website.DeleteWebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
+GET         /email-verification-codes-and-emails-exceeded                 controllers.EmailVerificationCodesAndEmailsExceededController.onPageLoad()
+GET         /email-verification-codes-exceeded                            controllers.EmailVerificationCodesExceededController.onPageLoad()

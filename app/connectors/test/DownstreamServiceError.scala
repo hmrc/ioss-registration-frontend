@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package config
+package connectors.test
 
-object Constants {
+class ServiceError(private val message: String, private val cause: Throwable)
+  extends Exception(message, cause) {}
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
-
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-
-  val emailVerificationMaxEmails: Int = 10
-}
+case class DownstreamServiceError(private val message: String, private val cause: Throwable)
+  extends ServiceError(message, cause) {}

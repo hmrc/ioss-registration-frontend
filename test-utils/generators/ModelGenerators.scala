@@ -16,6 +16,7 @@
 
 package generators
 
+import connectors.SavedUserAnswers
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
@@ -24,7 +25,10 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.EitherValues
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.domain.Vrn
+
+import java.time.Instant
 
 trait ModelGenerators extends EitherValues {
 
@@ -236,5 +240,14 @@ trait ModelGenerators extends EitherValues {
         "GB21SCBL60910417068859",
         "GB42CPBK08005470328725"
       ).map(v => Iban(v).right.get)
+    }
+
+  implicit val arbitrarySavedUserAnswers: Arbitrary[SavedUserAnswers] =
+    Arbitrary {
+      for {
+        vrn <- arbitrary[Vrn]
+        data = JsObject(Seq("test" -> Json.toJson("test")))
+        now = Instant.now
+      } yield SavedUserAnswers(vrn, data, None, now)
     }
 }
