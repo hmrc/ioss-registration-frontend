@@ -16,43 +16,24 @@
 
 package controllers
 
+import cats.data.Validated.{Invalid, Valid}
 import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
+import logging.Logging
+import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
+import models.responses.ConflictFound
 import pages.{CheckYourAnswersPage, EmptyWaypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.RegistrationValidationService
+import services._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
+import utils.FutureSyntax._
 import viewmodels.VatRegistrationDetailsSummary
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
-import viewmodels.govuk.summarylist._
-import views.html.CheckYourAnswersView
-import cats.data.Validated.{Invalid, Valid}
-import config.FrontendAppConfig
-import connectors.RegistrationConnector
-import controllers.actions.AuthenticatedControllerComponents
-import logging.Logging
-import models.{CheckMode, NormalMode}
-import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
-import models.domain.Registration
-import models.requests.AuthenticatedDataRequest
-import models.responses.ConflictFound
-import pages.CheckYourAnswersPage
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc._
-
-import services._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.CompletionChecks
-import utils.FutureSyntax._
-import viewmodels.checkAnswers._
-import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
-import viewmodels.checkAnswers.previousRegistrations.{PreviouslyRegisteredSummary, PreviousRegistrationSummary}
 import viewmodels.govuk.summarylist._
 import views.html.CheckYourAnswersView
 

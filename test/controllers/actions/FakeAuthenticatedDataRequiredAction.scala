@@ -16,8 +16,10 @@
 
 package controllers.actions
 
+import connectors.RegistrationConnector
 import models.UserAnswers
 import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
 import utils.FutureSyntax.FutureOps
 
@@ -25,7 +27,7 @@ import java.time.{LocalDate, ZoneId}
 import scala.concurrent.{ExecutionContext, Future}
 
 case class FakeAuthenticatedDataRequiredAction(dataToReturn: Option[UserAnswers])
-  extends AuthenticatedDataRequiredActionImpl()(ExecutionContext.Implicits.global) {
+  extends AuthenticatedDataRequiredActionImpl(mock[RegistrationConnector])(ExecutionContext.Implicits.global) {
 
   private val emptyUserAnswers: UserAnswers = UserAnswers("12345-credId", lastUpdated = LocalDate.now.atStartOfDay(ZoneId.systemDefault()).toInstant)
 
@@ -35,6 +37,6 @@ case class FakeAuthenticatedDataRequiredAction(dataToReturn: Option[UserAnswers]
   }
 
   override protected def refine[A](request: AuthenticatedOptionalDataRequest[A]): Future[Either[Result, AuthenticatedDataRequest[A]]] = {
-    Right(AuthenticatedDataRequest(request, request.credentials, request.vrn, data)).toFuture
+    Right(AuthenticatedDataRequest(request, request.credentials, request.vrn, None, data)).toFuture
   }
 }

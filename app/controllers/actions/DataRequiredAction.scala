@@ -16,17 +16,22 @@
 
 package controllers.actions
 
+import connectors.RegistrationConnector
 import controllers.filters.{routes => filterRoutes}
 import controllers.routes
 import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest, UnauthenticatedDataRequest, UnauthenticatedOptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthenticatedDataRequiredActionImpl @Inject()()(implicit val executionContext: ExecutionContext)
+class AuthenticatedDataRequiredActionImpl @Inject()(
+                                                     val registrationConnector: RegistrationConnector
+                                                   )(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[AuthenticatedOptionalDataRequest, AuthenticatedDataRequest] {
 
   override protected def refine[A](request: AuthenticatedOptionalDataRequest[A]): Future[Either[Result, AuthenticatedDataRequest[A]]] = {
@@ -35,7 +40,10 @@ class AuthenticatedDataRequiredActionImpl @Inject()()(implicit val executionCont
       case None =>
         Left(Redirect(routes.JourneyRecoveryController.onPageLoad())).toFuture
       case Some(data) =>
-        Right(AuthenticatedDataRequest(request.request, request.credentials, request.vrn, data)).toFuture
+        val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request.request, request.session)
+        registrationConnector.getRegistration()(hc).flatMap { registration =>
+          Right(AuthenticatedDataRequest(request.request, request.credentials, request.vrn, registration, data)).toFuture
+        }
     }
   }
 }
@@ -54,9 +62,11 @@ class UnauthenticatedDataRequiredAction @Inject()(implicit val executionContext:
   }
 }
 
-class AuthenticatedDataRequiredAction @Inject()()(implicit executionContext: ExecutionContext) {
+class AuthenticatedDataRequiredAction @Inject()(
+                                                 registrationConnector: RegistrationConnector
+                                               )(implicit executionContext: ExecutionContext) {
 
   def apply(): AuthenticatedDataRequiredActionImpl = {
-    new AuthenticatedDataRequiredActionImpl()
+    new AuthenticatedDataRequiredActionImpl(registrationConnector)
   }
 }

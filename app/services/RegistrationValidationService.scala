@@ -56,7 +56,7 @@ class RegistrationValidationService @Inject()()
         Registration(
           vrn = vrn,
           registeredCompanyName = name,
-          tradingNames = tradingNames,
+          tradingNames = tradingNames.map(_.name),
           vatDetails = vatDetails,
           euRegistrations = euRegistrations,
           contactDetails = contactDetails,

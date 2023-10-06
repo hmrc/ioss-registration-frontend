@@ -87,7 +87,7 @@ class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
 
         val expectedAnswers = answers
           .set(DeleteAllTradingNamesPage, true).success.value
-          .remove(AllTradingNames()).success.value
+          .remove(AllTradingNames).success.value
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe DeleteAllTradingNamesPage.navigate(waypoints, answers, expectedAnswers).url

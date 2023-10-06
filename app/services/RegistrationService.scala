@@ -19,10 +19,9 @@ package services
 import connectors.returns.VatReturnConnector
 import logging.Logging
 import models._
-import models.domain.{PreviousSchemeNumbers, _}
+import models.domain._
 import models.euDetails._
 import models.previousRegistrations.PreviousRegistrationDetails
-import models.requests.AuthenticatedDataRequest
 import pages._
 import pages.euDetails._
 import pages.filters.BusinessBasedInNiPage
@@ -31,10 +30,8 @@ import pages.tradingNames.HasTradingNamePage
 import queries.euDetails.AllEuOptionalDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
-import queries.{AllEuOptionalDetailsQuery, AllTradingNames, AllWebsites}
-import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Clock, LocalDate}
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -54,7 +51,7 @@ class RegistrationService @Inject()(
       ).set(BusinessBasedInNiPage, true)
       hasTradingNameUA <- businessBasedInNiUA.set(HasTradingNamePage, registration.tradingNames.nonEmpty)
       tradingNamesUA <- if (registration.tradingNames.nonEmpty) {
-        hasTradingNameUA.set(AllTradingNames, registration.tradingNames.toList)
+        hasTradingNameUA.set(AllTradingNames, registration.tradingNames.toList.map(TradingName(_)))
       } else {
         Try(hasTradingNameUA)
       }
@@ -299,39 +296,4 @@ class RegistrationService @Inject()(
         PreviousSchemeType.IOSS
     }
   }
-
-  def isEligibleSalesAmendable()(implicit ec: ExecutionContext, hc: HeaderCarrier, request: AuthenticatedDataRequest[_]): Future[Boolean] = {
-    request.registration match {
-      case Some(registration) =>
-        val firstReturnPeriod = periodService.getFirstReturnPeriod(registration.commencementDate)
-        vatReturnConnector.get(firstReturnPeriod).map {
-          case Right(_) =>
-            false
-          case _ =>
-            val today = LocalDate.now(clock)
-            val finalDay = dateService.calculateFinalAmendmentDate(registration.commencementDate)
-            finalDay.isAfter(today) || finalDay.isEqual(today)
-        }
-      case _ =>
-        Future.successful(true)
-    }
-  }
-
-
-
-  def getLastPossibleDateOfFirstSale(maybeRegistration: Option[Registration])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[LocalDate]] = {
-    maybeRegistration match {
-      case Some(registration) =>
-        val firstReturnPeriod = periodService.getFirstReturnPeriod(registration.commencementDate)
-        vatReturnConnector.get(firstReturnPeriod).map {
-          case Right(_) =>
-            Some(firstReturnPeriod.lastDay)
-          case _ =>
-            None
-        }
-      case _ =>
-        Future.successful(None)
-    }
-  }
-
 }

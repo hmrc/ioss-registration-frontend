@@ -19,10 +19,9 @@ package services
 import cats.implicits._
 import models.domain.EuTaxIdentifierType.{Other, Vat}
 import models.domain._
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Country, DataMissingError, GenericError, Index, InternationalAddress, UserAnswers, ValidationResult}
+import models.{Country, DataMissingError, Index, InternationalAddress, UserAnswers, ValidationError, ValidationResult}
 import pages.euDetails._
-import queries.AllEuDetailsRawQuery
+import queries.euDetails.AllEuDetailsRawQuery
 
 trait EuTaxRegistrationValidations {
 
@@ -53,45 +52,8 @@ trait EuTaxRegistrationValidations {
 
   private def processEuDetail(answers: UserAnswers, index: Index): ValidationResult[EuTaxRegistration] = {
     answers.get(EuCountryPage(index)) match {
-      case Some(country) =>
-        answers.get(SellsGoodsToEUConsumersPage(index)) match {
-          case Some(true) =>
-            sellsGoodsToEuConsumers(answers, country, index)
-          case Some(false) =>
-            doesNotSellGoodsToEuConsumers(answers, country, index)
-          case None => DataMissingError(SellsGoodsToEUConsumersPage(index)).invalidNec
-        }
-      case None =>
-        DataMissingError(EuCountryPage(index)).invalidNec
-    }
-  }
-
-  private def sellsGoodsToEuConsumers(answers: UserAnswers, country: Country, index: Index): ValidationResult[EuTaxRegistration] = {
-    (answers.vatInfo.exists(_.partOfVatGroup), answers.get(SellsGoodsToEUConsumerMethodPage(index))) match {
-      case (true, Some(EuConsumerSalesMethod.DispatchWarehouse)) =>
-        getRegistrationWithDispatchWarehouse(answers, country, index)
-      case (true, Some(EuConsumerSalesMethod.FixedEstablishment)) =>
-        GenericError("A state where a country exists but cannot be added").invalidNec
-      case (true, None) =>
-        DataMissingError(SellsGoodsToEUConsumerMethodPage(index)).invalidNec
-      case (false, Some(EuConsumerSalesMethod.FixedEstablishment)) =>
-        getRegistrationWithFixedEstablishment(answers, country, index)
-      case (false, Some(EuConsumerSalesMethod.DispatchWarehouse)) =>
-        getRegistrationWithDispatchWarehouse(answers, country, index)
-      case (_, None) =>
-        DataMissingError(SellsGoodsToEUConsumerMethodPage(index)).invalidNec
-    }
-  }
-
-  private def doesNotSellGoodsToEuConsumers(answers: UserAnswers, country: Country, index: Index): ValidationResult[EuTaxRegistration] = {
-    answers.get(VatRegisteredPage(index)) match {
-      case Some(true) =>
-        getEuVatNumber(answers, index).map(
-          vatNumber => EuVatRegistration(country, vatNumber)
-        )
-
-      case _ =>
-        DataMissingError(VatRegisteredPage(index)).invalidNec
+      case Some(country) => getRegistrationWithFixedEstablishment(answers, country, index) // TODO: check logic here
+      case None => DataMissingError(EuCountryPage(index)).invalidNec
     }
   }
 
@@ -104,45 +66,17 @@ trait EuTaxRegistrationValidations {
         RegistrationWithFixedEstablishment(country, taxIdentifier, fixedEstablishment)
     )
 
-  private def getRegistrationWithDispatchWarehouse(answers: UserAnswers, country: Country, index: Index): ValidationResult[EuTaxRegistration] =
-    (
-      getEuTaxIdentifier(answers, index),
-      getEuSendGoods(answers, index)
-      ).mapN(
-      (taxIdentifier, dispatchWarehouse) =>
-        RegistrationWithoutFixedEstablishmentWithTradeDetails(country, taxIdentifier, dispatchWarehouse)
-    )
-
-  private def getEuTaxIdentifier(answers: UserAnswers, index: Index): ValidationResult[EuTaxIdentifier] = {
-    answers.get(SellsGoodsToEUConsumersPage(index)) match {
-      case Some(true) =>
-        answers.get(RegistrationTypePage(index)) match {
-          case Some(RegistrationType.VatNumber) =>
-            getEuVatNumber(answers, index).map(v => EuTaxIdentifier(Vat, Some(v)))
-          case Some(RegistrationType.TaxId) =>
-            getEuTaxId(answers, index).map(v => EuTaxIdentifier(Other, Some(v)))
-          case None => DataMissingError(RegistrationTypePage(index)).invalidNec
-        }
-
-      case Some(false) =>
-        answers.get(VatRegisteredPage(index)) match {
-          case Some(true) =>
-            getEuVatNumber(answers, index).map(v => EuTaxIdentifier(Vat, Some(v)))
-          case Some(false) =>
-            EuTaxIdentifier(Other, None).validNec
-          case None =>
-            DataMissingError(VatRegisteredPage(index)).invalidNec
-        }
-
-      case None => DataMissingError(SellsGoodsToEUConsumersPage(index)).invalidNec
-    }
-  }
-
   private def getEuVatNumber(answers: UserAnswers, index: Index): ValidationResult[String] =
     answers.get(EuVatNumberPage(index)) match {
       case Some(vatNumber) => vatNumber.validNec
       case None => DataMissingError(EuVatNumberPage(index)).invalidNec
     }
+
+  private def getEuTaxIdentifier(answers: UserAnswers, index: Index): ValidationResult[EuTaxIdentifier] = {
+    getEuVatNumber(answers, index).map(v => EuTaxIdentifier(Vat, Some(v))) // TODO: check logic here
+    .orElse(getEuTaxId(answers, index).map(v => EuTaxIdentifier(Other, Some(v))))
+    .orElse(EuTaxIdentifier(Other, None).validNec[ValidationError])
+  }
 
   private def getEuTaxId(answers: UserAnswers, index: Index): ValidationResult[String] =
     answers.get(EuTaxReferencePage(index)) match {
@@ -156,12 +90,6 @@ trait EuTaxRegistrationValidations {
       getFixedEstablishmentAddress(answers, index)
       ).mapN(TradeDetails.apply)
 
-  private def getEuSendGoods(answers: UserAnswers, index: Index): ValidationResult[TradeDetails] =
-    (
-      getEuSendGoodsTradingName(answers, index),
-      getEuSendGoodsAddress(answers, index)
-      ).mapN(TradeDetails.apply)
-
   private def getFixedEstablishmentTradingName(answers: UserAnswers, index: Index): ValidationResult[String] =
     answers.get(FixedEstablishmentTradingNamePage(index)) match {
       case Some(name) => name.validNec
@@ -173,19 +101,4 @@ trait EuTaxRegistrationValidations {
       case Some(address) => address.validNec
       case None => DataMissingError(FixedEstablishmentAddressPage(index)).invalidNec
     }
-
-  private def getEuSendGoodsTradingName(userAnswers: UserAnswers, index: Index): ValidationResult[String] = {
-    userAnswers.get(EuSendGoodsTradingNamePage(index)) match {
-      case Some(answer) => answer.validNec
-      case None => DataMissingError(EuSendGoodsTradingNamePage(index)).invalidNec
-    }
-  }
-
-  private def getEuSendGoodsAddress(userAnswers: UserAnswers, index: Index): ValidationResult[InternationalAddress] = {
-    userAnswers.get(EuSendGoodsAddressPage(index)) match {
-      case Some(answer) => answer.validNec
-      case None => DataMissingError(EuSendGoodsAddressPage(index)).invalidNec
-    }
-  }
-
 }

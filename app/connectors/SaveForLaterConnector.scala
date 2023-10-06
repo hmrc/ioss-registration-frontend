@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SaveForLaterConnector @Inject()(config: Configuration, httpClient: HttpClient)
                                      (implicit ec: ExecutionContext) extends HttpErrorFunctions {
 
-  private val baseUrl = config.get[Service]("microservice.services.one-stop-shop-registration")
+  private val baseUrl = config.get[Service]("microservice.services.ioss-registration")
 
   def submit(s4lRequest: SaveForLaterRequest)(implicit hc: HeaderCarrier): Future[SaveForLaterResponse] = {
     val url = s"$baseUrl/save-for-later"
