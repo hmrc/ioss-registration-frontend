@@ -17,7 +17,7 @@
 package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
-import models.{Index, UserAnswers}
+import models.{Country, Index, UserAnswers}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.{AddItemPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
@@ -41,7 +41,7 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
   override def route(waypoints: Waypoints): Call =
     routes.AddPreviousRegistrationController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+/*  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     (answers.get(AddPreviousRegistrationPage()), answers.get(DeriveNumberOfPreviousRegistrations)) match {
       case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
       case (Some(false), _) => TaxRegisteredInEuPage
@@ -56,6 +56,30 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
       case (Some(false), _) => TaxRegisteredInEuPage
       case _ => JourneyRecoveryPage
     }
+  }*/
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    val t = answers.get(this).map {
+      case true =>
+        index
+          .map { i =>
+            if (i.position + 1 < Country.euCountries.size) {
+              PreviousEuCountryPage(Index(i.position + 1))
+            } else {
+              TaxRegisteredInEuPage
+            }
+          }
+          .getOrElse {
+            answers
+              .get(deriveNumberOfItems)
+              .map(n => PreviousEuCountryPage(Index(n)))
+              .orRecover
+          }
+      case false => TaxRegisteredInEuPage
+    }.orRecover
+    println(t)
+    println()
+    println()
+    t
   }
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfPreviousRegistrations

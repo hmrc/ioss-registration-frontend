@@ -19,7 +19,7 @@ package pages
 import models.{CheckMode, Mode, NormalMode}
 import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.tradingNames.AddTradingNamePage
-import pages.previousRegistrations.AddPreviousRegistrationPage
+import pages.previousRegistrations.{AddPreviousRegistrationPage, CheckPreviousSchemeAnswersPage}
 
 case class Waypoint(
                      page: WaypointPage,

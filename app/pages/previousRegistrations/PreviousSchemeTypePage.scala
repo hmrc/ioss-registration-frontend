@@ -17,8 +17,8 @@
 package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
-import models.{Index,PreviousSchemeType, UserAnswers}
-import pages.{NonEmptyWaypoints, Page, QuestionPage, Waypoints}
+import models.{Index, PreviousSchemeType, UserAnswers}
+import pages.{Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
@@ -36,14 +36,6 @@ case class PreviousSchemeTypePage(countryIndex: Index, schemeIndex: Index) exten
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     if(answers.get(this).contains(PreviousSchemeType.OSS)) {
-      PreviousOssNumberPage(countryIndex, schemeIndex)
-    } else {
-      PreviousIossSchemePage(countryIndex, schemeIndex)
-    }
-  }
-
-  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
-    if (answers.get(this).contains(PreviousSchemeType.OSS)) {
       PreviousOssNumberPage(countryIndex, schemeIndex)
     } else {
       PreviousIossSchemePage(countryIndex, schemeIndex)

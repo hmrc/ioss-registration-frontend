@@ -28,8 +28,8 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.previousRegistrations.{PreviousIntermediaryNumberSummary, PreviousSchemeNumberSummary, PreviousSchemeSummary}
-import views.html.previousRegistrations.CheckPreviousSchemeAnswersView
 import viewmodels.govuk.summarylist._
+import views.html.previousRegistrations.CheckPreviousSchemeAnswersView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
