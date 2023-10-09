@@ -24,7 +24,10 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
+import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.RegisteredForIossInEuPage
+import pages.previousRegistrations.PreviouslyRegisteredPage
+import pages.tradingNames.HasTradingNamePage
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
@@ -69,6 +72,11 @@ trait SpecBase
   val vrn: Vrn = Vrn("123456789")
 
   val userAnswersId: String = "12345-credId"
+
+  val completeUserAnswers: UserAnswers = basicUserAnswersWithVatInfo
+    .set(HasTradingNamePage, false).success.value
+    .set(TaxRegisteredInEuPage, false).success.value
+    .set(PreviouslyRegisteredPage, false).success.value
 
   def testCredentials: Credentials = Credentials(userAnswersId, "GGW")
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, lastUpdated = arbitraryInstant)

@@ -17,16 +17,17 @@
 package controllers.euDetails
 
 import base.SpecBase
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Country, Index, NormalMode}
+import models.euDetails.RegistrationType
+import models.{Country, Index}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.EmptyWaypoints
 import pages.euDetails._
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import queries.EuDetailsQuery
+import queries.euDetails.EuDetailsQuery
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.euDetails.CannotAddCountryView
 
@@ -38,14 +39,12 @@ class CannotAddCountryControllerSpec extends SpecBase {
   private val countryIndex1: Index = Index(1)
   private val country = Country.euCountries.head
 
-  private lazy val cannotAddCountryRoute = routes.CannotAddCountryController.onSubmit(NormalMode, countryIndex).url
+  private lazy val cannotAddCountryRoute = routes.CannotAddCountryController.onSubmit(EmptyWaypoints, countryIndex).url
 
   private val answers =
     basicUserAnswersWithVatInfo.copy(vatInfo = Some(vatCustomerInfo.copy(partOfVatGroup = true)))
       .set(TaxRegisteredInEuPage, true).success.value
       .set(EuCountryPage(countryIndex), country).success.value
-      .set(SellsGoodsToEUConsumersPage(countryIndex), true).success.value
-      .set(SellsGoodsToEUConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
 
   "CannotAddCountry Controller" - {
 
@@ -54,14 +53,14 @@ class CannotAddCountryControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CannotAddCountryController.onPageLoad(NormalMode, countryIndex).url)
+        val request = FakeRequest(GET, routes.CannotAddCountryController.onPageLoad(EmptyWaypoints, countryIndex).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[CannotAddCountryView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(NormalMode, countryIndex)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(EmptyWaypoints, countryIndex)(request, messages(application)).toString
       }
     }
 
@@ -84,7 +83,7 @@ class CannotAddCountryControllerSpec extends SpecBase {
         val expectedAnswers = answers.remove(EuDetailsQuery(countryIndex)).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(NormalMode).url
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(EmptyWaypoints).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -94,17 +93,11 @@ class CannotAddCountryControllerSpec extends SpecBase {
       val answers =
         basicUserAnswersWithVatInfo.copy(vatInfo = Some(vatCustomerInfo.copy(partOfVatGroup = true)))
           .set(TaxRegisteredInEuPage, true).success.value
-            .set(EuCountryPage(countryIndex), country).success.value
-            .set(SellsGoodsToEUConsumersPage(countryIndex), true).success.value
-            .set(SellsGoodsToEUConsumerMethodPage(countryIndex), EuConsumerSalesMethod.DispatchWarehouse).success.value
-            .set(RegistrationTypePage(countryIndex), RegistrationType.VatNumber).success.value
-            .set(EuVatNumberPage(countryIndex), "ATU12345678").success.value
-            .set(EuSendGoodsTradingNamePage(countryIndex), "Foo").success.value
-            .set(EuSendGoodsAddressPage(countryIndex), arbitraryInternationalAddress.arbitrary.sample.value).success.value
-          .set(AddEuDetailsPage, true).success.value
-            .set(EuCountryPage(countryIndex1), country).success.value
-            .set(SellsGoodsToEUConsumersPage(countryIndex1), true).success.value
-            .set(SellsGoodsToEUConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment).success.value
+          .set(EuCountryPage(countryIndex), country).success.value
+          .set(RegistrationTypePage(countryIndex), RegistrationType.VatNumber).success.value
+          .set(EuVatNumberPage(countryIndex), "ATU12345678").success.value
+          .set(AddEuDetailsPage(), true).success.value
+          .set(EuCountryPage(countryIndex1), country).success.value
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
@@ -123,7 +116,7 @@ class CannotAddCountryControllerSpec extends SpecBase {
         val expectedAnswers = answers.remove(EuDetailsQuery(countryIndex)).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.euDetails.routes.AddEuDetailsController.onPageLoad(NormalMode).url
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.AddEuDetailsController.onPageLoad(EmptyWaypoints).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
