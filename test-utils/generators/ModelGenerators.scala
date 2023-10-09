@@ -20,7 +20,7 @@ import connectors.SavedUserAnswers
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
-import models.domain.PreviousSchemeNumbers
+import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
@@ -35,6 +35,19 @@ trait ModelGenerators extends EitherValues {
   private val maxFieldLength: Int = 35
   private val maxEuTaxReferenceLength: Int = 20
 
+  implicit val arbitraryEuTaxIdentifierType: Arbitrary[EuTaxIdentifierType] =
+    Arbitrary {
+      Gen.oneOf(EuTaxIdentifierType.values)
+    }
+
+  implicit val arbitraryEuTaxIdentifier: Arbitrary[EuTaxIdentifier] =
+    Arbitrary {
+      for {
+        identifierType <- arbitrary[EuTaxIdentifierType]
+        value <- Gen.option(arbitrary[Int].toString)
+      } yield EuTaxIdentifier(identifierType, value)
+    }
+
   implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
     Arbitrary {
       Gen.oneOf(CheckVatDetails.values)
@@ -48,8 +61,8 @@ trait ModelGenerators extends EitherValues {
         line3 <- Gen.option(commonFieldString(maxFieldLength))
         line4 <- Gen.option(commonFieldString(maxFieldLength))
         line5 <- Gen.option(commonFieldString(maxFieldLength))
-        postCode      <- Gen.option(arbitrary[String])
-        country       <- Gen.oneOf(Country.internationalCountries.map(_.code))
+        postCode <- Gen.option(arbitrary[String])
+        country <- Gen.oneOf(Country.internationalCountries.map(_.code))
       } yield DesAddress(
         normaliseSpaces(line1),
         normaliseSpaces(line2),
@@ -125,7 +138,7 @@ trait ModelGenerators extends EitherValues {
     }
 
   implicit lazy val arbitraryEuTaxReference: Gen[String] = {
-      Gen.listOfN(maxEuTaxReferenceLength, Gen.alphaNumChar).map(_.mkString)
+    Gen.listOfN(maxEuTaxReferenceLength, Gen.alphaNumChar).map(_.mkString)
   }
 
   implicit lazy val arbitraryEuVatNumber: Gen[String] =
@@ -166,7 +179,7 @@ trait ModelGenerators extends EitherValues {
 
   implicit def arbitraryVrn: Arbitrary[Vrn] = Arbitrary {
     for {
-      chars  <- Gen.listOfN(9, Gen.numChar)
+      chars <- Gen.listOfN(9, Gen.numChar)
     } yield {
       Vrn(chars.mkString(""))
     }
@@ -174,10 +187,10 @@ trait ModelGenerators extends EitherValues {
 
   def ukPostcode(): Gen[String] =
     for {
-      numberOfFirstLetters <- choose(1,2)
+      numberOfFirstLetters <- choose(1, 2)
       firstLetters <- listOfN(numberOfFirstLetters, Gen.alphaChar)
       firstNumber <- Gen.numChar
-      numberOfMiddle <- choose(0,1)
+      numberOfMiddle <- choose(0, 1)
       middle <- listOfN(numberOfMiddle, Gen.alphaNumChar)
       lastNumber <- Gen.numChar
       lastLetters <- listOfN(2, Gen.alphaChar)
@@ -219,14 +232,31 @@ trait ModelGenerators extends EitherValues {
     }
   }
 
-    implicit val arbitrarySavedUserAnswers: Arbitrary[SavedUserAnswers] =
+  implicit val arbitrarySavedUserAnswers: Arbitrary[SavedUserAnswers] =
     Arbitrary {
       for {
-        vrn         <- arbitrary[Vrn]
-        data        = JsObject(Seq("test" -> Json.toJson("test")))
-        now         = Instant.now
+        vrn <- arbitrary[Vrn]
+        data = JsObject(Seq("test" -> Json.toJson("test")))
+        now = Instant.now
       } yield SavedUserAnswers(vrn, data, None, now)
     }
+
+  implicit val arbitraryPeriod: Arbitrary[Period] =
+    Arbitrary {
+      for {
+        year <- Gen.choose(2022, 2099)
+        quarter <- Gen.oneOf(Quarter.values)
+      } yield Period(year, quarter)
+    }
+
+  implicit lazy val arbitraryFixedEstablishment: Arbitrary[TradeDetails] =
+    Arbitrary {
+      for {
+        tradingName <- arbitrary[String]
+        address <- arbitrary[InternationalAddress]
+      } yield TradeDetails(tradingName, address)
+    }
+
 
   implicit lazy val arbitraryIban: Arbitrary[Iban] =
     Arbitrary {

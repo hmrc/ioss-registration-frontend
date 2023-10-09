@@ -17,7 +17,7 @@
 package models.domain
 
 import models.domain.ModelHelpers._
-import models.{BankDetails, BusinessContactDetails, TradingName}
+import models.{BankDetails, BusinessContactDetails}
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Vrn
 
