@@ -22,8 +22,6 @@ import controllers.routes
 import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest, UnauthenticatedDataRequest, UnauthenticatedOptionalDataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
@@ -40,10 +38,7 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
       case None =>
         Left(Redirect(routes.JourneyRecoveryController.onPageLoad())).toFuture
       case Some(data) =>
-        val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request.request, request.session)
-        registrationConnector.getRegistration()(hc).flatMap { registration =>
-          Right(AuthenticatedDataRequest(request.request, request.credentials, request.vrn, registration, data)).toFuture
-        }
+        Right(AuthenticatedDataRequest(request.request, request.credentials, request.vrn, None, data)).toFuture
     }
   }
 }
