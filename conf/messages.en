@@ -10,7 +10,9 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.submit = Register
 site.tryAgain = Try again
+site.processing = We are processing your registration.
 
 date.day = Day
 date.month = Month
@@ -540,3 +542,9 @@ bankDetails.error.iban.checksum = Enter a real IBAN
 bankDetails.error.accountName.invalid = Name on the account must only include letters, numbers, hyphens, spaces and apostrophes
 bankDetails.error.bic.invalid = Enter a real BIC
 bankDetails.change.hidden = your bank account details
+
+error.missing_answers = Some of your information is missing. You must complete this before you can submit your changes.
+error.missing_answers_header = Some information is missing.
+error.missing_answers_prompt = You need to complete the missing information for {0} before you continue.
+error.missing_answers_prompt.general = You need to complete the missing information before you continue.
+error.resolve_missing_answers = Resolve missing answers
