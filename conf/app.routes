@@ -198,6 +198,9 @@ POST        /remove-tax-details/:index                                    contro
 GET         /remove-all-tax-details                                       controllers.euDetails.DeleteAllEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /remove-all-tax-details                                       controllers.euDetails.DeleteAllEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
+GET         /no-fixed-establishments-required/:index                      controllers.euDetails.CannotAddCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /no-fixed-establishments-required/:index                      controllers.euDetails.CannotAddCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+
 # Business contact details section
 GET         /business-contact-details                                     controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                                     controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

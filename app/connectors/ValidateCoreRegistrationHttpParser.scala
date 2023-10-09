@@ -63,7 +63,4 @@ object ValidateCoreRegistrationHttpParser extends Logging {
       }
     }
   }
-
 }
-
-

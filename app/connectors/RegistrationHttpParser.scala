@@ -18,7 +18,7 @@ package connectors
 
 import logging.Logging
 import models.responses.{ConflictFound, ErrorResponse, UnexpectedResponseStatus}
-import play.api.http.Status.{CONFLICT, CREATED, OK}
+import play.api.http.Status.{CONFLICT, CREATED}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 object RegistrationHttpParser extends Logging {
@@ -33,19 +33,4 @@ object RegistrationHttpParser extends Logging {
         case status => Left(UnexpectedResponseStatus(response.status, s"Unexpected response, status $status returned"))
       }
   }
-
-}
-
-object AmendRegistrationHttpParser extends Logging {
-
-  type AmendRegistrationResultResponse = Either[ErrorResponse, Any]
-
-  implicit object AmendRegistrationResultResponseReads extends HttpReads[AmendRegistrationResultResponse] {
-    override def read(method: String, url: String, response: HttpResponse): AmendRegistrationResultResponse =
-      response.status match {
-        case OK => Right(())
-        case status => Left(UnexpectedResponseStatus(response.status, s"Unexpected amend response, status $status returned"))
-      }
-  }
-
 }

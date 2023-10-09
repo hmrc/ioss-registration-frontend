@@ -46,8 +46,8 @@ class CheckYourAnswersController @Inject()(
                                             view: CheckYourAnswersView,
                                             registrationConnector: RegistrationConnector,
                                             registrationService: RegistrationValidationService,
-                                          auditService: AuditService,
-                                          saveForLaterService: SaveForLaterService,
+                                            auditService: AuditService,
+                                            saveForLaterService: SaveForLaterService,
                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with CompletionChecks {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -121,7 +121,7 @@ class CheckYourAnswersController @Inject()(
       Ok(view(vatRegistrationDetailsList, list, isValid))
   }
 
-  def onSubmit(incompletePrompt: Boolean): Action[AnyContent] =  cc.authAndGetData().async {
+  def onSubmit(incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
       registrationService.fromUserAnswers(request.userAnswers, request.vrn) match {
         case Valid(registration) =>

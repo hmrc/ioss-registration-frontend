@@ -35,5 +35,4 @@ class VatReturnConnector @Inject()(config: Configuration, httpClient: HttpClient
 
     httpClient.GET[VatReturnResponse](url)
   }
-
 }

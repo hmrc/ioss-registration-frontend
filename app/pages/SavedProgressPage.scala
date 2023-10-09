@@ -30,4 +30,3 @@ case object SavedProgressPage extends QuestionPage[String] {
     routes.SavedProgressController.onPageLoad("continueUrl") // TODO: check logic
 
 }
-

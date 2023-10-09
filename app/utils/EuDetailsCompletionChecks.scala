@@ -103,59 +103,34 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
         Redirect(controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, Index(incompleteCountry._2)))
     )
 
-  /*def incompleteCheckEuDetailsRedirect(mode: Mode)
-                                      (implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-    val isPartOfVatGroup = request.userAnswers.vatInfo.exists(_.partOfVatGroup)
-    firstIndexedIncompleteEuDetails(getAllIncompleteEuDetails().map(_.euCountry)) match {
-      case Some(incompleteCountry) =>
-        request.userAnswers.get(SellsGoodsToEUConsumersPage(Index(incompleteCountry._2))) match {
-          case Some(true) =>
-            request.userAnswers.get(SellsGoodsToEUConsumerMethodPage(Index(incompleteCountry._2))) match {
-              case Some(EuConsumerSalesMethod.FixedEstablishment) =>
-                fixedEstablishmentRedirect(mode, isPartOfVatGroup, incompleteCountry)
-              case Some(EuConsumerSalesMethod.DispatchWarehouse) =>
-                dispatchWarehouseRedirect(mode, incompleteCountry)
-              case None =>
-                Some(Redirect(controllers.euDetails.routes.SellsGoodsToEUConsumerMethodController.onPageLoad(mode, Index(incompleteCountry._2))))
-            }
-          case Some(false) =>
-            notSellingGoodsRedirect(mode, incompleteCountry)
-          case None =>
-            Some(Redirect(controllers.euDetails.routes.SellsGoodsToEUConsumersController.onPageLoad(mode, Index(incompleteCountry._2))))
-        }
-      case None => None
-    }
-  }*/
-
-  /*private def fixedEstablishmentRedirect(
-                                          mode: Mode,
+    private def fixedEstablishmentRedirect(
+                                          waypoints: Waypoints,
                                           isPartOfVatGroup: Boolean,
                                           incompleteCountry: (EuOptionalDetails, Int)
                                         )(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
     if (isPartOfVatGroup) {
-      Some(Redirect(controllers.euDetails.routes.CannotAddCountryController.onPageLoad(mode, Index(incompleteCountry._2))))
+      Some(Redirect(controllers.euDetails.routes.CannotAddCountryController.onPageLoad(waypoints, Index(incompleteCountry._2))))
     } else {
       request.userAnswers.get(RegistrationTypePage(Index(incompleteCountry._2))) match {
         case Some(RegistrationType.VatNumber) =>
           request.userAnswers.get(EuVatNumberPage(Index(incompleteCountry._2))) match {
             case Some(_) =>
-              fixedEstablishingTradeDetailsRedirect(mode, incompleteCountry)
+              fixedEstablishingTradeDetailsRedirect(waypoints, incompleteCountry)
             case None =>
-              Some(Redirect(controllers.euDetails.routes.EuVatNumberController.onPageLoad(mode, Index(incompleteCountry._2))))
+              Some(Redirect(controllers.euDetails.routes.EuVatNumberController.onPageLoad(waypoints, Index(incompleteCountry._2))))
           }
         case Some(RegistrationType.TaxId) =>
           request.userAnswers.get(EuTaxReferencePage(Index(incompleteCountry._2))) match {
             case Some(_) =>
-              fixedEstablishingTradeDetailsRedirect(mode, incompleteCountry)
+              fixedEstablishingTradeDetailsRedirect(waypoints, incompleteCountry)
             case None =>
-              Some(Redirect(controllers.euDetails.routes.EuTaxReferenceController.onPageLoad(mode, Index(incompleteCountry._2))))
+              Some(Redirect(controllers.euDetails.routes.EuTaxReferenceController.onPageLoad(waypoints, Index(incompleteCountry._2))))
           }
         case None =>
-          Some(Redirect(controllers.euDetails.routes.RegistrationTypeController.onPageLoad(mode, Index(incompleteCountry._2))))
+          Some(Redirect(controllers.euDetails.routes.RegistrationTypeController.onPageLoad(waypoints, Index(incompleteCountry._2))))
       }
     }
-  }*/
-
+  }
   private def fixedEstablishingTradeDetailsRedirect(
                                                      waypoints: Waypoints,
                                                      incompleteCountry: (EuOptionalDetails, Int)
@@ -172,66 +147,5 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
         Some(Redirect(controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(waypoints, Index(incompleteCountry._2))))
     }
   }
-
-  /*private def dispatchWarehouseRedirect(
-                                         waypoints: Waypoints,
-                                         incompleteCountry: (EuOptionalDetails, Int)
-                                       )(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-    request.userAnswers.get(RegistrationTypePage(Index(incompleteCountry._2))) match {
-      case Some(RegistrationType.VatNumber) =>
-        request.userAnswers.get(EuVatNumberPage(Index(incompleteCountry._2))) match {
-          case Some(_) =>
-            dispatchWarehouseTradeDetailsRedirect(waypoints, incompleteCountry)
-          case None =>
-            Some(Redirect(controllers.euDetails.routes.EuVatNumberController.onPageLoad(waypoints, Index(incompleteCountry._2))))
-        }
-      case Some(RegistrationType.TaxId) =>
-        request.userAnswers.get(EuTaxReferencePage(Index(incompleteCountry._2))) match {
-          case Some(_) =>
-            dispatchWarehouseTradeDetailsRedirect(mode, incompleteCountry)
-          case None =>
-            Some(Redirect(controllers.euDetails.routes.EuTaxReferenceController.onPageLoad(mode, Index(incompleteCountry._2))))
-        }
-      case None =>
-        Some(Redirect(controllers.euDetails.routes.RegistrationTypeController.onPageLoad(mode, Index(incompleteCountry._2))))
-    }
-  }
-
-  private def dispatchWarehouseTradeDetailsRedirect(
-                                                     waypoints: Waypoints,
-                                                     incompleteCountry: (EuOptionalDetails, Int)
-                                                   )(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-    request.userAnswers.get(EuSendGoodsTradingNamePage(Index(incompleteCountry._2))) match {
-      case Some(_) =>
-        request.userAnswers.get(EuSendGoodsAddressPage(Index(incompleteCountry._2))) match {
-          case Some(_) =>
-            Some(Redirect(controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(mode, Index(incompleteCountry._2))))
-          case None =>
-            Some(Redirect(controllers.euDetails.routes.EuSendGoodsAddressController.onPageLoad(mode, Index(incompleteCountry._2))))
-        }
-      case None =>
-        Some(Redirect(controllers.euDetails.routes.EuSendGoodsTradingNameController.onPageLoad(mode, Index(incompleteCountry._2))))
-    }
-  }
-
-  private def notSellingGoodsRedirect(
-                                       waypoints: Waypoints,
-                                       incompleteCountry: (EuOptionalDetails, Int)
-                                     )(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-    request.userAnswers.get(VatRegisteredPage(Index(incompleteCountry._2))) match {
-      case Some(true) =>
-        request.userAnswers.get(EuVatNumberPage(Index(incompleteCountry._2))) match {
-          case Some(_) =>
-            Some(Redirect(controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(mode, Index(incompleteCountry._2))))
-          case None =>
-            Some(Redirect(controllers.euDetails.routes.EuVatNumberController.onPageLoad(mode, Index(incompleteCountry._2))))
-        }
-      case Some(false) =>
-        Some(Redirect(controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(mode, Index(incompleteCountry._2))))
-      case None =>
-        Some(Redirect(controllers.euDetails.routes.VatRegisteredController.onPageLoad(mode, Index(incompleteCountry._2))))
-    }
-  }*/
-
 }
 

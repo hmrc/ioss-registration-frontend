@@ -128,6 +128,7 @@ class RegistrationValidationService @Inject()()
     }
 
   private def getWebsites(answers: UserAnswers): ValidationResult[List[String]] = {
-    ???
+    // TODO: complete once the website section has been merged https://github.com/hmrc/ioss-registration-frontend/pull/15
+    List.empty[String].validNec
   }
 }

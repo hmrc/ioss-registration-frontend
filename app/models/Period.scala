@@ -92,6 +92,4 @@ object Period {
       s"$key=${value.toString}"
     }
   }
-
 }
-

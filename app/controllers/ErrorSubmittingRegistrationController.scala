@@ -31,7 +31,7 @@ class ErrorSubmittingRegistrationController @Inject()(
                                                        cc: AuthenticatedControllerComponents,
                                                        registrationConnector: RegistrationConnector,
                                                        view: ErrorSubmittingRegistration
-                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
@@ -45,8 +45,5 @@ class ErrorSubmittingRegistrationController @Inject()(
           logger.warn(s"There was an error when getting saved external entry url ${e.body} but we didn't block the user from continuing the journey")
           Ok(view(None))
       }
-
   }
-
 }
-

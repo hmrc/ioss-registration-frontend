@@ -18,14 +18,13 @@ package connectors
 
 import logging.Logging
 import models.domain.VatCustomerInfo
-import models.responses.{ConflictFound, ErrorResponse, InvalidJson, NotFound, UnexpectedResponseStatus}
+import models.responses._
 import play.api.http.Status.{CONFLICT, CREATED, NOT_FOUND, OK}
-import play.api.libs.json.{JsError, JsObject, JsSuccess, Json, OFormat}
+import play.api.libs.json._
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 import java.time.Instant
-
 
 object SaveForLaterHttpParser extends Logging {
 
@@ -87,6 +86,5 @@ case class SavedUserAnswers(
                            )
 
 object SavedUserAnswers {
-
   implicit val format: OFormat[SavedUserAnswers] = Json.format[SavedUserAnswers]
 }

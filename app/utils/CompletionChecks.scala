@@ -86,20 +86,6 @@ trait CompletionChecks {
     }
   }
 
-  /*private def isAlreadyMadeSalesValid()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
-    request.userAnswers.get(HasMadeSalesPage).exists {
-      case true => request.userAnswers.get(DateOfFirstSalePage).isDefined
-      case false => request.userAnswers.get(IsPlanningFirstEligibleSalePage).isDefined
-    }
-  }
-
-  private def hasWebsiteValid()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
-    request.userAnswers.get(HasWebsitePage).exists {
-      case true => request.userAnswers.get(AllWebsites).getOrElse(List.empty).nonEmpty
-      case false => request.userAnswers.get(AllWebsites).getOrElse(List.empty).isEmpty
-    }
-  }
-*/
   private def isDeregisteredPopulated()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
     request.userAnswers.get(PreviouslyRegisteredPage).exists {
       case true => request.userAnswers.get(AllPreviousRegistrationsWithOptionalVatNumberQuery).isDefined
@@ -111,20 +97,16 @@ trait CompletionChecks {
     getAllIncompleteDeregisteredDetails().isEmpty &&
       getAllIncompleteEuDetails().isEmpty &&
       isTradingNamesValid() &&
-      /*isAlreadyMadeSalesValid() &&
-      hasWebsiteValid() &&*/
       isEuDetailsPopulated() &&
       isDeregisteredPopulated()
   }
 
   def getFirstValidationErrorRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
     (incompleteTradingNameRedirect(waypoints) ++
-      //incompleteEligibleSalesRedirect(mode) ++
       emptyEuDetailsRedirect(waypoints) ++
       incompleteEuDetailsRedirect(waypoints) ++
       emptyDeregisteredRedirect(waypoints) ++
-      incompletePreviousRegistrationRedirect(waypoints) /*++
-      incompleteWebsiteUrlsRedirect(mode)*/
+      incompletePreviousRegistrationRedirect(waypoints)
       ).headOption
   }
 
@@ -165,18 +147,6 @@ trait CompletionChecks {
     None
   }
 
-  /*private def incompleteEligibleSalesRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isAlreadyMadeSalesValid()) {
-    Some(Redirect(controllers.routes.HasMadeSalesController.onPageLoad(mode)))
-  } else {
-    None
-  }
-
-  private def incompleteWebsiteUrlsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!hasWebsiteValid()) {
-    Some(Redirect(controllers.routes.HasWebsiteController.onPageLoad(mode)))
-  } else {
-    None
-  }*/
-
   private def emptyDeregisteredRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isDeregisteredPopulated()) {
     Some(Redirect(controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints)))
   } else {
@@ -184,5 +154,3 @@ trait CompletionChecks {
   }
 
 }
-
-
