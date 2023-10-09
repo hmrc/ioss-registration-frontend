@@ -40,11 +40,6 @@ trait Page {
         nextPageNormalMode(waypoints, originalAnswers, updatedAnswers)
 
       case nonEmptyWaypoints: NonEmptyWaypoints =>
-        println()
-        println()
-        println(nonEmptyWaypoints.currentMode)
-        println()
-        println()
         nonEmptyWaypoints.currentMode match {
           case CheckMode => nextPageCheckMode(nonEmptyWaypoints, originalAnswers, updatedAnswers)
           case NormalMode => nextPageNormalMode(nonEmptyWaypoints, originalAnswers, updatedAnswers)
@@ -58,12 +53,8 @@ trait Page {
   protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     nextPageNormalMode(waypoints, answers, answers) match {
       case questionPage: Page with Gettable[_] =>
-        val t = if (answers.isDefined(questionPage)) waypoints.next.page else questionPage
+        if (answers.isDefined(questionPage)) waypoints.next.page else questionPage
 
-        println()
-        println(questionPage)
-        println(t)
-        t
       case otherPage =>
         otherPage
     }

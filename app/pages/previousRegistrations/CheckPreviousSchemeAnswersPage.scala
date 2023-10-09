@@ -23,8 +23,7 @@ import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousSchemes
 
-case class CheckPreviousSchemeAnswersPage(countryIndex: Index) extends QuestionPage[Boolean] with AddToListQuestionPage  {
-
+case class CheckPreviousSchemeAnswersPage(countryIndex: Index) extends AddToListQuestionPage with QuestionPage[Boolean]  {
 
   override val addItemWaypoint: Waypoint = AddPreviousRegistrationPage(Some(countryIndex)).waypoint(NormalMode)
   override def path: JsPath = JsPath \ toString
@@ -35,16 +34,10 @@ case class CheckPreviousSchemeAnswersPage(countryIndex: Index) extends QuestionP
     routes.CheckPreviousSchemeAnswersController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-val t =     (answers.get(CheckPreviousSchemeAnswersPage(countryIndex)), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
+    (answers.get(CheckPreviousSchemeAnswersPage(countryIndex)), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
       case (Some(true), Some(size)) => PreviousSchemePage(countryIndex, Index(size))
       case (Some(false), _) => AddPreviousRegistrationPage()
       case _ => JourneyRecoveryPage
     }
-    println(t)
-    println()
-    println()
-    t
   }
-
-
 }
