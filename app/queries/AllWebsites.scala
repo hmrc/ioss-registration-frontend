@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package config
+package queries
 
-object Constants {
+import models.Website
+import play.api.libs.json.JsPath
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+case object AllWebsites extends Gettable[List[Website]] with Settable[List[Website]] {
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-
+  override def path: JsPath = JsPath \ "websites"
 }

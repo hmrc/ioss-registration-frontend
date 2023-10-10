@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package config
+package queries
 
-object Constants {
+import play.api.libs.json.{JsObject, JsPath}
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+case object DeriveNumberOfWebsites extends Derivable[Seq[JsObject], Int] {
+  override val derive: Seq[JsObject] => Int = _.size
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-
+  override def path: JsPath = JsPath \ "websites"
 }

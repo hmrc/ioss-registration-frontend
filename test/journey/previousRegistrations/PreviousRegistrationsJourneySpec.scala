@@ -43,7 +43,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, false),
-            pageMustBe(TaxRegisteredInEuPage)
+          pageMustBe(TaxRegisteredInEuPage)
         )
     }
 

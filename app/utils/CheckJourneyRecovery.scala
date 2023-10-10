@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package config
+package utils
 
-object Constants {
+import controllers.routes
+import pages.Waypoints
+import play.api.mvc.Call
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+object CheckJourneyRecovery {
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+  def determineJourneyRecovery(waypoints :Waypoints): Call = {
+      //TODO: Add AmendJourneyRecoveryController logic when done
+      routes.JourneyRecoveryController.onPageLoad()
+  }
 
 }

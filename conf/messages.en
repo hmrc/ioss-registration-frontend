@@ -540,3 +540,32 @@ bankDetails.error.iban.checksum = Enter a real IBAN
 bankDetails.error.accountName.invalid = Name on the account must only include letters, numbers, hyphens, spaces and apostrophes
 bankDetails.error.bic.invalid = Enter a real BIC
 bankDetails.change.hidden = your bank account details
+
+website.title = Enter a website you use to sell your goods
+website.heading = Enter a website you use to sell your goods
+website.checkYourAnswersLabel = Website address
+website.error.required = Enter a website address
+website.error.length = Website address must be 250 characters or less
+website.error.duplicate = You entered this website address already. Enter a different one.
+website.error.invalid = Enter a website address in the correct format, like www.gov.uk
+website.change.hidden = website address
+
+websites.checkYourAnswersLabel = Trading websites
+websites.change.hidden = Trading websites
+
+addWebsite.name.singular = website address
+addWebsite.name.plural = website addresses
+addWebsite.title.singular = You have added one website address
+addWebsite.title = You have added {0} website addresses
+addWebsite.heading.singular = You have added one website address
+addWebsite.heading = You have added {0} website addresses
+addWebsite.maximumReached = You have added the maximum number of website addresses.
+addWebsite.addAnother = Add another website address?
+addWebsite.error.required = Select yes if you need to add a website address
+addWebsite.addAnother.hint = You can add up to 10 websites that you use to sell your goods.
+addWebsite.change.hidden = Change {0}
+addWebsite.remove.hidden = Remove {0}
+
+deleteWebsite.title = Are you sure you need to remove {0}?
+deleteWebsite.heading = Are you sure you need to remove {0}?
+deleteWebsite.error.required = Select yes if you need to remove this website address
