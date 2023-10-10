@@ -21,6 +21,7 @@ import play.api.mvc.Call
 import queries.Gettable
 
 import scala.annotation.nowarn
+
 final case class PageAndWaypoints(page: Page, waypoints: Waypoints) {
 
   lazy val route: Call = page.route(waypoints)
@@ -41,8 +42,11 @@ trait Page {
 
       case nonEmptyWaypoints: NonEmptyWaypoints =>
         nonEmptyWaypoints.currentMode match {
-          case CheckMode => nextPageCheckMode(nonEmptyWaypoints, originalAnswers, updatedAnswers)
-          case NormalMode => nextPageNormalMode(nonEmptyWaypoints, originalAnswers, updatedAnswers)
+          case CheckMode =>
+            nextPageCheckMode(nonEmptyWaypoints, originalAnswers, updatedAnswers)
+
+          case NormalMode =>
+            nextPageNormalMode(nonEmptyWaypoints, originalAnswers, updatedAnswers)
         }
     }
   }

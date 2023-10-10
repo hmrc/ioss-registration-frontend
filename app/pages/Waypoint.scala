@@ -20,6 +20,7 @@ import models.{CheckMode, Mode, NormalMode}
 import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.tradingNames.AddTradingNamePage
 import pages.previousRegistrations.AddPreviousRegistrationPage
+import pages.website.AddWebsitePage
 
 case class Waypoint(
                      page: WaypointPage,
@@ -37,6 +38,8 @@ object Waypoint {
       AddPreviousRegistrationPage().checkModeUrlFragment -> AddPreviousRegistrationPage().waypoint(CheckMode),
       AddEuDetailsPage().normalModeUrlFragment -> AddEuDetailsPage().waypoint(NormalMode),
       AddEuDetailsPage().checkModeUrlFragment -> AddEuDetailsPage().waypoint(CheckMode),
+      AddWebsitePage().normalModeUrlFragment ->  AddWebsitePage().waypoint(NormalMode),
+      AddWebsitePage().checkModeUrlFragment ->  AddWebsitePage().waypoint(CheckMode),
       // Continue journey
       CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint
     )

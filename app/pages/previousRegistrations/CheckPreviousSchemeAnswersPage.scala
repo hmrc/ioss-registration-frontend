@@ -18,35 +18,26 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.{Index, NormalMode, UserAnswers}
-import pages.{AddToListQuestionPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoint, Waypoints}
-import play.api.libs.json.{JsPath}
+import pages.{AddToListQuestionPage, JourneyRecoveryPage, Page, QuestionPage, Waypoint, Waypoints}
+import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousSchemes
 
-case class CheckPreviousSchemeAnswersPage(index: Index) extends QuestionPage[Boolean]  with AddToListQuestionPage  {
+case class CheckPreviousSchemeAnswersPage(countryIndex: Index) extends AddToListQuestionPage with QuestionPage[Boolean]  {
 
-
-  override val addItemWaypoint: Waypoint = AddPreviousRegistrationPage().waypoint(NormalMode)
+  override val addItemWaypoint: Waypoint = AddPreviousRegistrationPage(Some(countryIndex)).waypoint(NormalMode)
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "checkPreviousSchemeAnswers"
 
   override def route(waypoints: Waypoints): Call =
-    routes.CheckPreviousSchemeAnswersController.onPageLoad(waypoints, index)
+    routes.CheckPreviousSchemeAnswersController.onPageLoad(waypoints, countryIndex)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    (answers.get(CheckPreviousSchemeAnswersPage(index)), answers.get(DeriveNumberOfPreviousSchemes(index))) match {
-      case (Some(true), Some(size)) => PreviousSchemePage(index, Index(size))
-      case (Some(false), _) => AddPreviousRegistrationPage()
-      case _ => JourneyRecoveryPage
-    }
-
-  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
-    (answers.get(CheckPreviousSchemeAnswersPage(index)), answers.get(DeriveNumberOfPreviousSchemes(index))) match {
-      case (Some(true), Some(size)) => PreviousSchemePage(index, Index(size))
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    (answers.get(CheckPreviousSchemeAnswersPage(countryIndex)), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
+      case (Some(true), Some(size)) => PreviousSchemePage(countryIndex, Index(size))
       case (Some(false), _) => AddPreviousRegistrationPage()
       case _ => JourneyRecoveryPage
     }
   }
-
 }

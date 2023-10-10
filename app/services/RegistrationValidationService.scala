@@ -23,6 +23,7 @@ import models.domain._
 import pages._
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.tradingNames.HasTradingNamePage
+import queries.AllWebsites
 import queries.tradingNames.AllTradingNames
 import uk.gov.hmrc.domain.Vrn
 
@@ -39,7 +40,6 @@ class RegistrationValidationService @Inject()()
       getVatDetails(answers),
       getEuTaxRegistrations(answers),
       getContactDetails(answers),
-      getWebsites(answers),
       getPreviousRegistrations(answers),
       getBankDetails(answers)
     ).mapN(
@@ -49,7 +49,6 @@ class RegistrationValidationService @Inject()()
         vatDetails,
         euRegistrations,
         contactDetails,
-        websites,
         previousRegistrations,
         bankDetails
       ) =>
@@ -60,13 +59,12 @@ class RegistrationValidationService @Inject()()
           vatDetails = vatDetails,
           euRegistrations = euRegistrations,
           contactDetails = contactDetails,
-          websites = websites,
+          websites = answers.get(AllWebsites).getOrElse(Nil).map(_.site),
           previousRegistrations = previousRegistrations,
           bankDetails = bankDetails
         )
     )
   }
-
 
   private def getCompanyName(answers: UserAnswers): ValidationResult[String] =
     answers.vatInfo match {
@@ -126,9 +124,4 @@ class RegistrationValidationService @Inject()()
       case Some(bankDetails) => bankDetails.validNec
       case None => DataMissingError(BankDetailsPage).invalidNec
     }
-
-  private def getWebsites(answers: UserAnswers): ValidationResult[List[String]] = {
-    // TODO: complete once the website section has been merged https://github.com/hmrc/ioss-registration-frontend/pull/15
-    List.empty[String].validNec
-  }
 }

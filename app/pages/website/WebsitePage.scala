@@ -14,25 +14,33 @@
  * limitations under the License.
  */
 
-package pages.previousRegistrations
+package pages.website
 
-import controllers.previousRegistrations.routes
-import models.{Country, Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import models.{Index, NormalMode, UserAnswers, Website}
+import pages.{AddToListQuestionPage, Page, QuestionPage, Waypoint, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import queries.AllWebsites
 
+import scala.util.Try
 
-case class PreviousEuCountryPage(index: Index) extends QuestionPage[Country] {
+case class WebsitePage(index: Index) extends QuestionPage[Website] with AddToListQuestionPage {
 
-  override def path: JsPath = JsPath \ "previousRegistrations" \ index.position \ toString
+  override def path: JsPath = JsPath \ "websites" \ index.position
 
-  override def toString: String = "previousEuCountry"
+  override val addItemWaypoint: Waypoint = AddWebsitePage().waypoint(NormalMode)
 
   override def route(waypoints: Waypoints): Call =
-    routes.PreviousEuCountryController.onPageLoad(waypoints, index)
+    controllers.website.routes.WebsiteController.onPageLoad(waypoints, index)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    PreviousSchemePage(index, Index(0))
+    AddWebsitePage(Some(index))
 
+  override def cleanup(value: Option[Website], userAnswers: UserAnswers): Try[UserAnswers] = {
+    if (userAnswers.get(AllWebsites).exists(_.isEmpty)) {
+      userAnswers.remove(AllWebsites)
+    } else {
+      super.cleanup(value, userAnswers)
+    }
+  }
 }

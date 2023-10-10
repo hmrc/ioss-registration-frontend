@@ -1,0 +1,62 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import components.ButtonGroup
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.Long
+@import viewmodels.{LegendSize, ListItemWrapper}
+
+@this(
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukRadios: GovukRadios,
+        button: ButtonGroup,
+        addToList: components.addToList
+)
+
+@(form: Form[_], waypoints: Waypoints, list: Seq[ListItemWrapper], canAddWebsites: Boolean)(implicit request: Request[_], messages: Messages)
+@defining(if(list.size == 1) ".singular" else "") { messageSuffix =>
+
+    @layout(pageTitle = title(form, messages("addWebsite.title" + messageSuffix, list.size))) {
+
+        @formHelper(action = website.routes.AddWebsiteController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
+
+            @if(form.errors.nonEmpty) {
+                @govukErrorSummary(ErrorSummaryViewModel(form))
+            }
+
+            <h1 class="govuk-heading-l">@messages("addWebsite.heading" + messageSuffix, list.size)</h1>
+
+            @addToList(list, itemSize = Long, "addWebsite.change.hidden", "addWebsite.remove.hidden")
+
+            @if(canAddWebsites) {
+                @govukRadios(
+                    RadiosViewModel.yesNo(
+                        field = form("value"),
+                        legend = LegendViewModel(
+                            HtmlContent(Html("""<h2 class="govuk-fieldset__heading">""" + messages("addWebsite.addAnother") + "</h2>"))
+                        ).withSize(LegendSize.Medium)
+                    ).withHint(HintViewModel(messages("addWebsite.addAnother.hint")))
+                )
+            } else {
+                <p class="govuk-body">@messages("addWebsite.maximumReached")</p>
+                <input type="hidden" name="value" id="value" value="false"/>
+            }
+
+            @button("site.continue",  website.routes.AddWebsiteController.onPageLoad(waypoints).url)
+        }
+    }
+}

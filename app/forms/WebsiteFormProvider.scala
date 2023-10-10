@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package pages.previousRegistrations
+package forms
 
-import controllers.previousRegistrations.routes
-import models.{Index, UserAnswers}
-import pages.{Page, Waypoints}
-import play.api.mvc.Call
+import forms.mappings.Mappings
+import forms.validation.Validation.websitePattern
+import models.Index
+import play.api.data.Form
 
-case class PreviousOssNumberPage (countryIndex: Index, schemeIndex: Index) extends PreviousSchemeNumbersPage {
+import javax.inject.Inject
 
-  override def route(waypoints: Waypoints): Call =
-    routes.PreviousOssNumberController.onPageLoad(waypoints, countryIndex, schemeIndex)
+class WebsiteFormProvider @Inject() extends Mappings {
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    CheckPreviousSchemeAnswersPage(countryIndex)
-  }
+  def apply(thisIndex: Index, existingAnswers: Seq[String]): Form[String] =
+    Form(
+      "value" -> text("website.error.required")
+        .verifying(firstError(
+          maxLength(250, "website.error.length"),
+          notADuplicate(thisIndex, existingAnswers, "website.error.duplicate"),
+          regexp(websitePattern, "website.error.invalid")))
+    )
 }

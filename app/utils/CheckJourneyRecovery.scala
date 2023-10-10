@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package pages.previousRegistrations
+package utils
 
-import controllers.previousRegistrations.routes
-import models.{Index, UserAnswers}
-import pages.{Page, Waypoints}
+import controllers.routes
+import pages.Waypoints
 import play.api.mvc.Call
 
-case class PreviousOssNumberPage (countryIndex: Index, schemeIndex: Index) extends PreviousSchemeNumbersPage {
+object CheckJourneyRecovery {
 
-  override def route(waypoints: Waypoints): Call =
-    routes.PreviousOssNumberController.onPageLoad(waypoints, countryIndex, schemeIndex)
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    CheckPreviousSchemeAnswersPage(countryIndex)
+  def determineJourneyRecovery(waypoints :Waypoints): Call = {
+      //TODO: Add AmendJourneyRecoveryController logic when done
+      routes.JourneyRecoveryController.onPageLoad()
   }
+
 }

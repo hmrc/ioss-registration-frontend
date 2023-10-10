@@ -25,12 +25,12 @@ import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 
 case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
-
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "previouslyRegistered"
 
   override def route(waypoints: Waypoints): Call = routes.PreviouslyRegisteredController.onPageLoad(waypoints)
+
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
       case true => PreviousEuCountryPage(Index(0))
@@ -39,11 +39,10 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
   (answers.get(this), answers.get(DeriveNumberOfPreviousRegistrations)) match {
-      case (Some(true), Some(size)) if size > 0   => CheckYourAnswersPage
+      case (Some(true), Some(size)) if size > 0   => AddPreviousRegistrationPage()
       case (Some(true), _)                        => PreviousEuCountryPage(Index(0))
       case (Some(false), Some(size)) if size > 0  => DeleteAllPreviousRegistrationsPage
       case (Some(false), _)                       => CheckYourAnswersPage
       case _                                      => JourneyRecoveryPage
     }
-
 }

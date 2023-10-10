@@ -23,45 +23,49 @@ import org.scalatest.matchers.must.Matchers
 import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.previousRegistrations.AddPreviousRegistrationPage
 import pages.tradingNames.AddTradingNamePage
+import pages.website.AddWebsitePage
 
 class WaypointSpec extends AnyFreeSpec with Matchers with OptionValues {
 
-  "must return Add Trading Name when given it's Normal mode waypoint" in {
+  "fromString" - {
+    "must return Add Trading Name when given it's Normal mode waypoint" in {
+      Waypoint.fromString("add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(NormalMode)
+    }
 
-    Waypoint.fromString("add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(NormalMode)
-  }
+    "must return Add Trading Name when given it's Check mode waypoint" in {
+      Waypoint.fromString("change-add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(CheckMode)
+    }
 
-  "must return Add Trading Name when given it's Check mode waypoint" in {
+    "must return Edit Website when given it's Check mode waypoint" in {
+      Waypoint.fromString("change-add-website-address").value mustBe AddWebsitePage().waypoint(CheckMode)
+    }
 
-    Waypoint.fromString("change-add-uk-trading-name").value mustBe AddTradingNamePage().waypoint(CheckMode)
-  }
+    "must return Add Website answers when given its waypoint" in {
+      Waypoint.fromString("add-website-address").value mustBe AddWebsitePage().waypoint(NormalMode)
+    }
 
-  "must return Add Previous Registration when given it's Normal mode waypoint" in {
+    "must return Add Previous Registration when given it's Normal mode waypoint" in {
+      Waypoint.fromString("previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(NormalMode)
+    }
 
-    Waypoint.fromString("previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(NormalMode)
-  }
+    "must return Add Previous Registration when given it's Check mode waypoint" in {
+      Waypoint.fromString("change-previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(CheckMode)
+    }
 
-  "must return Add Previous Registration when given it's Check mode waypoint" in {
-    Waypoint.fromString("change-previous-schemes-overview").value mustBe AddPreviousRegistrationPage().waypoint(CheckMode)
-  }
+    "must return Check EU Details Answers when given it's waypoint" in {
+      Waypoint.fromString("check-tax-details-1").value mustBe CheckEuDetailsAnswersPage(Index(0)).waypoint
+    }
 
-  "must return Check EU Details Answers when given it's waypoint" in {
+    "must return Add EU Details when given it's Normal mode waypoint" in {
+      Waypoint.fromString("add-tax-details").value mustBe AddEuDetailsPage().waypoint(NormalMode)
+    }
 
-    Waypoint.fromString("check-tax-details-1").value mustBe CheckEuDetailsAnswersPage(Index(0)).waypoint
-  }
+    "must return Add EU Details when given it's Check mode waypoint" in {
+      Waypoint.fromString("change-add-tax-details").value mustBe AddEuDetailsPage().waypoint(CheckMode)
+    }
 
-  "must return Add EU Details when given it's Normal mode waypoint" in {
-
-    Waypoint.fromString("add-tax-details").value mustBe AddEuDetailsPage().waypoint(NormalMode)
-  }
-
-  "must return Add EU Details when given it's Check mode waypoint" in {
-
-    Waypoint.fromString("change-add-tax-details").value mustBe AddEuDetailsPage().waypoint(CheckMode)
-  }
-
-  "must return Check Your Answers when given its waypoint" in {
-
-    Waypoint.fromString("check-your-answers").value mustBe CheckYourAnswersPage.waypoint
+    "must return Check Your Answers when given its waypoint" in {
+      Waypoint.fromString("check-your-answers").value mustBe CheckYourAnswersPage.waypoint
+    }
   }
 }

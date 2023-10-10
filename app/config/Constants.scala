@@ -21,6 +21,7 @@ import java.time.LocalDate
 object Constants {
 
   val maxTradingNames: Int = 10
+  val maxWebsites: Int = 10
 
   val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
   val maxSchemes: Int = 3

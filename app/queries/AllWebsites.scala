@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package pages.previousRegistrations
+package queries
 
-import controllers.previousRegistrations.routes
-import models.{Index, PreviousScheme}
-import pages.{QuestionPage, Waypoints}
+import models.Website
 import play.api.libs.json.JsPath
-import play.api.mvc.Call
 
-case class PreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[PreviousScheme] {
+case object AllWebsites extends Gettable[List[Website]] with Settable[List[Website]] {
 
-  override def path: JsPath = JsPath \ "previousRegistrations" \ countryIndex.position \ "previousSchemesDetails" \ schemeIndex.position \ toString
-
-  override def toString: String = "previousScheme"
-
-  override def route(waypoints: Waypoints): Call =
-    routes.PreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
+  override def path: JsPath = JsPath \ "websites"
 }

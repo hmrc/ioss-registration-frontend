@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package pages.previousRegistrations
+package pages.website
 
-import controllers.previousRegistrations.routes
-import models.{Country, Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
-import play.api.libs.json.JsPath
+import controllers.website
+import models.{Index, UserAnswers}
+import pages.{NonEmptyWaypoints, Page, Waypoints}
 import play.api.mvc.Call
+import queries.DeriveNumberOfWebsites
 
-
-case class PreviousEuCountryPage(index: Index) extends QuestionPage[Country] {
-
-  override def path: JsPath = JsPath \ "previousRegistrations" \ index.position \ toString
-
-  override def toString: String = "previousEuCountry"
+case class DeleteWebsitePage(index: Index) extends Page {
 
   override def route(waypoints: Waypoints): Call =
-    routes.PreviousEuCountryController.onPageLoad(waypoints, index)
+    website.routes.DeleteWebsiteController.onPageLoad(waypoints, index)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    PreviousSchemePage(index, Index(0))
+    navigate(answers)
+
+  private def navigate(answers: UserAnswers): Page = {
+    answers.get(DeriveNumberOfWebsites) match {
+      case Some(n) if n > 0 => AddWebsitePage()
+      case _ => WebsitePage(Index(0))
+    }
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
+    navigate(answers)
 
 }

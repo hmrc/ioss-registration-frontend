@@ -18,11 +18,17 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Country, Index, UserAnswers}
-import pages.{AddItemPage, CheckYourAnswersPage, Page, QuestionPage, Waypoints}
+import pages.website.WebsitePage
+import pages.{AddItemPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
 import queries.euDetails.DeriveNumberOfEuRegistrations
+
+object AddEuDetailsPage{
+   val normalModeUrlFragment: String = "add-tax-details"
+   val checkModeUrlFragment: String = "change-add-tax-details"
+}
 
 final case class AddEuDetailsPage(override val index: Option[Index] = None) extends AddItemPage(index) with QuestionPage[Boolean] {
 
@@ -31,8 +37,8 @@ final case class AddEuDetailsPage(override val index: Option[Index] = None) exte
     case _ => false
   }
 
-  override val normalModeUrlFragment: String = "add-tax-details"
-  override val checkModeUrlFragment: String = "change-add-tax-details"
+  override val normalModeUrlFragment: String = AddEuDetailsPage.normalModeUrlFragment
+  override val checkModeUrlFragment: String =  AddEuDetailsPage.checkModeUrlFragment
 
   override def path: JsPath = JsPath \ toString
 
@@ -49,7 +55,7 @@ final case class AddEuDetailsPage(override val index: Option[Index] = None) exte
             if (i.position + 1 < Country.euCountries.size) {
               EuCountryPage(Index(i.position + 1))
             } else {
-              CheckYourAnswersPage // TODO -> to Websites???
+              WebsitePage(Index(0))
             }
           }
           .getOrElse {
@@ -58,7 +64,7 @@ final case class AddEuDetailsPage(override val index: Option[Index] = None) exte
               .map(n => EuCountryPage(Index(n)))
               .orRecover
           }
-      case false => CheckYourAnswersPage // TODO -> to Websites
+      case false => WebsitePage(Index(0))
     }.orRecover
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfEuRegistrations

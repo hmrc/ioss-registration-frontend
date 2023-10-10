@@ -43,17 +43,17 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
         (0 until config.Constants.maxTradingNames).foldLeft(Seq.empty[JourneyStep[Unit]]) {
           case (journeySteps: Seq[JourneyStep[Unit]], index: Int) =>
             journeySteps :+
-            submitAnswer(TradingNamePage(Index(index)), Gen.oneOf(companyNames).sample.value) :+
-            submitAnswer(AddTradingNamePage(Some(Index(index))), true)
+              submitAnswer(TradingNamePage(Index(index)), Gen.oneOf(companyNames).sample.value) :+
+              submitAnswer(AddTradingNamePage(Some(Index(index))), true)
         }
       }
 
       startingFrom(HasTradingNamePage)
         .run(
           submitAnswer(HasTradingNamePage, true) +:
-          generateTradingNames :+
-          pageMustBe(PreviouslyRegisteredPage): _*
-      )
+            generateTradingNames :+
+            pageMustBe(PreviouslyRegisteredPage): _*
+        )
     }
 
     "must be able to remove them" - {
