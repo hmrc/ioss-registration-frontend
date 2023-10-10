@@ -17,9 +17,9 @@
 package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
-import models.{Index, UserAnswers}
+import models.{Country, Index, UserAnswers}
 import pages.euDetails.TaxRegisteredInEuPage
-import pages.{AddItemPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
+import pages.{AddItemPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
@@ -41,21 +41,26 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
   override def route(waypoints: Waypoints): Call =
     routes.AddPreviousRegistrationController.onPageLoad(waypoints)
 
+
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    (answers.get(AddPreviousRegistrationPage()), answers.get(DeriveNumberOfPreviousRegistrations)) match {
-      case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
-      case (Some(false), _) => TaxRegisteredInEuPage
-      case _ => JourneyRecoveryPage
-    }
-  }
-
-
-  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
-    (answers.get(AddPreviousRegistrationPage()), answers.get(DeriveNumberOfPreviousRegistrations)) match {
-      case (Some(true), Some(size)) => PreviousEuCountryPage(Index(size))
-      case (Some(false), _) => TaxRegisteredInEuPage
-      case _ => JourneyRecoveryPage
-    }
+    answers.get(this).map {
+      case true =>
+        index
+          .map { i =>
+            if (i.position + 1 < Country.euCountries.size) {
+              PreviousEuCountryPage(Index(i.position + 1))
+            } else {
+              TaxRegisteredInEuPage
+            }
+          }
+          .getOrElse {
+            answers
+              .get(deriveNumberOfItems)
+              .map(n => PreviousEuCountryPage(Index(n)))
+              .orRecover
+          }
+      case false => TaxRegisteredInEuPage
+    }.orRecover
   }
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfPreviousRegistrations
