@@ -21,6 +21,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.select.SelectItem
 import viewmodels.govuk.select._
 
 case class Country(code: String, name: String)
+
 case class CountryWithValidationDetails(country: Country, vrnRegex: String, messageInput: String, exampleVrn: String, additionalMessage: Option[String] = None)
 
 object Country {
@@ -63,7 +64,7 @@ object Country {
         country =>
           SelectItemViewModel(
             value = country.code,
-            text  = country.name
+            text = country.name
           )
       }
   }
@@ -275,7 +276,7 @@ object Country {
 object CountryWithValidationDetails {
 
   lazy val euCountriesWithVRNValidationRules: Seq[CountryWithValidationDetails] = Seq(
-    CountryWithValidationDetails(Country("AT", "Austria"),austriaVatNumberRegex, "the 9 characters", "U12345678"),
+    CountryWithValidationDetails(Country("AT", "Austria"), austriaVatNumberRegex, "the 9 characters", "U12345678"),
     CountryWithValidationDetails(Country("BE", "Belgium"), belgiumVatNumberRegex, "the 10 numbers", "0123456789"),
     CountryWithValidationDetails(Country("BG", "Bulgaria"), bulgariaVatNumberRegex, "9 or 10 numbers", "123456789"),
     CountryWithValidationDetails(Country("HR", "Croatia"), croatiaVatNumberRegex, "the 11 numbers", "01234567899"),
@@ -288,7 +289,7 @@ object CountryWithValidationDetails {
     CountryWithValidationDetails(Country("DE", "Germany"), germanyVatNumberRegex, "the 9 numbers", "123456789"),
     CountryWithValidationDetails(Country("EL", "Greece"), greeceVatNumberRegex, "the 9 numbers", "123456789"),
     CountryWithValidationDetails(Country("HU", "Hungary"), hungaryVatNumberRegex, "the 8 numbers", "12345678"),
-    CountryWithValidationDetails(Country("IE", "Ireland"), irelandVatNumberRegex, "8 or 9 characters", "1234567WI"),
+    CountryWithValidationDetails(Country("IE", "Ireland"), irelandVatNumberRegex, "8 or 9 characters", "1234567XX"),
     CountryWithValidationDetails(Country("IT", "Italy"), italyVatNumberRegex, "the 11 numbers", "01234567899"),
     CountryWithValidationDetails(Country("LV", "Latvia"), latviaVatNumberRegex, "the 11 numbers", "01234567899"),
     CountryWithValidationDetails(Country("LT", "Lithuania"), lithuaniaVatNumberRegex, "9 or 12 numbers", "123456789"),
@@ -318,7 +319,7 @@ object CountryWithValidationDetails {
   private val franceVatNumberRegex = """^FR[A-Z0-9]{2}[0-9]{9}$"""
   private val croatiaVatNumberRegex = """^HR[0-9]{11}$"""
   private val hungaryVatNumberRegex = """^HU[0-9]{8}$"""
-  private val irelandVatNumberRegex = """^IE[0-9][A-Z0-9\+\*][0-9]{5}[A-Z]$|^IE[0-9]{7}WI$"""
+  private val irelandVatNumberRegex = """^IE([0-9][A-Z][0-9]{5}[A-Z]|[0-9]{7}[A-Z0-9]{1,2})$"""
   private val italyVatNumberRegex = """^IT[0-9]{11}$"""
   private val lithuaniaVatNumberRegex = """^LT[0-9]{9}$|^LT[0-9]{12}$"""
   private val luxembourgVatNumberRegex = """^LU[0-9]{8}$"""
@@ -332,3 +333,4 @@ object CountryWithValidationDetails {
   private val sloveniaVatNumberRegex = """^SI[0-9]{8}$"""
   private val slovakiaVatNumberRegex = """^SK[0-9]{10}$"""
 }
+

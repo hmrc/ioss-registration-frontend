@@ -22,19 +22,40 @@
         layout: templates.Layout,
         formHelper: FormWithCSRF,
         govukSummaryList: GovukSummaryList,
-        button: ButtonGroup
+        govukErrorSummary: GovukErrorSummary,
+        button: ButtonGroup,
+        govukWarningText: GovukWarningText
 )
 
-@(waypoints: Waypoints, countryIndex: Index, country: Country, list: SummaryList)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, countryIndex: Index, country: Country, list: SummaryList, incompleteDetails: Boolean = false)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkEuDetailsAnswers.title", country.name))) {
 
- <h1 class="govuk-heading-l">@messages("checkEuDetailsAnswers.heading", country.name)</h1>
+        @if(incompleteDetails) {
+            @govukWarningText(WarningText(
+                iconFallbackText = Option(messages("site.warning")),
+                content = Text(messages("error.missing_answers"))
+            ))
+        }
 
- @formHelper(action = routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex)) {
+        <h1 class="govuk-heading-xl">@messages("checkEuDetailsAnswers.heading", country.name)</h1>
 
-  @govukSummaryList(list)
+        @if(!incompleteDetails){
+            @formHelper(action = controllers.euDetails.routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex, false)) {
+                @govukSummaryList(list)
 
-  @button("site.continue", CheckEuDetailsAnswersPage(countryIndex).route(waypoints).url)
- }
+                @button("site.continue",  controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex).url)
+            }
+        } else {
+            <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+            <p class="govuk-body">@messages("error.missing_answers_prompt", country.name)</p>
+
+            @formHelper(action = controllers.euDetails.routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex, true)) {
+
+                @button("error.resolve_missing_answers",  controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex).url)
+
+            }
+
+        }
+
 }

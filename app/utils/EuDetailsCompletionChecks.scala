@@ -16,7 +16,7 @@
 
 package utils
 
-import models.Index
+import models.{CountryWithValidationDetails, Index}
 import models.euDetails.{EuConsumerSalesMethod, EuOptionalDetails, RegistrationType}
 import models.requests.AuthenticatedDataRequest
 import pages.Waypoints
@@ -61,11 +61,23 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
   }
 
   private def partOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    isPartOfVatGroup && notSellingToEuConsumers(details) || sellsToEuConsumers(isPartOfVatGroup, details)
+    isPartOfVatGroup && notSellingToEuConsumers(details) || sellsToEuConsumers(isPartOfVatGroup, details) ||
+      checkVatNumber(details)
   }
 
   private def notPartOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    !isPartOfVatGroup && notSellingToEuConsumers(details) || sellsToEuConsumers(isPartOfVatGroup, details)
+    !isPartOfVatGroup && notSellingToEuConsumers(details) || sellsToEuConsumers(isPartOfVatGroup, details) ||
+      checkVatNumber(details)
+  }
+
+  private def checkVatNumber(details: EuOptionalDetails): Boolean = {
+    details.euVatNumber.nonEmpty && details.euVatNumber.exists { euVatNumber =>
+      CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == details.euCountry.code) match {
+        case Some(validationRule) =>
+          !euVatNumber.matches(validationRule.vrnRegex)
+        case _ => true
+      }
+    }
   }
 
   private def notSellingToEuConsumers(details: EuOptionalDetails): Boolean = {
@@ -103,7 +115,7 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
         Redirect(controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, Index(incompleteCountry._2)))
     )
 
-    private def fixedEstablishmentRedirect(
+  private def fixedEstablishmentRedirect(
                                           waypoints: Waypoints,
                                           isPartOfVatGroup: Boolean,
                                           incompleteCountry: (EuOptionalDetails, Int)
@@ -131,6 +143,7 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
       }
     }
   }
+
   private def fixedEstablishingTradeDetailsRedirect(
                                                      waypoints: Waypoints,
                                                      incompleteCountry: (EuOptionalDetails, Int)

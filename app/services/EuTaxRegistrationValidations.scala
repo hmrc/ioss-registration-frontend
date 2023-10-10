@@ -19,7 +19,7 @@ package services
 import cats.implicits._
 import models.domain.EuTaxIdentifierType.{Other, Vat}
 import models.domain._
-import models.{Country, DataMissingError, Index, InternationalAddress, UserAnswers, ValidationError, ValidationResult}
+import models.{Country, CountryWithValidationDetails, DataMissingError, Index, InternationalAddress, UserAnswers, ValidationError, ValidationResult}
 import pages.euDetails._
 import queries.euDetails.AllEuDetailsRawQuery
 
@@ -61,21 +61,30 @@ trait EuTaxRegistrationValidations {
     (
       getEuTaxIdentifier(answers, index),
       getFixedEstablishment(answers, index)
-      ).mapN(
+    ).mapN(
       (taxIdentifier, fixedEstablishment) =>
         RegistrationWithFixedEstablishment(country, taxIdentifier, fixedEstablishment)
     )
 
-  private def getEuVatNumber(answers: UserAnswers, index: Index): ValidationResult[String] =
-    answers.get(EuVatNumberPage(index)) match {
-      case Some(vatNumber) => vatNumber.validNec
-      case None => DataMissingError(EuVatNumberPage(index)).invalidNec
+  private def getEuVatNumber(answers: UserAnswers, index: Index): ValidationResult[String] = {
+    val country = answers.get(EuCountryPage(index))
+    val euVatNumber = answers.get(EuVatNumberPage(index))
+    (euVatNumber, country) match {
+      case (Some(vatNumber), Some(country)) =>
+        CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == country.code) match {
+          case Some(validationRule) if vatNumber.matches(validationRule.vrnRegex) =>
+            vatNumber.validNec
+          case _ =>
+            DataMissingError(EuVatNumberPage(index)).invalidNec
+        }
+      case (None, _) => DataMissingError(EuVatNumberPage(index)).invalidNec
     }
+  }
 
   private def getEuTaxIdentifier(answers: UserAnswers, index: Index): ValidationResult[EuTaxIdentifier] = {
     getEuVatNumber(answers, index).map(v => EuTaxIdentifier(Vat, Some(v))) // TODO: check logic here
-    .orElse(getEuTaxId(answers, index).map(v => EuTaxIdentifier(Other, Some(v))))
-    .orElse(EuTaxIdentifier(Other, None).validNec[ValidationError])
+      .orElse(getEuTaxId(answers, index).map(v => EuTaxIdentifier(Other, Some(v))))
+      .orElse(EuTaxIdentifier(Other, None).validNec[ValidationError])
   }
 
   private def getEuTaxId(answers: UserAnswers, index: Index): ValidationResult[String] =
@@ -88,7 +97,7 @@ trait EuTaxRegistrationValidations {
     (
       getFixedEstablishmentTradingName(answers, index),
       getFixedEstablishmentAddress(answers, index)
-      ).mapN(TradeDetails.apply)
+    ).mapN(TradeDetails.apply)
 
   private def getFixedEstablishmentTradingName(answers: UserAnswers, index: Index): ValidationResult[String] =
     answers.get(FixedEstablishmentTradingNamePage(index)) match {

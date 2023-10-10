@@ -42,7 +42,7 @@ object RegistrationData extends Generators with EitherValues {
       ),
       euRegistrations = Seq(
         RegistrationWithoutFixedEstablishmentWithTradeDetails(Country("FR", "France"),
-          EuTaxIdentifier(EuTaxIdentifierType.Vat, Some("FR123456789")),
+          EuTaxIdentifier(EuTaxIdentifierType.Vat, Some("FRAA123456789")),
           TradeDetails(
             "French trading name",
           InternationalAddress(
@@ -60,7 +60,7 @@ object RegistrationData extends Generators with EitherValues {
         ),
         RegistrationWithoutFixedEstablishmentWithTradeDetails(
           Country("IE", "Ireland"),
-          EuTaxIdentifier(EuTaxIdentifierType.Other, Some("IE123456789")),
+          EuTaxIdentifier(EuTaxIdentifierType.Other, Some("IE1234567AB")),
           TradeDetails(
           "Irish trading name",
           InternationalAddress(
@@ -74,12 +74,12 @@ object RegistrationData extends Generators with EitherValues {
         ),
         RegistrationWithFixedEstablishment(
           Country("ES", "Spain"),
-          EuTaxIdentifier(EuTaxIdentifierType.Vat, Some("ES123456789")),
+          EuTaxIdentifier(EuTaxIdentifierType.Vat, Some("ESA1234567A")),
           TradeDetails("Spanish trading name", InternationalAddress("Line 1", None, "Town", None, None, Country("ES", "Spain")))
         ),
         RegistrationWithFixedEstablishment(
           Country("DK", "Denmark"),
-          EuTaxIdentifier(EuTaxIdentifierType.Other, Some("DK123456789")),
+          EuTaxIdentifier(EuTaxIdentifierType.Other, Some("DK12345678")),
           TradeDetails("Danish trading name", InternationalAddress("Line 1", None, "Town", None, None, Country("DK", "Denmark")))
         ),
       ),

@@ -141,6 +141,27 @@ trait CompletionChecks {
       case None => None
     }
 
+
+  def incompleteCountryEuDetailsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
+
+    firstIndexedIncompleteEuDetails(getAllIncompleteEuDetails().map(_.euCountry)) match {
+      case Some((incompleteCountry, index)) =>
+        val defaultRedirect = Some(Redirect(controllers.euDetails.routes.EuCountryController.onPageLoad(waypoints, Index(index))))
+
+        incompleteCountry.euVatNumber match {
+          case Some(vatNumber) =>
+            CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == incompleteCountry.euCountry.code) match {
+              case Some(validationRule) if !vatNumber.matches(validationRule.vrnRegex) =>
+                Some(Redirect(controllers.euDetails.routes.EuVatNumberController.onPageLoad(waypoints, Index(index))))
+              case _ => defaultRedirect
+            }
+          case _ => defaultRedirect
+        }
+      case _ => None
+    }
+
+  }
+
   private def incompleteTradingNameRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isTradingNamesValid()) {
     Some(Redirect(controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints)))
   } else {
