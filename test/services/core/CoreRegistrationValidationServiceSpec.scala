@@ -289,7 +289,7 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
 
       val response = coreRegistrationValidationService.isActiveTrader(genericMatch)
 
-      response equals true
+      response mustBe true
     }
 
     "call isActiveTrader with matchType = TraderIdActiveNETP and must return true" in {
@@ -299,7 +299,7 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
       val newMatch = genericMatch.copy(matchType = MatchType.TraderIdActiveNETP)
       val response = coreRegistrationValidationService.isActiveTrader(newMatch)
 
-      response equals true
+      response mustBe true
     }
 
     "call isActiveTrader with matchType = OtherMSNETPActiveNETP and must return true" in {
@@ -309,7 +309,7 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
       val newMatch = genericMatch.copy(matchType = MatchType.OtherMSNETPActiveNETP)
       val response = coreRegistrationValidationService.isActiveTrader(newMatch)
 
-      response equals true
+      response mustBe true
     }
 
     "call isActiveTrader with matchType = FixedEstablishmentQuarantinedNETP and must return false" in {
@@ -319,7 +319,7 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
       val newMatch = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP)
       val response = coreRegistrationValidationService.isActiveTrader(newMatch)
 
-      response equals false
+      response mustBe false
     }
   }
 
@@ -332,7 +332,7 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
       val newMatch = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP)
       val response = coreRegistrationValidationService.isQuarantinedTrader(newMatch)
 
-      response equals true
+      response mustBe true
     }
 
     "call isExcludedTrader with matchType = TraderIdQuarantinedNETP and must return true" in {
@@ -342,7 +342,7 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
       val newMatch = genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)
       val response = coreRegistrationValidationService.isQuarantinedTrader(newMatch)
 
-      response equals true
+      response mustBe true
     }
 
     "call isExcludedTrader with matchType = OtherMSNETPQuarantinedNETP and must return true" in {
@@ -352,7 +352,7 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
       val newMatch = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP)
       val response = coreRegistrationValidationService.isQuarantinedTrader(newMatch)
 
-      response equals true
+      response mustBe true
     }
 
     "call isExcludedTrader with matchType = FixedEstablishmentActiveNETP and must return false" in {
@@ -362,7 +362,7 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
       val newMatch = genericMatch.copy(matchType = MatchType.FixedEstablishmentActiveNETP)
       val response = coreRegistrationValidationService.isQuarantinedTrader(newMatch)
 
-      response equals false
+      response mustBe false
     }
   }
 }

@@ -19,10 +19,10 @@ package controllers.previousRegistrations
 import controllers.GetCountry
 import controllers.actions._
 import forms.previousRegistrations.PreviousOssNumberFormProvider
+import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, WithName}
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.PreviousSchemeHintText
 import models.requests.AuthenticatedDataRequest
-import models.{Country, CountryWithValidationDetails, Index, Mode, PreviousScheme, WithName}
 import pages.Waypoints
 import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
