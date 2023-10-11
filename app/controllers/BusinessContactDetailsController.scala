@@ -19,6 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.BusinessContactDetailsFormProvider
+import logging.Logging
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
 import models.{BusinessContactDetails, CheckMode}
@@ -43,7 +44,7 @@ class BusinessContactDetailsController @Inject()(
                                                   config: FrontendAppConfig,
                                                   view: BusinessContactDetailsView
                                                 )(implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport {
+  extends FrontendBaseController with I18nSupport with Logging{
 
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -121,12 +122,14 @@ class BusinessContactDetailsController @Inject()(
         } yield Redirect(BusinessContactDetailsPage.navigate(waypoints, updatedAnswers, updatedAnswers).route)
 
       case LockedPasscodeForSingleEmail =>
+        logger.info("saving as locked passcode for single email")
         saveForLaterService.saveAnswers(
           routes.EmailVerificationCodesExceededController.onPageLoad(),
           routes.BusinessContactDetailsController.onPageLoad(waypoints)
         )
 
       case LockedTooManyLockedEmails =>
+        logger.info("saving as too many locked emails")
         saveForLaterService.saveAnswers(
           routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad(),
           routes.BusinessContactDetailsController.onPageLoad(waypoints)

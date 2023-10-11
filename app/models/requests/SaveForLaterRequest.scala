@@ -16,7 +16,6 @@
 
 package models.requests
 
-import models.UserAnswers
 import models.domain.VatCustomerInfo
 import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.domain.Vrn
@@ -32,5 +31,10 @@ object SaveForLaterRequest {
 
   implicit val format: OFormat[SaveForLaterRequest] = Json.format[SaveForLaterRequest]
 
-  def apply(answers: UserAnswers, vrn: Vrn): SaveForLaterRequest = SaveForLaterRequest(vrn, answers.data, answers.vatInfo)
+  def apply(data: JsValue, vrn: Vrn): SaveForLaterRequest = {
+    // vatInfo is always pulled fresh
+    // possibly worth having 2 models for clarity as vatInfo is not optional on retrieve
+    // This is how it is modeled in the API
+    SaveForLaterRequest(vrn = vrn, data = data, vatInfo = None)
+  }
 }

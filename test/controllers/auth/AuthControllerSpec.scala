@@ -18,32 +18,34 @@ package controllers.auth
 
 import base.SpecBase
 import config.FrontendAppConfig
-import connectors.RegistrationConnector
+import connectors.{RegistrationConnector, SaveForLaterConnector}
 import controllers.auth.{routes => authRoutes}
 import models.{UserAnswers, VatApiCallResult, responses}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
+import pages._
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
-import pages._
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.VatApiCallResultQuery
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import repositories.AuthenticatedUserAnswersRepository
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import utils.FutureSyntax.FutureOps
 import views.html.auth.{InsufficientEnrolmentsView, UnsupportedAffinityGroupView, UnsupportedAuthProviderView, UnsupportedCredentialRoleView}
 
 import java.net.URLEncoder
 import java.time.LocalDate
+import scala.concurrent.Future
 
 class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
+  private val mockSavedAnswersConnector = mock[SaveForLaterConnector]
 
   private val continueUrl = "http://localhost/foo"
   private val waypoints: Waypoints = EmptyWaypoints
@@ -51,24 +53,47 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
     reset(mockAuthenticatedUserAnswersRepository)
+    reset(mockSavedAnswersConnector)
   }
 
   private def appBuilder(answers: Option[UserAnswers]) =
     applicationBuilder(answers)
       .overrides(
         bind[RegistrationConnector].toInstance(mockRegistrationConnector),
-        bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository)
+        bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository),
+        bind[SaveForLaterConnector].toInstance(mockSavedAnswersConnector)
       )
 
   ".onSignIn" - {
 
     "when we already have some user answers" - {
 
+      "must redirect to the ContinueRegistration page if saved url was retrieved from saved answers" in {
+        val answers = emptyUserAnswers.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+          .set(SavedProgressPage, "/url").success.value
+
+        val application = appBuilder(Some(answers)).build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.AuthController.onSignIn().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.ContinueRegistrationController.onPageLoad().url
+
+          verifyNoInteractions(mockRegistrationConnector)
+          verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
+          verifyNoInteractions(mockSavedAnswersConnector)
+        }
+      }
+
       "and we have a made a call to get VAT info" - {
 
         "must redirect to the next page without making calls to get data or updating the users answers" in {
-
           val answers = emptyUserAnswersWithVatInfo.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+
+          when(mockSavedAnswersConnector.get()(any()))
+            .thenReturn(Future.successful(Right(None)))
 
           val application = appBuilder(Some(answers)).build()
 
@@ -78,6 +103,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+
+            verify(mockSavedAnswersConnector, times(1)).get()(any())
             verifyNoInteractions(mockRegistrationConnector)
             verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
           }
@@ -91,11 +118,10 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
           "and the de-registration date is today or before" - {
 
             "must redirect to Expired Vrn Date page" in {
-
               val application = appBuilder(answers = Some(emptyUserAnswersWithVatInfo)).build()
-
               val nonExpiredVrnVatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate)))
 
+              when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
               when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(nonExpiredVrnVatInfo).toFuture
               when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
 
@@ -105,6 +131,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                 val result = route(application, request).value
 
                 status(result) mustBe SEE_OTHER
+
+                verify(mockSavedAnswersConnector, times(1)).get()(any())
                 redirectLocation(result).value mustBe ExpiredVrnDatePage.route(waypoints).url
                 verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
               }
@@ -114,9 +142,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
           "and the de-registration date is later than today" - {
 
             "must create user answers with their VAT details, then redirect to the next page" in {
-
               val answers = emptyUserAnswersWithVatInfo.set(BusinessBasedInNiPage, true).success.value
-
               val application = appBuilder(answers = Some(answers)).build()
 
               val nonExpiredVrnVatInfo = vatCustomerInfo.copy(
@@ -124,6 +150,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                 deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate).plusDays(1))
               )
 
+              when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
               when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(nonExpiredVrnVatInfo).toFuture
               when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -137,6 +164,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                   .set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
 
                 status(result) mustBe SEE_OTHER
+
+                verify(mockSavedAnswersConnector, times(1)).get()(any())
                 redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
                 verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
               }
@@ -156,6 +185,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
               val application = appBuilder(answers = Some(answers)).build()
 
+              when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
               when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
               when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
 
@@ -166,6 +196,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 status(result) mustBe SEE_OTHER
                 redirectLocation(result).value mustBe CannotRegisterNoNiProtocolPage.route(waypoints).url
+
+                verify(mockSavedAnswersConnector, times(1)).get()(any())
                 verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
               }
             }
@@ -205,6 +237,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
               val application = appBuilder(answers = Some(answers)).build()
 
+              when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
               when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
               when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -219,6 +252,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 status(result) mustBe SEE_OTHER
                 redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+
+                verify(mockSavedAnswersConnector, times(1)).get()(any())
                 verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
               }
             }
@@ -242,6 +277,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                   val application = appBuilder(answers = Some(answers)).build()
 
+                  when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
                   when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
                   when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
 
@@ -252,6 +288,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                     status(result) mustBe SEE_OTHER
                     redirectLocation(result).value mustBe CannotRegisterNotNorwegianBasedBusinessPage.route(waypoints).url
+
+                    verify(mockSavedAnswersConnector, times(1)).get()(any())
                     verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
                   }
                 }
@@ -273,6 +311,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                   val application = appBuilder(answers = Some(answers)).build()
 
+                  when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
                   when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
                   when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -285,6 +324,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                     status(result) mustBe SEE_OTHER
                     redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+
+                    verify(mockSavedAnswersConnector, times(1)).get()(any())
                     verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
                   }
                 }
@@ -304,6 +345,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 val application = appBuilder(answers = Some(answers)).build()
 
+                when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
                 when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
                 when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
 
@@ -314,6 +356,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                   status(result) mustBe SEE_OTHER
                   redirectLocation(result).value mustBe CannotRegisterNonEstablishedTaxablePersonPage.route(waypoints).url
+
+                  verify(mockSavedAnswersConnector, times(1)).get()(any())
                   verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
                 }
               }
@@ -337,6 +381,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 val application = appBuilder(answers = Some(answers)).build()
 
+                when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
                 when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
                 when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -349,6 +394,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                   status(result) mustBe SEE_OTHER
                   redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+
+                  verify(mockSavedAnswersConnector, times(1)).get()(any())
                   verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
                 }
               }
@@ -364,6 +411,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 val application = appBuilder(answers = Some(answers)).build()
 
+                when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
                 when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
                 when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn false.toFuture
 
@@ -374,6 +422,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                   status(result) mustBe SEE_OTHER
                   redirectLocation(result).value mustBe CannotRegisterNonEstablishedTaxablePersonPage.route(waypoints).url
+
+                  verify(mockSavedAnswersConnector, times(1)).get()(any())
                   verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
                 }
               }
@@ -396,6 +446,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                   val application = appBuilder(answers = Some(answers)).build()
 
+                  when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
                   when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(updatedVatInfo).toFuture
                   when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -408,6 +459,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                     status(result) mustBe SEE_OTHER
                     redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+
+                    verify(mockSavedAnswersConnector, times(1)).get()(any())
                     verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
                   }
                 }
@@ -424,6 +477,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             val application = appBuilder(Some(emptyUserAnswers)).build()
 
+            when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
             when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(responses.NotFound).toFuture
             when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -436,6 +490,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
               status(result) mustBe SEE_OTHER
               redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
+
+              verify(mockSavedAnswersConnector, times(1)).get()(any())
               verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
             }
           }
@@ -449,6 +505,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             val application = appBuilder(None).build()
 
+            when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
             when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(failureResponse).toFuture
             when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -461,6 +518,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
               status(result) mustBe SEE_OTHER
               redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
+
+              verify(mockSavedAnswersConnector, times(1)).get()(any())
               verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
             }
           }
@@ -478,6 +537,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
             .set(BusinessBasedInNiPage, true).success.value))
             .build()
 
+          when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
           when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
           when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -491,6 +551,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
+
+            verify(mockSavedAnswersConnector, times(1)).get()(any())
             verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }
@@ -502,6 +564,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
           val application = appBuilder(None).build()
 
+          when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
           when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(responses.NotFound).toFuture
           when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -514,6 +577,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
+
+            verify(mockSavedAnswersConnector, times(1)).get()(any())
             verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }
@@ -527,6 +592,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
           val application = appBuilder(None).build()
 
+          when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
           when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(failureResponse).toFuture
           when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
@@ -539,6 +605,8 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
+
+            verify(mockSavedAnswersConnector, times(1)).get()(any())
             verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }

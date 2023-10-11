@@ -30,6 +30,7 @@ import pages._
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.VatApiCallResultQuery
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.auth.{InsufficientEnrolmentsView, UnsupportedAffinityGroupView, UnsupportedAuthProviderView, UnsupportedCredentialRoleView}
@@ -55,27 +56,33 @@ class AuthController @Inject()(
 
   private val redirectPolicy = OnlyRelative | AbsoluteWithHostnameFromAllowlist(frontendAppConfig.allowedRedirectUrls: _*)
 
-  def onSignIn(): Action[AnyContent] = cc.authAndGetOptionalData().async {
+  def onSignIn(): Action[AnyContent] = (cc.authAndGetOptionalData() andThen cc.retrieveSavedAnswers()).async {
     implicit request =>
       val answers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId, lastUpdated = Instant.now(clock)))
-      answers.get(VatApiCallResultQuery) match {
-        case Some(vatApiCallResult) if vatApiCallResult == VatApiCallResult.Success =>
-          Redirect(CheckVatDetailsPage.route(EmptyWaypoints).url).toFuture
+      answers.get(SavedProgressPage).map {
+        _ => Future.successful(Redirect(controllers.routes.ContinueRegistrationController.onPageLoad()))
+      }.getOrElse(showNonSavedAnswersPage(answers))
+  }
 
-        case _ =>
-          registrationConnector.getVatCustomerInfo().flatMap {
-            case Right(vatInfo) if checkVrnExpired(vatInfo) =>
-              Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
-            case Right(vatInfo) if checkNiOrNorwayAndRedirect(vatInfo, answers) =>
-                checkNiORNorwayAndRedirect(answers)
-            case Right(vatInfo) if isNETP(vatInfo) =>
-              Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
-            case Right(vatInfo) =>
-                saveAndRedirect(answers, Some(vatInfo))
-            case _ =>
-              saveAndRedirect(answers, None)
-          }
-      }
+  private def showNonSavedAnswersPage(answers: UserAnswers)( implicit headerCarrier: HeaderCarrier): Future[Result] = {
+    answers.get(VatApiCallResultQuery) match {
+      case Some(vatApiCallResult) if vatApiCallResult == VatApiCallResult.Success =>
+        Redirect(CheckVatDetailsPage.route(EmptyWaypoints).url).toFuture
+
+      case _ =>
+        registrationConnector.getVatCustomerInfo().flatMap {
+          case Right(vatInfo: VatCustomerInfo) if checkVrnExpired(vatInfo) =>
+            Redirect(ExpiredVrnDatePage.route(EmptyWaypoints).url).toFuture
+          case Right(vatInfo) if checkNiOrNorwayAndRedirect(vatInfo, answers) =>
+            checkNiORNorwayAndRedirect(answers)
+          case Right(vatInfo) if isNETP(vatInfo) =>
+            Redirect(CannotRegisterNonEstablishedTaxablePersonPage.route(EmptyWaypoints).url).toFuture
+          case Right(vatInfo) =>
+            saveAndRedirect(answers, Some(vatInfo))
+          case _ =>
+            saveAndRedirect(answers, None)
+        }
+    }
   }
 
   private def checkNiOrNorwayAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Boolean = {

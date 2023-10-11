@@ -20,6 +20,7 @@ import config.FrontendAppConfig
 import connectors.{RegistrationConnector, SaveForLaterConnector, SavedUserAnswers}
 import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
+import models.UserAnswers
 import models.requests.SaveForLaterRequest
 import pages.SavedProgressPage
 import play.api.i18n.I18nSupport
@@ -51,10 +52,13 @@ class SavedProgressController @Inject()(
       val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
       val answersExpiry = request.userAnswers.lastUpdated.plus(appConfig.saveForLaterTtl, ChronoUnit.DAYS)
         .atZone(clock.getZone).toLocalDate.format(dateTimeFormatter)
-      Future.fromTry(request.userAnswers.set(SavedProgressPage, continueUrl.get(OnlyRelative).url)).flatMap {
-        updatedAnswers =>
-          val s4LRequest = SaveForLaterRequest(updatedAnswers, request.vrn)
-          (for{
+      val eventualAnswers = Future.fromTry(request.userAnswers.set(SavedProgressPage, continueUrl.get(OnlyRelative).url))
+      eventualAnswers.failed.foreach(error => logger.error("Failed saving answers", error))
+
+      eventualAnswers.flatMap {
+        updatedAnswers: UserAnswers =>
+          val s4LRequest = SaveForLaterRequest(updatedAnswers.data, request.vrn)
+          (for {
             savedExternalEntry <- registrationConnector.getSavedExternalEntry()
             s4laterResult <- connector.submit(s4LRequest)
           } yield {
@@ -71,7 +75,7 @@ class SavedProgressController @Inject()(
               logger.error(s"Unexpected result on submit: ${e.toString}")
               Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
             case (Right(None), _) =>
-              logger.error(s"Unexpected result on submit")
+              logger.error(s"Unexpected result on submit, no saved for later result and no external url")
               Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
           }
       }

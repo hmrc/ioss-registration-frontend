@@ -67,7 +67,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   )
 
   val coreValidationUrl: Service = configuration.get[Service]("microservice.services.core-validation")
-  
+
   val timeout: Int   = configuration.get[Int]("timeout-dialog.timeout")
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
@@ -84,4 +84,5 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val coreValidationService: Service = configuration.get[Service]("microservice.services.core-validation")
 
   val iossEnrolment: String = configuration.get[String]("ioss-enrolment")
+
 }

@@ -17,6 +17,7 @@
 @import controllers.euDetails.routes
 @import viewmodels.LegendSize
 @import views.html.components.ButtonGroup
+@import pages.euDetails.AddEuDetailsPage
 
 @this(
         layout: templates.Layout,
@@ -27,6 +28,7 @@
         govukSummaryList: GovukSummaryList,
         govukWarningText: GovukWarningText
 )
+
 
 @(form: Form[_], waypoints: Waypoints, euDetails: SummaryList, canAddEuDetails: Boolean, incompleteCountries: Seq[EuOptionalDetails] = List.empty)(implicit request: Request[_], messages: Messages)
 
@@ -76,7 +78,7 @@
             <input type="hidden" name="value" id="value" value="false"/>
           }
 
-          @button("site.continue", waypoints = waypoints)
+          @button("site.continue", AddEuDetailsPage().route(waypoints).url, waypoints)
         }
       } else {
         <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
@@ -84,7 +86,7 @@
 
         @formHelper(action = routes.AddEuDetailsController.onSubmit(waypoints, incompletePromptShown = true)) {
 
-          @button("error.resolve_missing_answers", waypoints = waypoints)
+          @button("error.resolve_missing_answers", AddEuDetailsPage().route(waypoints).url, waypoints)
         }
       }
 }
