@@ -22,12 +22,13 @@ import forms.previousRegistrations.PreviousOssNumberFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.PreviousSchemeHintText
 import models.requests.AuthenticatedDataRequest
-import models.{Country, CountryWithValidationDetails, Index, PreviousScheme}
+import models.{Country, CountryWithValidationDetails, Index, Mode, PreviousScheme, WithName}
 import pages.Waypoints
 import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
+import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.previousRegistrations.PreviousOssNumberView
 
@@ -37,6 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class PreviousOssNumberController @Inject()(
                                         override val messagesApi: MessagesApi,
                                         cc: AuthenticatedControllerComponents,
+                                        coreRegistrationValidationService: CoreRegistrationValidationService,
                                         formProvider: PreviousOssNumberFormProvider,
                                         view: PreviousOssNumberView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
@@ -103,17 +105,44 @@ class PreviousOssNumberController @Inject()(
               } else {
                 PreviousScheme.OSSU
               }
-              saveAndRedirect(countryIndex, schemeIndex, value, country, previousScheme, waypoints)
+              searchSchemeThenSaveAndRedirect(waypoints, countryIndex, schemeIndex, country, value, previousScheme)
             }
           )
       }
+  }
+
+  private def searchSchemeThenSaveAndRedirect(
+                                               waypoints: Waypoints,
+                                               countryIndex: Index,
+                                               schemeIndex: Index,
+                                               country: Country,
+                                               value: String,
+                                               previousScheme: WithName with PreviousScheme
+                                             )(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
+    if (previousScheme == PreviousScheme.OSSU) {
+      coreRegistrationValidationService.searchScheme(
+        searchNumber = value,
+        previousScheme = previousScheme,
+        intermediaryNumber = None,
+        countryCode = country.code
+      ).flatMap {
+        case Some(activeMatch) if coreRegistrationValidationService.isActiveTrader(activeMatch) =>
+          Future.successful(
+            Redirect(controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(waypoints, activeMatch.memberState, countryIndex, schemeIndex)))
+        case Some(activeMatch) if coreRegistrationValidationService.isQuarantinedTrader(activeMatch) =>
+          Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints, countryIndex, schemeIndex)))
+        case _ =>
+          saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)
+      }
+    } else {
+      saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)
+    }
   }
 
   private def saveAndRedirect(
                                countryIndex: Index,
                                schemeIndex: Index,
                                registrationNumber: String,
-                               country: Country,
                                previousScheme: PreviousScheme,
                                waypoints: Waypoints
                              )(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {

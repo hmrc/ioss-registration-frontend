@@ -147,6 +147,10 @@ GET         /cannot-delete-previous-registrations                         contro
 GET         /remove-all-previous-registrations                            controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /remove-all-previous-registrations                            controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
+GET         /scheme-still-active/:countryIndex/:schemeIndex               controllers.previousRegistrations.SchemeStillActiveController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String, countryIndex: Index, schemeIndex: Index)
+
+GET         /scheme-quarantined/:countryIndex/:schemeIndex                controllers.previousRegistrations.SchemeQuarantinedController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+
 # EU details section
 GET         /tax-in-eu                                                    controllers.euDetails.TaxRegisteredInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /tax-in-eu                                                    controllers.euDetails.TaxRegisteredInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
