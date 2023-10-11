@@ -16,13 +16,18 @@
 
 package controllers.auth
 
+import config.FrontendAppConfig
 import connectors.IdentityVerificationConnector
 import controllers.auth.{routes => authRoutes}
 import models.iv.IdentityVerificationResult._
 import models.iv._
+import play.api.i18n.Messages.implicitMessagesProviderToMessages
+import play.api.mvc.Results.Redirect
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
+import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative, RedirectUrl}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
@@ -36,13 +41,15 @@ class IdentityVerificationController @Inject()(
                                                 override val messagesApi: MessagesApi,
                                                 val controllerComponents: MessagesControllerComponents,
                                                 ivConnector: IdentityVerificationConnector,
-                                                view: IdentityProblemView
+                                                view: IdentityProblemView,
+                                                frontendAppConfig: FrontendAppConfig
                                               )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
-  def identityError(continueUrl: String): Action[AnyContent] = Action {
-    implicit request =>
-      Ok(view(continueUrl))
+  private val redirectPolicy = AbsoluteWithHostnameFromAllowlist(frontendAppConfig.allowedRedirectUrls: _*)
+
+  def identityError(continueUrl: RedirectUrl): Action[AnyContent] = Action { implicit request =>
+    Ok(view(continueUrl.get(redirectPolicy).url))
   }
 
   private val allPossibleEvidences: List[IdentityVerificationEvidenceSource] =
@@ -51,7 +58,7 @@ class IdentityVerificationController @Inject()(
   private def allSourcesDisabled(disabledSources: List[IdentityVerificationEvidenceSource]): Boolean =
     allPossibleEvidences.forall(disabledSources.contains)
 
-  def handleIvFailure(continueUrl: String, journeyId: Option[String]): Action[AnyContent] = Action.async {
+  def handleIvFailure(continueUrl: RedirectUrl, journeyId: Option[String]): Action[AnyContent] = Action.async {
     implicit request =>
 
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
@@ -62,7 +69,7 @@ class IdentityVerificationController @Inject()(
             case Some(result: IdentityVerificationResult) =>
               result match {
                 case InsufficientEvidence       => handleInsufficientEvidence(continueUrl)
-                case Success                    => Redirect(continueUrl).toFuture
+                case Success                    => Redirect(continueUrl.get(redirectPolicy).url).toFuture
                 case Incomplete                 => Redirect(authRoutes.IvReturnController.incomplete(continueUrl).url).toFuture
                 case FailedMatching             => Redirect(authRoutes.IvReturnController.failedMatching(continueUrl).url).toFuture
                 case FailedIdentityVerification => Redirect(authRoutes.IvReturnController.failed(continueUrl).url).toFuture
@@ -80,7 +87,7 @@ class IdentityVerificationController @Inject()(
       }
   }
 
-  private def handleInsufficientEvidence(continueUrl: String)(implicit hc: HeaderCarrier): Future[Result] =
+  private def handleInsufficientEvidence(continueUrl: RedirectUrl)(implicit hc: HeaderCarrier): Future[Result] =
     ivConnector.getDisabledEvidenceSource().map {
       case list if allSourcesDisabled(list) => Redirect(authRoutes.IvReturnController.notEnoughEvidenceSources(continueUrl).url)
       case _                                => Redirect(authRoutes.IvReturnController.insufficientEvidence(continueUrl).url)

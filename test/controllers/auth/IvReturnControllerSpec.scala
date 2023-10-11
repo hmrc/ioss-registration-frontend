@@ -18,13 +18,14 @@ package controllers.auth
 
 import base.SpecBase
 import controllers.auth.{routes => authRoutes}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.iv._
 
 class IvReturnControllerSpec extends SpecBase {
 
-  private val continueUrl: String = "continueUrl"
+  private val continueUrl = "http://localhost/foo"
 
   "IvReturn Controller" - {
 
@@ -35,7 +36,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.error(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.error(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -54,7 +55,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.incomplete(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.failedMatching(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -73,7 +74,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.insufficientEvidence(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.failed(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -92,7 +93,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.lockedOut(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.incomplete(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -111,7 +112,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.preconditionFailed(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.insufficientEvidence(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -130,7 +131,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.technicalIssue(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.lockedOut(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -149,7 +150,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.timeout(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.notEnoughEvidenceSources(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -168,7 +169,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.userAborted(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.preconditionFailed(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -187,7 +188,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.notEnoughEvidenceSources(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.technicalIssue(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -206,7 +207,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.failedMatching(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.timeout(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 
@@ -225,7 +226,7 @@ class IvReturnControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.failed(continueUrl).url)
+          val request = FakeRequest(GET, routes.IvReturnController.userAborted(RedirectUrl("http://localhost/foo")).url)
 
           val result = route(application, request).value
 

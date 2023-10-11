@@ -36,7 +36,10 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Retrieval, ~}
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import utils.FutureSyntax.FutureOps
+import uk.gov.hmrc.play.bootstrap.binders.OnlyRelative
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
 
+import java.net.URLEncoder
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -260,7 +263,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
 
           val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), appConfig, urlBuilder)
           val controller = new Harness(authAction, actionBuilder)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result = controller.onPageLoad()(FakeRequest("", "/endpoint"))
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value must startWith(appConfig.loginUrl)
@@ -281,11 +284,11 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
 
           val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig, urlBuilder)
           val controller = new Harness(authAction, actionBuilder)
-          val result = controller.onPageLoad()(FakeRequest())
+          val request = FakeRequest("", "/endpoint")
+          val result = controller.onPageLoad()(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value must startWith(appConfig.loginUrl)
-        }
+          redirectLocation(result).value mustEqual appConfig.loginUrl + "?continue=" + URLEncoder.encode(urlBuilder.loginContinueUrl(request).get(OnlyRelative).url, "UTF-8")        }
       }
     }
 
@@ -302,10 +305,10 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
 
           val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedAuthProvider), appConfig, urlBuilder)
           val controller = new Harness(authAction, actionBuilder)
-          val result = controller.onPageLoad()(FakeRequest())
+          val result = controller.onPageLoad()(FakeRequest("", "/endpoint"))
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe authRoutes.AuthController.unsupportedAuthProvider(urlBuilder.loginContinueUrl(FakeRequest())).url
+          redirectLocation(result).value mustBe controllers.auth.routes.AuthController.unsupportedAuthProvider(urlBuilder.loginContinueUrl(FakeRequest("", "/endpoint"))).url
         }
       }
     }

@@ -47,6 +47,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val ivEvidenceStatusUrl: String =
     s"${configuration.get[Service]("microservice.services.identity-verification").baseUrl}/disabled-evidences?origin=$origin"
 
+  val allowedRedirectUrls: Seq[String] = configuration.get[Seq[String]]("urls.allowedRedirects")
+
   private val ivJourneyServiceUrl: String =
     s"${configuration.get[Service]("microservice.services.identity-verification").baseUrl}/journey/"
   def ivJourneyResultUrl(journeyId: String): String = new URI(s"$ivJourneyServiceUrl$journeyId").toString

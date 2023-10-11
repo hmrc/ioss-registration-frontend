@@ -92,7 +92,7 @@ trait SpecBase
   }
 
   lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest("", "").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+    FakeRequest("", "/endpoint").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
   val verifyEmail: VerifyEmail = VerifyEmail(
     address = contactDetails.emailAddress,
