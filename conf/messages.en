@@ -578,4 +578,4 @@ emailVerificationCodesAndEmailsExceeded.returnBTA = <a class="govuk-link" href="
 emailVerificationCodesExceeded.title = You''ve entered too many incorrect codes
 emailVerificationCodesExceeded.heading = You''ve entered too many incorrect codes
 emailVerificationCodesExceeded.paragraph = We''ve saved your progress. You can try again in 24 hours or use a different email address.
-emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href="/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details">Return to contact details page</a>
+emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href="/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/business-contact-details">Return to contact details page</a>
