@@ -29,6 +29,7 @@
 
         <p class="govuk-body">@messages("ivInsufficientEvidence.p")</p>
 
-  <a href="@controllers.auth.routes.AuthController.redirectToLogin(RedirectUrl(routes.IndexController.onPageLoad().url)).url" class="govuk-link">            @messages("site.tryAgain")
-        </a>
+      <a href="@continueUrl" class="govuk-button" data-module="govuk-button" role="button" draggable="false">
+        @messages("site.tryAgain")
+      </a>
     }
