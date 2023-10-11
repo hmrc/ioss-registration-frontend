@@ -559,7 +559,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
         status(result) mustBe SEE_OTHER
 
-        redirectLocation(result).value mustEqual "http://localhost:9553/bas-gateway/register?origin=OSS&continueUrl=http%3A%2F%2Flocalhost%2Ffoo&accountType=Organisation"
+        redirectLocation(result).value mustEqual "http://localhost:9553/bas-gateway/register?origin=IOSS&continueUrl=http%3A%2F%2Flocalhost%2Ffoo&accountType=Organisation"
       }
     }
   }
@@ -577,7 +577,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
         status(result) mustBe SEE_OTHER
 
-        redirectLocation(result).value mustEqual "http://localhost:9553/bas-gateway/sign-in?origin=OSS&continue=http%3A%2F%2Flocalhost%2Ffoo"
+        redirectLocation(result).value mustEqual "http://localhost:9553/bas-gateway/sign-in?origin=IOSS&continue=http%3A%2F%2Flocalhost%2Ffoo"
       }
     }
   }
