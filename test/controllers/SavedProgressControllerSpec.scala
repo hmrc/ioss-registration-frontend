@@ -31,6 +31,7 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import views.html.SavedProgressView
 
 import java.time.format.DateTimeFormatter
@@ -76,15 +77,15 @@ class SavedProgressControllerSpec extends SpecBase {
 
       running(app) {
 
-        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad("test").url)
+        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(RedirectUrl("/test")).url)
 
         val result = route(app, request).value
 
         val view = app.injector.instanceOf[SavedProgressView]
 
         status(result) mustEqual OK
-        verify(mockUARepository, times(1)).set(eqTo(completeUserAnswers.set(SavedProgressPage, "test").success.value.copy(lastUpdated = instantDate)))
-        contentAsString(result) mustEqual view(date.format(dateTimeFormatter), "test")(request, messages(app)).toString
+        verify(mockUARepository, times(1)).set(eqTo(completeUserAnswers.set(SavedProgressPage, "/test").success.value.copy(lastUpdated = instantDate)))
+        contentAsString(result) mustEqual view(date.format(dateTimeFormatter), "/test")(request, messages(app)).toString
       }
     }
 
@@ -124,7 +125,7 @@ class SavedProgressControllerSpec extends SpecBase {
 
       running(app) {
 
-        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad("test").url)
+        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(RedirectUrl("/test")).url)
 
         val result = route(app, request).value
 
@@ -132,8 +133,8 @@ class SavedProgressControllerSpec extends SpecBase {
 
 
         status(result) mustEqual OK
-        verify(mockUARepository, times(1)).set(eqTo(completeUserAnswers.set(SavedProgressPage, "test").success.value.copy(lastUpdated = instantDate)))
-        contentAsString(result) mustEqual view( date.format(dateTimeFormatter), "test", Some("/example"))(request, messages(app)).toString
+        verify(mockUARepository, times(1)).set(eqTo(completeUserAnswers.set(SavedProgressPage, "/test").success.value.copy(lastUpdated = instantDate)))
+        contentAsString(result) mustEqual view( date.format(dateTimeFormatter), "/test", Some("/example"))(request, messages(app)).toString
       }
     }
 
@@ -156,7 +157,7 @@ class SavedProgressControllerSpec extends SpecBase {
 
       running(app) {
 
-        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad("test").url)
+        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(RedirectUrl("/test")).url)
 
         val result = route(app, request).value
 
@@ -185,7 +186,7 @@ class SavedProgressControllerSpec extends SpecBase {
 
       running(app) {
 
-        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad("test").url)
+        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(RedirectUrl("/test")).url)
 
         val result = route(app, request).value
 

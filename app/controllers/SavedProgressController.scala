@@ -18,12 +18,14 @@ package controllers
 
 import config.FrontendAppConfig
 import connectors.{RegistrationConnector, SaveForLaterConnector, SavedUserAnswers}
-import controllers.actions._
+import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
 import models.requests.SaveForLaterRequest
 import pages.SavedProgressPage
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
+import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, RedirectUrl}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SavedProgressView
 
@@ -44,12 +46,12 @@ class SavedProgressController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(continueUrl: String): Action[AnyContent] = cc.authAndGetData().async {
+  def onPageLoad(continueUrl: RedirectUrl): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
       val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
       val answersExpiry = request.userAnswers.lastUpdated.plus(appConfig.saveForLaterTtl, ChronoUnit.DAYS)
         .atZone(clock.getZone).toLocalDate.format(dateTimeFormatter)
-      Future.fromTry(request.userAnswers.set(SavedProgressPage, continueUrl)).flatMap {
+      Future.fromTry(request.userAnswers.set(SavedProgressPage, continueUrl.get(OnlyRelative).url)).flatMap {
         updatedAnswers =>
           val s4LRequest = SaveForLaterRequest(updatedAnswers, request.vrn)
           (for{
@@ -63,7 +65,7 @@ class SavedProgressController @Inject()(
               for {
                 _ <- cc.sessionRepository.set(updatedAnswers)
               } yield {
-                Ok(view(answersExpiry, continueUrl, externalUrl))
+                Ok(view(answersExpiry, continueUrl.get(OnlyRelative).url, externalUrl))
               }
             case (Left(e), _) =>
               logger.error(s"Unexpected result on submit: ${e.toString}")

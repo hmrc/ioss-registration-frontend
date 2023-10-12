@@ -50,7 +50,7 @@ GET         /error-submitting-registration                                contro
 
 GET         /answers-deleted                                              controllers.AnswersDeletedController.onPageLoad()
 
-GET         /progress-saved                                               controllers.SavedProgressController.onPageLoad(continueUrl: String)
+GET         /progress-saved                                               controllers.SavedProgressController.onPageLoad(continueUrl: RedirectUrl)
 
 # Filter questions section
 GET         /ioss-registered                                              controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
