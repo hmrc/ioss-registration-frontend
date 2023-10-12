@@ -30,6 +30,8 @@ import queries.previousRegistration.AllPreviousRegistrationsWithOptionalVatNumbe
 import queries.tradingNames.AllTradingNames
 import utils.EuDetailsCompletionChecks.{emptyEuDetailsRedirect, getAllIncompleteEuDetails, incompleteEuDetailsRedirect, isEuDetailsPopulated}
 import pages.previousRegistrations.PreviousSchemeTypePage
+import queries.AllWebsites
+
 import scala.concurrent.Future
 
 trait CompletionChecks {
@@ -86,6 +88,10 @@ trait CompletionChecks {
     }
   }
 
+  private def hasWebsiteValid()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
+    request.userAnswers.get(AllWebsites).getOrElse(List.empty).nonEmpty
+  }
+
   private def isDeregisteredPopulated()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
     request.userAnswers.get(PreviouslyRegisteredPage).exists {
       case true => request.userAnswers.get(AllPreviousRegistrationsWithOptionalVatNumberQuery).isDefined
@@ -97,6 +103,7 @@ trait CompletionChecks {
     getAllIncompleteDeregisteredDetails().isEmpty &&
       getAllIncompleteEuDetails().isEmpty &&
       isTradingNamesValid() &&
+      hasWebsiteValid() &&
       isEuDetailsPopulated() &&
       isDeregisteredPopulated()
   }
