@@ -14,9 +14,12 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+
 @this(
         layout: templates.Layout
 )
+
 
 @(continueUrl: String)(implicit request: Request[_], messages: Messages)
 
@@ -26,7 +29,7 @@
 
         <p class="govuk-body">@messages("ivInsufficientEvidence.p")</p>
 
-        <a href="@continueUrl" class="govuk-button" data-module="govuk-button" role="button" draggable="false">
-            @messages("site.tryAgain")
-        </a>
+      <a href="@continueUrl" class="govuk-button" data-module="govuk-button" role="button" draggable="false">
+        @messages("site.tryAgain")
+      </a>
     }

@@ -15,6 +15,8 @@
  *@
 
 @import uk.gov.hmrc.domain.Vrn
+@import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+
 
 @this(
         layout: templates.Layout
@@ -30,7 +32,7 @@
 
         <p class="govuk-body">
             @messages("useOtherAccount.p2.1")
-            <a href="@controllers.auth.routes.AuthController.redirectToLogin(routes.IndexController.onPageLoad().url).url"
+          <a href="@controllers.auth.routes.AuthController.redirectToLogin(RedirectUrl(routes.IndexController.onPageLoad().url)).url"
             class="govuk-link">@messages("useOtherAccount.p2.link.text")</a>
             @messages("useOtherAccount.p2.2")
         </p>

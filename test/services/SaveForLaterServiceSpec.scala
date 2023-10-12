@@ -26,6 +26,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.EmptyWaypoints
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.AnyContent
 import play.api.mvc.Results.Redirect
@@ -41,15 +42,16 @@ class SaveForLaterServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   implicit private lazy val hc: HeaderCarrier = HeaderCarrier()
 
-  val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers)
-  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, None, emptyUserAnswers)
+  val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, emptyUserAnswers)
+  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, emptyUserAnswers)
 
   private val mockSaveForLaterConnector = mock[SaveForLaterConnector]
   private val mockUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
   private val saveForLaterService = new SaveForLaterService(mockUserAnswersRepository, mockSaveForLaterConnector)
-  private val redirectLocation = routes.BankDetailsController.onPageLoad()
-  private val originLocation = routes.BusinessContactDetailsController.onPageLoad()
-  private val errorLocation = routes.JourneyRecoveryController.onPageLoad()
+
+  private lazy val redirectLocation = routes.BankDetailsController.onPageLoad(EmptyWaypoints)
+  private lazy val originLocation = routes.BusinessContactDetailsController.onPageLoad(EmptyWaypoints)
+  private lazy val errorLocation = routes.JourneyRecoveryController.onPageLoad()
 
   private val instantDate = Instant.now()
   private val saveForLaterRequest: SaveForLaterRequest = SaveForLaterRequest(vrn, Json.toJson("test"), None)

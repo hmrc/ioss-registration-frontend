@@ -47,7 +47,7 @@ class MaximumIndexFilterSpec extends SpecBase with ScalaCheckPropertyChecks {
 
       forAll(invalidCombinations) {
         case (index, max) =>
-          val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers)
+          val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, emptyUserAnswers)
           val harness = new Harness(index, max)
 
           val result = harness.callFilter(request).futureValue
@@ -65,7 +65,7 @@ class MaximumIndexFilterSpec extends SpecBase with ScalaCheckPropertyChecks {
 
       forAll(validCombinations) {
         case (index, max) =>
-          val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers)
+          val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, emptyUserAnswers)
           val harness = new Harness(index, max)
 
           val result = harness.callFilter(request).futureValue

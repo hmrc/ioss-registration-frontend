@@ -84,28 +84,33 @@ Or alternatively from step 5 above:
 5.
 ![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/1d5d89b1-e1c0-4507-8077-347ffd7018af)
 
-6.
+7.
 ![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/b8dc83d5-71f4-4a9d-b390-b262af02d13b)
 
-7.
+8.
 ![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/50b9ef63-26de-40c7-9e12-30af04c9a03e)
 
-[//]: # (8.)
+9.
 
-[//]: # (After clicking continue on the Contact details page, you will see the email verification page.)
+After clicking continue on the Contact details page, you will see the email verification page.
 
-[//]: # (![image]&#40;https://user-images.githubusercontent.com/36073378/203574815-a6fdba3a-59aa-41a7-827f-58b5382af95c.png&#41;)
+![image](https://user-images.githubusercontent.com/36073378/203574815-a6fdba3a-59aa-41a7-827f-58b5382af95c.png)
 
-[//]: # ()
-[//]: # (Open a new tab and paste this url:)
+This will generate a passcode to enter into the email verification page.
+![image](https://user-images.githubusercontent.com/36073378/203574977-a8298624-bc88-4090-8e8f-4b9d2be0abf4.png)
 
-[//]: # (8.)
+Open a new tab and paste this url:
 
-[//]: # (  ```)
+  ```
 
-[//]: # (  /pay-vat-on-goods-sold-to-eu/northern-ireland-register/test-only/get-passcodes)
+  /pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/test-only/get-passcodes
 
-[//]: # (  ```)
+  ```
+
+Once you have pasted/entered the passcode into the input box on the email verification page and clicked continue and the email verification is successful,
+you will need to change the port in the url back to 10190 in order to redirect to the bank details page.
+
+<http://localhost:10190/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/bank-details>
 
 [//]: # ()
 [//]: # (This will generate a passcode to enter into the email verification page.)

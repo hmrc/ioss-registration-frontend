@@ -232,15 +232,6 @@ trait ModelGenerators extends EitherValues {
     }
   }
 
-  implicit val arbitrarySavedUserAnswers: Arbitrary[SavedUserAnswers] =
-    Arbitrary {
-      for {
-        vrn <- arbitrary[Vrn]
-        data = JsObject(Seq("test" -> Json.toJson("test")))
-        now = Instant.now
-      } yield SavedUserAnswers(vrn, data, None, now)
-    }
-
   implicit val arbitraryPeriod: Arbitrary[Period] =
     Arbitrary {
       for {
@@ -279,5 +270,14 @@ trait ModelGenerators extends EitherValues {
         "GB21SCBL60910417068859",
         "GB42CPBK08005470328725"
       ).map(v => Iban(v).right.get)
+    }
+
+  implicit val arbitrarySavedUserAnswers: Arbitrary[SavedUserAnswers] =
+    Arbitrary {
+      for {
+        vrn <- arbitrary[Vrn]
+        data = JsObject(Seq("test" -> Json.toJson("test")))
+        now = Instant.now
+      } yield SavedUserAnswers(vrn, data, None, now)
     }
 }

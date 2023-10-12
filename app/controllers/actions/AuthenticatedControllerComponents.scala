@@ -19,7 +19,7 @@ package controllers.actions
 import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest}
 import play.api.http.FileMimeTypes
 import play.api.i18n.{Langs, MessagesApi}
-import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder, MessagesActionBuilder, MessagesControllerComponents, PlayBodyParsers}
+import play.api.mvc._
 import repositories.AuthenticatedUserAnswersRepository
 
 import javax.inject.Inject
@@ -39,6 +39,8 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def limitIndex: MaximumIndexFilterProvider
 
+  def checkEmailVerificationStatus: CheckEmailVerificationFilterProvider
+
   def authAndGetData(): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     actionBuilder andThen
       identify andThen
@@ -51,6 +53,10 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       identify andThen
       getData
   }
+
+  def authAndGetDataAndCheckVerifyEmail(): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
+    authAndGetData() andThen
+      checkEmailVerificationStatus()
 
 }
 
@@ -66,5 +72,6 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                identify: AuthenticatedIdentifierAction,
                                                                getData: AuthenticatedDataRetrievalAction,
                                                                requireData: AuthenticatedDataRequiredAction,
-                                                               limitIndex: MaximumIndexFilterProvider
+                                                               limitIndex: MaximumIndexFilterProvider,
+                                                               checkEmailVerificationStatus: CheckEmailVerificationFilterProvider
                                                              ) extends AuthenticatedControllerComponents

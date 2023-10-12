@@ -20,6 +20,7 @@ import controllers.actions._
 import generators.Generators
 import models.{BusinessContactDetails, UserAnswers}
 import models.domain.VatCustomerInfo
+import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -99,5 +100,21 @@ trait SpecBase
   }
 
   lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest("", "").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+    FakeRequest("", "/endpoint").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  val verifyEmail: VerifyEmail = VerifyEmail(
+    address = contactDetails.emailAddress,
+    enterUrl = "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"
+  )
+
+  val emailVerificationRequest: EmailVerificationRequest = EmailVerificationRequest(
+    credId = userAnswersId,
+    continueUrl = "/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/bank-details",
+    origin = "OSS",
+    deskproServiceName = Some("one-stop-shop-registration-frontend"),
+    accessibilityStatementUrl = "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",
+    pageTitle = Some("ioss-registration-frontend"),
+    backUrl = Some("/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"),
+    email = Some(verifyEmail)
+  )
 }

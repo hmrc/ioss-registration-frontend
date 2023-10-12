@@ -14,11 +14,14 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+@import sun.tools.jconsole.LabeledComponent.layout
+
 @this(
         layout: templates.Layout
 )
 
-@(continueUrl: String)(implicit request: Request[_], messages: Messages)
+@(continueUrl: RedirectUrl)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("unsupportedAuthProvider.title")), showBackLink = false) {
 

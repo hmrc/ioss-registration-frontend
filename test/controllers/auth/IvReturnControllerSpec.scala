@@ -17,222 +17,200 @@
 package controllers.auth
 
 import base.SpecBase
-import controllers.auth.{routes => authRoutes}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import views.html.iv._
 
 class IvReturnControllerSpec extends SpecBase {
 
-  private val continueUrl: String = "continueUrl"
+  private val continueUrl = "http://localhost/foo"
 
-  "IvReturn Controller" - {
+  "Iv Return Controller" - {
 
     ".error" - {
 
-      "must return OK and the correct view" in {
+      "must return Ok and the correct view" in {
 
-        val application = applicationBuilder(userAnswers = None).build()
+        val app = applicationBuilder(None).build()
 
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.error(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvErrorView]
+        running(app) {
+          val view = app.injector.instanceOf[IvErrorView]
+          val request = FakeRequest(GET, routes.IvReturnController.error(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
-        }
-      }
-    }
-
-    ".incomplete" - {
-
-      "must return OK and the correct view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.incomplete(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvIncompleteView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
-        }
-      }
-    }
-
-    ".insufficientEvidence" - {
-
-      "must return OK and the correct view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.insufficientEvidence(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[InsufficientEvidenceView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
-        }
-      }
-    }
-
-    ".lockedOut" - {
-
-      "must return OK and the correct view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.lockedOut(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvLockedOutView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
-        }
-      }
-    }
-
-    ".preconditionFailed" - {
-
-      "must return OK and the correct view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.preconditionFailed(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvPreconditionFailedView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
-        }
-      }
-    }
-
-    ".technicalIssue" - {
-
-      "must return OK and the correct view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.technicalIssue(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvTechnicalIssueView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
-        }
-      }
-    }
-
-    ".timeout" - {
-
-      "must return OK and the correct view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.timeout(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvTimeoutView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
-        }
-      }
-    }
-
-    ".userAborted" - {
-
-      "must return OK and the correct view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.userAborted(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvUserAbortedView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
-        }
-      }
-    }
-
-    ".notEnoughEvidenceSources" - {
-
-      "must return OK and the correct view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.notEnoughEvidenceSources(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvNotEnoughEvidenceView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
         }
       }
     }
 
     ".failedMatching" - {
 
-      "must return OK and the correct view" in {
+      "must return Ok and the correct view" in {
 
-        val application = applicationBuilder(userAnswers = None).build()
+        val app = applicationBuilder(None).build()
 
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.failedMatching(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvFailedMatchingView]
+        running(app) {
+          val view = app.injector.instanceOf[IvFailedMatchingView]
+          val request = FakeRequest(GET, routes.IvReturnController.failedMatching(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
         }
       }
     }
 
     ".failed" - {
 
-      "must return OK and the correct view" in {
+      "must return Ok and the correct view" in {
 
-        val application = applicationBuilder(userAnswers = None).build()
+        val app = applicationBuilder(None).build()
 
-        running(application) {
-          val request = FakeRequest(GET, authRoutes.IvReturnController.failed(continueUrl).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[IvFailedView]
+        running(app) {
+          val view = app.injector.instanceOf[IvFailedView]
+          val request = FakeRequest(GET, routes.IvReturnController.failed(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(continueUrl)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
+        }
+      }
+    }
+
+    ".incomplete" - {
+
+      "must return Ok and the correct view" in {
+
+        val app = applicationBuilder(None).build()
+
+        running(app) {
+          val view = app.injector.instanceOf[IvIncompleteView]
+          val request = FakeRequest(GET, routes.IvReturnController.incomplete(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
+        }
+      }
+    }
+
+    ".insufficientEvidence" - {
+
+      "must return Ok and the correct view" in {
+
+        val app = applicationBuilder(None).build()
+
+        running(app) {
+          val view = app.injector.instanceOf[InsufficientEvidenceView]
+          val request = FakeRequest(GET, routes.IvReturnController.insufficientEvidence(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
+        }
+      }
+    }
+
+    ".lockedOut" - {
+
+      "must return Ok and the correct view" in {
+
+        val app = applicationBuilder(None).build()
+
+        running(app) {
+          val view = app.injector.instanceOf[IvLockedOutView]
+          val request = FakeRequest(GET, routes.IvReturnController.lockedOut(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
+        }
+      }
+    }
+
+    ".notEnoughEvidenceSources" - {
+
+      "must return Ok and the correct view" in {
+
+        val app = applicationBuilder(None).build()
+
+        running(app) {
+          val view = app.injector.instanceOf[IvNotEnoughEvidenceView]
+          val request = FakeRequest(GET, routes.IvReturnController.notEnoughEvidenceSources(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
+        }
+      }
+    }
+
+    ".preconditionFailed" - {
+
+      "must return Ok and the correct view" in {
+
+        val app = applicationBuilder(None).build()
+
+        running(app) {
+          val view = app.injector.instanceOf[IvPreconditionFailedView]
+          val request = FakeRequest(GET, routes.IvReturnController.preconditionFailed(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
+        }
+      }
+    }
+
+    ".technicalIssue" - {
+
+      "must return Ok and the correct view" in {
+
+        val app = applicationBuilder(None).build()
+
+        running(app) {
+          val view = app.injector.instanceOf[IvTechnicalIssueView]
+          val request = FakeRequest(GET, routes.IvReturnController.technicalIssue(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
+        }
+      }
+    }
+
+    ".timeout" - {
+
+      "must return Ok and the correct view" in {
+
+        val app = applicationBuilder(None).build()
+
+        running(app) {
+          val view = app.injector.instanceOf[IvTimeoutView]
+          val request = FakeRequest(GET, routes.IvReturnController.timeout(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
+        }
+      }
+    }
+
+    ".userAborted" - {
+
+      "must return Ok and the correct view" in {
+
+        val app = applicationBuilder(None).build()
+
+        running(app) {
+          val view = app.injector.instanceOf[IvUserAbortedView]
+          val request = FakeRequest(GET, routes.IvReturnController.userAborted(RedirectUrl("http://localhost/foo")).url)
+          val result = route(app, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(continueUrl)(request, messages(app)).toString
         }
       }
     }

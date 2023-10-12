@@ -19,21 +19,18 @@ package controllers.euDetails
 import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import models.Index
-import models.euDetails.EuOptionalDetails
 import pages.Waypoints
 import pages.euDetails.CheckEuDetailsAnswersPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
-import utils.EuDetailsCompletionChecks.getIncompleteEuDetails
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails._
 import viewmodels.govuk.summarylist._
 import views.html.euDetails.CheckEuDetailsAnswersView
 
 import javax.inject.Inject
-import scala.concurrent.Future
 
 class CheckEuDetailsAnswersController @Inject()(
                                                  override val messagesApi: MessagesApi,

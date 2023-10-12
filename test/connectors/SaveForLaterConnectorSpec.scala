@@ -23,7 +23,7 @@ import models.responses.{ConflictFound, InvalidJson, NotFound, UnexpectedRespons
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.EitherValues
 import play.api.Application
-import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
+import play.api.http.Status._
 import play.api.libs.json.{JsBoolean, JsObject, Json}
 import play.api.test.Helpers.running
 import testutils.WireMockHelper
@@ -63,7 +63,7 @@ class SaveForLaterConnectorSpec extends SpecBase with WireMockHelper with Either
 
         val result = connector.submit(saveForLaterRequest).futureValue
 
-        result.value must be(Some(expectedSavedUserAnswers))
+        result.value mustBe Some(expectedSavedUserAnswers)
       }
     }
 

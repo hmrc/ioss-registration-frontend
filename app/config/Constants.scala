@@ -29,4 +29,5 @@ object Constants {
   val maxOssSchemes: Int = 2
   val maxIossSchemes: Int = 1
   val schemeStartDate: LocalDate = LocalDate.of(2021, 7, 1)
+  val emailVerificationMaxEmails: Int = 10
 }

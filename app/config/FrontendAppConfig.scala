@@ -47,6 +47,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val ivEvidenceStatusUrl: String =
     s"${configuration.get[Service]("microservice.services.identity-verification").baseUrl}/disabled-evidences?origin=$origin"
 
+  val allowedRedirectUrls: Seq[String] = configuration.get[Seq[String]]("urls.allowedRedirects")
+
   private val ivJourneyServiceUrl: String =
     s"${configuration.get[Service]("microservice.services.identity-verification").baseUrl}/journey/"
   def ivJourneyResultUrl(journeyId: String): String = new URI(s"$ivJourneyServiceUrl$journeyId").toString
@@ -68,5 +70,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
   val cacheTtl: Int = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+
   val saveForLaterTtl: Int = configuration.get[Int]("mongodb.saveForLaterTTLInDays")
+
+  val accessibilityStatementUrl: String = configuration.get[String]("accessibility-statement.service-path")
+
+  val emailVerificationUrl: String  = configuration.get[String]("urls.emailVerificationUrl")
+
+  val emailVerificationEnabled: Boolean = configuration.get[Boolean]("features.email-verification-enabled")
 }

@@ -24,6 +24,8 @@ import models.domain.VatCustomerInfo
 import models.{UserAnswers, VatApiCallResult}
 import pages.checkVatDetails.CheckVatDetailsPage
 import pages.filters.{BusinessBasedInNiPage, NorwegianBasedBusinessPage}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
+import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative, RedirectUrl}
 import pages._
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -45,10 +47,13 @@ class AuthController @Inject()(
                                 unsupportedAuthProviderView: UnsupportedAuthProviderView,
                                 unsupportedCredentialRoleView: UnsupportedCredentialRoleView,
                                 config: FrontendAppConfig,
+                                frontendAppConfig: FrontendAppConfig,
                                 clock: Clock
                               )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
+
+  private val redirectPolicy = OnlyRelative | AbsoluteWithHostnameFromAllowlist(frontendAppConfig.allowedRedirectUrls: _*)
 
   def onSignIn(): Action[AnyContent] = cc.authAndGetOptionalData().async {
     implicit request =>
@@ -128,20 +133,22 @@ class AuthController @Inject()(
       case _ => false
     }
 
-  def redirectToRegister(continueUrl: String): Action[AnyContent] = Action {
-    Redirect(config.registerUrl,
+  def redirectToRegister(continueUrl: RedirectUrl): Action[AnyContent] = Action {
+    Redirect(
+      config.registerUrl,
       Map(
-        "origin"      -> Seq(config.origin),
-        "continueUrl" -> Seq(continueUrl),
+        "origin" -> Seq(config.origin),
+        "continueUrl" -> Seq(continueUrl.get(redirectPolicy).url),
         "accountType" -> Seq("Organisation"))
     )
   }
 
-  def redirectToLogin(continueUrl: String): Action[AnyContent] = Action {
+  def redirectToLogin(continueUrl: RedirectUrl): Action[AnyContent] = Action {
     Redirect(config.loginUrl,
       Map(
-        "origin"   -> Seq(config.origin),
-        "continue" -> Seq(continueUrl))
+        "origin" -> Seq(config.origin),
+        "continue" -> Seq(continueUrl.get(redirectPolicy).url)
+      )
     )
   }
 
@@ -160,7 +167,7 @@ class AuthController @Inject()(
       Ok(unsupportedAffinityGroupView())
   }
 
-  def unsupportedAuthProvider(continueUrl: String): Action[AnyContent] = Action {
+  def unsupportedAuthProvider(continueUrl: RedirectUrl): Action[AnyContent] = Action {
     implicit request =>
       Ok(unsupportedAuthProviderView(continueUrl))
   }
