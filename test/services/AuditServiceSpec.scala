@@ -17,6 +17,8 @@
 package services
 
 import config.FrontendAppConfig
+import models.audit.CoreRegistrationAuditModel
+import models.core.{CoreRegistrationRequest, CoreRegistrationValidationResult}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
@@ -42,35 +44,20 @@ class AuditServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures w
 
   ".audit" - {
 
-    /*TODO
     "must send Extended Event for create" in {
       when(auditConnector.sendExtendedEvent(any())(any(), any())) thenReturn Future.successful(AuditResult.Success)
 
       val service = new AuditService(mockAppConfig, auditConnector)
 
-      service.audit(RegistrationAuditModel(
-        registrationAuditType = RegistrationAuditType.CreateRegistration,
+      service.audit(CoreRegistrationAuditModel(
         credId = "test",
         userAgent = "test",
-        registration = registration,
-        result = SubmissionResult.Success
+        vrn = "test",
+        coreRegistrationRequest = CoreRegistrationRequest("source", None, "searchId", None, "searchIdIssuedBy"),
+        coreRegistrationValidationResult = CoreRegistrationValidationResult("searchId", None, "searchIdIssuedBy", traderFound = false, Seq.empty)
       ))(hc, FakeRequest("POST", "test"))
       verify(auditConnector, times(1)).sendExtendedEvent(any())(any(), any())
     }
 
-    "must send Extended Event for amend" in {
-      when(auditConnector.sendExtendedEvent(any())(any(), any())) thenReturn Future.successful(AuditResult.Success)
-
-      val service = new AuditService(mockAppConfig, auditConnector)
-
-      service.audit(RegistrationAuditModel(
-        registrationAuditType = RegistrationAuditType.AmendRegistration,
-        credId = "test",
-        userAgent = "test",
-        registration = registration,
-        result = SubmissionResult.Success
-      ))(hc, FakeRequest("POST", "test"))
-      verify(auditConnector, times(1)).sendExtendedEvent(any())(any(), any())
-    }*/
   }
 }

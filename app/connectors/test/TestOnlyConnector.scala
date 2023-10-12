@@ -20,7 +20,6 @@ import config.Service
 import connectors.test.TestOnlyExternalResponseHttpParser.{ExternalResponseReads, ExternalResponseResponse}
 import models.external.ExternalRequest
 import play.api.Configuration
-import services.EmailVerificationService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.Inject
