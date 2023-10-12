@@ -53,7 +53,7 @@ class AuthController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  private val redirectPolicy = AbsoluteWithHostnameFromAllowlist(frontendAppConfig.allowedRedirectUrls: _*)
+  private val redirectPolicy = OnlyRelative | AbsoluteWithHostnameFromAllowlist(frontendAppConfig.allowedRedirectUrls: _*)
 
   def onSignIn(): Action[AnyContent] = cc.authAndGetOptionalData().async {
     implicit request =>

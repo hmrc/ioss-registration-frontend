@@ -18,9 +18,8 @@ package controllers.auth
 
 import base.SpecBase
 import connectors.IdentityVerificationConnector
-import controllers.auth.{routes => authRoutes}
-import models.iv.IdentityVerificationResult._
 import models.iv._
+import models.iv.IdentityVerificationResult._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
@@ -28,8 +27,8 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import utils.FutureSyntax.FutureOps
 import views.html.iv.IdentityProblemView
 

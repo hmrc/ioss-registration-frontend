@@ -17,10 +17,9 @@
 package controllers.auth
 
 import base.SpecBase
-import controllers.auth.{routes => authRoutes}
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import views.html.iv._
 
 class IvReturnControllerSpec extends SpecBase {

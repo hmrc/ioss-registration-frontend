@@ -664,7 +664,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
         status(result) mustBe OK
 
-        view(RedirectUrl(continueUrl))(request, messages(application)).toString
+        contentAsString(result) mustBe view(RedirectUrl(continueUrl))(request, messages(application)).toString
       }
     }
   }
