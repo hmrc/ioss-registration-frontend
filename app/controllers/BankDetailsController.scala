@@ -37,7 +37,7 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
 
   override protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(BankDetailsPage) match {

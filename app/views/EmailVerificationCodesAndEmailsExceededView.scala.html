@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package config
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton
+)
 
-object Constants {
+@()(implicit request: Request[_], messages: Messages)
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+@layout(pageTitle = titleNoForm(messages("emailVerificationCodesAndEmailsExceeded.title"))) {
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+    <h1 class="govuk-heading-xl">@messages("emailVerificationCodesAndEmailsExceeded.heading")</h1>
 
-  val emailVerificationMaxEmails: Int = 10
+    <p class="govuk-body">@messages("emailVerificationCodesAndEmailsExceeded.paragraph")</p>
+
+    <p class="govuk-body">@Html(messages("emailVerificationCodesAndEmailsExceeded.returnBTA"))</p>
+
 }

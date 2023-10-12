@@ -569,3 +569,13 @@ addWebsite.remove.hidden = Remove {0}
 deleteWebsite.title = Are you sure you need to remove {0}?
 deleteWebsite.heading = Are you sure you need to remove {0}?
 deleteWebsite.error.required = Select yes if you need to remove this website address
+
+emailVerificationCodesAndEmailsExceeded.title = You''ve tried too many email addresses
+emailVerificationCodesAndEmailsExceeded.heading = You''ve tried too many email addresses
+emailVerificationCodesAndEmailsExceeded.paragraph = We''ve saved your progress and you can try again in 24 hours.
+emailVerificationCodesAndEmailsExceeded.returnBTA = <a class="govuk-link" href="/business-account">Return to your BTA account</a>
+
+emailVerificationCodesExceeded.title = You''ve entered too many incorrect codes
+emailVerificationCodesExceeded.heading = You''ve entered too many incorrect codes
+emailVerificationCodesExceeded.paragraph = We''ve saved your progress. You can try again in 24 hours or use a different email address.
+emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href="/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/business-contact-details">Return to contact details page</a>

@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package config
+package pages
 
-object Constants {
+import play.api.libs.json.JsPath
+import play.api.mvc.Call
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+case object SavedProgressPage extends QuestionPage[String] {
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+  override def path: JsPath = JsPath \ toString
 
-  val emailVerificationMaxEmails: Int = 10
+  override def toString: String = "continueUrl"
+
+  override def route(waypoints: Waypoints): Call = ???
 }
+

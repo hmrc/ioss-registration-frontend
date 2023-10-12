@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package config
+package models.external
 
-object Constants {
+import play.api.libs.json.{Format, Json}
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+case class ExternalRequest(origin: String, returnUrl: String)
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-
-  val emailVerificationMaxEmails: Int = 10
+object ExternalRequest {
+  implicit val format:Format[ExternalRequest] = Json.format[ExternalRequest]
 }
