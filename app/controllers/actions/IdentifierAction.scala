@@ -30,6 +30,8 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.domain.Vrn
+import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
@@ -45,6 +47,8 @@ class AuthenticatedIdentifierAction @Inject()(
   extends ActionRefiner[Request, AuthenticatedIdentifierRequest]
     with AuthorisedFunctions
     with Logging {
+
+  private lazy val redirectPolicy = (OnlyRelative | AbsoluteWithHostnameFromAllowlist(config.allowedRedirectUrls: _*))
 
   private type IdentifierActionResult[A] = Future[Either[Result, AuthenticatedIdentifierRequest[A]]]
 
@@ -92,7 +96,8 @@ class AuthenticatedIdentifierAction @Inject()(
     }.recoverWith {
       case _: NoActiveSession =>
         logger.info("No active session")
-        Left(Redirect(config.loginUrl, Map("continue" -> Seq(urlBuilderService.loginContinueUrl(request))))).toFuture
+        Left(Redirect(config.loginUrl, Map("continue" ->
+          Seq(urlBuilderService.loginContinueUrl(request).get(redirectPolicy).url)))).toFuture
 
       case _: UnsupportedAffinityGroup =>
         logger.info("Unsupported affinity group")
@@ -144,7 +149,7 @@ class AuthenticatedIdentifierAction @Inject()(
       config.mfaUpliftUrl,
       Map(
         "origin" -> Seq(config.origin),
-        "continueUrl" -> Seq(urlBuilderService.loginContinueUrl(request))
+        "continueUrl" -> Seq(urlBuilderService.loginContinueUrl(request).get(redirectPolicy).url)
       )
     )).toFuture
 
@@ -154,7 +159,7 @@ class AuthenticatedIdentifierAction @Inject()(
       Map(
         "origin" -> Seq(config.origin),
         "confidenceLevel" -> Seq(ConfidenceLevel.L200.toString),
-        "completionURL" -> Seq(urlBuilderService.loginContinueUrl(request)),
+        "completionURL" -> Seq(urlBuilderService.loginContinueUrl(request).get(redirectPolicy).url),
         "failureURL" -> Seq(urlBuilderService.ivFailureUrl(request))
       )
     )

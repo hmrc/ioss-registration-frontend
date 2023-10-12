@@ -11,31 +11,31 @@ GET         /language/:lang                                               contro
 GET         /refresh-session                                              controllers.KeepAliveController.keepAlive
 GET         /refresh-session-unauthenticated                              controllers.KeepAliveController.keepAliveUnauthenticated()
 
-GET         /there-is-a-problem                                           controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                                           controllers.JourneyRecoveryController.onPageLoad(redirectUrl: Option[RedirectUrl] ?= None)
 
 GET         /check-your-answers                                           controllers.CheckYourAnswersController.onPageLoad()
 
-GET         /identity-problem                                             controllers.auth.IdentityVerificationController.identityError(continueUrl: String)
-GET         /identity-complete                                            controllers.auth.IdentityVerificationController.handleIvFailure(continueUrl: String, journeyId: Option[String])
-GET         /iv/error                                                     controllers.auth.IvReturnController.error(continueUrl: String)
-GET         /iv/incomplete                                                controllers.auth.IvReturnController.incomplete(continueUrl: String)
-GET         /iv/insufficient-evidence                                     controllers.auth.IvReturnController.insufficientEvidence(continueUrl: String)
-GET         /iv/locked-out                                                controllers.auth.IvReturnController.lockedOut(continueUrl: String)
-GET         /iv/precondition-failed                                       controllers.auth.IvReturnController.preconditionFailed(continueUrl: String)
-GET         /iv/technical-issue                                           controllers.auth.IvReturnController.technicalIssue(continueUrl: String)
-GET         /iv/timeout                                                   controllers.auth.IvReturnController.timeout(continueUrl: String)
-GET         /iv/user-aborted                                              controllers.auth.IvReturnController.userAborted(continueUrl: String)
-GET         /iv/insufficient-evidence-sources                             controllers.auth.IvReturnController.notEnoughEvidenceSources(continueUrl: String)
-GET         /iv/failed-matching                                           controllers.auth.IvReturnController.failedMatching(continueUrl: String)
-GET         /iv/failed-identity-verification                              controllers.auth.IvReturnController.failed(continueUrl: String)
+GET         /identity-problem                                             controllers.auth.IdentityVerificationController.identityError(redirectUrl: RedirectUrl)
+GET         /identity-complete                                            controllers.auth.IdentityVerificationController.handleIvFailure(redirectUrl: RedirectUrl, journeyId: Option[String])
+GET         /iv/error                                                     controllers.auth.IvReturnController.error(continueUrl: RedirectUrl)
+GET         /iv/incomplete                                                controllers.auth.IvReturnController.incomplete(continueUrl: RedirectUrl)
+GET         /iv/insufficient-evidence                                     controllers.auth.IvReturnController.insufficientEvidence(continueUrl: RedirectUrl)
+GET         /iv/locked-out                                                controllers.auth.IvReturnController.lockedOut(continueUrl: RedirectUrl)
+GET         /iv/precondition-failed                                       controllers.auth.IvReturnController.preconditionFailed(continueUrl: RedirectUrl)
+GET         /iv/technical-issue                                           controllers.auth.IvReturnController.technicalIssue(continueUrl: RedirectUrl)
+GET         /iv/timeout                                                   controllers.auth.IvReturnController.timeout(continueUrl: RedirectUrl)
+GET         /iv/user-aborted                                              controllers.auth.IvReturnController.userAborted(continueUrl: RedirectUrl)
+GET         /iv/insufficient-evidence-sources                             controllers.auth.IvReturnController.notEnoughEvidenceSources(continueUrl: RedirectUrl)
+GET         /iv/failed-matching                                           controllers.auth.IvReturnController.failedMatching(continueUrl: RedirectUrl)
+GET         /iv/failed-identity-verification                              controllers.auth.IvReturnController.failed(continueUrl: RedirectUrl)
 
 GET         /account/sign-out-survey                                      controllers.auth.AuthController.signOut
 GET         /account/sign-out                                             controllers.auth.AuthController.signOutNoSurvey
 GET         /account/signed-out                                           controllers.auth.SignedOutController.onPageLoad
-GET         /account/login                                                controllers.auth.AuthController.redirectToLogin(continueUrl: String)
-GET         /account/register                                             controllers.auth.AuthController.redirectToRegister(continueUrl: String)
+GET         /account/login                                                controllers.auth.AuthController.redirectToLogin(redirectUrl: RedirectUrl)
+GET         /account/register                                             controllers.auth.AuthController.redirectToRegister(redirectUrl: RedirectUrl)
 GET         /cannot-use-agent                                             controllers.auth.AuthController.unsupportedAffinityGroup()
-GET         /provider-unsupported                                         controllers.auth.AuthController.unsupportedAuthProvider(continueUrl: String)
+GET         /provider-unsupported                                         controllers.auth.AuthController.unsupportedAuthProvider(redirectUrl: RedirectUrl)
 GET         /credential-unsupported                                       controllers.auth.AuthController.insufficientEnrolments()
 GET         /account/role-unsupported                                     controllers.auth.AuthController.unsupportedCredentialRole()
 
