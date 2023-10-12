@@ -18,20 +18,24 @@ package controllers.euDetails
 
 import base.SpecBase
 import forms.euDetails.EuTaxReferenceFormProvider
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import models.{Country, Index, UserAnswers}
+import models.core.{Match, MatchType}
+import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.euDetails._
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
+import pages.euDetails._
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
+import services.core.CoreRegistrationValidationService
 import utils.FutureSyntax.FutureOps
 import views.html.euDetails.EuTaxReferenceView
+
+import scala.concurrent.Future
 
 class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
   
@@ -49,7 +53,22 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
     .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
     .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
 
-  lazy val euTaxReferenceRoute: String = routes.EuTaxReferenceController.onPageLoad(waypoints, countryIndex).url
+  private lazy val euTaxReferenceRoute: String = routes.EuTaxReferenceController.onPageLoad(waypoints, countryIndex).url
+  private lazy val euTaxReferenceSubmitRoute: String = routes.EuTaxReferenceController.onSubmit(waypoints, countryIndex).url
+
+  private val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+  private val genericMatch = Match(
+    MatchType.FixedEstablishmentActiveNETP,
+    "333333333",
+    None,
+    "DE",
+    None,
+    None,
+    None,
+    None,
+    None
+  )
 
   "EuTaxReference Controller" - {
 
@@ -96,11 +115,15 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
       val application =
         applicationBuilder(userAnswers = Some(answers))
           .overrides(
-            bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
+            bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
+            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
           )
           .build()
 
       running(application) {
+        when(mockCoreRegistrationValidationService.searchEuTaxId(any(), any())(any(), any())) thenReturn
+          Future.successful(None)
+
         val request =
           FakeRequest(POST, euTaxReferenceRoute)
             .withFormUrlEncodedBody(("value", euTaxReference))
@@ -111,6 +134,258 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe EuTaxReferencePage(countryIndex).navigate(waypoints, answers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must redirect to FixedEstablishmentVRNAlreadyRegisteredController page when matchType=FixedEstablishmentActiveNETP" in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(genericMatch))
+
+        when(mockCoreRegistrationValidationService.isActiveTrader(genericMatch)) thenReturn true
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, countryIndex).url
+      }
+    }
+
+    "must redirect to FixedEstablishmentVRNAlreadyRegisteredController page when matchType=TraderIdActiveNETP" in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.TraderIdActiveNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        when(mockCoreRegistrationValidationService.isActiveTrader(expectedResponse)) thenReturn true
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, countryIndex).url
+      }
+    }
+
+    "must redirect to FixedEstablishmentVRNAlreadyRegisteredController page when matchType=OtherMSNETPActiveNETP" in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.OtherMSNETPActiveNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        when(mockCoreRegistrationValidationService.isActiveTrader(expectedResponse)) thenReturn true
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, countryIndex).url
+      }
+    }
+
+    "must redirect to ExcludedVRNController page when the vat number is excluded for match FixedEstablishmentQuarantinedNETP " in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        when(mockCoreRegistrationValidationService.isQuarantinedTrader(expectedResponse)) thenReturn true
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.ExcludedVRNController.onPageLoad().url
+      }
+    }
+
+    "must redirect to ExcludedVRNController page when the vat number is excluded for match TraderIdQuarantinedNETP " in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        when(mockCoreRegistrationValidationService.isQuarantinedTrader(expectedResponse)) thenReturn true
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.ExcludedVRNController.onPageLoad().url
+      }
+    }
+
+    "must redirect to ExcludedVRNController page when the vat number is excluded for match OtherMSNETPQuarantinedNETP " in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        when(mockCoreRegistrationValidationService.isQuarantinedTrader(expectedResponse)) thenReturn true
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.ExcludedVRNController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the next page when there is no active trader" in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.TransferringMSID)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        when(mockCoreRegistrationValidationService.isActiveTrader(expectedResponse)) thenReturn false
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        val expectedAnswers = answers.set(EuTaxReferencePage(countryIndex), taxReferenceNumber).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual EuTaxReferencePage(countryIndex).navigate(waypoints, answers, expectedAnswers).url
+      }
+    }
+
+    "must redirect to the next page when there is no excluded trader" in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.TransferringMSID)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        when(mockCoreRegistrationValidationService.isQuarantinedTrader(expectedResponse)) thenReturn false
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        val expectedAnswers = answers.set(EuTaxReferencePage(countryIndex), taxReferenceNumber).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual EuTaxReferencePage(countryIndex).navigate(waypoints, answers, expectedAnswers).url
+      }
+    }
+
+    "must redirect to the next page when no active match found" in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(None)
+
+        val request = FakeRequest(POST, euTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        val expectedAnswers = answers.set(EuTaxReferencePage(countryIndex), taxReferenceNumber).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual EuTaxReferencePage(countryIndex).navigate(waypoints, answers, expectedAnswers).url
       }
     }
 
