@@ -36,12 +36,12 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PreviousOssNumberController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        cc: AuthenticatedControllerComponents,
-                                        coreRegistrationValidationService: CoreRegistrationValidationService,
-                                        formProvider: PreviousOssNumberFormProvider,
-                                        view: PreviousOssNumberView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
+                                             override val messagesApi: MessagesApi,
+                                             cc: AuthenticatedControllerComponents,
+                                             coreRegistrationValidationService: CoreRegistrationValidationService,
+                                             formProvider: PreviousOssNumberFormProvider,
+                                             view: PreviousOssNumberView
+                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -126,9 +126,6 @@ class PreviousOssNumberController @Inject()(
         intermediaryNumber = None,
         countryCode = country.code
       ).flatMap {
-        case Some(activeMatch) if coreRegistrationValidationService.isActiveTrader(activeMatch) =>
-          Future.successful(
-            Redirect(controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(waypoints, activeMatch.memberState, countryIndex, schemeIndex)))
         case Some(activeMatch) if coreRegistrationValidationService.isQuarantinedTrader(activeMatch) =>
           Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints, countryIndex, schemeIndex)))
         case _ =>

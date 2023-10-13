@@ -29,6 +29,7 @@ import pages.{JourneyRecoveryPage, Waypoints}
 import pages.previousRegistrations.{PreviousIossNumberPage, PreviousIossSchemePage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.previousRegistrations.PreviousIossNumberView
@@ -37,12 +38,13 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PreviousIossNumberController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        cc: AuthenticatedControllerComponents,
-                                        formProvider: PreviousIossNumberFormProvider,
-                                        appConfig: FrontendAppConfig,
-                                        view: PreviousIossNumberView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with GetCountry {
+                                              override val messagesApi: MessagesApi,
+                                              cc: AuthenticatedControllerComponents,
+                                              formProvider: PreviousIossNumberFormProvider,
+                                              coreRegistrationValidationService: CoreRegistrationValidationService,
+                                              appConfig: FrontendAppConfig,
+                                              view: PreviousIossNumberView
+                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
@@ -80,8 +82,25 @@ class PreviousIossNumberController @Inject()(
                   formWithErrors, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country)))),
 
               value =>
-                saveAndRedirect(countryIndex, schemeIndex, value, waypoints)
-
+                coreRegistrationValidationService.searchScheme(
+                  searchNumber = value.previousSchemeNumber,
+                  previousScheme = previousScheme,
+                  intermediaryNumber = value.previousIntermediaryNumber,
+                  countryCode = country.code
+                ).flatMap {
+                  case Some(activeMatch) if coreRegistrationValidationService.isActiveTrader(activeMatch) =>
+                    Future.successful(
+                      Redirect(controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
+                        waypoints,
+                        activeMatch.memberState,
+                        countryIndex,
+                        schemeIndex))
+                    )
+                  case Some(activeMatch) if coreRegistrationValidationService.isQuarantinedTrader(activeMatch) =>
+                    Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints, countryIndex, schemeIndex)))
+                  case _ =>
+                    saveAndRedirect(countryIndex, schemeIndex, value, waypoints)
+                }
             )
           }
         }

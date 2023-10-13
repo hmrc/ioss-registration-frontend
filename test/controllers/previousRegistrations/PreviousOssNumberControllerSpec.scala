@@ -167,7 +167,7 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
         None
       )
 
-      "Redirect to scheme still active when active OSS found" in {
+      "Continue on normal journey if to scheme still active when active OSS found" in {
 
         val countryCode = genericMatch.memberState
 
@@ -195,7 +195,11 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(waypoints, countryCode, index, index).url
+          redirectLocation(result).value mustEqual
+            controllers.previousRegistrations.routes.CheckPreviousSchemeAnswersController.onPageLoad(
+              waypoints,
+              index
+            ).url
           verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
         }
       }
@@ -238,8 +242,6 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
-          Future.successful(Some(genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)))
         when(mockCoreRegistrationValidationService.isActiveTrader(any())) thenReturn false
         when(mockCoreRegistrationValidationService.isQuarantinedTrader(any())) thenReturn true
 
@@ -247,9 +249,6 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .configure(
-              "features.other-country-reg-validation-enabled" -> true
-            )
             .build()
 
         running(application) {
