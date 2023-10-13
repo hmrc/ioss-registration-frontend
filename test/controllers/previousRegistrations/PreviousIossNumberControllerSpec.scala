@@ -100,12 +100,15 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
     "must save the answer and redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
 
       val application =
         applicationBuilder(userAnswers = Some(baseAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
           .build()
 
       running(application) {
@@ -125,12 +128,15 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
     "continue normally when active IOSS found" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
 
       val application =
         applicationBuilder(userAnswers = Some(baseAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
           .build()
 
       running(application) {
