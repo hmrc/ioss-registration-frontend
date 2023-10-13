@@ -23,13 +23,11 @@ sealed trait SourceType
 
 object SourceType extends Enumerable.Implicits {
   case object VATNumber extends WithName("VATNumber") with SourceType
-  case object EUVATNumber extends WithName("EUVATNumber") with SourceType
   case object EUTraderId extends WithName("EUTraderId") with SourceType
   case object TraderId extends WithName("TraderId") with SourceType
 
   val values: Seq[SourceType] = Seq(
     VATNumber,
-    EUVATNumber,
     EUTraderId,
     TraderId
   )

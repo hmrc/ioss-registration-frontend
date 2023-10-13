@@ -55,7 +55,7 @@ class CoreRegistrationValidationService @Inject()(
                                                       request: AuthenticatedDataRequest[_]): Future[Option[Match]] = {
 
     val convertedEuVrn = convertTaxIdentifierForTransfer(euVrn, countryCode)
-    val coreRegistrationRequest = CoreRegistrationRequest(SourceType.EUVATNumber.toString, None, convertedEuVrn, None, countryCode)
+    val coreRegistrationRequest = CoreRegistrationRequest(SourceType.EUTraderId.toString, None, convertedEuVrn, None, countryCode)
 
     getValidateCoreRegistrationResponse(coreRegistrationRequest)
   }
@@ -68,13 +68,13 @@ class CoreRegistrationValidationService @Inject()(
     } else {
 
       val sourceType = previousScheme match {
-        case PreviousScheme.OSSU => SourceType.EUVATNumber
-        case PreviousScheme.OSSNU => SourceType.EUVATNumber
+        case PreviousScheme.OSSU => SourceType.EUTraderId
+        case PreviousScheme.OSSNU => SourceType.EUTraderId
         case PreviousScheme.IOSSWOI => SourceType.TraderId
         case PreviousScheme.IOSSWI => SourceType.TraderId
       }
 
-      val convertedSearchNumber = if (sourceType == SourceType.EUVATNumber) {
+      val convertedSearchNumber = if (sourceType == SourceType.EUTraderId) {
         convertTaxIdentifierForTransfer(searchNumber, countryCode)
       } else {
         searchNumber
