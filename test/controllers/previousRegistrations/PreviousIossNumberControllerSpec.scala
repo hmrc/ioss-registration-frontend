@@ -195,9 +195,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
           redirectLocation(result).value mustEqual
             controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
               waypoints,
-              countryCode,
-              index,
-              index
+              countryCode
             ).url
           verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
         }
@@ -232,9 +230,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
           redirectLocation(result).value mustEqual
             controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
               waypoints,
-              countryCode,
-              index,
-              index
+              countryCode
             ).url
           verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
         }

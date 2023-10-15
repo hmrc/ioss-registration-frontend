@@ -27,20 +27,16 @@ import views.html.previousRegistrations.SchemeQuarantinedView
 import javax.inject.Inject
 
 class SchemeQuarantinedController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       cc: AuthenticatedControllerComponents,
-                                       view: SchemeQuarantinedView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                             override val messagesApi: MessagesApi,
+                                             cc: AuthenticatedControllerComponents,
+                                             view: SchemeQuarantinedView
+                                           ) extends FrontendBaseController with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(
-                  waypoints: Waypoints,
-                  countryIndex: Index,
-                  schemeIndex: Index
-                ): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
-      Ok(view(countryIndex, schemeIndex: Index))
+      Ok(view())
   }
 
 }

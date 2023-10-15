@@ -29,13 +29,14 @@
 
     <h1 class="govuk-heading-xl">@messages("otherCountryExcludedAndQuarantined.heading")</h1>
 
-    <p class="govuk-body">@Html(messages("otherCountryExcludedAndQuarantined.blocked.message",memberState, exclusionDate))</p>
+    <p class="govuk-body">@Html(messages("otherCountryExcludedAndQuarantined.paragraph", memberState, exclusionDate))</p>
 
     <p class="govuk-body">@Html(messages("otherCountryExcludedAndQuarantined.contact"))</p>
 
     @externalUrl.map(
-    url => Html(
-    s"""<p class="govuk-body"><a href=$url id="back-to-your-account" class="govuk-link">""" + messages("otherCountryExcludedAndQuarantined.returnBTA") + "</a></p>"
-    ))
+        url => Html(
+            s"""<p class="govuk-body"><a href=$url id="back-to-your-account" class="govuk-link">""" + messages("otherCountryExcludedAndQuarantined.returnBTA") + "</a></p>"
+        )
+    )
 
 }

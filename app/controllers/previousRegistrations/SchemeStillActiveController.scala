@@ -18,7 +18,7 @@ package controllers.previousRegistrations
 
 import controllers.actions._
 import logging.Logging
-import models.{Country, Index}
+import models.Country
 import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -37,13 +37,11 @@ class SchemeStillActiveController @Inject()(
 
   def onPageLoad(
                   waypoints: Waypoints,
-                  countryCode: String,
-                  countryIndex: Index,
-                  schemeIndex: Index
+                  countryCode: String
                 ): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
 
-      Ok(view(Country.getCountryName(countryCode), countryIndex, schemeIndex))
+      Ok(view(Country.getCountryName(countryCode)))
   }
 
 }

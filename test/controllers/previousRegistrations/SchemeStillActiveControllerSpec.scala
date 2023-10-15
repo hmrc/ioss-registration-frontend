@@ -32,39 +32,21 @@ class SchemeStillActiveControllerSpec extends SpecBase {
 
     ".onPageLoad" - {
 
-      "must return OK and the correct view for a GET in NormalMode" in {
+      "must return OK and the correct view for a GET" in {
 
         val country = Country.getCountryName("EE")
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
-          val request = FakeRequest(GET, controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(waypoints, "EE", index, index).url)
+          val request = FakeRequest(GET, controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(waypoints, "EE").url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[SchemeStillActiveView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(country, index, index)(request, messages(application)).toString
-        }
-      }
-
-      "must return OK and the correct view for a GET in AmendMode" in {
-
-        val country = Country.getCountryName("EE")
-
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-
-        running(application) {
-          val request = FakeRequest(GET, controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(waypoints, "EE", index, index).url)
-
-          val result = route(application, request).value
-
-          val view = application.injector.instanceOf[SchemeStillActiveView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(country, index, index)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(country)(request, messages(application)).toString
         }
       }
 

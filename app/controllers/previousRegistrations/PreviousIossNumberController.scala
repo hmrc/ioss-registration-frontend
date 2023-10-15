@@ -92,12 +92,10 @@ class PreviousIossNumberController @Inject()(
                     Future.successful(
                       Redirect(controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
                         waypoints,
-                        activeMatch.memberState,
-                        countryIndex,
-                        schemeIndex))
+                        activeMatch.memberState))
                     )
                   case Some(activeMatch) if coreRegistrationValidationService.isQuarantinedTrader(activeMatch) =>
-                    Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints, countryIndex, schemeIndex)))
+                    Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
                   case _ =>
                     saveAndRedirect(countryIndex, schemeIndex, value, waypoints)
                 }

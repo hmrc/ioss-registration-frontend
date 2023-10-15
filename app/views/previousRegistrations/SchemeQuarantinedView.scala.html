@@ -19,7 +19,7 @@
         govukButton: GovukButton
 )
 
-@(countryIndex: Index, schemeIndex: Index)(implicit request: Request[_], messages: Messages)
+@(externalUrl: Option[String] = None)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("schemeQuarantined.title"))) {
 
@@ -29,5 +29,12 @@
 
     <p class="govuk-body">@Html(messages("schemeQuarantined.contactUs"))</p>
 
+  @if(externalUrl) {
+    @externalUrl.map(
+      url => Html(
+        s"""<p class="govuk-body"><a href=$url id="back-to-your-account" class="govuk-link">""" + messages("site.back.BTA") + "</a></p>"
+      ))
+  } else {
     <p class="govuk-body">@Html(messages("schemeQuarantined.returnToRegistration"))</p>
+  }
 }

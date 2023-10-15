@@ -17,6 +17,7 @@
 package controllers.euDetails
 
 import controllers.actions._
+import controllers.GetCountry
 import models.Index
 import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -25,18 +26,23 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.euDetails.FixedEstablishmentVRNAlreadyRegisteredView
 
 import javax.inject.Inject
+import scala.concurrent.Future
 
 class FixedEstablishmentVRNAlreadyRegisteredController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        cc: AuthenticatedControllerComponents,
                                        view: FixedEstablishmentVRNAlreadyRegisteredView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                     ) extends FrontendBaseController with I18nSupport with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-      Ok(view(countryIndex))
+      println("test")
+      getCountry(waypoints, countryIndex){ country =>
+        println("Test1")
+        Future.successful(Ok(view(country.name)))
+      }
   }
 
 }

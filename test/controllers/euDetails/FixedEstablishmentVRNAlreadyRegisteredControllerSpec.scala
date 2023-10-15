@@ -17,8 +17,9 @@
 package controllers.euDetails
 
 import base.SpecBase
-import models.Index
+import models.{Country, Index}
 import pages.EmptyWaypoints
+import pages.euDetails.EuCountryPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.euDetails.FixedEstablishmentVRNAlreadyRegisteredView
@@ -33,7 +34,10 @@ class FixedEstablishmentVRNAlreadyRegisteredControllerSpec extends SpecBase {
 
       "must return OK and the correct view for a GET" in {
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        val country: Country = arbitraryCountry.arbitrary.sample.value
+
+        val userAnswers = basicUserAnswersWithVatInfo.set(EuCountryPage(countryIndex), country).success.value
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
           val request = FakeRequest(GET, routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, countryIndex).url)
@@ -43,7 +47,7 @@ class FixedEstablishmentVRNAlreadyRegisteredControllerSpec extends SpecBase {
           val view = application.injector.instanceOf[FixedEstablishmentVRNAlreadyRegisteredView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(countryIndex)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(country.name)(request, messages(application)).toString
         }
       }
 

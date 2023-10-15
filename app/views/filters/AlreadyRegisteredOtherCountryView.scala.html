@@ -24,13 +24,11 @@
     externalUrl: Option[String] = None
 )(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("alreadyRegisteredOtherCountry.title"))) {
+@layout(pageTitle = titleNoForm(messages("alreadyRegisteredOtherCountry.title", memberState))) {
 
     <h1 class="govuk-heading-xl">@messages("alreadyRegisteredOtherCountry.heading", memberState)</h1>
 
-    <p class="govuk-body">@messages("alreadyRegisteredOtherCountry.register", memberState)</p>
-
-    <p class="govuk-body">@messages("alreadyRegisteredOtherCountry.paragraph", memberState)</p>
+    <p class="govuk-body">@messages("alreadyRegisteredOtherCountry.paragraph")</p>
 
     <p class="govuk-body">@Html(messages("alreadyRegisteredOtherCountry.contact"))</p>
 

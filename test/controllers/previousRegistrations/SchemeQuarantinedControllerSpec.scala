@@ -38,14 +38,14 @@ class SchemeQuarantinedControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
-          val request = FakeRequest(GET, prevRoutes.SchemeQuarantinedController.onPageLoad(waypoints, index, index).url)
+          val request = FakeRequest(GET, prevRoutes.SchemeQuarantinedController.onPageLoad(waypoints).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[SchemeQuarantinedView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(index, index)(request, messages(application)).toString
+          contentAsString(result) mustEqual view()(request, messages(application)).toString
         }
       }
 
@@ -54,14 +54,14 @@ class SchemeQuarantinedControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
-          val request = FakeRequest(GET, prevRoutes.SchemeQuarantinedController.onPageLoad(waypoints, index, index).url)
+          val request = FakeRequest(GET, prevRoutes.SchemeQuarantinedController.onPageLoad(waypoints).url)
 
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[SchemeQuarantinedView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(index, index)(request, messages(application)).toString
+          contentAsString(result) mustEqual view()(request, messages(application)).toString
         }
       }
 
