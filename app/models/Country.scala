@@ -288,7 +288,7 @@ object CountryWithValidationDetails {
     CountryWithValidationDetails(Country("DE", "Germany"), germanyVatNumberRegex, "the 9 numbers", "123456789"),
     CountryWithValidationDetails(Country("EL", "Greece"), greeceVatNumberRegex, "the 9 numbers", "123456789"),
     CountryWithValidationDetails(Country("HU", "Hungary"), hungaryVatNumberRegex, "the 8 numbers", "12345678"),
-    CountryWithValidationDetails(Country("IE", "Ireland"), irelandVatNumberRegex, "8 or 9 characters", "1234567WI"), // TODO FIX THIS
+    CountryWithValidationDetails(Country("IE", "Ireland"), irelandVatNumberRegex, "8 or 9 characters", "1234567XX"),
     CountryWithValidationDetails(Country("IT", "Italy"), italyVatNumberRegex, "the 11 numbers", "01234567899"),
     CountryWithValidationDetails(Country("LV", "Latvia"), latviaVatNumberRegex, "the 11 numbers", "01234567899"),
     CountryWithValidationDetails(Country("LT", "Lithuania"), lithuaniaVatNumberRegex, "9 or 12 numbers", "123456789"),
