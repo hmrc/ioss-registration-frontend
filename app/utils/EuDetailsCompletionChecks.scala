@@ -46,8 +46,10 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
     request.userAnswers
       .get(EuOptionalDetailsQuery(index))
       .find { details =>
+        println("request.userAnswers="+request.userAnswers)
         println("-- getIncompleteEuDetails details: "+details)
-        partOfVatGroup(isPartOfVatGroup, details) || notPartOfVatGroup(isPartOfVatGroup, details)
+        //partOfVatGroup(isPartOfVatGroup, details) || notPartOfVatGroup(isPartOfVatGroup, details)
+        sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) || checkVatNumber(details)
       }
   }
 
@@ -59,21 +61,24 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
       .get(AllEuOptionalDetailsQuery).map(
       _.filter { details =>
         println("-- details: "+details)
-        partOfVatGroup(isPartOfVatGroup, details) ||
-          notPartOfVatGroup(isPartOfVatGroup, details)
+//        println(partOfVatGroup(isPartOfVatGroup, details))
+//        println(notPartOfVatGroup(isPartOfVatGroup, details))
+//        partOfVatGroup(isPartOfVatGroup, details) ||
+//          notPartOfVatGroup(isPartOfVatGroup, details)
+        sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) || checkVatNumber(details)
       }
     ).getOrElse(List.empty)
   }
 
-  private def partOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    isPartOfVatGroup || sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) ||
-      checkVatNumber(details)
-  }
-
-  private def notPartOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    !isPartOfVatGroup || sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) ||
-      checkVatNumber(details)
-  }
+//  private def partOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
+//    isPartOfVatGroup || sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) ||
+//      checkVatNumber(details)
+//  }
+//
+//  private def notPartOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
+//    !isPartOfVatGroup || sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) ||
+//      checkVatNumber(details)
+//  }
 
   private def checkVatNumber(details: EuOptionalDetails): Boolean = {
     details.euVatNumber.exists { euVatNumber =>
@@ -86,26 +91,28 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
   }
 
   private def sellsGoodsToEuConsumersMethod(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    details.sellsGoodsToEUConsumerMethod.isEmpty ||
-      details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) && details.registrationType.isEmpty ||
+    details.sellsGoodsToEuConsumerMethod.isEmpty ||
+      details.sellsGoodsToEuConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) && details.registrationType.isEmpty ||
       (details.registrationType.contains(RegistrationType.VatNumber) && details.euVatNumber.isEmpty) ||
       (details.registrationType.contains(RegistrationType.TaxId) && details.euTaxReference.isEmpty) ||
       fixedEstablishment(isPartOfVatGroup, details)
   }
 
   private def fixedEstablishment(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    !isPartOfVatGroup && details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) &&
+    !isPartOfVatGroup && details.sellsGoodsToEuConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) &&
       (details.registrationType.contains(RegistrationType.TaxId) || details.registrationType.contains(RegistrationType.VatNumber)) &&
       (details.fixedEstablishmentTradingName.isEmpty || details.fixedEstablishmentAddress.isEmpty) /*||
-      (isPartOfVatGroup && details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment))*/
+      (isPartOfVatGroup && details.sellsGoodsToEuConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment))*/
   }
 
-  def incompleteEuDetailsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] =
+  def incompleteEuDetailsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
+    println("-- HERE in incompleteEuDetailsRedirect")
     firstIndexedIncompleteEuDetails(getAllIncompleteEuDetails().map(
       _.euCountry
     )).map(
       incompleteCountry =>
         Redirect(controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, Index(incompleteCountry._2)))
     )
+  }
 }
 

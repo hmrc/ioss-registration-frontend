@@ -59,7 +59,7 @@ class TaxRegisteredInEuController @Inject()(
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-
+      println("In TaxRegisteredInEuController - request.userAnswers = " + request.userAnswers)
       form.bindFromRequest().fold(
         formWithErrors =>
           BadRequest(view(formWithErrors, waypoints)).toFuture,

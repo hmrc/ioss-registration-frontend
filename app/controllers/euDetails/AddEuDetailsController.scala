@@ -69,14 +69,17 @@ class AddEuDetailsController @Inject()(
 
   def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-
       withCompleteDataAsync[EuOptionalDetails](
         data = getAllIncompleteEuDetails,
         onFailure = (incomplete: Seq[EuOptionalDetails]) => {
+          println("YOOOOOOOOOOO - incompletePromptShown:"+incompletePromptShown)
           if (incompletePromptShown) {
             incompleteEuDetailsRedirect(waypoints).map(
               redirectIncompletePage => redirectIncompletePage.toFuture
-            ).getOrElse(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()).toFuture)
+            ).getOrElse {
+              println("Redirecting to JourneyRecoveryController")
+              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()).toFuture
+            }
           } else {
             Future.successful(Redirect(routes.AddEuDetailsController.onPageLoad(waypoints)))
           }

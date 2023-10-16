@@ -60,39 +60,31 @@
 
     @govukSummaryList(euDetails)
 
-    @formHelper(action = routes.AddEuDetailsController.onSubmit(waypoints, false), Symbol("autoComplete") -> "off") {
-
+    @if(incompleteCountries.isEmpty) {
+      @formHelper(action = controllers.euDetails.routes.AddEuDetailsController.onSubmit(waypoints, incompletePromptShown = false), Symbol("autoComplete") -> "off") {
         @if(canAddEuDetails) {
-
-            @govukRadios(
-                RadiosViewModel.yesNo(
-                    field = form("value"),
-                    legend = LegendViewModel(
-                        HtmlContent(Html("""<h2 class="govuk-fieldset__heading">""" + messages("addEuDetails.addAnother") + "</h2>"))
-                    ).withSize(LegendSize.Medium)
-                ).withHint(HintViewModel(messages("addEuDetails.addAnother.hint")))
-            )
-        } else {
+          @govukRadios(
+            RadiosViewModel.yesNo(
+              field = form("value"),
+              legend = LegendViewModel(
+                HtmlContent(Html("""<h2 class="govuk-fieldset__heading">""" + messages("addEuDetails.addAnother") + "</h2>"))
+              ).withSize(LegendSize.Medium)
+            ).withHint(HintViewModel(messages("addEuDetails.addAnother.hint")))
+          )
+          } else {
             <p class="govuk-body">@messages("addEuDetails.maximumReached")</p>
             <input type="hidden" name="value" id="value" value="false"/>
+          }
+
+          @button("site.continue")
         }
+      } else {
+        <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+        <p class="govuk-body">@messages("error.missing_answers_prompt", if(incompleteCountries.size > 1) {incompleteCountries.map(_.euCountry.name).reverse.tail.mkString(", ") + " and " + incompleteCountries.last.euCountry.name} else {incompleteCountries.head.euCountry.name})</p>
 
-     @if(incompleteCountries.isEmpty){
-            @formHelper(action = controllers.euDetails.routes.AddEuDetailsController.onSubmit(waypoints, false)) {
+        @formHelper(action = controllers.euDetails.routes.AddEuDetailsController.onSubmit(waypoints, incompletePromptShown = true)) {
 
-                @button("site.continue")
-            }
-     } else {
-            <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
-            <p class="govuk-body">@messages("error.missing_answers_prompt", if(incompleteCountries.size > 1) {incompleteCountries.map(_.euCountry.name).reverse.tail.mkString(", ") + " and " + incompleteCountries.last.euCountry.name} else {incompleteCountries.head.euCountry.name}))</p>
-
-            @formHelper(action = controllers.euDetails.routes.AddEuDetailsController.onSubmit(waypoints, true)) {
-
-                //@button("error.resolve_missing_answers", controllers.euDetails.routes.AddEuDetailsController.onPageLoad(waypoints).url)
-                @button("error.resolve_missing_answers")
-
-            }
+          @button("error.resolve_missing_answers")
         }
-
-    }
+      }
 }
