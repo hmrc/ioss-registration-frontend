@@ -151,14 +151,6 @@ trait CompletionChecks {
 
 
   def incompleteCountryEuDetailsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-    println("In incompleteCountryPageRedirect")
-    // TaxRegisteredInEuController
-    // EuCountryController
-    // SellsGoodsToEuConsumerMethodController
-    // RegistrationTypeController -> EuVatNumberController or EuTaxReferenceController
-    // FixedEstablishmentTradingNameController
-    // FixedEstablishmentAddressController
-
     firstIndexedIncompleteEuDetails(getAllIncompleteEuDetails().map(_.euCountry)).flatMap { case (incompleteCountry, indexNumber) =>
       val index: Index = Index(indexNumber)
       val pageRedirect = incompleteCountryPageRedirect(incompleteCountry, waypoints, index)
@@ -175,11 +167,7 @@ trait CompletionChecks {
 
   private def incompleteCountryPageRedirect(incompleteCountry: EuOptionalDetails, waypoints: Waypoints, index: Index)
                                            (implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-println("In incompleteCountryPageRedirect")
     val redirectCalls: Seq[(Boolean, Call)] = Seq(
-      /*request.userAnswers.get(EuCountryPage(index)).isEmpty ->
-        controllers.euDetails.routes.EuCountryController.onPageLoad(waypoints, index),*/
-
       request.userAnswers.get(SellsGoodsToEuConsumerMethodPage(index)).isEmpty ->
         controllers.euDetails.routes.SellsGoodsToEuConsumerMethodController.onPageLoad(waypoints, index),
 

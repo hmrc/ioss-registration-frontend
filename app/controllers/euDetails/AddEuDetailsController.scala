@@ -58,7 +58,7 @@ class AddEuDetailsController @Inject()(
           val euDetailsSummary = EuDetailsSummary.countryAndVatNumberList(request.userAnswers, waypoints, AddEuDetailsPage())
 
           withCompleteDataAsync[EuOptionalDetails](
-            data = getAllIncompleteEuDetails,
+            data = getAllIncompleteEuDetails _,
             onFailure = (incomplete: Seq[EuOptionalDetails]) => {
               Future.successful(Ok(view(form, waypoints, euDetailsSummary, canAddEuDetails, incomplete)))
             }) {
@@ -70,16 +70,12 @@ class AddEuDetailsController @Inject()(
   def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
       withCompleteDataAsync[EuOptionalDetails](
-        data = getAllIncompleteEuDetails,
+        data = getAllIncompleteEuDetails _,
         onFailure = (incomplete: Seq[EuOptionalDetails]) => {
-          println("YOOOOOOOOOOO - incompletePromptShown:"+incompletePromptShown)
           if (incompletePromptShown) {
             incompleteEuDetailsRedirect(waypoints).map(
               redirectIncompletePage => redirectIncompletePage.toFuture
-            ).getOrElse {
-              println("Redirecting to JourneyRecoveryController")
-              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()).toFuture
-            }
+            ).getOrElse(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()).toFuture)
           } else {
             Future.successful(Redirect(routes.AddEuDetailsController.onPageLoad(waypoints)))
           }
@@ -100,23 +96,5 @@ class AddEuDetailsController @Inject()(
             )
         }
       }
-
-      /*getDerivedItems(waypoints, DeriveNumberOfEuRegistrations) {
-        number =>
-
-          val canAddEuDetails = number < Country.euCountries.size
-          val euDetailsSummary = EuDetailsSummary.countryAndVatNumberList(request.userAnswers, waypoints, AddEuDetailsPage())
-
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              BadRequest(view(formWithErrors, waypoints, euDetailsSummary, canAddEuDetails)).toFuture,
-
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(AddEuDetailsPage(), value))
-                _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(AddEuDetailsPage().navigate(waypoints, request.userAnswers, updatedAnswers).route)
-          )
-      }*/
   }
 }

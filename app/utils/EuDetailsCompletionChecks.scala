@@ -46,39 +46,19 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
     request.userAnswers
       .get(EuOptionalDetailsQuery(index))
       .find { details =>
-        println("request.userAnswers="+request.userAnswers)
-        println("-- getIncompleteEuDetails details: "+details)
-        //partOfVatGroup(isPartOfVatGroup, details) || notPartOfVatGroup(isPartOfVatGroup, details)
         sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) || checkVatNumber(details)
       }
   }
 
   def getAllIncompleteEuDetails()(implicit request: AuthenticatedDataRequest[AnyContent]): Seq[EuOptionalDetails] = {
-    println("-- In getAllIncompleteEuDetails")
     val isPartOfVatGroup = request.userAnswers.vatInfo.exists(_.partOfVatGroup)
-    println("isPartOfVatGroup: "+isPartOfVatGroup)
     request.userAnswers
       .get(AllEuOptionalDetailsQuery).map(
       _.filter { details =>
-        println("-- details: "+details)
-//        println(partOfVatGroup(isPartOfVatGroup, details))
-//        println(notPartOfVatGroup(isPartOfVatGroup, details))
-//        partOfVatGroup(isPartOfVatGroup, details) ||
-//          notPartOfVatGroup(isPartOfVatGroup, details)
         sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) || checkVatNumber(details)
       }
     ).getOrElse(List.empty)
   }
-
-//  private def partOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-//    isPartOfVatGroup || sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) ||
-//      checkVatNumber(details)
-//  }
-//
-//  private def notPartOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-//    !isPartOfVatGroup || sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) ||
-//      checkVatNumber(details)
-//  }
 
   private def checkVatNumber(details: EuOptionalDetails): Boolean = {
     details.euVatNumber.exists { euVatNumber =>
@@ -106,7 +86,6 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
   }
 
   def incompleteEuDetailsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-    println("-- HERE in incompleteEuDetailsRedirect")
     firstIndexedIncompleteEuDetails(getAllIncompleteEuDetails().map(
       _.euCountry
     )).map(

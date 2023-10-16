@@ -45,7 +45,6 @@ class TradingNameController @Inject()(
   def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] =
     (cc.authAndGetData() andThen cc.limitIndex(index, maxTradingNames)) {
       implicit request =>
-        println("-- In TradingNameController waypoints: "+waypoints)
         val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames).getOrElse(Seq.empty).map(_.name))
 
         val preparedForm = request.userAnswers.get(TradingNamePage(index)) match {
