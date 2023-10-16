@@ -30,7 +30,7 @@
 @(waypoints: Waypoints, countryIndex: Index, country: Country, list: SummaryList, incompleteDetails: Boolean = false)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkEuDetailsAnswers.title", country.name))) {
-In CheckEuDetailsAnswersView
+
         @if(incompleteDetails) {
             @govukWarningText(WarningText(
                 iconFallbackText = Option(messages("site.warning")),

@@ -17,21 +17,19 @@
 package utils
 
 import models._
-import models.euDetails.{EuOptionalDetails, RegistrationType}
+import models.euDetails.EuOptionalDetails
 import models.previousRegistrations.PreviousRegistrationDetailsWithOptionalVatNumber
 import models.requests.AuthenticatedDataRequest
 import pages._
-import pages.euDetails._
-import pages.previousRegistrations.PreviouslyRegisteredPage
+import pages.previousRegistrations.{PreviousSchemeTypePage, PreviouslyRegisteredPage}
 import pages.tradingNames._
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{AnyContent, Call, Result}
+import play.api.mvc.{AnyContent, Result}
+import queries.AllWebsites
 import queries.euDetails.AllEuOptionalDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsWithOptionalVatNumberQuery
 import queries.tradingNames.AllTradingNames
-import utils.EuDetailsCompletionChecks.{emptyEuDetailsRedirect, getAllIncompleteEuDetails, incompleteEuDetailsRedirect, isEuDetailsPopulated}
-import pages.previousRegistrations.PreviousSchemeTypePage
-import queries.AllWebsites
+import utils.EuDetailsCompletionChecks._
 
 import scala.concurrent.Future
 
@@ -112,7 +110,7 @@ trait CompletionChecks {
   def getFirstValidationErrorRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
     (incompleteTradingNameRedirect(waypoints) ++
       emptyEuDetailsRedirect(waypoints) ++
-      incompleteEuDetailsRedirect(waypoints) ++
+      incompleteCheckEuDetailsRedirect(waypoints) ++
       emptyDeregisteredRedirect(waypoints) ++
       incompletePreviousRegistrationRedirect(waypoints)
       ).headOption
@@ -149,51 +147,6 @@ trait CompletionChecks {
       case None => None
     }
 
-
-  def incompleteCountryEuDetailsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-    firstIndexedIncompleteEuDetails(getAllIncompleteEuDetails().map(_.euCountry)).flatMap { case (incompleteCountry, indexNumber) =>
-      val index: Index = Index(indexNumber)
-      val pageRedirect = incompleteCountryPageRedirect(incompleteCountry, waypoints, index)
-
-      incompleteCountry.euVatNumber.flatMap(vatNumber =>
-        CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == incompleteCountry.euCountry.code) match {
-          case Some(validationRule) if !vatNumber.matches(validationRule.vrnRegex) =>
-            Some(Redirect(controllers.euDetails.routes.EuVatNumberController.onPageLoad(waypoints, index)))
-          case _ => None
-        }
-      ).orElse(pageRedirect)
-    }
-  }
-
-  private def incompleteCountryPageRedirect(incompleteCountry: EuOptionalDetails, waypoints: Waypoints, index: Index)
-                                           (implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
-    val redirectCalls: Seq[(Boolean, Call)] = Seq(
-      request.userAnswers.get(SellsGoodsToEuConsumerMethodPage(index)).isEmpty ->
-        controllers.euDetails.routes.SellsGoodsToEuConsumerMethodController.onPageLoad(waypoints, index),
-
-      request.userAnswers.get(RegistrationTypePage(index)).isEmpty ->
-        controllers.euDetails.routes.RegistrationTypeController.onPageLoad(waypoints, index),
-
-      (request.userAnswers.get(RegistrationTypePage(index)).contains(RegistrationType.VatNumber) &&
-        request.userAnswers.get(EuVatNumberPage(index)).isEmpty) ->
-        controllers.euDetails.routes.EuVatNumberController.onPageLoad(waypoints, index),
-
-      (request.userAnswers.get(RegistrationTypePage(index)).contains(RegistrationType.TaxId) &&
-        request.userAnswers.get(EuTaxReferencePage(index)).isEmpty) ->
-        controllers.euDetails.routes.EuTaxReferenceController.onPageLoad(waypoints, index),
-
-      request.userAnswers.get(FixedEstablishmentTradingNamePage(index)).isEmpty ->
-        controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(waypoints, index),
-
-      request.userAnswers.get(FixedEstablishmentAddressPage(index)).isEmpty ->
-        controllers.euDetails.routes.FixedEstablishmentAddressController.onPageLoad(waypoints, index)
-    )
-
-    redirectCalls.find(_._1).map { case (_, redirectCall) =>
-      Redirect(redirectCall)
-    }
-  }
-
   private def incompleteTradingNameRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isTradingNamesValid()) {
     Some(Redirect(controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints)))
   } else {
@@ -205,5 +158,4 @@ trait CompletionChecks {
   } else {
     None
   }
-
 }

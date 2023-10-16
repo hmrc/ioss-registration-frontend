@@ -26,7 +26,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
-import utils.EuDetailsCompletionChecks.getIncompleteEuDetails
+import utils.EuDetailsCompletionChecks.{getIncompleteEuDetails, incompleteCheckEuDetailsRedirect}
 import viewmodels.checkAnswers.euDetails._
 import viewmodels.govuk.summarylist._
 import views.html.euDetails.CheckEuDetailsAnswersView
@@ -74,16 +74,12 @@ class CheckEuDetailsAnswersController @Inject()(
     implicit request =>
       val incomplete = getIncompleteEuDetails(countryIndex)
       if (incomplete.isEmpty) {
-        /*for {
-          updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckEuDetailsAnswersPage, value))
-          _ <- cc.sessionRepository.set(updatedAnswers)
-        } yield Redirect(CheckVatDetailsPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)*/
         Redirect(CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
       } else {
         if (!incompletePromptShown) {
           Redirect(routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex))
         } else {
-          incompleteCountryEuDetailsRedirect(waypoints).map {
+          incompleteCheckEuDetailsRedirect(waypoints).map {
             redirectIncompletePage =>
               redirectIncompletePage
           }.getOrElse(Redirect(routes.EuCountryController.onPageLoad(waypoints, countryIndex)))
