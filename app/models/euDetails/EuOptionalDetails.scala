@@ -21,16 +21,12 @@ import play.api.libs.json.{Json, OFormat}
 
 case class EuOptionalDetails(
                               euCountry: Country,
-                              sellsGoodsToEUConsumers: Option[Boolean],
-                              vatRegistered: Option[Boolean],
                               sellsGoodsToEUConsumerMethod: Option[EuConsumerSalesMethod],
                               registrationType: Option[RegistrationType],
                               euVatNumber: Option[String],
                               euTaxReference: Option[String],
                               fixedEstablishmentTradingName: Option[String],
-                              fixedEstablishmentAddress: Option[InternationalAddress],
-                              euSendGoodsTradingName: Option[String],
-                              euSendGoodsAddress: Option[InternationalAddress]
+                              fixedEstablishmentAddress: Option[InternationalAddress]
                        )
 
 

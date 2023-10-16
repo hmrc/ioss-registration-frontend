@@ -16,25 +16,21 @@
 
 package controllers
 
-import cats.data.Validated.{Invalid, Valid}
-import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
-import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
-import models.responses.ConflictFound
-import pages.{CheckYourAnswersPage, EmptyWaypoints}
+import models.CheckMode
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax._
-import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.summarylist._
+import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.CheckYourAnswersView
 
 import javax.inject.Inject
@@ -43,20 +39,17 @@ import scala.concurrent.{ExecutionContext, Future}
 class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             cc: AuthenticatedControllerComponents,
-                                            view: CheckYourAnswersView,
-                                            registrationConnector: RegistrationConnector,
-                                            registrationService: RegistrationValidationService,
-                                            auditService: AuditService,
-                                            saveForLaterService: SaveForLaterService,
+                                            view: CheckYourAnswersView
                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with CompletionChecks {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
     implicit request =>
 
       val thisPage = CheckYourAnswersPage
-      val waypoints = EmptyWaypoints
+
+      val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
 
       val vatRegistrationDetailsList = SummaryListViewModel(
         rows = Seq(
@@ -121,46 +114,18 @@ class CheckYourAnswersController @Inject()(
       )
 
       val isValid = validate()
-      Ok(view(vatRegistrationDetailsList, list, isValid))
+      Ok(view(waypoints, vatRegistrationDetailsList, list, isValid))
   }
 
-  def onSubmit(incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-      registrationService.fromUserAnswers(request.userAnswers, request.vrn) match {
-        case Valid(registration) =>
-          registrationConnector.submitRegistration(registration).flatMap {
-            case Right(_) =>
-              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, registration, SubmissionResult.Success, request))
-              Future.successful(Ok) // TODO: replace with sendEmailConfirmation
-            case Left(ConflictFound) =>
-              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, registration, SubmissionResult.Duplicate, request))
-              Redirect(filters.routes.CannotRegisterAlreadyRegisteredController.onPageLoad()).toFuture
-
-            case Left(e) =>
-              logger.error(s"Unexpected result on submit: ${e.toString}")
-              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, registration, SubmissionResult.Failure, request))
-              saveForLaterService.saveAnswers(
-                routes.ErrorSubmittingRegistrationController.onPageLoad(),
-                routes.CheckYourAnswersController.onPageLoad()
-              )
-          }
-
-        case Invalid(errors) =>
-          getFirstValidationErrorRedirect(EmptyWaypoints).map(
-            errorRedirect => if (incompletePrompt) {
-              errorRedirect.toFuture
-            } else {
-              Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
-            }
-          ).getOrElse {
-            val errorList = errors.toChain.toList
-            val errorMessages = errorList.map(_.errorMessage).mkString("\n")
-            logger.error(s"Unable to create a registration request from user answers: $errorMessages")
-            saveForLaterService.saveAnswers(
-              routes.ErrorSubmittingRegistrationController.onPageLoad(),
-              routes.CheckYourAnswersController.onPageLoad()
-            )
-          }
+      getFirstValidationErrorRedirect(waypoints) match {
+        case Some(errorRedirect) => if (incompletePrompt) {
+          errorRedirect.toFuture
+        } else {
+          Redirect(routes.CheckYourAnswersController.onPageLoad(waypoints)).toFuture
+        }
+        case None => Future.successful(Ok)
       }
   }
 }

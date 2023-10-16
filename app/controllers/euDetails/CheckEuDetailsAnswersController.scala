@@ -19,18 +19,21 @@ package controllers.euDetails
 import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import models.Index
+import models.euDetails.EuOptionalDetails
 import pages.Waypoints
 import pages.euDetails.CheckEuDetailsAnswersPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
+import utils.EuDetailsCompletionChecks.getIncompleteEuDetails
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails._
 import viewmodels.govuk.summarylist._
 import views.html.euDetails.CheckEuDetailsAnswersView
 
 import javax.inject.Inject
+import scala.concurrent.Future
 
 class CheckEuDetailsAnswersController @Inject()(
                                                  override val messagesApi: MessagesApi,
@@ -57,12 +60,38 @@ class CheckEuDetailsAnswersController @Inject()(
             ).flatten
           )
 
-          Ok(view(waypoints, countryIndex, country, list)).toFuture
+          Future.successful(withCompleteDataModel[EuOptionalDetails](
+            countryIndex,
+            data = getIncompleteEuDetails _,
+            onFailure = (incomplete: Option[EuOptionalDetails]) => {
+              Ok(view(waypoints, countryIndex, country, list, incomplete.isDefined))
+            }) {
+            Ok(view(waypoints, countryIndex, country, list))
+          })
       }
   }
 
   def onSubmit(waypoints: Waypoints, countryIndex: Index, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
-      Redirect(CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
+      val incomplete = getIncompleteEuDetails(countryIndex)
+      if (incomplete.isEmpty) {
+        println("In incomplete.isEmpty")
+        /*for {
+          updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckEuDetailsAnswersPage, value))
+          _ <- cc.sessionRepository.set(updatedAnswers)
+        } yield Redirect(CheckVatDetailsPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)*/
+        Redirect(CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
+      } else {
+        if (!incompletePromptShown) {
+          println("In incompletePromptShown")
+          Redirect(routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex))
+        } else {
+          println("In else")
+          incompleteCountryEuDetailsRedirect(waypoints).map {
+            redirectIncompletePage =>
+              redirectIncompletePage
+          }.getOrElse(Redirect(routes.EuCountryController.onPageLoad(waypoints, countryIndex)))
+        }
+      }
   }
 }

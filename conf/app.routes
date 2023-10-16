@@ -13,8 +13,8 @@ GET         /refresh-session-unauthenticated                              contro
 
 GET         /there-is-a-problem                                           controllers.JourneyRecoveryController.onPageLoad(redirectUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                                           controllers.CheckYourAnswersController.onPageLoad()
-POST        /check-your-answers/:incompletePrompt                         controllers.CheckYourAnswersController.onSubmit(incompletePrompt: Boolean)
+GET         /check-your-answers                                           controllers.CheckYourAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /check-your-answers/:incompletePrompt                         controllers.CheckYourAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
 GET         /identity-problem                                             controllers.auth.IdentityVerificationController.identityError(redirectUrl: RedirectUrl)
 GET         /identity-complete                                            controllers.auth.IdentityVerificationController.handleIvFailure(redirectUrl: RedirectUrl, journeyId: Option[String])
@@ -185,7 +185,7 @@ GET         /check-tax-details/:index                                     contro
 POST        /check-tax-details/:index                                     controllers.euDetails.CheckEuDetailsAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index, incompletePromptShown: Boolean)
 
 GET         /add-tax-details                                              controllers.euDetails.AddEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /add-tax-details                                              controllers.euDetails.AddEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /add-tax-details                                              controllers.euDetails.AddEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePromptShown: Boolean)
 
 GET         /remove-tax-details/:index                                    controllers.euDetails.DeleteEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /remove-tax-details/:index                                    controllers.euDetails.DeleteEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)

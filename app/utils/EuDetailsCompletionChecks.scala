@@ -45,33 +45,38 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
     val isPartOfVatGroup = request.userAnswers.vatInfo.exists(_.partOfVatGroup)
     request.userAnswers
       .get(EuOptionalDetailsQuery(index))
-      .find(details =>
-        partOfVatGroup(isPartOfVatGroup, details) || notPartOfVatGroup(isPartOfVatGroup, details))
+      .find { details =>
+        println("-- getIncompleteEuDetails details: "+details)
+        partOfVatGroup(isPartOfVatGroup, details) || notPartOfVatGroup(isPartOfVatGroup, details)
+      }
   }
 
   def getAllIncompleteEuDetails()(implicit request: AuthenticatedDataRequest[AnyContent]): Seq[EuOptionalDetails] = {
+    println("-- In getAllIncompleteEuDetails")
     val isPartOfVatGroup = request.userAnswers.vatInfo.exists(_.partOfVatGroup)
+    println("isPartOfVatGroup: "+isPartOfVatGroup)
     request.userAnswers
       .get(AllEuOptionalDetailsQuery).map(
-      _.filter(details =>
+      _.filter { details =>
+        println("-- details: "+details)
         partOfVatGroup(isPartOfVatGroup, details) ||
           notPartOfVatGroup(isPartOfVatGroup, details)
-      )
+      }
     ).getOrElse(List.empty)
   }
 
   private def partOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    isPartOfVatGroup && notSellingToEuConsumers(details) || sellsToEuConsumers(isPartOfVatGroup, details) ||
+    isPartOfVatGroup || sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) ||
       checkVatNumber(details)
   }
 
   private def notPartOfVatGroup(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    !isPartOfVatGroup && notSellingToEuConsumers(details) || sellsToEuConsumers(isPartOfVatGroup, details) ||
+    !isPartOfVatGroup || sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) ||
       checkVatNumber(details)
   }
 
   private def checkVatNumber(details: EuOptionalDetails): Boolean = {
-    details.euVatNumber.nonEmpty && details.euVatNumber.exists { euVatNumber =>
+    details.euVatNumber.exists { euVatNumber =>
       CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == details.euCountry.code) match {
         case Some(validationRule) =>
           !euVatNumber.matches(validationRule.vrnRegex)
@@ -80,31 +85,19 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
     }
   }
 
-  private def notSellingToEuConsumers(details: EuOptionalDetails): Boolean = {
-    details.sellsGoodsToEUConsumers.isEmpty ||
-      (details.sellsGoodsToEUConsumers.contains(false) && !details.vatRegistered.contains(true)) ||
-      (details.vatRegistered.contains(true) && details.euVatNumber.isEmpty)
-  }
-
-  private def sellsToEuConsumers(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    (details.sellsGoodsToEUConsumers.contains(true) && details.sellsGoodsToEUConsumerMethod.isEmpty) ||
-      (details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.DispatchWarehouse) && details.registrationType.isEmpty) ||
+  private def sellsGoodsToEuConsumersMethod(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
+    details.sellsGoodsToEUConsumerMethod.isEmpty ||
+      details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) && details.registrationType.isEmpty ||
       (details.registrationType.contains(RegistrationType.VatNumber) && details.euVatNumber.isEmpty) ||
       (details.registrationType.contains(RegistrationType.TaxId) && details.euTaxReference.isEmpty) ||
-      fixedEstablishment(isPartOfVatGroup, details) || sendsGoods(details)
-  }
-
-  private def sendsGoods(details: EuOptionalDetails): Boolean = {
-    (details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.DispatchWarehouse) &&
-      (details.registrationType.contains(RegistrationType.TaxId) || details.registrationType.contains(RegistrationType.VatNumber)) &&
-      (details.euSendGoodsTradingName.isEmpty || details.euSendGoodsAddress.isEmpty))
+      fixedEstablishment(isPartOfVatGroup, details)
   }
 
   private def fixedEstablishment(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    (!isPartOfVatGroup && details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) &&
+    !isPartOfVatGroup && details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) &&
       (details.registrationType.contains(RegistrationType.TaxId) || details.registrationType.contains(RegistrationType.VatNumber)) &&
-      (details.fixedEstablishmentTradingName.isEmpty || details.fixedEstablishmentAddress.isEmpty)) ||
-      (isPartOfVatGroup && details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment))
+      (details.fixedEstablishmentTradingName.isEmpty || details.fixedEstablishmentAddress.isEmpty) /*||
+      (isPartOfVatGroup && details.sellsGoodsToEUConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment))*/
   }
 
   def incompleteEuDetailsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] =

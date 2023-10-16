@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import pages.EmptyWaypoints
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import viewmodels.govuk.SummaryListFluency
@@ -39,7 +40,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val list = SummaryListViewModel(Seq.empty)
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(list, list, isValid = false)(request, messages(application)).toString
+        contentAsString(result) mustBe view(EmptyWaypoints, list, list, isValid = false)(request, messages(application)).toString
       }
     }
   }

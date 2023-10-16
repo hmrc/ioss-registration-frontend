@@ -155,15 +155,20 @@ trait CompletionChecks {
       case Some((incompleteCountry, index)) =>
         val defaultRedirect = Some(Redirect(controllers.euDetails.routes.EuCountryController.onPageLoad(waypoints, Index(index))))
 
-        incompleteCountry.euVatNumber match {
-          case Some(vatNumber) =>
-            CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == incompleteCountry.euCountry.code) match {
-              case Some(validationRule) if !vatNumber.matches(validationRule.vrnRegex) =>
-                Some(Redirect(controllers.euDetails.routes.EuVatNumberController.onPageLoad(waypoints, Index(index))))
-              case _ => defaultRedirect
-            }
-          case _ => defaultRedirect
+        incompleteCountry.sellsGoodsToEUConsumerMethod match {
+          case Some(_) => incompleteCountry.euVatNumber match {
+            case Some(vatNumber) =>
+              CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == incompleteCountry.euCountry.code) match {
+                case Some(validationRule) if !vatNumber.matches(validationRule.vrnRegex) =>
+                  Some(Redirect(controllers.euDetails.routes.EuVatNumberController.onPageLoad(waypoints, Index(index))))
+                case _ => defaultRedirect
+              }
+            case _ => ???
+          }
+          case None => Some(Redirect(controllers.euDetails.routes.SellsGoodsToEuConsumerMethodController.onPageLoad(waypoints, Index(index))))
         }
+
+
       case _ => None
     }
 

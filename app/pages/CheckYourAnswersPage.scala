@@ -29,7 +29,7 @@ object CheckYourAnswersPage extends CheckAnswersPage {
   override val urlFragment: String = "check-your-answers"
 
   override def route(waypoints: Waypoints): Call =
-    routes.CheckYourAnswersController.onPageLoad()
+    routes.CheckYourAnswersController.onPageLoad(waypoints)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     CheckYourAnswersPage // TODO - to ApplicationComplete when created

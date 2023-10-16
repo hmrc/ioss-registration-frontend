@@ -18,12 +18,10 @@ package connectors
 
 import config.Service
 import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, ExternalEntryUrlResponseReads}
-import connectors.RegistrationHttpParser.{RegistrationResponseReads, RegistrationResultResponse}
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
-import models.domain.Registration
 import play.api.Configuration
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,15 +34,6 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
   def getVatCustomerInfo()(implicit hc: HeaderCarrier): Future[VatCustomerInfoResponse] = {
     httpClient.GET[VatCustomerInfoResponse](s"$baseUrl/vat-information")
   }
-
-  def submitRegistration(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
-    val url = s"$baseUrl/create"
-
-    httpClient.POST[Registration, RegistrationResultResponse](url, registration)
-  }
-
-  def getRegistration()(implicit hc: HeaderCarrier): Future[Option[Registration]] =
-    httpClient.GET[Option[Registration]](s"$baseUrl/registration")
 
   def getSavedExternalEntry()(implicit hc: HeaderCarrier): Future[ExternalEntryUrlResponse] = {
     httpClient.GET[ExternalEntryUrlResponse](s"$baseUrl/external-entry")
