@@ -17,12 +17,16 @@
 package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
-import models.{Index, PreviousScheme}
-import pages.{QuestionPage, Waypoints}
+import models.{Index, NormalMode, PreviousScheme}
+import pages.{AddToListQuestionPage, AddToListSection, PreviousSchemeSection, QuestionPage, Waypoint, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case class PreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[PreviousScheme] {
+case class PreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[PreviousScheme] with AddToListQuestionPage {
+
+  override val section: AddToListSection = PreviousSchemeSection
+
+  override val addItemWaypoint: Waypoint = CheckPreviousSchemeAnswersPage(countryIndex).waypoint(NormalMode)
 
   override def path: JsPath = JsPath \ "previousRegistrations" \ countryIndex.position \ "previousSchemesDetails" \ schemeIndex.position \ toString
 
@@ -30,4 +34,5 @@ case class PreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends Q
 
   override def route(waypoints: Waypoints): Call =
     routes.PreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
+
 }

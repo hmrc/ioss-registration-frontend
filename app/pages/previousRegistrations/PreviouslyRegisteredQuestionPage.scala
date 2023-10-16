@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package pages
+package pages.previousRegistrations
 
-trait AddToListQuestionPage {
-  self: Page =>
 
-  val section: AddToListSection
-  val addItemWaypoint: Waypoint
+import models.NormalMode
+import pages.{AddToListQuestionPage, AddToListSection, PreviousRegistrationsSection, QuestionPage, Waypoint}
+
+trait PreviouslyRegisteredQuestionPage[A] extends QuestionPage[A] with AddToListQuestionPage{
+
+  override val addItemWaypoint: Waypoint = AddPreviousRegistrationPage().waypoint(NormalMode)
+
+  override val section: AddToListSection = PreviousRegistrationsSection
 }

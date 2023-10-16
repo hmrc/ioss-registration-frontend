@@ -20,7 +20,7 @@ import models.{CheckMode, Mode, NormalMode}
 import pages.amend.AmendYourAnswersPage
 import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.tradingNames.AddTradingNamePage
-import pages.previousRegistrations.AddPreviousRegistrationPage
+import pages.previousRegistrations.{AddPreviousRegistrationPage, CheckPreviousSchemeAnswersPage}
 import pages.website.AddWebsitePage
 
 case class Waypoint(
@@ -49,4 +49,5 @@ object Waypoint {
   def fromString(s: String): Option[Waypoint] =
     fragments.get(s)
       .orElse(CheckEuDetailsAnswersPage.waypointFromString(s))
+      .orElse(CheckPreviousSchemeAnswersPage.waypointFromString(s))
 }

@@ -16,9 +16,9 @@
 
 package pages
 
-trait AddToListQuestionPage {
-  self: Page =>
+trait AddToListSection
 
-  val section: AddToListSection
-  val addItemWaypoint: Waypoint
-}
+object TradingNameSection extends AddToListSection
+object PreviousRegistrationsSection extends AddToListSection
+object PreviousSchemeSection extends AddToListSection
+

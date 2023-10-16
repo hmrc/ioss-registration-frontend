@@ -25,6 +25,7 @@ import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 
 case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
+
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "previouslyRegistered"
@@ -42,7 +43,7 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
       case (Some(true), Some(size)) if size > 0   => AddPreviousRegistrationPage()
       case (Some(true), _)                        => PreviousEuCountryPage(Index(0))
       case (Some(false), Some(size)) if size > 0  => DeleteAllPreviousRegistrationsPage
-      case (Some(false), _)                       => CheckYourAnswersPage
+      case (Some(false), _)                       => TaxRegisteredInEuPage
       case _                                      => JourneyRecoveryPage
     }
 }
