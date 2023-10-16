@@ -546,8 +546,8 @@ deleteAllPreviousRegistrations.warning = This will delete all your previous regi
 deleteAllPreviousRegistrations.error.required = Select yes if you want to remove all your previous registrations from this scheme
 deleteAllPreviousRegistrations.change.hidden = Remove all your previous registrations information from this scheme
 
-schemeStillActive.title = You cannot use this registration number
-schemeStillActive.heading = You cannot use this registration number
+schemeStillActive.title = You cannot register for this service
+schemeStillActive.heading = You cannot register for this service
 schemeStillActive.p1 = This Import One Stop Shop registration in {0} is still active.
 schemeStillActive.p2 = You can only have one active IOSS account.
 schemeStillActive.contactUs = For more information, contact us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
