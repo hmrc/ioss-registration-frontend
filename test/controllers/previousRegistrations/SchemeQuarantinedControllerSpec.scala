@@ -18,7 +18,6 @@ package controllers.previousRegistrations
 
 import base.SpecBase
 import controllers.previousRegistrations.{routes => prevRoutes}
-import models.Index
 import pages.{EmptyWaypoints, Waypoints}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

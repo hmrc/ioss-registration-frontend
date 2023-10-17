@@ -17,7 +17,7 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import models.{Country, Index}
+import models.Country
 import pages.{EmptyWaypoints, Waypoints}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
