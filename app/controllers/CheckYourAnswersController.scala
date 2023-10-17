@@ -44,9 +44,8 @@ class CheckYourAnswersController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
+  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
     implicit request =>
-
       val thisPage = CheckYourAnswersPage
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
@@ -123,7 +122,7 @@ class CheckYourAnswersController @Inject()(
         case Some(errorRedirect) => if (incompletePrompt) {
           errorRedirect.toFuture
         } else {
-          Redirect(routes.CheckYourAnswersController.onPageLoad(waypoints)).toFuture
+          Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
         }
         case None => Future.successful(Ok)
       }

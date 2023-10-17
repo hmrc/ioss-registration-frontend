@@ -13,7 +13,7 @@ GET         /refresh-session-unauthenticated                              contro
 
 GET         /there-is-a-problem                                           controllers.JourneyRecoveryController.onPageLoad(redirectUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                                           controllers.CheckYourAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /check-your-answers                                           controllers.CheckYourAnswersController.onPageLoad()
 POST        /check-your-answers/:incompletePrompt                         controllers.CheckYourAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
 GET         /identity-problem                                             controllers.auth.IdentityVerificationController.identityError(redirectUrl: RedirectUrl)

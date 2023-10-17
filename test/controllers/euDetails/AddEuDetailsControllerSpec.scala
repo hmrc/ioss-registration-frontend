@@ -31,15 +31,19 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
+import utils.EuDetailsCompletionChecks.getAllIncompleteEuDetails
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.EuDetailsSummary
 import views.html.euDetails.AddEuDetailsView
+import models.requests.AuthenticatedDataRequest
+import play.api.mvc.{AnyContent, AnyContentAsEmpty}
 
 class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
   private val countryIndex: Index = Index(0)
-  private val country: Country = arbitraryCountry.arbitrary.sample.value
+  //private val country: Country = arbitraryCountry.arbitrary.sample.value
+  private val country: Country = Country.euCountries.head
 
   val formProvider = new AddEuDetailsFormProvider()
   val form: Form[Boolean] = formProvider()
@@ -94,10 +98,15 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val list = EuDetailsSummary.countryAndVatNumberList(userAnswers, waypoints, AddEuDetailsPage())
 
+        val authenticatedDataRequest: AuthenticatedDataRequest[AnyContent] =
+          AuthenticatedDataRequest(request, testCredentials, vrn, userAnswers)
+
+        val incomplete = getAllIncompleteEuDetails()(authenticatedDataRequest)
+
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form.fill(true), waypoints, list, canAddEuDetails = false)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form.fill(true), waypoints, list, canAddEuDetails = false, incomplete)(request, messages(application)).toString
       }
     }
 
@@ -117,12 +126,18 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val list = EuDetailsSummary.countryAndVatNumberList(userAnswers, waypoints, AddEuDetailsPage())
 
+        val authenticatedDataRequest: AuthenticatedDataRequest[AnyContent] =
+          AuthenticatedDataRequest(request, testCredentials, vrn, userAnswers)
+
+        val incomplete = getAllIncompleteEuDetails()(authenticatedDataRequest)
+
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form, waypoints, list, canAddEuDetails = true)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form, waypoints, list, canAddEuDetails = true, incomplete)(request, messages(application)).toString
       }
     }
+
     "must save redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
@@ -138,7 +153,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, addEuDetailsRoute)
+          FakeRequest(POST, s"$addEuDetailsRoute?incompletePromptShown=false")
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
@@ -158,7 +173,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
         implicit val msgs: Messages = messages(application)
 
         val request =
-          FakeRequest(POST, addEuDetailsRoute)
+          FakeRequest(POST, s"$addEuDetailsRoute?incompletePromptShown=true")
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
@@ -194,8 +209,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, addEuDetailsRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+          FakeRequest(POST, s"$addEuDetailsRoute?incompletePromptShown=false")
 
         val result = route(application, request).value
 
