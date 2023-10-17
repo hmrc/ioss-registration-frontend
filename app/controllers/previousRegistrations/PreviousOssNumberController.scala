@@ -126,7 +126,7 @@ class PreviousOssNumberController @Inject()(
         intermediaryNumber = None,
         countryCode = country.code
       ).flatMap {
-        case Some(activeMatch) if coreRegistrationValidationService.isQuarantinedTrader(activeMatch) =>
+        case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
           Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
         case _ =>
           saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)

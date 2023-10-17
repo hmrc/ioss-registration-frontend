@@ -20,7 +20,7 @@ import connectors.core.ValidateCoreRegistrationConnector
 import logging.Logging
 import models.{CountryWithValidationDetails, PreviousScheme}
 import models.audit.CoreRegistrationAuditModel
-import models.core.{CoreRegistrationRequest, Match, MatchType, SourceType}
+import models.core.{CoreRegistrationRequest, Match, SourceType}
 import models.requests.AuthenticatedDataRequest
 import services.AuditService
 import uk.gov.hmrc.domain.Vrn
@@ -100,16 +100,6 @@ class CoreRegistrationValidationService @Inject()(
         coreRegistrationResponse.matches.headOption
       case _ => throw CoreRegistrationValidationException("Error while validating core registration")
     }
-  }
-
-  def isActiveTrader(activeMatch: Match): Boolean = {
-    activeMatch.matchType == MatchType.FixedEstablishmentActiveNETP ||
-      activeMatch.matchType == MatchType.TraderIdActiveNETP || activeMatch.matchType == MatchType.OtherMSNETPActiveNETP
-  }
-
-  def isQuarantinedTrader(activeMatch: Match): Boolean = {
-    activeMatch.matchType == MatchType.FixedEstablishmentQuarantinedNETP ||
-      activeMatch.matchType == MatchType.TraderIdQuarantinedNETP || activeMatch.matchType == MatchType.OtherMSNETPQuarantinedNETP
   }
 
   private def convertScheme(previousScheme: PreviousScheme): String = {

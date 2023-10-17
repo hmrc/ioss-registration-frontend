@@ -83,7 +83,7 @@ class EuVatNumberController @Inject()(
 
               coreRegistrationValidationService.searchEuVrn(value, country.code).flatMap {
 
-                case Some(activeMatch) if coreRegistrationValidationService.isActiveTrader(activeMatch) =>
+                case Some(activeMatch) if activeMatch.matchType.isActiveTrader =>
                   Future.successful(
                     Redirect(
                       controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(
@@ -93,7 +93,7 @@ class EuVatNumberController @Inject()(
                     )
                   )
 
-                case Some(activeMatch) if coreRegistrationValidationService.isQuarantinedTrader(activeMatch) =>
+                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
                   Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
 
                 case _ => for {

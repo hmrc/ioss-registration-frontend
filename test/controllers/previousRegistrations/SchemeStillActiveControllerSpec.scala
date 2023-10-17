@@ -25,7 +25,6 @@ import views.html.previousRegistrations.SchemeStillActiveView
 
 class SchemeStillActiveControllerSpec extends SpecBase {
 
-  private val index: Index = Index(0)
   private val waypoints: Waypoints = EmptyWaypoints
 
   "SchemeStillActiveController Controller" - {

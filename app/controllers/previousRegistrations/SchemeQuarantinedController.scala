@@ -17,7 +17,6 @@
 package controllers.previousRegistrations
 
 import controllers.actions._
-import models.Index
 import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
