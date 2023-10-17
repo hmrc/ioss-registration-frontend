@@ -25,6 +25,7 @@ import pages.euDetails.EuTaxReferencePage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.euDetails.EuTaxReferenceView
@@ -36,7 +37,8 @@ class EuTaxReferenceController @Inject()(
                                           override val messagesApi: MessagesApi,
                                           cc: AuthenticatedControllerComponents,
                                           formProvider: EuTaxReferenceFormProvider,
-                                          view: EuTaxReferenceView
+                                          view: EuTaxReferenceView,
+                                          coreRegistrationValidationService: CoreRegistrationValidationService
                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -71,10 +73,20 @@ class EuTaxReferenceController @Inject()(
             BadRequest(view(formWithErrors, waypoints, countryIndex, country)).toFuture,
 
           value =>
-            for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(EuTaxReferencePage(countryIndex), value))
-              _ <- cc.sessionRepository.set(updatedAnswers)
-            } yield Redirect(EuTaxReferencePage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+
+            coreRegistrationValidationService.searchEuTaxId(value, country.code).flatMap {
+
+              case Some(activeMatch) if activeMatch.matchType.isActiveTrader =>
+                Future.successful(Redirect(controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints, countryIndex)))
+
+              case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
+                Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
+
+              case _ => for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(EuTaxReferencePage(countryIndex), value))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(EuTaxReferencePage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+            }
         )
       }
   }

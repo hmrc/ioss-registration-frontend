@@ -18,8 +18,8 @@ package journey.previousRegistrations
 
 import generators.ModelGenerators
 import journey.JourneyHelpers
-import models.domain.PreviousSchemeNumbers
 import models.{Country, Index, PreviousSchemeType}
+import models.domain.PreviousSchemeNumbers
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
 import pages.euDetails.TaxRegisteredInEuPage

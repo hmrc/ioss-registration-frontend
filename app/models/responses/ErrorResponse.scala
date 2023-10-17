@@ -34,3 +34,10 @@ case object ConflictFound extends ErrorResponse {
 }
 
 case class UnexpectedResponseStatus(status: Int, body: String) extends ErrorResponse
+
+case class EisError(eisErrorResponse: EisErrorResponse) extends ErrorResponse {
+  override val body: String =
+    s"${eisErrorResponse.timestamp} " +
+      s"${eisErrorResponse.error} " +
+      s"${eisErrorResponse.errorMessage} "
+}

@@ -43,7 +43,7 @@ class EuVatNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("DE", "Germany"), Seq("DE123456789")),
     (Country("EL", "Greece"), Seq("EL123456789")),
     (Country("HU", "Hungary"), Seq("HU12345678")),
-    (Country("IE", "Ireland"), Seq("IE1A12345L", "IE1112345L", "IE1+12345L", "IE1*12345L", "IE1234567WI")),
+    (Country("IE", "Ireland"), Seq("IE1A12345L", "IE1112345L", "IE1234567WI", "IE1A23456A")),
     (Country("IT", "Italy"), Seq("IT12345678901")),
     (Country("LV", "Latvia"), Seq("LV12345678901")),
     (Country("LT", "Lithuania"), Seq("LT123456789", "LT123456789012")),

@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package config
+package models.core
 
-object Constants {
+import models.{Enumerable, WithName}
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val addQuarantineYears: Int = 2
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
+sealed trait SourceType
 
-  val emailVerificationMaxEmails: Int = 10
+object SourceType extends Enumerable.Implicits {
+  case object VATNumber extends WithName("VATNumber") with SourceType
+  case object EUTraderId extends WithName("EUTraderId") with SourceType
+  case object TraderId extends WithName("TraderId") with SourceType
+
+  val values: Seq[SourceType] = Seq(
+    VATNumber,
+    EUTraderId,
+    TraderId
+  )
+
+  implicit val enumerable: Enumerable[SourceType] =
+    Enumerable(values.map(v => v.toString -> v): _*)
 }
