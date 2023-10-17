@@ -200,7 +200,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "Redirect to scheme quarantined when active IOSS found" in {
+      "Redirect to scheme quarantined when quarantined IOSS found" in {
 
         val countryCode = genericMatch.memberState
 
@@ -226,9 +226,8 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual
-            controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
-              waypoints,
-              countryCode
+            controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(
+              waypoints
             ).url
           verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
         }
