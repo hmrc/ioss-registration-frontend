@@ -112,7 +112,8 @@ trait CompletionChecks {
       emptyEuDetailsRedirect(waypoints) ++
       incompleteCheckEuDetailsRedirect(waypoints) ++
       emptyDeregisteredRedirect(waypoints) ++
-      incompletePreviousRegistrationRedirect(waypoints)
+      incompletePreviousRegistrationRedirect(waypoints) ++
+      incompleteWebsiteUrlsRedirect(waypoints)
       ).headOption
   }
 
@@ -149,6 +150,12 @@ trait CompletionChecks {
 
   private def incompleteTradingNameRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isTradingNamesValid()) {
     Some(Redirect(controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints)))
+  } else {
+    None
+  }
+
+  private def incompleteWebsiteUrlsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!hasWebsiteValid()) {
+    Some(Redirect(controllers.website.routes.WebsiteController.onPageLoad(waypoints, Index(0))))
   } else {
     None
   }
