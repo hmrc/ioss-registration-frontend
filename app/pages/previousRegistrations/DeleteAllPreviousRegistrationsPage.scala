@@ -32,7 +32,7 @@ case object DeleteAllPreviousRegistrationsPage extends QuestionPage[Boolean] {
     routes.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints)
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
-    answers.get(DeleteAllPreviousRegistrationsPage) match {
+    answers.get(this) match {
       case Some(_) => CheckYourAnswersPage
       case _ => JourneyRecoveryPage
     }

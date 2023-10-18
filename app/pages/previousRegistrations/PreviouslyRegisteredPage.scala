@@ -19,7 +19,7 @@ package pages.previousRegistrations
 import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
 import pages.euDetails.TaxRegisteredInEuPage
-import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
+import pages.{JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations

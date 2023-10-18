@@ -20,6 +20,7 @@ import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.PreviouslyRegisteredFormProvider
 import pages.Waypoints
 import pages.previousRegistrations.PreviouslyRegisteredPage
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.previousRegistration.{AllPreviousRegistrationsRawQuery, DeriveNumberOfPreviousRegistrations}
@@ -38,8 +39,9 @@ class PreviouslyRegisteredController @Inject()(
                                          view: PreviouslyRegisteredView
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
+
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
     implicit request =>

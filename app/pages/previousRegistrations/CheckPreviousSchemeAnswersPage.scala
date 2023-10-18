@@ -34,7 +34,7 @@ case class CheckPreviousSchemeAnswersPage(countryIndex: Index, schemeIndex: Opti
   override val checkModeUrlFragment: String = s"change-previous-scheme-answers-${countryIndex.display}"
   override val normalModeUrlFragment: String = s"previous-scheme-answers-${countryIndex.display}"
 
-  override def path: JsPath = JsPath \ "country" \ countryIndex.position \ toString
+  override def path: JsPath = JsPath \ "previousRegistrations" \ countryIndex.position \ toString
 
   override def toString: String = "checkPreviousSchemeAnswers"
 
