@@ -38,9 +38,7 @@ class FixedEstablishmentVRNAlreadyRegisteredController @Inject()(
 
   def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-      println("test")
       getCountry(waypoints, countryIndex){ country =>
-        println("Test1")
         Future.successful(Ok(view(country.name)))
       }
   }
