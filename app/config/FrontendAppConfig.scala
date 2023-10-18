@@ -78,4 +78,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val emailVerificationUrl: String  = configuration.get[String]("urls.emailVerificationUrl")
 
   val emailVerificationEnabled: Boolean = configuration.get[Boolean]("features.email-verification-enabled")
+
+  val coreValidationService: Service = configuration.get[Service]("microservice.services.core-validation")
 }

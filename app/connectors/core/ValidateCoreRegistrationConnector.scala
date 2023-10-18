@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.core
 
 import config.FrontendAppConfig
-import connectors.ValidateCoreRegistrationHttpParser.{ValidateCoreRegistrationReads, ValidateCoreRegistrationResponse}
+import connectors.core.ValidateCoreRegistrationHttpParser.{ValidateCoreRegistrationReads, ValidateCoreRegistrationResponse}
 import logging.Logging
 import models.core.CoreRegistrationRequest
-import models.responses.{EisError, EisErrorResponse}
+import models.responses.{EisErrorResponse, EisError}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpException}
 
-import java.time.Instant
+import java.time.{Clock, Instant}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ValidateCoreRegistrationConnector @Inject()(
                                                    frontendAppConfig: FrontendAppConfig,
-                                                   httpClient: HttpClient
+                                                   httpClient: HttpClient,
+                                                   clock: Clock
                                                  )(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
-  private val baseUrl = frontendAppConfig.coreValidationUrl
+  private val baseUrl = frontendAppConfig.coreValidationService
 
   def validateCoreRegistration(
                                 coreRegistrationRequest: CoreRegistrationRequest
@@ -48,7 +49,7 @@ class ValidateCoreRegistrationConnector @Inject()(
           s"Unexpected error response from backend"
         )
         Left(EisError(
-          EisErrorResponse(Instant.now(), s"UNEXPECTED_${e.responseCode.toString}", e.message)
+          EisErrorResponse(Instant.now(clock), s"UNEXPECTED_${e.responseCode.toString}", e.message)
         ))
 
       case e =>
@@ -56,8 +57,10 @@ class ValidateCoreRegistrationConnector @Inject()(
           s"Unexpected error response from backend"
         )
         Left(EisError(
-          EisErrorResponse(Instant.now(), "UNEXPECTED", e.getMessage)
+          EisErrorResponse(Instant.now(clock), "UNEXPECTED", e.getMessage)
         ))
     }
   }
+
 }
+

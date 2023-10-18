@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.core
 
 import base.SpecBase
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, ok, post, urlEqualTo}
-import models.core._
+import models.core.{CoreRegistrationRequest, CoreRegistrationValidationResult, Match, MatchType, SourceType}
 import models.responses.{EisError, EisErrorResponse, UnexpectedResponseStatus}
 import org.scalacheck.Gen
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -39,7 +39,7 @@ class ValidateCoreRegistrationConnectorSpec extends SpecBase with WireMockHelper
 
   private val timestamp = Instant.now
 
-  val getValidateCoreRegistrationUrl = "/ioss-registration/validate-core-registration"
+  def getValidateCoreRegistrationUrl = s"/ioss-registration/validate-core-registration"
 
   private def application: Application =
     applicationBuilder()

@@ -16,53 +16,48 @@
 
 package models.core
 
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.Gen
-import org.scalatest.OptionValues
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.libs.json.{JsError, JsString, Json}
+import base.SpecBase
+import models.core.MatchType._
 
-class MatchTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues {
+class MatchTypeSpec extends SpecBase {
 
   "MatchType" - {
+    "isActiveTrader" - {
+      "must return true for active match types" in {
+        val activeTypes = Seq(FixedEstablishmentActiveNETP, TraderIdActiveNETP, OtherMSNETPActiveNETP)
 
-    "must deserialise valid values" in {
+        for (activeType <- activeTypes) {
+          activeType.isActiveTrader mustBe true
+        }
+      }
 
-      val gen = Gen.oneOf(MatchType.values)
+      "must return false for not active match types" in {
+        val activeTypes = Seq(TraderIdQuarantinedNETP, OtherMSNETPQuarantinedNETP, FixedEstablishmentQuarantinedNETP, TransferringMSID, PreviousRegistrationFound)
 
-      forAll(gen) {
-        matchTypes =>
-
-          JsString(matchTypes.toString).validate[MatchType].asOpt.value mustEqual matchTypes
+        for (activeType <- activeTypes) {
+          activeType.isActiveTrader mustBe false
+        }
       }
     }
 
-    "must fail to deserialise invalid values" in {
+    "isQuarantinedTrader" - {
 
-      val gen = arbitrary[String] suchThat (!MatchType.values.map(_.toString).contains(_))
+      "must return true for quarantined match types" in {
+        val activeTypes = Seq(TraderIdQuarantinedNETP, OtherMSNETPQuarantinedNETP, FixedEstablishmentQuarantinedNETP)
 
-      forAll(gen) {
-        invalidValue =>
+        for (activeType <- activeTypes) {
+          activeType.isQuarantinedTrader mustBe true
+        }
+      }
 
-          JsString(invalidValue).validate[MatchType] mustEqual JsError("error.invalid")
+      "must return false for non quarantined match types" in {
+        val activeTypes = Seq(FixedEstablishmentActiveNETP, TraderIdActiveNETP, OtherMSNETPActiveNETP, TransferringMSID, PreviousRegistrationFound)
+
+        for (activeType <- activeTypes) {
+          activeType.isQuarantinedTrader mustBe false
+        }
       }
     }
-
-    "must serialise" in {
-
-      val gen = Gen.oneOf(MatchType.values)
-
-      forAll(gen) {
-        matchType =>
-
-          Json.toJson(matchType) mustEqual JsString(matchType.toString)
-      }
-    }
-
   }
 
 }
-
-

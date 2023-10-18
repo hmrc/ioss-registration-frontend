@@ -17,6 +17,7 @@
 package models.core
 
 import base.SpecBase
+import models.responses.EisErrorResponse
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}

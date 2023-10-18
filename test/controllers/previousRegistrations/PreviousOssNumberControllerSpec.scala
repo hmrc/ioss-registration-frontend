@@ -19,9 +19,10 @@ package controllers.previousRegistrations
 import base.SpecBase
 import controllers.routes
 import forms.previousRegistrations.PreviousOssNumberFormProvider
+import models.{Country, CountryWithValidationDetails, Index, PreviousScheme}
+import models.core.{Match, MatchType}
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.PreviousSchemeHintText
-import models.{Country, CountryWithValidationDetails, Index, PreviousScheme}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{times, verify, when}
@@ -32,6 +33,7 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
+import services.core.CoreRegistrationValidationService
 import views.html.previousRegistrations.PreviousOssNumberView
 
 import scala.concurrent.Future
@@ -92,11 +94,16 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
       "when the ID starts with EU it sets to non-union" in {
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
 
         val application =
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
             .build()
 
         running(application) {
@@ -118,11 +125,16 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
       "when the ID doesn't start with EU it sets to union" in {
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
 
         val application =
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
             .build()
 
         running(application) {
@@ -139,6 +151,116 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
           redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
         }
+      }
+    }
+
+    "must deal with core validation responses" - {
+      val genericMatch = Match(
+        MatchType.TraderIdActiveNETP,
+        "IM0987654321",
+        None,
+        "DE",
+        None,
+        None,
+        None,
+        None,
+        None
+      )
+
+      "Continue on normal journey if to scheme still active when active OSS found" in {
+
+        val countryCode = genericMatch.memberState
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(Some(genericMatch))
+
+        val application =
+          applicationBuilder(userAnswers = Some(baseAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+            .configure(
+              "features.other-country-reg-validation-enabled" -> true
+            )
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousOssNumberRoute)
+              .withFormUrlEncodedBody(("value", "SI12345678"))
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual
+            controllers.previousRegistrations.routes.CheckPreviousSchemeAnswersController.onPageLoad(
+              waypoints,
+              index
+            ).url
+          verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
+        }
+      }
+
+      "Redirect to scheme quarantined when quarantined OSS found" in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
+          Future.successful(Some(genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)))
+
+        val application =
+          applicationBuilder(userAnswers = Some(baseAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+            .configure(
+              "features.other-country-reg-validation-enabled" -> true
+            )
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousOssNumberRoute)
+              .withFormUrlEncodedBody(("value", "SI12345678"))
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
+        }
+      }
+
+      "not call core validation when OSS Non Union" in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        val application =
+          applicationBuilder(userAnswers = Some(baseAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousOssNumberRoute)
+              .withFormUrlEncodedBody(("value", "EU123456789"))
+
+          val result = route(application, request).value
+          val expectedAnswers = baseAnswers
+            .set(PreviousOssNumberPage(index, index), PreviousSchemeNumbers("EU123456789", None)).success.value
+            .set(PreviousSchemePage(index, index), PreviousScheme.OSSNU).success.value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(waypoints, baseAnswers, expectedAnswers).url
+          verify(mockCoreRegistrationValidationService, times(0)).searchScheme(any(), any(), any(), any())(any(), any())
+        }
+
       }
     }
 

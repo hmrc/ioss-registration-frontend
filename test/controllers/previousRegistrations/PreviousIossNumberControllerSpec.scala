@@ -21,6 +21,7 @@ import controllers.routes
 import forms.previousRegistrations.PreviousIossNumberFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.{Country, Index, PreviousScheme}
+import models.core.{Match, MatchType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{times, verify, when}
@@ -30,7 +31,8 @@ import pages.previousRegistrations.{PreviousEuCountryPage, PreviousIossNumberPag
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.{AuthenticatedUserAnswersRepository}
+import repositories.AuthenticatedUserAnswersRepository
+import services.core.CoreRegistrationValidationService
 import views.html.previousRegistrations.PreviousIossNumberView
 
 import scala.concurrent.Future
@@ -48,6 +50,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
     .set(PreviousIossSchemePage(index, index), false).success.value
 
   private lazy val previousIossNumberRoute = controllers.previousRegistrations.routes.PreviousIossNumberController.onPageLoad(waypoints, index, index).url
+  private lazy val previousIossNumberSubmitRoute = controllers.previousRegistrations.routes.PreviousIossNumberController.onSubmit(waypoints, index, index).url
 
   private val hasIntermediary: Boolean = false
 
@@ -97,12 +100,15 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
     "must save the answer and redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
 
       val application =
         applicationBuilder(userAnswers = Some(baseAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
           .build()
 
       running(application) {
@@ -122,12 +128,15 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
     "continue normally when active IOSS found" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
 
       val application =
         applicationBuilder(userAnswers = Some(baseAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
           .build()
 
       running(application) {
@@ -143,6 +152,86 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
 
+    }
+
+    "Deal with core validation responses" - {
+      val genericMatch = Match(
+        MatchType.TraderIdActiveNETP,
+        "IM0987654321",
+        None,
+        "DE",
+        None,
+        None,
+        None,
+        None,
+        None
+      )
+
+      "Redirect to scheme still active when active IOSS found" in {
+
+        val countryCode = genericMatch.memberState
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(Some(genericMatch))
+
+        val application =
+          applicationBuilder(userAnswers = Some(baseAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousIossNumberSubmitRoute)
+              .withFormUrlEncodedBody(("previousSchemeNumber", "IM0401234567"))
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual
+            controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
+              waypoints,
+              countryCode
+            ).url
+          verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
+        }
+      }
+
+      "Redirect to scheme quarantined when quarantined IOSS found" in {
+
+        val countryCode = genericMatch.memberState
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
+          Future.successful(Some(genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)))
+
+        val application =
+          applicationBuilder(userAnswers = Some(baseAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousIossNumberSubmitRoute)
+              .withFormUrlEncodedBody(("previousSchemeNumber", "IM0401234567"))
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual
+            controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(
+              waypoints
+            ).url
+          verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
+        }
+      }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {

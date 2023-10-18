@@ -43,8 +43,8 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
               Some("444444444"),
               "DE",
               Some(3),
-              Some(LocalDate.now()),
-              Some(LocalDate.now()),
+              Some(LocalDate.now().toString),
+              Some(LocalDate.now().toString),
               Some(1),
               Some(2)
             ))

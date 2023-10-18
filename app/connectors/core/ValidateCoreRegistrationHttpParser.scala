@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.core
 
 import logging.Logging
 import models.core.CoreRegistrationValidationResult
@@ -63,4 +63,7 @@ object ValidateCoreRegistrationHttpParser extends Logging {
       }
     }
   }
+
 }
+
+

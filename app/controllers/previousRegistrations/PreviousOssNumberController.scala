@@ -19,15 +19,16 @@ package controllers.previousRegistrations
 import controllers.GetCountry
 import controllers.actions._
 import forms.previousRegistrations.PreviousOssNumberFormProvider
+import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, WithName}
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.PreviousSchemeHintText
 import models.requests.AuthenticatedDataRequest
-import models.{Country, CountryWithValidationDetails, Index, PreviousScheme}
 import pages.Waypoints
 import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
+import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.previousRegistrations.PreviousOssNumberView
 
@@ -35,11 +36,12 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PreviousOssNumberController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        cc: AuthenticatedControllerComponents,
-                                        formProvider: PreviousOssNumberFormProvider,
-                                        view: PreviousOssNumberView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
+                                             override val messagesApi: MessagesApi,
+                                             cc: AuthenticatedControllerComponents,
+                                             coreRegistrationValidationService: CoreRegistrationValidationService,
+                                             formProvider: PreviousOssNumberFormProvider,
+                                             view: PreviousOssNumberView
+                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -103,17 +105,41 @@ class PreviousOssNumberController @Inject()(
               } else {
                 PreviousScheme.OSSU
               }
-              saveAndRedirect(countryIndex, schemeIndex, value, country, previousScheme, waypoints)
+              searchSchemeThenSaveAndRedirect(waypoints, countryIndex, schemeIndex, country, value, previousScheme)
             }
           )
       }
+  }
+
+  private def searchSchemeThenSaveAndRedirect(
+                                               waypoints: Waypoints,
+                                               countryIndex: Index,
+                                               schemeIndex: Index,
+                                               country: Country,
+                                               value: String,
+                                               previousScheme: WithName with PreviousScheme
+                                             )(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
+    if (previousScheme == PreviousScheme.OSSU) {
+      coreRegistrationValidationService.searchScheme(
+        searchNumber = value,
+        previousScheme = previousScheme,
+        intermediaryNumber = None,
+        countryCode = country.code
+      ).flatMap {
+        case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
+          Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
+        case _ =>
+          saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)
+      }
+    } else {
+      saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)
+    }
   }
 
   private def saveAndRedirect(
                                countryIndex: Index,
                                schemeIndex: Index,
                                registrationNumber: String,
-                               country: Country,
                                previousScheme: PreviousScheme,
                                waypoints: Waypoints
                              )(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {

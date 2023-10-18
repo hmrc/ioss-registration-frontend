@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package models.core
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton
+)
 
-import models.{Enumerable, WithName}
+@()(implicit request: Request[_], messages: Messages)
 
-sealed trait SourceType
+@layout(pageTitle = titleNoForm(messages("excludedVRN.title"))) {
 
-object SourceType extends Enumerable.Implicits {
-  case object VATNumber extends WithName("VATNumber") with SourceType
-  case object EUTraderId extends WithName("EUTraderId") with SourceType
-  case object TraderId extends WithName("TraderId") with SourceType
+    <h1 class="govuk-heading-l">@messages("excludedVRN.heading")</h1>
 
-  val values: Seq[SourceType] = Seq(
-    VATNumber,
-    EUTraderId,
-    TraderId
-  )
+    <p class="govuk-body">@messages("excludedVRN.paragraph")</p>
 
-  implicit val enumerable: Enumerable[SourceType] =
-    Enumerable(values.map(v => v.toString -> v): _*)
+    <p class="govuk-body">@Html(messages("excludedVRN.contactUs"))</p>
 }
