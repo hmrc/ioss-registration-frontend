@@ -151,13 +151,11 @@ cannotRegisterAlreadyRegistered.title = Come back later
 cannotRegisterAlreadyRegistered.heading = Come back later
 cannotRegisterAlreadyRegistered.p1 = You can only be registered on one Import One Stop Shop scheme.
 cannotRegisterAlreadyRegistered.p2 = You can register for this service after you deregister from your current IOSS scheme.
-cannotRegisterAlreadyRegistered.returnToBTA = <a class="govuk-link" href="/business-account">Return to Business Tax Account</a>
 
 alreadyRegisteredOtherCountry.title = This account is already registered on an Import One Stop Shop scheme in {0}
 alreadyRegisteredOtherCountry.heading = This account is already registered on an Import One Stop Shop scheme in {0}
 alreadyRegisteredOtherCountry.paragraph = You can only register on one Import One Stop Shop scheme at a time.
 alreadyRegisteredOtherCountry.contact = If you believe this is an error, contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
-alreadyRegisteredOtherCountry.returnToRegistration = <a class="govuk-link" href="https://www.gov.uk/guidance/register-to-report-and-pay-vat-on-distance-sales-of-goods-from-northern-ireland-to-the-eu" rel="noreferrer noopener">Return to registration</a>
 
 otherCountryExcludedAndQuarantined.title = You cannot register for this service
 otherCountryExcludedAndQuarantined.heading = You cannot register for this service
@@ -413,7 +411,6 @@ fixedEstablishmentVRNAlreadyRegistered.heading = You cannot register using this 
 fixedEstablishmentVRNAlreadyRegistered.p1 = This VAT number is linked to an IOSS account in {0} that is still active.
 fixedEstablishmentVRNAlreadyRegistered.p2 = You can only have one active IOSS account.
 fixedEstablishmentVRNAlreadyRegistered.contactUs = For more information, contact us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
-fixedEstablishmentVRNAlreadyRegistered.returnToRegistration = <a class="govuk-link" href="https://www.gov.uk/guidance/register-to-report-and-pay-vat-on-distance-sales-of-goods-from-northern-ireland-to-the-eu" rel="noreferrer noopener">Return to registration</a>
 
 excludedVRN.title = You cannot register for this service
 excludedVRN.heading = You cannot register for this service
@@ -551,13 +548,11 @@ schemeStillActive.heading = You cannot register for this service
 schemeStillActive.p1 = This Import One Stop Shop registration in {0} is still active.
 schemeStillActive.p2 = You can only have one active IOSS account.
 schemeStillActive.contactUs = For more information, contact us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
-schemeStillActive.returnToRegistration = <a class="govuk-link" href="https://www.gov.uk/guidance/register-to-report-and-pay-vat-on-distance-sales-of-goods-from-northern-ireland-to-the-eu" rel="noreferrer noopener">Return to registration</a>
 
 schemeQuarantined.title = You cannot register for this service
 schemeQuarantined.heading = You cannot register for this service
 schemeQuarantined.paragraph = This account is excluded from all One Stop Shop services.
 schemeQuarantined.contactUs = If you believe this is an error, contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
-schemeQuarantined.returnToRegistration = <a class="govuk-link" href="https://www.gov.uk/guidance/register-to-report-and-pay-vat-on-distance-sales-of-goods-from-northern-ireland-to-the-eu" rel="noreferrer noopener">Return to registration</a>
 
 bankDetails.title = Enter your bank or building society account details
 bankDetails.heading = Enter your bank or building society account details
