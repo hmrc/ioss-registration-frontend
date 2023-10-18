@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package queries.tradingNames
+package models.etmp
 
-import models.TradingName
-import play.api.libs.json.JsPath
-import queries.{Gettable, Settable}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.domain.Vrn
 
-object AllTradingNames extends Gettable[List[TradingName]] with Settable[List[TradingName]] {
+case class EtmpCustomerIdentification(vrn: Vrn)
 
-  override def path: JsPath = JsPath \ "tradingNames"
+object EtmpCustomerIdentification {
+
+  implicit val format: OFormat[EtmpCustomerIdentification] = Json.format[EtmpCustomerIdentification]
 }

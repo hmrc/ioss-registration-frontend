@@ -16,20 +16,20 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
+import models.domain.PreviousRegistration
 import models.{Index, UserAnswers}
-import models.domain.{PreviousRegistration, PreviousRegistrationLegacy, PreviousRegistrationNew}
 import pages.previousRegistrations._
 import pages.{AddItemPage, CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import queries.previousRegistration._
-import viewmodels.ListItemWrapper
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
 import utils.CheckExistingRegistrations.existingPreviousRegistration
+import viewmodels.ListItemWrapper
+import viewmodels.govuk.summarylist._
+import viewmodels.implicits._
 
 object PreviousRegistrationSummary {
 
@@ -62,26 +62,23 @@ object PreviousRegistrationSummary {
 
         val currentAnswerCountries = previousRegistrations.map(_.previousEuCountry)
 
-        val existingCountries = existingPreviousRegistrations.map {
-          case previousRegistrationNew: PreviousRegistrationNew => previousRegistrationNew.country
-          case previousRegistrationLegacy: PreviousRegistrationLegacy => previousRegistrationLegacy.country
-        }
+        val existingCountries = existingPreviousRegistrations.map(previousRegistration => previousRegistration.country)
 
         val sameListOfCountries: Boolean = currentAnswerCountries.sortBy(_.code) == existingCountries.sortBy(_.code)
 
-          SummaryListRowViewModel(
-            key = "previousRegistrations.checkYourAnswersLabel",
-            value = ValueViewModel(HtmlContent(value)),
-            actions = Seq(
-              if (sameListOfCountries) {
-                ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
-                  .withVisuallyHiddenText(messages("previousRegistrations.add.hidden"))
-              } else {
-                ActionItemViewModel("site.change", AddPreviousRegistrationPage().changeLink(waypoints, sourcePage).url)
-                  .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
-              }
-            )
+        SummaryListRowViewModel(
+          key = "previousRegistrations.checkYourAnswersLabel",
+          value = ValueViewModel(HtmlContent(value)),
+          actions = Seq(
+            if (sameListOfCountries) {
+              ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
+                .withVisuallyHiddenText(messages("previousRegistrations.add.hidden"))
+            } else {
+              ActionItemViewModel("site.change", AddPreviousRegistrationPage().changeLink(waypoints, sourcePage).url)
+                .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
+            }
           )
+        )
     }
 
 }

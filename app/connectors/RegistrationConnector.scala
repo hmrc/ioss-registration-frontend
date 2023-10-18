@@ -36,6 +36,7 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
     httpClient.GET[VatCustomerInfoResponse](s"$baseUrl/vat-information")
   }
 
+  // TODO -> send etmpRegRequest
   def createRegistration(string: String)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
     httpClient.POST[String, RegistrationResultResponse](s"$baseUrl/create", string)
   }.map {

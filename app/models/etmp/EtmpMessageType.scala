@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package queries.tradingNames
+package models.etmp
 
-import models.TradingName
-import play.api.libs.json.JsPath
-import queries.{Gettable, Settable}
+import models.{Enumerable, WithName}
 
-object AllTradingNames extends Gettable[List[TradingName]] with Settable[List[TradingName]] {
+sealed trait EtmpMessageType
 
-  override def path: JsPath = JsPath \ "tradingNames"
+object EtmpMessageType extends Enumerable.Implicits {
+
+  case object IOSSSubscriptionCreate extends WithName("IOSSSubscriptionCreate") with EtmpMessageType
+
+  val values: Seq[EtmpMessageType] = Seq(
+    IOSSSubscriptionCreate
+  )
+
+  implicit val enumerable: Enumerable[EtmpMessageType] =
+    Enumerable(values.map(v => v.toString -> v): _*)
 }

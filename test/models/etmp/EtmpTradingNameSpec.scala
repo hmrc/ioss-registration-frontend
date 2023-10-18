@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
-package queries.tradingNames
+package models.etmp
 
-import models.TradingName
-import play.api.libs.json.JsPath
-import queries.{Gettable, Settable}
+import base.SpecBase
+import org.scalacheck.Arbitrary.arbitrary
+import play.api.libs.json.{JsSuccess, Json}
 
-object AllTradingNames extends Gettable[List[TradingName]] with Settable[List[TradingName]] {
+class EtmpTradingNameSpec extends SpecBase {
 
-  override def path: JsPath = JsPath \ "tradingNames"
+  "EtmpTradingName" - {
+
+    "must serialise/deserialise to and from EtmpTradingName" in {
+
+      val etmpTradingName = arbitrary[EtmpTradingName].sample.value
+
+      val expectedJson = Json.obj(
+        "tradingName" -> s"${etmpTradingName.tradingName}"
+      )
+
+      Json.toJson(etmpTradingName) mustBe expectedJson
+      expectedJson.validate[EtmpTradingName] mustBe JsSuccess(etmpTradingName)
+    }
+  }
 }

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package queries.tradingNames
+package models.etmp
 
-import models.TradingName
-import play.api.libs.json.JsPath
-import queries.{Gettable, Settable}
+import play.api.libs.json.{Json, OFormat}
 
-object AllTradingNames extends Gettable[List[TradingName]] with Settable[List[TradingName]] {
+case class EtmpAdministration(messageType: EtmpMessageType, regimeId: String = "IOSS")
 
-  override def path: JsPath = JsPath \ "tradingNames"
+object EtmpAdministration {
+
+  implicit val format: OFormat[EtmpAdministration] = Json.format[EtmpAdministration]
 }

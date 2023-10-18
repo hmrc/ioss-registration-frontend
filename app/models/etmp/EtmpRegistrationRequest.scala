@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package models.domain
+package models.etmp
 
-import models.{Country, PreviousScheme}
+import models.BankDetails
 import play.api.libs.json.{Json, OFormat}
 
-case class PreviousRegistration(country: Country, previousSchemesDetails: Seq[PreviousSchemeDetails])
+final case class EtmpRegistrationRequest(
+                                          administration: EtmpAdministration,
+                                          customerIdentification: EtmpCustomerIdentification,
+                                          tradingNames: Seq[EtmpTradingName],
+                                          schemeDetails: EtmpSchemeDetails,
+                                          bankDetails: BankDetails
+                                        )
 
-object PreviousRegistration {
+object EtmpRegistrationRequest {
 
-  implicit val format: OFormat[PreviousRegistration] = Json.format[PreviousRegistration]
-}
-
-case class PreviousSchemeDetails(previousScheme: PreviousScheme, previousSchemeNumbers: PreviousSchemeNumbers)
-
-object PreviousSchemeDetails {
-
-  implicit val format: OFormat[PreviousSchemeDetails] = Json.format[PreviousSchemeDetails]
+  implicit val format: OFormat[EtmpRegistrationRequest] = Json.format[EtmpRegistrationRequest]
 }

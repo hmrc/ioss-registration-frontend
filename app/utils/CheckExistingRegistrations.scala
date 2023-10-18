@@ -17,7 +17,7 @@
 package utils
 
 import logging.Logging
-import models.domain.{PreviousRegistration, PreviousRegistrationLegacy, PreviousRegistrationNew}
+import models.domain.PreviousRegistration
 import models.{Country, UserAnswers}
 import play.api.libs.json.{JsArray, JsObject}
 import queries.{Derivable, Settable}
@@ -28,9 +28,8 @@ import scala.util.Try
 object CheckExistingRegistrations extends Logging {
 
   def existingPreviousRegistration(country: Country, existingPreviousRegistration: Seq[PreviousRegistration]): Boolean = {
-    existingPreviousRegistration.exists {
-      case previousRegistrationNew: PreviousRegistrationNew => previousRegistrationNew.country == country
-      case previousRegistrationLegacy: PreviousRegistrationLegacy => previousRegistrationLegacy.country == country
+    existingPreviousRegistration.exists { previousRegistration =>
+      previousRegistration.country == country
     }
   }
 
