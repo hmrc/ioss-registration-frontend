@@ -36,6 +36,6 @@ class AlreadyRegisteredOtherCountryController @Inject()(
   def onPageLoad(countryCode: String): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
 
-      Ok(view(Country.getCountryName(countryCode), None))
+      Ok(view(Country.getCountryName(countryCode)))
   }
 }

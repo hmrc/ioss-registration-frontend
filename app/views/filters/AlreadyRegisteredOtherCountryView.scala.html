@@ -20,11 +20,10 @@
 )
 
 @(
-    memberState: String,
-    externalUrl: Option[String] = None
+    memberState: String
 )(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("alreadyRegisteredOtherCountry.title", memberState))) {
+@layout(pageTitle = titleNoForm(messages("alreadyRegisteredOtherCountry.title", memberState)), showBackLink = false) {
 
     <h1 class="govuk-heading-l">@messages("alreadyRegisteredOtherCountry.heading", memberState)</h1>
 
@@ -32,12 +31,4 @@
 
     <p class="govuk-body">@Html(messages("alreadyRegisteredOtherCountry.contact"))</p>
 
-    @if(externalUrl) {
-        @externalUrl.map(
-        url => Html(
-        s"""<p class="govuk-body"><a href=$url id="back-to-your-account" class="govuk-link">""" + messages("site.back.BTA") + "</a></p>"
-        ))
-    } else {
-        <p class="govuk-body">@Html(messages("alreadyRegisteredOtherCountry.returnToRegistration"))</p>
-    }
 }

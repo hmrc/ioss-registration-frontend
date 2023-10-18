@@ -19,12 +19,9 @@
         govukButton: GovukButton
 )
 
-@(
-    memberState: String,
-    externalUrl: Option[String] = None
-)(implicit request: Request[_], messages: Messages)
+@(memberState: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("fixedEstablishmentVRNAlreadyRegistered.title"))) {
+@layout(pageTitle = titleNoForm(messages("fixedEstablishmentVRNAlreadyRegistered.title")), showBackLink = false) {
 
   <h1 class="govuk-heading-l">@messages("fixedEstablishmentVRNAlreadyRegistered.heading")</h1>
 
@@ -33,14 +30,5 @@
   <p class="govuk-body">@messages("fixedEstablishmentVRNAlreadyRegistered.p2")</p>
 
   <p class="govuk-body">@Html(messages("fixedEstablishmentVRNAlreadyRegistered.contactUs"))</p>
-
-  @if(externalUrl) {
-    @externalUrl.map(
-      url => Html(
-        s"""<p class="govuk-body"><a href=$url id="back-to-your-account" class="govuk-link">""" + messages("site.back.BTA") + "</a></p>"
-      ))
-  } else {
-    <p class="govuk-body">@Html(messages("fixedEstablishmentVRNAlreadyRegistered.returnToRegistration"))</p>
-  }
 
 }
