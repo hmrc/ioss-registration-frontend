@@ -20,6 +20,7 @@ import config.Constants
 import controllers.actions._
 import forms.AddWebsiteFormProvider
 import logging.Logging
+import models.Index
 import models.requests.AuthenticatedDataRequest
 import pages.Waypoints
 import pages.website.AddWebsitePage
@@ -27,7 +28,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.DeriveNumberOfWebsites
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.CheckJourneyRecovery.determineJourneyRecovery
 import utils.FutureSyntax.FutureOps
 import viewmodels.WebsiteSummary
 import views.html.AddWebsiteView
@@ -67,7 +67,7 @@ class AddWebsiteController @Inject()(
       number =>
         block(number)
     }.getOrElse {
-      Redirect(determineJourneyRecovery(waypoints)).toFuture
+      Redirect(controllers.website.routes.WebsiteController.onPageLoad(waypoints, Index(0))).toFuture
     }
   }
 
