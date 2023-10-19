@@ -113,7 +113,7 @@ class AddWebsiteControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery and the correct view for a GET when cannot derive number of websites" in {
+    "must redirect to Website Address page for a GET when cannot derive number of websites" in {
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
@@ -123,7 +123,7 @@ class AddWebsiteControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.website.routes.WebsiteController.onPageLoad(EmptyWaypoints, Index(0)).url
       }
     }
 
