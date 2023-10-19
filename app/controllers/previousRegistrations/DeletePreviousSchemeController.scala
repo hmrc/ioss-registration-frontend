@@ -64,7 +64,7 @@ class DeletePreviousSchemeController @Inject()(
 
           val form = formProvider(country)
 
-          val preparedForm = request.userAnswers.get(DeletePreviousSchemePage(countryIndex)) match {
+          val preparedForm = request.userAnswers.get(DeletePreviousSchemePage(countryIndex, schemeIndex)) match {
             case None => form
             case Some(value) => form.fill(value)
           }
@@ -101,9 +101,11 @@ class DeletePreviousSchemeController @Inject()(
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.remove(PreviousSchemeForCountryQuery(countryIndex, schemeIndex)))
                   _ <- cc.sessionRepository.set(updatedAnswers)
-                } yield Redirect(DeletePreviousSchemePage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+                } yield Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
               } else {
-                Future.successful(Redirect(DeletePreviousSchemePage(countryIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route))
+                Future.successful(
+                  Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
+                )
               }
           )
       }

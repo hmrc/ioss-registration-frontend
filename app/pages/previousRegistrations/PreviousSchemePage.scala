@@ -17,13 +17,10 @@
 package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
-import models.{Index, NormalMode, PreviousScheme, UserAnswers}
+import models.{Index, NormalMode, PreviousScheme}
 import pages.{AddToListQuestionPage, AddToListSection, PreviousSchemeSection, QuestionPage, Waypoint, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
-import queries.previousRegistration.DeriveNumberOfPreviousSchemes
-
-import scala.util.Try
 
 case class PreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[PreviousScheme] with AddToListQuestionPage {
 

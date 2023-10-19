@@ -173,7 +173,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
             submitAnswer(PreviousSchemeTypePage(index, index1), iossScheme),
             submitAnswer(PreviousIossSchemePage(index, index1), false),
             submitAnswer(PreviousIossNumberPage(index, index1), schemeNumber),
-            goTo(DeletePreviousSchemePage(index)),
+            goTo(DeletePreviousSchemePage(index, index)),
             removeAddToListItem(PreviousSchemeTypePage(index, index)),
             pageMustBe(CheckPreviousSchemeAnswersPage(index)),
             answersMustNotContain(PreviousSchemeTypePage(index, index))
@@ -189,7 +189,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
             submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
             submitAnswer(PreviousIossSchemePage(index, index), false),
             submitAnswer(PreviousIossNumberPage(index, index), schemeNumber),
-            goTo(DeletePreviousSchemePage(index)),
+            goTo(DeletePreviousSchemePage(index, index)),
             removeAddToListItem(PreviousSchemeTypePage(index, index)),
             pageMustBe(CheckPreviousSchemeAnswersPage(index)),
             answersMustNotContain(PreviousSchemeTypePage(index, index))

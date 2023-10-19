@@ -88,7 +88,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = baseUserAnswers.copy().set(DeletePreviousSchemePage(index), true).success.value
+      val userAnswers = baseUserAnswers.copy().set(DeletePreviousSchemePage(index, index), true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -132,7 +132,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
         val expectedAnswers = baseUserAnswers.remove(PreviousSchemeForCountryQuery(index, index)).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual DeletePreviousSchemePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        redirectLocation(result).value mustEqual DeletePreviousSchemePage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -154,7 +154,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual DeletePreviousSchemePage(index).navigate(waypoints, emptyUserAnswers, baseUserAnswers).url
+        redirectLocation(result).value mustEqual DeletePreviousSchemePage(index, index).navigate(waypoints, emptyUserAnswers, baseUserAnswers).url
         verifyNoInteractions(mockSessionRepository)
       }
     }

@@ -23,14 +23,14 @@ import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousRegistration.{DeriveNumberOfPreviousRegistrations, DeriveNumberOfPreviousSchemes}
 
-case class DeletePreviousSchemePage(countryIndex: Index) extends QuestionPage[Boolean] {
+case class DeletePreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "deletePreviousScheme"
 
   override def route(waypoints: Waypoints): Call =
-    routes.DeletePreviousRegistrationController.onPageLoad(waypoints, countryIndex)
+    routes.DeletePreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
     (answers.get(DeriveNumberOfPreviousRegistrations), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
