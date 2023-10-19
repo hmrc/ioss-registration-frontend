@@ -28,5 +28,5 @@ case object SavedProgressPage extends QuestionPage[String] {
   override def toString: String = "continueUrl"
 
   override def route(waypoints: Waypoints): Call =
-    routes.SavedProgressController.onPageLoad(RedirectUrl("continueUrl")) // TODO: check logic
+    routes.SavedProgressController.onPageLoad(RedirectUrl("continueUrl"))
 }

@@ -52,7 +52,7 @@ trait EuTaxRegistrationValidations {
 
   private def processEuDetail(answers: UserAnswers, index: Index): ValidationResult[EuTaxRegistration] = {
     answers.get(EuCountryPage(index)) match {
-      case Some(country) => getRegistrationWithFixedEstablishment(answers, country, index) // TODO: check logic here
+      case Some(country) => getRegistrationWithFixedEstablishment(answers, country, index)
       case None => DataMissingError(EuCountryPage(index)).invalidNec
     }
   }
@@ -82,7 +82,7 @@ trait EuTaxRegistrationValidations {
   }
 
   private def getEuTaxIdentifier(answers: UserAnswers, index: Index): ValidationResult[EuTaxIdentifier] = {
-    getEuVatNumber(answers, index).map(v => EuTaxIdentifier(Vat, Some(v))) // TODO: check logic here
+    getEuVatNumber(answers, index).map(v => EuTaxIdentifier(Vat, Some(v)))
       .orElse(getEuTaxId(answers, index).map(v => EuTaxIdentifier(Other, Some(v))))
       .orElse(EuTaxIdentifier(Other, None).validNec[ValidationError])
   }

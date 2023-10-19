@@ -20,7 +20,6 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.format.DateTimeFormatter
 
-
 case class CoreRegistrationValidationResult(
                                              searchId: String,
                                              searchIdIntermediary: Option[String],
