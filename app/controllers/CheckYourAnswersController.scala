@@ -18,22 +18,18 @@ package controllers
 
 import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
+import models.CheckMode
 import models.responses.ConflictFound
 import pages.filters.CannotRegisterAlreadyRegisteredPage
-import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoints}
-import logging.Logging
-import models.CheckMode
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
-import pages.{CheckYourAnswersPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.etmp.EtmpEnrolmentResponseQuery
 import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.FutureSyntax.FutureOps
 import utils.CompletionChecks
-import utils.FutureSyntax._
+import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
@@ -42,10 +38,8 @@ import viewmodels.govuk.summarylist._
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.CheckYourAnswersView
 
-import scala.concurrent.{ExecutionContext, Future}
-
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
@@ -129,38 +123,35 @@ class CheckYourAnswersController @Inject()(
   }
 
   // TODO - > Need to create Audit Service and pass request.userAnswers (as JSON if not already)
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
-    implicit request =>
-      registrationService.createRegistrationRequest(request.userAnswers, request.vrn).flatMap {
-        case Right(response) =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(EtmpEnrolmentResponseQuery, response))
-            _ <- cc.sessionRepository.set(updatedAnswers)
-          } yield Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
-
-        case Left(ConflictFound) =>
-          logger.warn("Conflict found on registration creation submission")
-          Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints)).toFuture
-
-        case Left(error) =>
-          // TODO Add SaveAndContinue when created
-          logger.error(s"Internal server error on registration creation submission: ${error.body}")
-          // TODO ErrorSubmittingRegistrationPage
-          // Remove InternalServerError
-          InternalServerError(Json.toJson(s"An internal server error occurred with error: ${error.body}")).toFuture
-      }
-
-  }
-
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
+
       getFirstValidationErrorRedirect(waypoints) match {
         case Some(errorRedirect) => if (incompletePrompt) {
           errorRedirect.toFuture
         } else {
           Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
         }
-        case None => Future.successful(Ok)
+
+        case None =>
+          registrationService.createRegistrationRequest(request.userAnswers, request.vrn).flatMap {
+            case Right(response) =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(EtmpEnrolmentResponseQuery, response))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+
+            case Left(ConflictFound) =>
+              logger.warn("Conflict found on registration creation submission")
+              Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints)).toFuture
+
+            case Left(error) =>
+              // TODO Add SaveAndContinue when created
+              logger.error(s"Internal server error on registration creation submission: ${error.body}")
+              // TODO ErrorSubmittingRegistrationPage
+              // Remove InternalServerError
+              InternalServerError(Json.toJson(s"An internal server error occurred with error: ${error.body}")).toFuture
+          }
       }
   }
 }

@@ -18,14 +18,13 @@ package controllers
 
 import base.SpecBase
 import models.CheckMode
-import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint}
 import models.responses.etmp.EtmpEnrolmentResponse
 import models.responses.{ConflictFound, InternalServerError => ServerError}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.filters.CannotRegisterAlreadyRegisteredPage
-import pages.{ApplicationCompletePage, EmptyWaypoints, Waypoints}
+import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
@@ -85,7 +84,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .build()
 
         running(application) {
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints).url)
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false).url)
 
           val result = route(application, request).value
 
@@ -103,7 +102,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .build()
 
         running(application) {
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints).url)
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false).url)
 
           val result = route(application, request).value
 
@@ -123,7 +122,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .build()
 
         running(application) {
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints).url)
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false).url)
 
           val result = route(application, request).value
 

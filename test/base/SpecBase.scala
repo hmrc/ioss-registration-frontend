@@ -18,22 +18,19 @@ package base
 
 import controllers.actions._
 import generators.Generators
-import models.{BankDetails, Bic, BusinessContactDetails, Iban, Index, UserAnswers, Website}
 import models.domain.VatCustomerInfo
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
+import models.{BankDetails, Bic, BusinessContactDetails, Iban, Index, UserAnswers, Website}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
-import pages.euDetails.TaxRegisteredInEuPage
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.RegisteredForIossInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
 import pages.website.WebsitePage
-import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.tradingNames.HasTradingNamePage
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
@@ -91,7 +88,6 @@ trait SpecBase
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, lastUpdated = arbitraryInstant)
   def emptyUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.copy(vatInfo = Some(vatCustomerInfo))
   def basicUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.set(RegisteredForIossInEuPage, false).success.value.copy(vatInfo = Some(vatCustomerInfo))
-
   def completeUserAnswersWithVatInfo: UserAnswers =
     basicUserAnswersWithVatInfo
       .set(HasTradingNamePage, false).success.value

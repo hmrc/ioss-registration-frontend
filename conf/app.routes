@@ -226,4 +226,4 @@ POST        /remove-website-address/:index                                   con
 GET         /email-verification-codes-and-emails-exceeded                    controllers.EmailVerificationCodesAndEmailsExceededController.onPageLoad()
 GET         /email-verification-codes-exceeded                               controllers.EmailVerificationCodesExceededController.onPageLoad()
 
-GET         /applicationComplete                                             controllers.ApplicationCompleteController.onPageLoad()
+GET         /successful                                                      controllers.ApplicationCompleteController.onPageLoad()

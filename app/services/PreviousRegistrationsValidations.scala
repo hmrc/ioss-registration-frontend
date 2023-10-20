@@ -54,7 +54,7 @@ trait PreviousRegistrationsValidations {
       getPreviousCountry(answers, index),
       getPreviousSchemes(answers, index)
       ).mapN((previousCountry, previousSchemes) =>
-      PreviousRegistrationNew(previousCountry, previousSchemes)
+      PreviousRegistration(previousCountry, previousSchemes)
     )
   }
 
