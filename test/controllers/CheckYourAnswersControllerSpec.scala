@@ -17,6 +17,8 @@
 package controllers
 
 import base.SpecBase
+import models.CheckMode
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import viewmodels.govuk.SummaryListFluency
@@ -36,10 +38,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[CheckYourAnswersView]
+        val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
         val list = SummaryListViewModel(Seq.empty)
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(list, list)(request, messages(application)).toString
+
+        contentAsString(result) mustBe view(waypoints, list, list, isValid = false)(request, messages(application)).toString
       }
     }
   }

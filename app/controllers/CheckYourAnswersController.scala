@@ -16,12 +16,15 @@
 
 package controllers
 
-import com.google.inject.Inject
 import controllers.actions.AuthenticatedControllerComponents
-import pages.{CheckYourAnswersPage, EmptyWaypoints}
+import logging.Logging
+import models.CheckMode
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.CompletionChecks
+import utils.FutureSyntax._
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
@@ -30,19 +33,22 @@ import viewmodels.govuk.summarylist._
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.CheckYourAnswersView
 
+import javax.inject.Inject
+import scala.concurrent.Future
+
 class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             cc: AuthenticatedControllerComponents,
                                             view: CheckYourAnswersView
-                                          ) extends FrontendBaseController with I18nSupport {
+                                          ) extends FrontendBaseController with I18nSupport with Logging with CompletionChecks {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
     implicit request =>
-
       val thisPage = CheckYourAnswersPage
-      val waypoints = EmptyWaypoints
+
+      val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
 
       val vatRegistrationDetailsList = SummaryListViewModel(
         rows = Seq(
@@ -106,6 +112,19 @@ class CheckYourAnswersController @Inject()(
         ).flatten
       )
 
-      Ok(view(vatRegistrationDetailsList, list))
+      val isValid = validate()
+      Ok(view(waypoints, vatRegistrationDetailsList, list, isValid))
+  }
+
+  def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {
+    implicit request =>
+      getFirstValidationErrorRedirect(waypoints) match {
+        case Some(errorRedirect) => if (incompletePrompt) {
+          errorRedirect.toFuture
+        } else {
+          Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
+        }
+        case None => Future.successful(Ok)
+      }
   }
 }

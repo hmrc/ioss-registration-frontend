@@ -19,31 +19,32 @@ package controllers.euDetails
 import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import models.Index
+import models.euDetails.EuOptionalDetails
 import pages.Waypoints
 import pages.euDetails.CheckEuDetailsAnswersPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.FutureSyntax.FutureOps
+import utils.CompletionChecks
+import utils.EuDetailsCompletionChecks.{getIncompleteEuDetails, incompleteCheckEuDetailsRedirect}
 import viewmodels.checkAnswers.euDetails._
 import viewmodels.govuk.summarylist._
 import views.html.euDetails.CheckEuDetailsAnswersView
 
 import javax.inject.Inject
+import scala.concurrent.Future
 
 class CheckEuDetailsAnswersController @Inject()(
                                                  override val messagesApi: MessagesApi,
                                                  cc: AuthenticatedControllerComponents,
                                                  view: CheckEuDetailsAnswersView
-                                               ) extends FrontendBaseController with I18nSupport with GetCountry {
+                                               ) extends FrontendBaseController with CompletionChecks with I18nSupport with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
-
       getCountry(waypoints, countryIndex) {
-
         country =>
 
           val thisPage = CheckEuDetailsAnswersPage(countryIndex)
@@ -54,17 +55,35 @@ class CheckEuDetailsAnswersController @Inject()(
               EuVatNumberSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
               EuTaxReferenceSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
               FixedEstablishmentTradingNameSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
-              FixedEstablishmentAddressSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
+              FixedEstablishmentAddressSummary.row(request.userAnswers, waypoints, countryIndex, thisPage)
             ).flatten
           )
 
-          Ok(view(waypoints, countryIndex, country, list)).toFuture
+          Future.successful(withCompleteDataModel[EuOptionalDetails](
+            countryIndex,
+            data = getIncompleteEuDetails _,
+            onFailure = (incomplete: Option[EuOptionalDetails]) => {
+              Ok(view(waypoints, countryIndex, country, list, incomplete.isDefined))
+            }) {
+            Ok(view(waypoints, countryIndex, country, list))
+          })
       }
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData() {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
-
-      Redirect(CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
+      val incomplete = getIncompleteEuDetails(countryIndex)
+      if (incomplete.isEmpty) {
+        Redirect(CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
+      } else {
+        if (!incompletePromptShown) {
+          Redirect(routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex))
+        } else {
+          incompleteCheckEuDetailsRedirect(waypoints).map {
+            redirectIncompletePage =>
+              redirectIncompletePage
+          }.getOrElse(Redirect(routes.EuCountryController.onPageLoad(waypoints, countryIndex)))
+        }
+      }
   }
 }

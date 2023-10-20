@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.core.ValidateCoreRegistrationHttpParser.{ValidateCoreRegistrationReads, ValidateCoreRegistrationResponse}
 import logging.Logging
 import models.core.CoreRegistrationRequest
-import models.responses.{EisError, EisErrorResponse}
+import models.responses.{EisErrorResponse, EisError}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpException}
 
 import java.time.{Clock, Instant}

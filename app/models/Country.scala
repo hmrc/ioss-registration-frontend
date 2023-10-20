@@ -21,6 +21,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.select.SelectItem
 import viewmodels.govuk.select._
 
 case class Country(code: String, name: String)
+
 case class CountryWithValidationDetails(country: Country, vrnRegex: String, messageInput: String, exampleVrn: String, additionalMessage: Option[String] = None)
 
 object Country {
@@ -63,7 +64,7 @@ object Country {
         country =>
           SelectItemViewModel(
             value = country.code,
-            text  = country.name
+            text = country.name
           )
       }
   }
@@ -275,7 +276,7 @@ object Country {
 object CountryWithValidationDetails {
 
   lazy val euCountriesWithVRNValidationRules: Seq[CountryWithValidationDetails] = Seq(
-    CountryWithValidationDetails(Country("AT", "Austria"),austriaVatNumberRegex, "the 9 characters", "U12345678"),
+    CountryWithValidationDetails(Country("AT", "Austria"), austriaVatNumberRegex, "the 9 characters", "U12345678"),
     CountryWithValidationDetails(Country("BE", "Belgium"), belgiumVatNumberRegex, "the 10 numbers", "0123456789"),
     CountryWithValidationDetails(Country("BG", "Bulgaria"), bulgariaVatNumberRegex, "9 or 10 numbers", "123456789"),
     CountryWithValidationDetails(Country("HR", "Croatia"), croatiaVatNumberRegex, "the 11 numbers", "01234567899"),

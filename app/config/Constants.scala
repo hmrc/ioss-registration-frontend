@@ -16,6 +16,8 @@
 
 package config
 
+import java.time.LocalDate
+
 object Constants {
 
   val maxTradingNames: Int = 10
@@ -27,6 +29,6 @@ object Constants {
   val lastSchemeForCountry: Int = 1
   val maxOssSchemes: Int = 2
   val maxIossSchemes: Int = 1
-
+  val schemeStartDate: LocalDate = LocalDate.of(2021, 7, 1)
   val emailVerificationMaxEmails: Int = 10
 }

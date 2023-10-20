@@ -17,8 +17,10 @@
 package connectors
 
 import config.Service
+import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, ExternalEntryUrlResponseReads}
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import play.api.Configuration
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 
 import javax.inject.Inject
@@ -31,5 +33,9 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
   private val baseUrl: Service = config.get[Service]("microservice.services.ioss-registration")
   def getVatCustomerInfo()(implicit hc: HeaderCarrier): Future[VatCustomerInfoResponse] = {
     httpClient.GET[VatCustomerInfoResponse](s"$baseUrl/vat-information")
+  }
+
+  def getSavedExternalEntry()(implicit hc: HeaderCarrier): Future[ExternalEntryUrlResponse] = {
+    httpClient.GET[ExternalEntryUrlResponse](s"$baseUrl/external-entry")
   }
 }

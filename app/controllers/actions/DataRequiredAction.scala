@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import connectors.RegistrationConnector
 import controllers.filters.{routes => filterRoutes}
 import controllers.routes
 import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest, UnauthenticatedDataRequest, UnauthenticatedOptionalDataRequest}
@@ -26,7 +27,9 @@ import utils.FutureSyntax.FutureOps
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthenticatedDataRequiredActionImpl @Inject()()(implicit val executionContext: ExecutionContext)
+class AuthenticatedDataRequiredActionImpl @Inject()(
+                                                     val registrationConnector: RegistrationConnector
+                                                   )(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[AuthenticatedOptionalDataRequest, AuthenticatedDataRequest] {
 
   override protected def refine[A](request: AuthenticatedOptionalDataRequest[A]): Future[Either[Result, AuthenticatedDataRequest[A]]] = {
@@ -54,9 +57,11 @@ class UnauthenticatedDataRequiredAction @Inject()(implicit val executionContext:
   }
 }
 
-class AuthenticatedDataRequiredAction @Inject()()(implicit executionContext: ExecutionContext) {
+class AuthenticatedDataRequiredAction @Inject()(
+                                                 registrationConnector: RegistrationConnector
+                                               )(implicit executionContext: ExecutionContext) {
 
   def apply(): AuthenticatedDataRequiredActionImpl = {
-    new AuthenticatedDataRequiredActionImpl()
+    new AuthenticatedDataRequiredActionImpl(registrationConnector)
   }
 }

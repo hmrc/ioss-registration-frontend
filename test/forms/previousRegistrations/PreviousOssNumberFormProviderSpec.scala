@@ -30,8 +30,8 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
   private val country: Country = arbitrary[Country].sample.value
 
   private val formProvider: PreviousOssNumberFormProvider = new PreviousOssNumberFormProvider()
-  private val form: Form[String] = formProvider(country, Seq(PreviousScheme.OSSU, PreviousScheme.OSSU))
 
+  private val form: Form[String] = formProvider(country, Seq(PreviousScheme.OSSU, PreviousScheme.OSSU))
   private val countriesAndValidVatNumbers: Seq[(Country, Seq[String])] = Seq(
     (Country("AT", "Austria"), Seq("ATU23456789")),
     (Country("BE", "Belgium"), Seq("BE0123456789", "BE1123456789")),
@@ -85,7 +85,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("NL", "Netherlands"), Seq("12345678", "AAAAAAAAAAAAA")),
     (Country("PL", "Poland"), Seq("123456789", "12345678900", "12345678AA")),
     (Country("PT", "Portugal"), Seq("12345678", "1234567890", "1234567AA")),
-    (Country("RO", "Romania"), Seq("1", "12AAA*6", "12345678900")),
+    (Country("RO", "Romania"), Seq("1", "12AAA*6","12345678900")),
     (Country("SK", "Slovakia"), Seq("123456789", "12345678900", "12345678AA")),
     (Country("SI", "Slovenia"), Seq("1234567", "123456780", "123456AA")),
     (Country("ES", "Spain"), Seq("112345678", "123456781A", "1234567A")),
@@ -96,7 +96,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("AT", "Austria"), Seq(PreviousScheme.OSSNU), Seq("ATU23456789")),
     (Country("BE", "Belgium"), Seq(PreviousScheme.OSSU), Seq("EU234567891")),
     (Country("BG", "Bulgaria"), Seq(PreviousScheme.IOSSWI, PreviousScheme.OSSU), Seq("EU345678912")),
-    (Country("HR", "Croatia"), Seq(PreviousScheme.IOSSWOI, PreviousScheme.OSSNU), Seq("HR12345678901")),
+    (Country("HR", "Croatia"), Seq(PreviousScheme.IOSSWOI,  PreviousScheme.OSSNU), Seq("HR12345678901")),
     (Country("CY", "Republic of Cyprus"), Seq.empty, Seq.empty),
     (Country("DK", "Denmark"), Seq.empty, Seq("DK12345678", "EU234567891"))
   )
@@ -113,7 +113,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
 
     val fieldName = "value"
 
-    countriesAndValidVatNumbers.foreach {
+    countriesAndValidVatNumbers.foreach{
       case (country, vatNumbers) =>
         vatNumbers.foreach { vatNumber =>
           s"must bind valid vat number ${vatNumber} for ${country.name}" - {
@@ -133,7 +133,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
       requiredError = FormError(fieldName, requiredKey, Seq(country.name))
     )
 
-    countriesAndInvalidVatNumbers.foreach {
+    countriesAndInvalidVatNumbers.foreach{
       case (country, vatNumbers) =>
         vatNumbers.foreach {
           vatNumber =>

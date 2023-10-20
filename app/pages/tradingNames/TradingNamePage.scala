@@ -40,8 +40,8 @@ case class TradingNamePage(index: Index) extends QuestionPage[TradingName] with 
     AddTradingNamePage(Some(index))
 
   override def cleanup(value: Option[TradingName], userAnswers: UserAnswers): Try[UserAnswers] = {
-    if (userAnswers.get(AllTradingNames()).exists(_.isEmpty)) {
-      userAnswers.remove(AllTradingNames())
+    if (userAnswers.get(AllTradingNames).exists(_.isEmpty)) {
+      userAnswers.remove(AllTradingNames)
     } else {
       super.cleanup(value, userAnswers)
     }

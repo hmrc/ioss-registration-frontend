@@ -21,13 +21,29 @@ import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage, DeleteEuDet
 import pages.{AddItemPage, CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import queries.euDetails.AllEuDetailsQuery
+import queries.euDetails.{AllEuDetailsQuery, AllEuOptionalDetailsQuery}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
+import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
+import viewmodels.ListItemWrapper
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
 object EuDetailsSummary {
+
+    def addToListRows(answers: UserAnswers, waypoints: Waypoints): Seq[ListItemWrapper] = {
+    answers.get(AllEuOptionalDetailsQuery).getOrElse(List.empty).zipWithIndex.map {
+      case (details, index) =>
+        ListItemWrapper(
+          ListItem(
+          name = HtmlFormat.escape(details.euCountry.name).toString,
+          changeUrl = controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, Index(index)).url,
+          removeUrl = controllers.euDetails.routes.DeleteEuDetailsController.onPageLoad(waypoints, Index(index)).url
+        ),
+          removeButtonEnabled = true
+        )
+    }
+  }
 
   def countryAndVatNumberList(answers: UserAnswers, waypoints: Waypoints, sourcePage: AddItemPage)
                              (implicit messages: Messages): SummaryList =

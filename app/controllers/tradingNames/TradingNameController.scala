@@ -45,8 +45,7 @@ class TradingNameController @Inject()(
   def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] =
     (cc.authAndGetData() andThen cc.limitIndex(index, maxTradingNames)) {
       implicit request =>
-
-        val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames()).getOrElse(Seq.empty).map(_.name))
+        val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames).getOrElse(Seq.empty).map(_.name))
 
         val preparedForm = request.userAnswers.get(TradingNamePage(index)) match {
           case None => form
@@ -60,7 +59,7 @@ class TradingNameController @Inject()(
     (cc.authAndGetData() andThen cc.limitIndex(index, maxTradingNames)).async {
       implicit request =>
 
-        val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames()).getOrElse(Seq.empty).map(_.name))
+        val form: Form[String] = formProvider(index, request.userAnswers.get(AllTradingNames).getOrElse(Seq.empty).map(_.name))
 
         form.bindFromRequest().fold(
           formWithErrors =>

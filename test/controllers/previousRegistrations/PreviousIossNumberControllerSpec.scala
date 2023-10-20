@@ -202,8 +202,6 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
 
       "Redirect to scheme quarantined when quarantined IOSS found" in {
 
-        val countryCode = genericMatch.memberState
-
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 

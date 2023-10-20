@@ -25,9 +25,10 @@
         govukRadios: GovukRadios,
         button: ButtonGroup,
         govukSummaryList: GovukSummaryList,
+        govukWarningText: GovukWarningText
 )
 
-@(form: Form[_], waypoints: Waypoints, euDetails: SummaryList, canAddEuDetails: Boolean)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, euDetails: SummaryList, canAddEuDetails: Boolean, incompleteCountries: Seq[EuOptionalDetails] = List.empty)(implicit request: Request[_], messages: Messages)
 
 @titleText = @{
     euDetails.rows.size match {
@@ -48,27 +49,42 @@
         @govukErrorSummary(ErrorSummaryViewModel(form))
     }
 
+    @if(incompleteCountries.nonEmpty) {
+      @govukWarningText(WarningText(
+        iconFallbackText = Option(messages("site.warning")),
+        content = Text(messages("error.missing_answers"))
+      ))
+    }
+
     <h1 class="govuk-heading-l">@headingText</h1>
 
     @govukSummaryList(euDetails)
 
-    @formHelper(action = routes.AddEuDetailsController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
-
+    @if(incompleteCountries.isEmpty) {
+      @formHelper(action = controllers.euDetails.routes.AddEuDetailsController.onSubmit(waypoints, incompletePromptShown = false), Symbol("autoComplete") -> "off") {
         @if(canAddEuDetails) {
-
-            @govukRadios(
-                RadiosViewModel.yesNo(
-                    field = form("value"),
-                    legend = LegendViewModel(
-                        HtmlContent(Html("""<h2 class="govuk-fieldset__heading">""" + messages("addEuDetails.addAnother") + "</h2>"))
-                    ).withSize(LegendSize.Medium)
-                ).withHint(HintViewModel(messages("addEuDetails.addAnother.hint")))
-            )
-        } else {
+          @govukRadios(
+            RadiosViewModel.yesNo(
+              field = form("value"),
+              legend = LegendViewModel(
+                HtmlContent(Html("""<h2 class="govuk-fieldset__heading">""" + messages("addEuDetails.addAnother") + "</h2>"))
+              ).withSize(LegendSize.Medium)
+            ).withHint(HintViewModel(messages("addEuDetails.addAnother.hint")))
+          )
+          } else {
             <p class="govuk-body">@messages("addEuDetails.maximumReached")</p>
             <input type="hidden" name="value" id="value" value="false"/>
-        }
+          }
 
-        @button("site.continue", routes.AddEuDetailsController.onPageLoad(waypoints).url)
-    }
+          @button("site.continue")
+        }
+      } else {
+        <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+        <p class="govuk-body">@messages("error.missing_answers_prompt", if(incompleteCountries.size > 1) {incompleteCountries.map(_.euCountry.name).reverse.tail.mkString(", ") + " and " + incompleteCountries.last.euCountry.name} else {incompleteCountries.head.euCountry.name})</p>
+
+        @formHelper(action = controllers.euDetails.routes.AddEuDetailsController.onSubmit(waypoints, incompletePromptShown = true)) {
+
+          @button("error.resolve_missing_answers")
+        }
+      }
 }

@@ -18,7 +18,6 @@ package models.core
 
 import models.{Enumerable, WithName}
 
-
 sealed trait SourceType
 
 object SourceType extends Enumerable.Implicits {

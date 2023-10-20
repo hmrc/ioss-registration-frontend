@@ -14,16 +14,29 @@
  * limitations under the License.
  *@
 
+@import components.ButtonGroupProcessing
+
 @this(
         layout: templates.Layout,
-        govukSummaryList: GovukSummaryList
+        formHelper: FormWithCSRF,
+        govukSummaryList: GovukSummaryList,
+        govukErrorSummary: GovukErrorSummary,
+        button: ButtonGroupProcessing,
+        govukWarningText: GovukWarningText
 )
 
-@(vatRegistrationDetailsList: SummaryList, list: SummaryList)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, isValid: Boolean)(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
-        <h1 class="govuk-heading-l">@messages("checkYourAnswers.heading")</h1>
+        @if(!isValid) {
+            @govukWarningText(WarningText(
+                iconFallbackText = Option(messages("site.warning")),
+                content = Text(messages("error.missing_answers"))
+            ))
+        }
+
+        <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
 
         <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 
@@ -44,4 +57,26 @@
         <p class="govuk-body">@messages("checkYourAnswers.info.p1")</p>
 
         <p class="govuk-body">@messages("checkYourAnswers.info.p2")</p>
+
+        @if(isValid) {
+            @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, false)) {
+                @button("site.submit", routes.CheckYourAnswersController.onPageLoad().url)
+            }
+        } else {
+            <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+            <p class="govuk-body">@messages("error.missing_answers_prompt.general")</p>
+
+            @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, true)) {
+                @button("error.resolve_missing_answers", routes.CheckYourAnswersController.onPageLoad().url)
+            }
+        }
+
+        <div id="processing-wheel" hidden>
+            <div id="processing" aria-live="polite" class="govuk-!-margin-bottom-9">
+                <h2 class="govuk-heading-m">
+                    @messages("site.processing")
+                </h2>
+                <div class="processing-wheel-loader"></div>
+            </div>
+        </div>
     }
