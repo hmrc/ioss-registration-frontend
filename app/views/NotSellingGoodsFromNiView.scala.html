@@ -1,0 +1,85 @@
+@*
+* Copyright 2023 HM Revenue & Customs
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*@
+
+@import uk.gov.hmrc.domain.Vrn
+
+@this(layout: templates.Layout, govukButton: GovukButton)
+
+@(
+        companyName: String,
+        vrn: Vrn,
+        feedbackLink: String,
+        commencementDate: String,
+        vatReturnEndDate: String,
+        vatReturnDeadline: String,
+        lastDayOfCalendarQuarter: String,
+        startOfCurrentQuarter: String,
+        startOfNextQuarter: String,
+        isDOFSDifferentToCommencementDate: Boolean,
+        externalUrl: Option[String] = None
+)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("alreadyRegistered.title", companyName)), showBackLink = false) {
+
+  <div class="grid-row column-two-thirds">
+
+    <div class="govuk-panel govuk-panel--confirmation">
+      <h1 class="govuk-panel__title">@messages("alreadyRegistered.heading", companyName)</h1>
+    </div>
+
+    <p class="govuk-body">@messages("alreadyRegistered.confirmation")</p>
+
+    <p class="govuk-body">@messages("alreadyRegistered.reference", vrn)</p>
+
+    @if(isDOFSDifferentToCommencementDate){
+      <div class="govuk-body">@messages("alreadyRegistered.youRegisteredAfterThe10th")</div>
+
+      <h2 class="govuk-heading-m">@messages("alreadyRegistered.CurrentQuarter.heading", startOfCurrentQuarter, lastDayOfCalendarQuarter)</h2>
+
+      <div class="govuk-body">@messages("alreadyRegistered.CurrentQuarter")</div>
+
+      <h2 class="govuk-heading-m">@messages("alreadyRegistered.nextQuarter.heading", startOfNextQuarter)</h2>
+    }
+
+    <p class="govuk-body">@messages("alreadyRegistered.chargeVATRateOfEUCountry")</p>
+
+    <p class="govuk-body">@messages("alreadyRegistered.list")
+    <ul class="govuk-list govuk-list--bullet">
+      <li>@messages("alreadyRegistered.list.p1")</li>
+      <li>@messages("alreadyRegistered.list.p2")</li>
+    </ul>
+    </p>
+
+    <p class="govuk-body">@messages("alreadyRegistered.commencementDate", commencementDate, vatReturnEndDate)</p>
+
+    <h2 class="govuk-heading-m">@messages("alreadyRegistered.next")</h2>
+
+    <p class="govuk-body">@messages("alreadyRegistered.p1")</p>
+
+    <p class="govuk-body">@messages("alreadyRegistered.p2", vatReturnDeadline)</p>
+
+    @externalUrl.map(
+      url => Html(
+        s"""<p class="govuk-body"><a href=$url id="back-to-your-account" class="govuk-link">""" + messages("site.back.BTA") + "</a></p>"
+      ))
+
+    <p class="govuk-body">
+      <a href="@feedbackLink" class="govuk-link">@messages("alreadyRegistered.feedback.link.text")</a>
+      @messages("alreadyRegistered.feedback.30seconds")
+    </p>
+  </div>
+
+}
