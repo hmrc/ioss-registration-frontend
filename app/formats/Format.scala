@@ -29,5 +29,8 @@ object Format {
     .withLocale(Locale.UK)
     .withZone(ZoneId.of("GMT"))
 
+  val eisDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
   val dateOfRegistrationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
 }

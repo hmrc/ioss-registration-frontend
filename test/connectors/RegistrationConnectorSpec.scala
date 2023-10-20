@@ -19,13 +19,14 @@ package connectors
 import base.SpecBase
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.domain.VatCustomerInfo
-import models.responses.etmp.EtmpEnrolmentResponse
 import models.responses._
+import models.responses.etmp.EtmpEnrolmentResponse
 import org.scalacheck.Gen
 import play.api.Application
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
+import testutils.RegistrationData.etmpRegistrationRequest
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -108,7 +109,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
   ".createRegistration" - {
 
-    val url: String = "/ioss-registration/create"
+    val url: String = "/ioss-registration/create-registration"
 
     "must return CREATED with a valid ETMP Enrolment Response when backend returns CREATED with a valid response body" in {
 
@@ -131,7 +132,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
         val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
 
-        val result = connector.createRegistration("").futureValue
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
 
         result mustBe Right(etmpEnrolmentResponse)
       }
@@ -147,7 +148,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
         val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
 
-        val result = connector.createRegistration("").futureValue
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
 
         result mustBe Left(InvalidJson)
       }
@@ -162,7 +163,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
         val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
 
-        val result = connector.createRegistration("").futureValue
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
 
         result mustBe Left(ConflictFound)
       }
@@ -177,7 +178,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
         val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
 
-        val result = connector.createRegistration("").futureValue
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
 
         result mustBe Left(InternalServerError)
       }
@@ -194,7 +195,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
         val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
 
-        val result = connector.createRegistration("").futureValue
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
 
         result mustBe Left(UnexpectedResponseStatus(status, s"Unexpected response, status $status returned"))
       }

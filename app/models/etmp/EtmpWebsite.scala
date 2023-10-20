@@ -18,9 +18,9 @@ package models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 
-case class EtmpAdministration(messageType: EtmpMessageType, regimeID: String = "IOSS")
+case class EtmpWebsite(websiteAddress: String)
 
-object EtmpAdministration {
+object EtmpWebsite {
 
-  implicit val format: OFormat[EtmpAdministration] = Json.format[EtmpAdministration]
+  implicit val format: OFormat[EtmpWebsite] = Json.format[EtmpWebsite]
 }

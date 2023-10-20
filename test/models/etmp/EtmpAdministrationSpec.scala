@@ -31,7 +31,7 @@ class EtmpAdministrationSpec extends SpecBase with ScalaCheckPropertyChecks {
 
       val expectedJson = Json.obj(
         "messageType" -> s"${etmpAdministration.messageType}",
-        "regimeId" -> s"${etmpAdministration.regimeId}"
+        "regimeID" -> s"${etmpAdministration.regimeID}"
       )
 
       Json.toJson(etmpAdministration) mustBe expectedJson

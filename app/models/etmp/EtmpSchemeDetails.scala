@@ -16,14 +16,13 @@
 
 package models.etmp
 
-import models.Website
 import play.api.libs.json.{Json, OFormat}
 
 case class EtmpSchemeDetails(
                               commencementDate: String,
                               euRegistrationDetails: Seq[EtmpEuRegistrationDetails],
                               previousEURegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails],
-                              websites: Seq[Website],
+                              websites: Seq[EtmpWebsite],
                               contactName: String,
                               businessTelephoneNumber: String,
                               businessEmailId: String,

@@ -21,6 +21,7 @@ import models._
 import models.domain.ModelHelpers.normaliseSpaces
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.domain.PreviousSchemeNumbers
+import models.etmp.{EtmpAdministration, EtmpCustomerIdentification, EtmpMessageType, EtmpTradingName, EtmpWebsite, SchemeType, TaxRefTraderID, VatNumberTraderId}
 import models.etmp.{EtmpAdministration, EtmpCustomerIdentification, EtmpMessageType, EtmpTradingName, SchemeType, TaxRefTraderID, VatNumberTraderId}
 import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
 import org.scalacheck.Arbitrary.arbitrary
@@ -310,11 +311,11 @@ trait ModelGenerators extends EitherValues {
       } yield TaxRefTraderID(taxReferenceNumber)
     }
 
-  implicit lazy val arbitraryWebsite: Arbitrary[Website] =
+  implicit lazy val arbitraryEtmpWebsite: Arbitrary[EtmpWebsite] =
     Arbitrary {
       for {
         websiteAddress <- Gen.alphaStr
-      } yield Website(websiteAddress)
+      } yield EtmpWebsite(websiteAddress)
     }
 
   implicit lazy val arbitraryEtmpTradingName: Arbitrary[EtmpTradingName] =

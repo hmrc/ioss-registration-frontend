@@ -18,11 +18,18 @@ package controllers
 
 import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
+import models.responses.ConflictFound
+import pages.filters.CannotRegisterAlreadyRegisteredPage
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoints}
+import logging.Logging
 import models.CheckMode
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.FutureSyntax.FutureOps
 import utils.CompletionChecks
 import utils.FutureSyntax._
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
@@ -33,19 +40,23 @@ import viewmodels.govuk.summarylist._
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.CheckYourAnswersView
 
+import scala.concurrent.ExecutionContext
+
 import javax.inject.Inject
 import scala.concurrent.Future
 
 class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             cc: AuthenticatedControllerComponents,
+                                            registrationService: RegistrationService,
                                             view: CheckYourAnswersView
-                                          ) extends FrontendBaseController with I18nSupport with Logging with CompletionChecks {
+                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
     implicit request =>
+
       val thisPage = CheckYourAnswersPage
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
@@ -111,9 +122,26 @@ class CheckYourAnswersController @Inject()(
           bankDetailsIbanSummaryRow
         ).flatten
       )
-
       val isValid = validate()
       Ok(view(waypoints, vatRegistrationDetailsList, list, isValid))
+  }
+
+  // TODO - > Need to create Audit Service and pass request.userAnswers (as JSON if not already)
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+    implicit request =>
+      registrationService.createRegistrationRequest(request.userAnswers, request.vrn).flatMap {
+        case Right(response) =>
+          // TODO Redirect to confirmation page when created
+          Ok(response.iossReference).toFuture
+        case Left(ConflictFound) =>
+          logger.warn("Conflict found on registration creation submission")
+          Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints)).toFuture
+        case Left(error) =>
+          // TODO Add SaveAndContinue when created
+          logger.error(s"Internal server error on registration creation submission: ${error.body}")
+          InternalServerError(Json.toJson(s"An internal server error occurred with error: ${error.body}")).toFuture
+      }
+
   }
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {

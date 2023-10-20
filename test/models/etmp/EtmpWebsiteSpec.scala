@@ -16,11 +16,24 @@
 
 package models.etmp
 
-import play.api.libs.json.{Json, OFormat}
+import base.SpecBase
+import org.scalacheck.Arbitrary.arbitrary
+import play.api.libs.json.{JsSuccess, Json}
 
-case class EtmpAdministration(messageType: EtmpMessageType, regimeID: String = "IOSS")
+class EtmpWebsiteSpec extends SpecBase {
 
-object EtmpAdministration {
+  "EtmpWebsite" - {
 
-  implicit val format: OFormat[EtmpAdministration] = Json.format[EtmpAdministration]
+    "must serialise/deserialise to and from EtmpWebsite" in {
+
+      val website = arbitrary[EtmpWebsite].sample.value
+
+      val expectedJson = Json.obj(
+        "websiteAddress" -> s"${website.websiteAddress}"
+      )
+
+      Json.toJson(website) mustBe expectedJson
+      expectedJson.validate[EtmpWebsite] mustBe JsSuccess(website)
+    }
+  }
 }

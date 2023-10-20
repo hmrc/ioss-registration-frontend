@@ -17,9 +17,9 @@
 package testutils
 
 import base.SpecBase
-import formats.Format.dateFormatter
+import formats.Format.eisDateFormatter
 import models.etmp._
-import models.{BankDetails, Bic, Country, Iban, Website}
+import models.{Bic, Country, Iban}
 import org.scalacheck.Arbitrary.arbitrary
 
 import java.time.LocalDate
@@ -45,10 +45,10 @@ object RegistrationData extends SpecBase {
   )
 
   val etmpSchemeDetails: EtmpSchemeDetails = EtmpSchemeDetails(
-    commencementDate = LocalDate.now.format(dateFormatter),
+    commencementDate = LocalDate.now.format(eisDateFormatter),
     euRegistrationDetails = Seq(etmpEuRegistrationDetails),
     previousEURegistrationDetails = Seq(etmpEuPreviousRegistrationDetails),
-    websites = Seq(arbitrary[Website].sample.value),
+    websites = Seq(arbitrary[EtmpWebsite].sample.value),
     contactName = arbitrary[String].sample.value,
     businessTelephoneNumber = arbitrary[String].sample.value,
     businessEmailId = arbitrary[String].sample.value,
@@ -56,7 +56,7 @@ object RegistrationData extends SpecBase {
     nonCompliantPayments = Some(arbitrary[String].sample.value)
   )
 
-  val genBankDetails: BankDetails = BankDetails(
+  val genBankDetails: EtmpBankDetails = EtmpBankDetails(
     accountName = arbitrary[String].sample.value,
     bic = Some(arbitrary[Bic].sample.value),
     iban = arbitrary[Iban].sample.value

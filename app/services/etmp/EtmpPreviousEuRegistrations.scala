@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package services
+package services.etmp
 
 import logging.Logging
 import models.domain.{PreviousRegistration, PreviousSchemeDetails, PreviousSchemeNumbers}
@@ -88,7 +88,7 @@ trait EtmpPreviousEuRegistrations extends Logging {
             processPreviousSchemes(answers, countryIndex, Index(schemeIndex))
         }.toList
       case None =>
-        ??? // TODO
+        List.empty
     }
   }
 

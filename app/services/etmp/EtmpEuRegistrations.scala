@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package services
+package services.etmp
 
 import logging.Logging
 import models.etmp.{EtmpEuRegistrationDetails, TaxRefTraderID, TraderId, VatNumberTraderId}

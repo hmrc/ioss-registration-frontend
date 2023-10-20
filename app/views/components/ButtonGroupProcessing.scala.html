@@ -15,12 +15,10 @@
  *@
 
 @this(govukButton: GovukButton)
+
 @(continueMessage: String, continueUrl: String = "")(implicit messages: Messages)
 <div class="govuk-button-group">
     @govukButton(
         ButtonViewModel(messages(continueMessage)).withAttribute(("id", "continue")).withAttribute("onclick", "showTheSpinner()")
     )
-
-    <!--to complete / copy from OSS
-    </a>-->
 </div>

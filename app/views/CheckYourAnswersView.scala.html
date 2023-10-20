@@ -14,14 +14,15 @@
  * limitations under the License.
  *@
 
-@import components.ButtonGroupProcessing
+@import pages.CheckYourAnswersPage
+@import views.html.components.ButtonGroupProcessing
 
 @this(
-        layout: templates.Layout,
         formHelper: FormWithCSRF,
+        layout: templates.Layout,
         govukSummaryList: GovukSummaryList,
-        govukErrorSummary: GovukErrorSummary,
         button: ButtonGroupProcessing,
+        govukErrorSummary: GovukErrorSummary,
         govukWarningText: GovukWarningText
 )
 
@@ -60,7 +61,7 @@
 
         @if(isValid) {
             @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, false)) {
-                @button("site.submit", routes.CheckYourAnswersController.onPageLoad().url)
+                @button("site.submit", CheckYourAnswersPage.route(waypoints).url)
             }
         } else {
             <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
@@ -74,7 +75,7 @@
         <div id="processing-wheel" hidden>
             <div id="processing" aria-live="polite" class="govuk-!-margin-bottom-9">
                 <h2 class="govuk-heading-m">
-                    @messages("site.processing")
+                @messages("site.processing")
                 </h2>
                 <div class="processing-wheel-loader"></div>
             </div>

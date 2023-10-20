@@ -16,11 +16,12 @@
 
 package models.etmp
 
-import play.api.libs.json.{Json, OFormat}
+import models.{Bic, Iban}
+import play.api.libs.json._
 
-case class EtmpAdministration(messageType: EtmpMessageType, regimeID: String = "IOSS")
+case class EtmpBankDetails(accountName: String, bic: Option[Bic], iban: Iban)
 
-object EtmpAdministration {
+object EtmpBankDetails {
 
-  implicit val format: OFormat[EtmpAdministration] = Json.format[EtmpAdministration]
+  implicit val format: OFormat[EtmpBankDetails] = Json.format[EtmpBankDetails]
 }

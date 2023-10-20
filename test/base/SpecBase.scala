@@ -18,15 +18,20 @@ package base
 
 import controllers.actions._
 import generators.Generators
-import models.{BusinessContactDetails, UserAnswers}
+import models.{BankDetails, Bic, BusinessContactDetails, Iban, Index, UserAnswers, Website}
 import models.domain.VatCustomerInfo
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
+import pages.euDetails.TaxRegisteredInEuPage
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.RegisteredForIossInEuPage
+import pages.previousRegistrations.PreviouslyRegisteredPage
+import pages.tradingNames.HasTradingNamePage
+import pages.website.WebsitePage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
 import play.api.Application
@@ -74,6 +79,9 @@ trait SpecBase
 
   val userAnswersId: String = "12345-credId"
 
+  val iban: Iban = Iban("GB33BUKB20201555555555").value
+  val bic: Bic = Bic("ABCDGB2A").get
+
   val completeUserAnswers: UserAnswers = basicUserAnswersWithVatInfo
     .set(HasTradingNamePage, false).success.value
     .set(TaxRegisteredInEuPage, false).success.value
@@ -84,6 +92,14 @@ trait SpecBase
   def emptyUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.copy(vatInfo = Some(vatCustomerInfo))
   def basicUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.set(RegisteredForIossInEuPage, false).success.value.copy(vatInfo = Some(vatCustomerInfo))
 
+  def completeUserAnswersWithVatInfo: UserAnswers =
+    basicUserAnswersWithVatInfo
+      .set(HasTradingNamePage, false).success.value
+      .set(PreviouslyRegisteredPage, false).success.value
+      .set(TaxRegisteredInEuPage, false).success.value
+      .set(WebsitePage(Index(0)), Website("www.test-website.com")).success.value
+      .set(BusinessContactDetailsPage, BusinessContactDetails("fullName", "0123456789", "testEmail@example.com")).success.value
+      .set(BankDetailsPage, BankDetails("Account name", Some(bic), iban)).success.value
 
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, clock: Option[Clock] = None): GuiceApplicationBuilder = {
 

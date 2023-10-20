@@ -16,7 +16,6 @@
 
 package models.etmp
 
-import models.BankDetails
 import play.api.libs.json.{Json, OFormat}
 
 final case class EtmpRegistrationRequest(
@@ -24,7 +23,7 @@ final case class EtmpRegistrationRequest(
                                           customerIdentification: EtmpCustomerIdentification,
                                           tradingNames: Seq[EtmpTradingName],
                                           schemeDetails: EtmpSchemeDetails,
-                                          bankDetails: BankDetails
+                                          bankDetails: EtmpBankDetails
                                         )
 
 object EtmpRegistrationRequest {

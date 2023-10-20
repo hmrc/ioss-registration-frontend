@@ -16,23 +16,34 @@
 
 package services
 
-import formats.Format.eisDateTimeFormatter
+import connectors.RegistrationConnector
+import connectors.RegistrationHttpParser.RegistrationResultResponse
+import formats.Format.eisDateFormatter
 import logging.Logging
 import models.etmp._
-import models.{BankDetails, BusinessContactDetails, UserAnswers, Website}
+import models.{BusinessContactDetails, UserAnswers}
 import pages.tradingNames.HasTradingNamePage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import queries.AllWebsites
 import queries.tradingNames.AllTradingNames
+import services.etmp.{EtmpEuRegistrations, EtmpPreviousEuRegistrations}
 import uk.gov.hmrc.domain.Vrn
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{Clock, LocalDateTime}
 import javax.inject.Inject
+import scala.concurrent.Future
 
-case class RegistrationService @Inject()(clock: Clock) extends EtmpEuRegistrations with EtmpPreviousEuRegistrations with Logging {
+class RegistrationService @Inject()(
+                                     clock: Clock,
+                                     registrationConnector: RegistrationConnector
+                                   ) extends EtmpEuRegistrations with EtmpPreviousEuRegistrations with Logging {
 
+  def createRegistrationRequest(answers: UserAnswers, vrn: Vrn)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
+    registrationConnector.createRegistration(buildEtmpRegistrationRequest(answers, vrn))
+  }
 
-  def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn): EtmpRegistrationRequest = EtmpRegistrationRequest(
+  private def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn): EtmpRegistrationRequest = EtmpRegistrationRequest(
     administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
     customerIdentification = EtmpCustomerIdentification(vrn),
     tradingNames = getTradingNames(answers),
@@ -41,15 +52,15 @@ case class RegistrationService @Inject()(clock: Clock) extends EtmpEuRegistratio
   )
 
   private def getSchemeDetails(answers: UserAnswers): EtmpSchemeDetails = EtmpSchemeDetails(
-    commencementDate = LocalDateTime.now(clock).format(eisDateTimeFormatter),
+    commencementDate = LocalDateTime.now(clock).format(eisDateFormatter),
     euRegistrationDetails = getEuTaxRegistrations(answers),
     previousEURegistrationDetails = getPreviousRegistrationDetails(answers),
     websites = getWebsites(answers),
     contactName = getBusinessContactDetails(answers).fullName,
     businessTelephoneNumber = getBusinessContactDetails(answers).telephoneNumber,
     businessEmailId = getBusinessContactDetails(answers).emailAddress,
-    nonCompliantReturns = None, // TODO -> where/how are these populated
-    nonCompliantPayments = None // TODO
+    nonCompliantReturns = None, // TODO -> VEIOSS-256
+    nonCompliantPayments = None // TODO -> VEIOSS-256
   )
 
   private def getTradingNames(answers: UserAnswers): List[EtmpTradingName] = {
@@ -60,49 +71,56 @@ case class RegistrationService @Inject()(clock: Clock) extends EtmpEuRegistratio
             for {
               tradingName <- tradingNames
             } yield EtmpTradingName(tradingName = tradingName.name)
-          case _ => throw new Exception("No trading names found")
+          case Some(Nil) | None =>
+            val exception = new IllegalStateException("Must have trading names if HasTradingNamePage is Yes") // TODO
+            logger.error(exception.getMessage, exception)
+            throw exception
         }
+
+        // TODO
       case Some(false) =>
-        List.empty
-      case _ =>
-        logger.error("Has trading name was not answered")
-        throw new Exception("Has Trading Name answer must not be empty")
+        answers.get(AllTradingNames) match {
+          case Some(_) => List.empty
+          case Some(Nil) | None => List.empty
+        }
+
+      case None =>
+        val exception = new IllegalStateException("Must select if trading name is different") // TODO
+        logger.error(exception.getMessage, exception)
+        throw exception
     }
   }
 
-  private def getWebsites(answers: UserAnswers): List[Website] =
+  private def getWebsites(answers: UserAnswers): List[EtmpWebsite] =
     answers.get(AllWebsites) match {
-      case Some(websites) => websites
+      case Some(websites) =>
+        for {
+          website <- websites
+        } yield EtmpWebsite(websiteAddress = website.site)
       case _ =>
-        logger.error("User has not submitted at least one website")
-        throw new Exception("User must have at least one website")
+        val exception = new IllegalStateException("User must have at least one website")
+        logger.error(exception.getMessage, exception)
+        throw exception
     }
 
   private def getBusinessContactDetails(answers: UserAnswers): BusinessContactDetails = {
     answers.get(BusinessContactDetailsPage) match {
       case Some(contactDetails) => contactDetails
       case _ =>
-        logger.error("User has not supplied any contact details")
-        throw new Exception("User must submit contact details")
-    }
-  }
-
-  private def getBankDetails(answers: UserAnswers): BankDetails =
-    answers.get(BankDetailsPage) match {
-      case Some(bankDetails) => bankDetails
-      case _ =>
-        logger.error("User has not submitted bank details")
-        throw new Exception("User must supply bank details")
-    }
-
-  implicit class ImprovedOption[A](option: Option[A]) {
-    def getOrError: A = {
-      option.getOrElse {
-        val exception = new Exception(s"Couldn't get expected value for type")
+        val exception = new IllegalStateException("User must submit contact details")
         logger.error(exception.getMessage, exception)
         throw exception
-      }
     }
   }
+
+  private def getBankDetails(answers: UserAnswers): EtmpBankDetails =
+    answers.get(BankDetailsPage) match {
+      case Some(bankDetails) =>
+        EtmpBankDetails(bankDetails.accountName, bankDetails.bic, bankDetails.iban)
+      case _ =>
+        val exception = new IllegalStateException("User must supply bank details")
+        logger.error(exception.getMessage, exception)
+        throw exception
+    }
 }
 

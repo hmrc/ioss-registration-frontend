@@ -40,9 +40,9 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   private lazy val bankDetailsRoute = routes.BankDetailsController.onPageLoad().url
 
-  private val bic = arbitrary[Bic].sample.value
-  private val iban = arbitrary[Iban].sample.value
-  private val bankDetails = BankDetails("account name", Some(bic), iban)
+  private val genBic = arbitrary[Bic].sample.value
+  private val genIban = arbitrary[Iban].sample.value
+  private val bankDetails = BankDetails("account name", Some(genBic), genIban)
   private val userAnswers = basicUserAnswersWithVatInfo.set(BankDetailsPage, bankDetails).success.value
 
   "BankDetails Controller" - {
@@ -95,7 +95,7 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, bankDetailsRoute)
-            .withFormUrlEncodedBody(("accountName", "account name"), ("bic", bic.toString), ("iban", iban.toString))
+            .withFormUrlEncodedBody(("accountName", "account name"), ("bic", genBic.toString), ("iban", genIban.toString))
 
         val result = route(application, request).value
         val expectedAnswers = basicUserAnswersWithVatInfo.set(BankDetailsPage, bankDetails).success.value
@@ -148,7 +148,7 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, bankDetailsRoute)
-            .withFormUrlEncodedBody(("accountName", "account name"), ("bic", bic.toString), ("iban", iban.toString))
+            .withFormUrlEncodedBody(("accountName", "account name"), ("bic", genBic.toString), ("iban", genIban.toString))
 
         val result = route(application, request).value
 
