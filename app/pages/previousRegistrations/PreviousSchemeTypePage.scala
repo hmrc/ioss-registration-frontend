@@ -18,13 +18,13 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.{Index, PreviousSchemeType, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{Page, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
 import scala.util.Try
 
-case class PreviousSchemeTypePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[PreviousSchemeType]  {
+case class PreviousSchemeTypePage(countryIndex: Index, schemeIndex: Index) extends PreviouslyRegisteredQuestionPage[PreviousSchemeType]  {
 
 
   override def path: JsPath = JsPath \ "previousRegistrations" \ countryIndex.position \ "previousSchemesDetails" \ schemeIndex.position \ toString
