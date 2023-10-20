@@ -57,7 +57,7 @@ class AddPreviousRegistrationController @Inject()(
           val previousRegistrations = PreviousRegistrationSummary.row(request.userAnswers, Seq.empty, waypoints, AddPreviousRegistrationPage())
 
           withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
-            data = getAllIncompleteDeregisteredDetails,
+            data = getAllIncompleteDeregisteredDetails _,
             onFailure = (incomplete: Seq[PreviousRegistrationDetailsWithOptionalVatNumber]) => {
               Future.successful(Ok(view(form, waypoints, previousRegistrations, canAddCountries, incomplete)))
             }) {
@@ -69,7 +69,7 @@ class AddPreviousRegistrationController @Inject()(
   def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
       withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
-        data = getAllIncompleteDeregisteredDetails,
+        data = getAllIncompleteDeregisteredDetails _,
         onFailure = (incomplete: Seq[PreviousRegistrationDetailsWithOptionalVatNumber]) => {
           if (incompletePromptShown) {
             incompletePreviousRegistrationRedirect(waypoints).map(
