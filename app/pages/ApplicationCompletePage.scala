@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(govukButton: GovukButton)
+package pages
+import controllers.routes
+import play.api.mvc.Call
 
-@(continueMessage: String, continueUrl: String = "", waypoints: Waypoints)(implicit messages: Messages)
-<div class="govuk-button-group">
-    @govukButton(
-        ButtonViewModel(messages(continueMessage)).withAttribute(("id", "continue")).withAttribute("onclick", "showTheSpinner()")
-    )
-
-    @if(waypoints.currentMode == CheckMode) {
-        <a id="saveProgress" role="button" href="" class="govuk-button govuk-button--secondary" data-module="govuk-button">
-        @messages("saveProgress.button")
-        </a>
-    }
-</div>
+object ApplicationCompletePage extends Page {
+  override def route(waypoints: Waypoints): Call =
+    routes.ApplicationCompleteController.onPageLoad()
+}

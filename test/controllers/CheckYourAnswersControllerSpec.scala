@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.filters.CannotRegisterAlreadyRegisteredPage
-import pages.{EmptyWaypoints, Waypoints}
+import pages.{ApplicationCompletePage, EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
@@ -68,8 +68,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
     ".onSubmit" - {
 
-      // TODO -> OK and correct view when created
-      "must return OK and a response body for a POST" in {
+      "must redirect to the correct page when a successful registration request returns a valid response body" in {
 
         val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(
           processingDateTime = LocalDateTime.now(),
@@ -90,7 +89,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
           val result = route(application, request).value
 
-          status(result) mustBe OK
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe ApplicationCompletePage.route(waypoints).url
         }
       }
 
@@ -113,6 +113,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       // TODO Add SaveAndContinue when created
+      // This will redirect to ErrorSubmittingRegistrationPage
       "must return InternalServerError when back end returns InternalServerError" in {
 
         when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Left(ServerError).toFuture

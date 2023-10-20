@@ -10,8 +10,8 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
-site.submit = Register
 site.tryAgain = Try again
+site.submit = Register
 site.processing = We are processing your registration.
 
 site.back.BTA = Return to Business Tax Account
@@ -620,3 +620,17 @@ emailVerificationCodesExceeded.title = You''ve entered too many incorrect codes
 emailVerificationCodesExceeded.heading = You''ve entered too many incorrect codes
 emailVerificationCodesExceeded.paragraph = We''ve saved your progress. You can try again in 24 hours or use a different email address.
 emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href="/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/business-contact-details">Return to contact details page</a>
+
+applicationComplete.title = You are registered for the Import One Stop Shop scheme
+applicationComplete.heading = You are registered for the Import One Stop Shop scheme
+applicationComplete.reference = Your reference number is <br><span class="govuk-!-font-weight-bold">{0}</span>
+applicationComplete.registration.text = We''ve received your registration for <span class="govuk-!-font-weight-bold">{0}</span>
+applicationComplete.registration.p1 = You can now use this service to fill out monthly returns for goods sold to consumers in the EU and Northern Ireland.
+applicationComplete.registration.p2 = You can also pay any Import One Stop Shop VAT that you owe.
+applicationComplete.registration.commencementDate = You can begin your {0} return on {1}. Include any sales from {2} onwards.
+applicationComplete.next = What happens next
+applicationComplete.manageAccount = <a class="govuk-link" href="/business-account">Manage your Import One Stop Shop returns in your account.</a>
+applicationComplete.checkInformation.contact = We'’ll contact you if we need to check any information.
+applicationComplete.checkInformation.info = Read more information about <a class="govuk-link" href="https://www.gov.uk/guidance/completing-a-one-stop-shop-vat-return">how to complete an IOSS return.</a>
+applicationComplete.feedback.link.text = What did you think of this service?
+applicationComplete.feedback.30seconds = (takes 30 seconds)
