@@ -227,3 +227,5 @@ GET         /email-verification-codes-and-emails-exceeded                    con
 GET         /email-verification-codes-exceeded                               controllers.EmailVerificationCodesExceededController.onPageLoad()
 
 GET         /successful                                                      controllers.ApplicationCompleteController.onPageLoad()
+
+GET         /error-submitting-registration                                   controllers.ErrorSubmittingRegistrationController.onPageLoad()

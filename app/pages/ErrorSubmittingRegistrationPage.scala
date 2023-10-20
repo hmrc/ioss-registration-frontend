@@ -19,7 +19,7 @@ package pages
 import controllers.routes
 import play.api.mvc.Call
 
-object ApplicationCompletePage extends Page {
+object ErrorSubmittingRegistrationPage extends Page {
   override def route(waypoints: Waypoints): Call =
-    routes.ApplicationCompleteController.onPageLoad()
+    routes.ErrorSubmittingRegistrationController.onPageLoad()
 }

@@ -634,3 +634,8 @@ applicationComplete.checkInformation.contact = We'’ll contact you if we need t
 applicationComplete.checkInformation.info = Read more information about <a class="govuk-link" href="https://www.gov.uk/guidance/completing-a-one-stop-shop-vat-return">how to complete an IOSS return.</a>
 applicationComplete.feedback.link.text = What did you think of this service?
 applicationComplete.feedback.30seconds = (takes 30 seconds)
+
+errorSubmittingRegistration.title = We have a problem with our service right now
+errorSubmittingRegistration.heading = Your registration is not submitted
+errorSubmittingRegistration.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
+errorSubmittingRegistration.your.account = Back to your account

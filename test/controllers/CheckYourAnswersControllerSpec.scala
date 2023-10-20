@@ -19,14 +19,13 @@ package controllers
 import base.SpecBase
 import models.CheckMode
 import models.responses.etmp.EtmpEnrolmentResponse
-import models.responses.{ConflictFound, InternalServerError => ServerError}
+import models.responses.{ConflictFound, ReceivedErrorFromCore, InternalServerError => ServerError}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.filters.CannotRegisterAlreadyRegisteredPage
-import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.inject.bind
-import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.RegistrationService
@@ -79,7 +78,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Right(etmpEnrolmentResponse).toFuture
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .build()
 
@@ -97,7 +96,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Left(ConflictFound).toFuture
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .build()
 
@@ -112,12 +111,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       // TODO Add SaveAndContinue when created
-      // This will redirect to ErrorSubmittingRegistrationPage
-      "must return InternalServerError when back end returns InternalServerError" in {
+      "redirect to the correct page when back end returns any other Error Response" in {
 
         when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Left(ServerError).toFuture
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .build()
 
@@ -126,8 +124,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
           val result = route(application, request).value
 
-          status(result) mustBe INTERNAL_SERVER_ERROR
-          contentAsJson(result) mustBe Json.toJson(s"An internal server error occurred with error: ${ServerError.body}")
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe ErrorSubmittingRegistrationPage.route(waypoints).url
         }
       }
     }

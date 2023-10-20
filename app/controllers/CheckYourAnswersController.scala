@@ -21,9 +21,8 @@ import logging.Logging
 import models.CheckMode
 import models.responses.ConflictFound
 import pages.filters.CannotRegisterAlreadyRegisteredPage
-import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.etmp.EtmpEnrolmentResponseQuery
 import services.RegistrationService
@@ -147,10 +146,8 @@ class CheckYourAnswersController @Inject()(
 
             case Left(error) =>
               // TODO Add SaveAndContinue when created
-              logger.error(s"Internal server error on registration creation submission: ${error.body}")
-              // TODO ErrorSubmittingRegistrationPage
-              // Remove InternalServerError
-              InternalServerError(Json.toJson(s"An internal server error occurred with error: ${error.body}")).toFuture
+              logger.error(s"Unexpected result on registration creation submission: ${error.body}")
+              Redirect(ErrorSubmittingRegistrationPage.route(waypoints)).toFuture
           }
       }
   }
