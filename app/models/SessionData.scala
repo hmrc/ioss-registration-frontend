@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.{JsError, JsObject, JsPath, JsResultException, JsSuccess, Json, OFormat, OWrites, Reads, Writes, __}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
@@ -25,7 +25,7 @@ import scala.util.{Failure, Success, Try}
 final case class SessionData(
                               userId: String,
                               data: JsObject = Json.obj(),
-                              lastUpdated: Instant = Instant.now()
+                              lastUpdated: Instant = Instant.now
                             ) {
 
   def get[A](key: JsPath)(implicit rds: Reads[A]): Option[A] =
@@ -41,7 +41,7 @@ final case class SessionData(
     }
 
     updatedData.map {
-      d => copy(data = d)
+      d => copy (data = d)
     }
   }
 
@@ -55,7 +55,7 @@ final case class SessionData(
     }
 
     updatedData.map {
-      d => copy(data = d)
+      d => copy (data = d)
     }
   }
 }
@@ -70,7 +70,7 @@ object SessionData {
       (__ \ "userId").read[String] and
         (__ \ "data").read[JsObject] and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
-      )(SessionData.apply _)
+      ) (SessionData.apply _)
   }
 
   val writes: OWrites[SessionData] = {
@@ -81,7 +81,7 @@ object SessionData {
       (__ \ "userId").write[String] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
-      )(unlift(SessionData.unapply))
+      ) (unlift(SessionData.unapply))
   }
 
   implicit val format: OFormat[SessionData] = OFormat(reads, writes)

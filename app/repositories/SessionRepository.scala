@@ -20,10 +20,8 @@ import config.FrontendAppConfig
 import models.SessionData
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._
-import play.api.libs.json.Format
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
@@ -38,8 +36,8 @@ class SessionRepository @Inject()(
                                  )(implicit ec: ExecutionContext) extends PlayMongoRepository[SessionData](
   collectionName = "session-data",
   mongoComponent = mongoComponent,
-  domainFormat = SessionData.format,
-  indexes = Seq(
+  domainFormat   = SessionData.format,
+  indexes        = Seq(
     IndexModel(
       Indexes.ascending("lastUpdated"),
       IndexOptions()
@@ -54,9 +52,6 @@ class SessionRepository @Inject()(
     )
   )
 ) {
-
-  implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
-
   private def byUserId(userId: String): Bson = Filters.equal("userId", userId)
 
   def keepAlive(userId: String): Future[Boolean] =
@@ -65,7 +60,7 @@ class SessionRepository @Inject()(
         filter = byUserId(userId),
         update = Updates.set("lastUpdated", Instant.now(clock)),
       )
-      .toFuture()
+      .toFuture
       .map(_ => true)
 
   def get(userId: String): Future[Seq[SessionData]] =
@@ -77,21 +72,22 @@ class SessionRepository @Inject()(
 
   def set(sessionData: SessionData): Future[Boolean] = {
 
-    val updatedSessionData = sessionData.copy(lastUpdated = Instant.now(clock))
+    val updatedSessionData = sessionData copy (lastUpdated = Instant.now(clock))
 
     collection
       .replaceOne(
-        filter = byUserId(updatedSessionData.userId),
+        filter      = byUserId(updatedSessionData.userId),
         replacement = updatedSessionData,
-        options = ReplaceOptions().upsert(true)
+        options     = ReplaceOptions().upsert(true)
       )
-      .toFuture()
+      .toFuture
       .map(_.wasAcknowledged())
   }
 
   def clear(userId: String): Future[Boolean] =
     collection
       .deleteOne(byUserId(userId))
-      .toFuture()
+      .toFuture
       .map(_ => true)
+
 }

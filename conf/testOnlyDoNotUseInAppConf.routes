@@ -13,3 +13,4 @@
 ->         /                          prod.Routes
 GET      /pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/test-only/get-passcodes    @controllers.test.TestOnlyEmailPasscodeController.testOnlyGetPasscodes()
 GET      /pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/test-only/get-status       @controllers.test.TestOnlyEmailPasscodeController.testOnlyGetEmailVerificationStatus()
+GET      /pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/test-only/from-external    @controllers.test.TestOnlyController.enterFromExternal()

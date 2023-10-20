@@ -56,9 +56,10 @@ case class DefaultUnauthenticatedControllerComponents @Inject()(
                                                                  messagesApi: MessagesApi,
                                                                  langs: Langs,
                                                                  fileMimeTypes: FileMimeTypes,
-                                                                 executionContext: ExecutionContext,
+                                                                 executionContext: scala.concurrent.ExecutionContext,
                                                                  sessionRepository: UnauthenticatedUserAnswersRepository,
                                                                  identify: SessionIdentifierAction,
                                                                  getData: UnauthenticatedDataRetrievalAction,
-                                                                 requireData: UnauthenticatedDataRequiredAction
+                                                                 requireData: UnauthenticatedDataRequiredAction,
+                                                                 features: FeatureFlagService
                                                                ) extends UnauthenticatedControllerComponents
