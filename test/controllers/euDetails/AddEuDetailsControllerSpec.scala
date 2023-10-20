@@ -19,6 +19,7 @@ package controllers.euDetails
 import base.SpecBase
 import forms.euDetails.AddEuDetailsFormProvider
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.requests.AuthenticatedDataRequest
 import models.{Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
@@ -28,6 +29,7 @@ import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.inject.bind
+import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
@@ -35,8 +37,6 @@ import utils.EuDetailsCompletionChecks.getAllIncompleteEuDetails
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.EuDetailsSummary
 import views.html.euDetails.AddEuDetailsView
-import models.requests.AuthenticatedDataRequest
-import play.api.mvc.{AnyContent, AnyContentAsEmpty}
 
 class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 

@@ -17,13 +17,12 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import controllers.previousRegistrations.{routes => prevRoutes}
 import controllers.routes
 import forms.previousRegistrations.AddPreviousRegistrationFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.{PreviousRegistrationDetailsWithOptionalVatNumber, SchemeDetailsWithOptionalVatNumber}
-import models.{Country, Index, NormalMode, PreviousScheme, PreviousSchemeType}
+import models.{Country, Index, PreviousScheme, PreviousSchemeType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -57,8 +56,6 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
     basicUserAnswersWithVatInfo
       .set(PreviousEuCountryPage(Index(0)), Country.euCountries.head).success.value
       .set(PreviousSchemePage(Index(0), Index(0)), PreviousScheme.OSSU).success.value
-
-  private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
 
   "AddPreviousRegistration Controller" - {
 
