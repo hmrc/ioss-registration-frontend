@@ -21,7 +21,7 @@ import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.DeletePreviousSchemeFormProvider
 import models.Index
-import pages.Waypoints
+import pages.{EmptyWaypoints, Waypoints}
 import pages.previousRegistrations.DeletePreviousSchemePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -77,6 +77,7 @@ class DeletePreviousSchemeController @Inject()(
     implicit request =>
 
       val isLastPreviousScheme = request.userAnswers.get(DeriveNumberOfPreviousSchemes(countryIndex)).get == lastSchemeForCountry
+      val emptyWaypoint = EmptyWaypoints
 
       getPreviousCountry(waypoints, countryIndex) {
         country =>
@@ -94,17 +95,17 @@ class DeletePreviousSchemeController @Inject()(
 
           form.bindFromRequest().fold(
             formWithErrors =>
-              Future.successful(BadRequest(view(formWithErrors, waypoints, countryIndex, schemeIndex, country, list, isLastPreviousScheme))),
+              Future.successful(BadRequest(view(formWithErrors, emptyWaypoint, countryIndex, schemeIndex, country, list, isLastPreviousScheme))),
 
             value =>
               if (value) {
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.remove(PreviousSchemeForCountryQuery(countryIndex, schemeIndex)))
                   _ <- cc.sessionRepository.set(updatedAnswers)
-                } yield Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+                } yield Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(emptyWaypoint, request.userAnswers, updatedAnswers).route)
               } else {
                 Future.successful(
-                  Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
+                  Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(emptyWaypoint, request.userAnswers, request.userAnswers).route)
                 )
               }
           )
