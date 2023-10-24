@@ -22,13 +22,11 @@ import logging.Logging
 import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.external.ExternalReturnUrlQuery
-import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.filters.CannotRegisterAlreadyRegisteredView
 
-import scala.concurrent.ExecutionContext
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class CannotRegisterAlreadyRegisteredController @Inject()(
                                                            override val messagesApi: MessagesApi,
