@@ -19,11 +19,9 @@ package generators
 import connectors.SavedUserAnswers
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
-import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
-import models.domain.PreviousSchemeNumbers
-import models.etmp.{EtmpAdministration, EtmpCustomerIdentification, EtmpMessageType, EtmpTradingName, EtmpWebsite, SchemeType, TaxRefTraderID, VatNumberTraderId}
-import models.etmp.{EtmpAdministration, EtmpCustomerIdentification, EtmpMessageType, EtmpTradingName, SchemeType, TaxRefTraderID, VatNumberTraderId}
 import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
+import models.etmp._
+import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
@@ -226,14 +224,6 @@ trait ModelGenerators extends EitherValues {
       } yield Bic(s"$firstChars$char7$char8${lastChars.getOrElse("")}").get
     }
   }
-
-  implicit val arbitraryPeriod: Arbitrary[Period] =
-    Arbitrary {
-      for {
-        year <- Gen.choose(2022, 2099)
-        quarter <- Gen.oneOf(Quarter.values)
-      } yield Period(year, quarter)
-    }
 
   implicit lazy val arbitraryFixedEstablishment: Arbitrary[TradeDetails] =
     Arbitrary {

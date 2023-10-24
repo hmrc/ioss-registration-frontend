@@ -66,6 +66,4 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
       verify(mockRegistrationConnector, times(1)).createRegistration(any())(any())
     }
   }
-
-  // TODO Left response test?
 }

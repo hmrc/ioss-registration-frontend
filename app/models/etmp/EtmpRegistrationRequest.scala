@@ -41,7 +41,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
 
   implicit val format: OFormat[EtmpRegistrationRequest] = Json.format[EtmpRegistrationRequest]
 
-  // TODO Test no answers, full answers(where optianal values used 2 entries (countries) one with full, one with opt))
+  // TODO Test no answers, full answers(where optional values used 2 entries (countries) one with full, one with opt))
   def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDateTime): EtmpRegistrationRequest = EtmpRegistrationRequest(
     administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
     customerIdentification = EtmpCustomerIdentification(vrn),
@@ -71,7 +71,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
               tradingName <- tradingNames
             } yield EtmpTradingName(tradingName = tradingName.name)
           case Some(Nil) | None =>
-            val exception = new IllegalStateException("Must have trading names if HasTradingNamePage is Yes") // TODO
+            val exception = new IllegalStateException("Must have at least one trading name")
             logger.error(exception.getMessage, exception)
             throw exception
         }
@@ -80,7 +80,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
         List.empty
 
       case None =>
-        val exception = new IllegalStateException("Must select if trading name is different") // TODO
+        val exception = new IllegalStateException("Must select Yes if trading name is different")
         logger.error(exception.getMessage, exception)
         throw exception
     }
@@ -102,7 +102,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
     answers.get(BusinessContactDetailsPage) match {
       case Some(contactDetails) => contactDetails
       case _ =>
-        val exception = new IllegalStateException("User must submit contact details")
+        val exception = new IllegalStateException("User must provide contact details")
         logger.error(exception.getMessage, exception)
         throw exception
     }
@@ -113,7 +113,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
       case Some(bankDetails) =>
         EtmpBankDetails(bankDetails.accountName, bankDetails.bic, bankDetails.iban)
       case _ =>
-        val exception = new IllegalStateException("User must supply bank details")
+        val exception = new IllegalStateException("User must provide bank details")
         logger.error(exception.getMessage, exception)
         throw exception
     }

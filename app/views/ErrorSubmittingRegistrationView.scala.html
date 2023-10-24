@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import pages.{CheckYourAnswersPage, EmptyWaypoints}
+
 @this(
         layout: templates.Layout,
         govukButton: GovukButton,
@@ -22,21 +24,23 @@
 
 @(externalUrl: Option[String] = None)(implicit request: Request[_], messages: Messages)
 
-    @layout(pageTitle = titleNoForm(messages("errorSubmittingRegistration.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("errorSubmittingRegistration.title")), showBackLink = false) {
 
-        @govukPanel(Panel(
-            title = Text(messages("errorSubmittingRegistration.title")),
-            content = HtmlContent(messages("errorSubmittingRegistration.heading")),
-            classes = "red-background"
-        ))
+    @govukPanel(Panel(
+        title = Text(messages("errorSubmittingRegistration.title")),
+        content = HtmlContent(messages("errorSubmittingRegistration.heading")),
+        classes = "red-background"
+    ))
 
-        <p class="govuk-body">@Html(messages("errorSubmittingRegistration.contactUs"))</p>
+    <p class="govuk-body">@Html(messages("errorSubmittingRegistration.tryAgainLater", CheckYourAnswersPage.route(EmptyWaypoints).url))</p>
 
-        @externalUrl.map { url =>
-            @govukButton(
-                ButtonViewModel(messages("errorSubmittingRegistration.your.account"))
-                        .asLink(url)
-                        .withAttribute(("id", "backToYourAccount"))
-            )
-        }
+    <p class="govuk-body">@Html(messages("errorSubmittingRegistration.contactUs"))</p>
+
+    @externalUrl.map { url =>
+        @govukButton(
+            ButtonViewModel(messages("errorSubmittingRegistration.your.account"))
+                .asLink(url)
+                .withAttribute(("id", "backToYourAccount"))
+        )
     }
+}

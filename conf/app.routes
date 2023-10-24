@@ -203,9 +203,6 @@ GET         /excluded-vrn                                                    con
 
 GET         /fixed-establishment-vrn-already-registered/:countryIndex        controllers.euDetails.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index)
 
-GET         /no-fixed-establishments-required/:index                         controllers.euDetails.CannotAddCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /no-fixed-establishments-required/:index                         controllers.euDetails.CannotAddCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-
 # Business contact details section
 GET         /business-contact-details                                        controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /business-contact-details                                        controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
@@ -214,6 +211,7 @@ POST        /business-contact-details                                        con
 GET         /bank-details                                                    controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /bank-details                                                    controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
+# Website section
 GET         /website-address/:index                                          controllers.website.WebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /website-address/:index                                          controllers.website.WebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
@@ -223,9 +221,11 @@ POST        /add-website-address                                             con
 GET         /remove-website-address/:index                                   controllers.website.DeleteWebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /remove-website-address/:index                                   controllers.website.DeleteWebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
+# Email verification section
 GET         /email-verification-codes-and-emails-exceeded                    controllers.EmailVerificationCodesAndEmailsExceededController.onPageLoad()
 GET         /email-verification-codes-exceeded                               controllers.EmailVerificationCodesExceededController.onPageLoad()
 
+# Other
 GET         /successful                                                      controllers.ApplicationCompleteController.onPageLoad()
 
 GET         /error-submitting-registration                                   controllers.ErrorSubmittingRegistrationController.onPageLoad()

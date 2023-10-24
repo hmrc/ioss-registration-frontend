@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import models.CheckMode
 import models.responses.etmp.EtmpEnrolmentResponse
-import models.responses.{ConflictFound, ReceivedErrorFromCore, InternalServerError => ServerError}
+import models.responses.{ConflictFound, InternalServerError => ServerError}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
