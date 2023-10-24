@@ -19,7 +19,7 @@ package services.etmp
 import logging.Logging
 import models.etmp.{EtmpEuRegistrationDetails, TaxRefTraderID, TraderId, VatNumberTraderId}
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Index, InternationalAddress, UserAnswers}
+import models.{Country, CountryWithValidationDetails, Index, InternationalAddress, UserAnswers}
 import pages.euDetails._
 import queries.euDetails.AllEuDetailsRawQuery
 
@@ -53,7 +53,7 @@ trait EtmpEuRegistrations extends Logging {
       case Some(country) =>
         answers.get(SellsGoodsToEuConsumerMethodPage(index)) match {
           case Some(EuConsumerSalesMethod.FixedEstablishment) =>
-            val traderId = getTraderId(answers, index)
+            val traderId = getTraderId(answers, index, country)
             val fixedEstablishmentTradingName = getFixedEstablishmentTradingName(answers, index)
             val fixedEstablishmentAddress = getFixedEstablishmentAddress(answers, index)
             EtmpEuRegistrationDetails(
@@ -78,12 +78,14 @@ trait EtmpEuRegistrations extends Logging {
     }
   }
 
-  private def getTraderId(answers: UserAnswers, index: Index): TraderId = {
+  private def getTraderId(answers: UserAnswers, index: Index, country: Country): TraderId = {
     answers.get(RegistrationTypePage(index)) match {
       case Some(RegistrationType.VatNumber) =>
         answers.get(EuVatNumberPage(index)) match {
           case Some(euVatNumber) =>
-            VatNumberTraderId(vatNumber = euVatNumber)
+            val convertedVatNumber = CountryWithValidationDetails.convertTaxIdentifierForTransfer(euVatNumber, country.code)
+            VatNumberTraderId(vatNumber = convertedVatNumber)
+
           case _ =>
             val exception = new IllegalStateException(s"Must have an EU VAT number if your Registration type is ${RegistrationType.VatNumber}")
             logger.error(exception.getMessage, exception)
