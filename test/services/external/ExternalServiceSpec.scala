@@ -17,12 +17,10 @@
 package services.external
 
 import base.SpecBase
-import models.SessionData
 import models.external.{ExternalRequest, ExternalResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
-import queries.external.ExternalReturnUrlQuery
 import repositories.SessionRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -60,6 +60,5 @@ case class DefaultUnauthenticatedControllerComponents @Inject()(
                                                                  sessionRepository: UnauthenticatedUserAnswersRepository,
                                                                  identify: SessionIdentifierAction,
                                                                  getData: UnauthenticatedDataRetrievalAction,
-                                                                 requireData: UnauthenticatedDataRequiredAction,
-                                                                 features: FeatureFlagService
+                                                                 requireData: UnauthenticatedDataRequiredAction
                                                                ) extends UnauthenticatedControllerComponents

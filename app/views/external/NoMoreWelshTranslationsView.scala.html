@@ -15,21 +15,19 @@
  *@
 
 @this(
-        layout: templates.UnauthenticatedLayout,
+        layout: templates.Layout,
         govukButton: GovukButton
 )
 
 @(externalUrl: Option[String] = None)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("notSellingGoodsFromNi.title"))) {
+@layout(pageTitle = titleNoForm(messages("noMoreWelsh.title"))) {
 
-  <h1 class="govuk-heading-xl">@messages("notSellingGoodsFromNi.heading")</h1>
+    <h1 class="govuk-heading-xl">@messages("noMoreWelsh.heading")</h1>
 
-  <p class="govuk-body">@messages("notSellingGoodsFromNi.p")</p>
-
-  @externalUrl.map(
-    url => Html(
-      s"""<p class="govuk-body"><a href=$url id="back-to-your-account" class="govuk-link">""" + messages("site.back.BTA") + "</a></p>"
-    ))
-
+    @govukButton(
+        ButtonViewModel(messages("noMoreWelsh.submit"))
+                .asLink(externalUrl.getOrElse(routes.IndexController.onPageLoad().url))
+                .withAttribute(("id", "continue"))
+    )
 }

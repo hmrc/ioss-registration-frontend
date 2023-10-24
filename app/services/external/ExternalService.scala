@@ -22,7 +22,6 @@ import models.external.{ExternalRequest, ExternalResponse}
 import queries.external.ExternalReturnUrlQuery
 import repositories.SessionRepository
 
-import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 

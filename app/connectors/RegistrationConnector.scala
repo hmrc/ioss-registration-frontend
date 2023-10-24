@@ -35,6 +35,7 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
                            (implicit executionContext: ExecutionContext) extends HttpErrorFunctions with Logging {
 
   private val baseUrl: Service = config.get[Service]("microservice.services.ioss-registration")
+
   def getVatCustomerInfo()(implicit hc: HeaderCarrier): Future[VatCustomerInfoResponse] = {
     httpClient.GET[VatCustomerInfoResponse](s"$baseUrl/vat-information")
   }
