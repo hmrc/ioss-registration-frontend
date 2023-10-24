@@ -18,31 +18,21 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
-import connectors.RegistrationConnector
-import formats.Format.dateFormatter
+import formats.Format.{dateFormatter, dateMonthYearFormatter}
+import models.UserAnswers
 import models.responses.etmp.EtmpEnrolmentResponse
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.MockitoSugar.when
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalatestplus.mockito.MockitoSugar.mock
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.RegistrationService
-import testutils.RegistrationData.etmpRegistrationRequest
-import utils.FutureSyntax.FutureOps
+import queries.etmp.EtmpEnrolmentResponseQuery
 import views.html.ApplicationCompleteView
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 class ApplicationCompleteControllerSpec extends SpecBase {
 
-//  private val iossReference: String = arbitrary[String].sample.value
-//  private val organisationName: String = vatCustomerInfo.organisationName.get
-  private val date: String = arbitraryDate.format(dateFormatter)
-
-  private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
-  private val mockRegistrationService: RegistrationService = mock[RegistrationService]
+  private val commencementDate = LocalDate.now(stubClockAtArbitraryDate)
+  private val returnStartDate = commencementDate.withDayOfMonth(commencementDate.lengthOfMonth()).plusDays(1)
+  private val includedSalesDate = commencementDate.withDayOfMonth(1)
 
   private val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(
     processingDateTime = LocalDateTime.now(stubClockAtArbitraryDate),
@@ -52,18 +42,14 @@ class ApplicationCompleteControllerSpec extends SpecBase {
     businessPartner = "businessPartner"
   )
 
-  // TODO
+  private val userAnswers: UserAnswers = completeUserAnswersWithVatInfo
+    .set(EtmpEnrolmentResponseQuery, etmpEnrolmentResponse).success.value
+
   "ApplicationComplete Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      when(mockRegistrationConnector.createRegistration(any())(any())) thenReturn Right(etmpEnrolmentResponse).toFuture
-      when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Right(etmpEnrolmentResponse).toFuture
-
-      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
-        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
-        .build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
@@ -78,9 +64,9 @@ class ApplicationCompleteControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view(
           etmpEnrolmentResponse.iossReference,
           vatCustomerInfo.organisationName.get,
-          date,
-          date,
-          date,
+          includedSalesDate.format(dateMonthYearFormatter),
+          returnStartDate.format(dateFormatter),
+          includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request)
         )(request, messages(application)).toString
       }

@@ -41,7 +41,6 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
 
   implicit val format: OFormat[EtmpRegistrationRequest] = Json.format[EtmpRegistrationRequest]
 
-  // TODO Test no answers, full answers(where optional values used 2 entries (countries) one with full, one with opt))
   def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDateTime): EtmpRegistrationRequest = EtmpRegistrationRequest(
     administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
     customerIdentification = EtmpCustomerIdentification(vrn),

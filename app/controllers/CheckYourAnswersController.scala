@@ -121,7 +121,6 @@ class CheckYourAnswersController @Inject()(
       Ok(view(waypoints, vatRegistrationDetailsList, list, isValid))
   }
 
-  // TODO - > Need to create Audit Service and pass request.userAnswers (as JSON if not already)
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
 

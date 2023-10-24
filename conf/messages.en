@@ -637,6 +637,6 @@ applicationComplete.feedback.30seconds = (takes 30 seconds)
 
 errorSubmittingRegistration.title = We have a problem with our service right now
 errorSubmittingRegistration.heading = Your registration is not submitted
-errorSubmittingRegistration.tryAgainLater = We have saved you answers and you can <a class="govuk-link" href={0}>try again later</a>.
+errorSubmittingRegistration.tryAgainLater = We have saved your answers and you can <a class="govuk-link" href={0}>try again later</a>.
 errorSubmittingRegistration.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 errorSubmittingRegistration.your.account = Back to your account
