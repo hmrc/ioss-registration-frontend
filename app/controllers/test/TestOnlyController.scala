@@ -17,35 +17,26 @@
 package controllers.test
 
 import connectors.test.TestOnlyConnector
-import controllers.actions.{AuthenticatedControllerComponents, UnauthenticatedControllerComponents}
+import controllers.actions.UnauthenticatedControllerComponents
 import models.external.ExternalRequest
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
-import services.external.ExternalService
-import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TestOnlyController @Inject()(testConnector: TestOnlyConnector,
-                                   externalService: ExternalService,
-                                   cc: UnauthenticatedControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(cc) {
-
-  def deleteAccounts(): Action[AnyContent] = Action.async { implicit request =>
-    testConnector.dropAccounts()
-      .map(_ => Ok("Perf Tests Accounts MongoDB deleted"))
-      .recover {
-        case _: NotFoundException => Ok("Perf Tests Accounts did not exist")
-      }
-  }
+class TestOnlyController @Inject()(
+                                    testConnector: TestOnlyConnector,
+                                    cc: UnauthenticatedControllerComponents
+                                  )(implicit ec: ExecutionContext) extends FrontendController(cc) {
 
   private val externalRequest = ExternalRequest("BTA", "/business-account")
 
-  def enterFromExternal(): Action[AnyContent] = (cc.actionBuilder andThen cc.identify).async  {
+  def enterFromExternal(lang: Option[String] = None): Action[AnyContent] = (cc.actionBuilder andThen cc.identify).async {
     implicit request =>
-      externalService.getExternalResponse(externalRequest, request.userId).map{
-        response => Redirect(response.redirectUrl)
+      testConnector.externalEntry(externalRequest, lang).map {
+        response =>
+          response.fold(error => InternalServerError(error.body), r => Redirect(r.redirectUrl))
       }
 
   }
