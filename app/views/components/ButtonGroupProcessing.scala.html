@@ -15,12 +15,16 @@
  *@
 
 @this(govukButton: GovukButton)
-@(continueMessage: String, continueUrl: String = "")(implicit messages: Messages)
+
+@(continueMessage: String, continueUrl: String = "", waypoints: Waypoints)(implicit messages: Messages)
 <div class="govuk-button-group">
     @govukButton(
         ButtonViewModel(messages(continueMessage)).withAttribute(("id", "continue")).withAttribute("onclick", "showTheSpinner()")
     )
 
-    <!--to complete / copy from OSS
-    </a>-->
+    @if(waypoints.currentMode == CheckMode) {
+        <a id="saveProgress" role="button" href="" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+        @messages("saveProgress.button")
+        </a>
+    }
 </div>

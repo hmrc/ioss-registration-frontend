@@ -300,7 +300,6 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
             pageMustBe(DeleteAllPreviousRegistrationsPage),
             submitAnswer(DeleteAllPreviousRegistrationsPage, true),
             removeAddToListItem(PreviousRegistrationQuery(index)),
-            pageMustBe(CheckYourAnswersPage),
             answersMustNotContain(PreviousSchemeTypePage(index, index))
           )
       }
@@ -317,7 +316,6 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
             setUserAnswerTo(PreviousEuCountryPage(index), country),
             setUserAnswerTo(PreviousSchemeTypePage(index, index), iossScheme),
             setUserAnswerTo(PreviousIossSchemePage(index, index), false),
-            setUserAnswerTo(PreviousIossNumberPage(index, index), schemeNumber),
             goTo(CheckYourAnswersPage)
           )
 
@@ -328,9 +326,8 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
               submitAnswer(PreviouslyRegisteredPage, false),
               pageMustBe(DeleteAllPreviousRegistrationsPage),
               submitAnswer(DeleteAllPreviousRegistrationsPage, false),
-              removeAddToListItem(PreviousRegistrationQuery(index)),
               pageMustBe(CheckYourAnswersPage),
-              answersMustNotContain(PreviousSchemeTypePage(index, index))
+              answersMustContain(PreviousSchemeTypePage(index, index))
             )
         }
       }

@@ -18,8 +18,12 @@ package connectors
 
 import config.Service
 import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, ExternalEntryUrlResponseReads}
+import connectors.RegistrationHttpParser.{RegistrationResponseReads, RegistrationResultResponse}
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
+import logging.Logging
+import models.etmp.EtmpRegistrationRequest
 import play.api.Configuration
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 
@@ -28,11 +32,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpClient)
-                           (implicit executionContext: ExecutionContext) extends HttpErrorFunctions {
+                           (implicit executionContext: ExecutionContext) extends HttpErrorFunctions with Logging {
 
   private val baseUrl: Service = config.get[Service]("microservice.services.ioss-registration")
   def getVatCustomerInfo()(implicit hc: HeaderCarrier): Future[VatCustomerInfoResponse] = {
     httpClient.GET[VatCustomerInfoResponse](s"$baseUrl/vat-information")
+  }
+
+  def createRegistration(registrationRequest: EtmpRegistrationRequest)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
+    logger.info(s"EtmpRegistrationRequest with : ${Json.toJson(registrationRequest)}")
+    httpClient.POST[EtmpRegistrationRequest, RegistrationResultResponse](s"$baseUrl/create-registration", registrationRequest)
+  }.map {
+    result => result
   }
 
   def getSavedExternalEntry()(implicit hc: HeaderCarrier): Future[ExternalEntryUrlResponse] = {

@@ -16,6 +16,7 @@
 
 package models
 
+import logging.Logging
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.select.SelectItem
 import viewmodels.govuk.select._
@@ -273,7 +274,7 @@ object Country {
   def getCountryName(countryCode: String): String = euCountries.filter(_.code == countryCode).map(_.name).head
 }
 
-object CountryWithValidationDetails {
+object CountryWithValidationDetails extends Logging {
 
   lazy val euCountriesWithVRNValidationRules: Seq[CountryWithValidationDetails] = Seq(
     CountryWithValidationDetails(Country("AT", "Austria"), austriaVatNumberRegex, "the 9 characters", "U12345678"),
@@ -332,4 +333,23 @@ object CountryWithValidationDetails {
   private val swedenVatNumberRegex = """^SE[0-9]{12}$"""
   private val sloveniaVatNumberRegex = """^SI[0-9]{8}$"""
   private val slovakiaVatNumberRegex = """^SK[0-9]{10}$"""
+
+
+  def convertTaxIdentifierForTransfer(identifier: String, countryCode: String): String = {
+
+    CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == countryCode) match {
+      case Some(countryValidationDetails) =>
+        if (identifier.matches(countryValidationDetails.vrnRegex)) {
+          identifier.substring(2)
+        } else if (identifier.substring(2).matches(countryValidationDetails.vrnRegex)) {
+          identifier.substring(4)
+        } else {
+          identifier
+        }
+
+      case _ =>
+        logger.error("Error occurred while getting country code regex, unable to convert identifier")
+        throw new IllegalStateException("Error occurred while getting country code regex, unable to convert identifier")
+    }
+  }
 }

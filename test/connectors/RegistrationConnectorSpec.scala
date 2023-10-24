@@ -19,14 +19,18 @@ package connectors
 import base.SpecBase
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.domain.VatCustomerInfo
-import models.responses.{InvalidJson, NotFound, UnexpectedResponseStatus}
+import models.responses._
+import models.responses.etmp.EtmpEnrolmentResponse
 import org.scalacheck.Gen
 import play.api.Application
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
+import testutils.RegistrationData.etmpRegistrationRequest
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
+
+import java.time.LocalDateTime
 
 
 class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
@@ -99,6 +103,101 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
         val result = connector.getVatCustomerInfo().futureValue
 
         result mustBe Left(UnexpectedResponseStatus(status, s"Received unexpected response code $status"))
+      }
+    }
+  }
+
+  ".createRegistration" - {
+
+    val url: String = "/ioss-registration/create-registration"
+
+    "must return CREATED with a valid ETMP Enrolment Response when backend returns CREATED with a valid response body" in {
+
+      running(application) {
+
+        val etmpEnrolmentResponse: EtmpEnrolmentResponse =
+          EtmpEnrolmentResponse(
+            processingDateTime = LocalDateTime.now(),
+            formBundleNumber = Some("123456789"),
+            vrn = vrn.vrn,
+            iossReference = "123456789",
+            businessPartner = "Business partner"
+          )
+
+        val responseBody = Json.toJson(etmpEnrolmentResponse).toString()
+
+        server.stubFor(post(urlEqualTo(url))
+            .willReturn(aResponse.withStatus(CREATED)
+              .withBody(responseBody)))
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
+
+        result mustBe Right(etmpEnrolmentResponse)
+      }
+    }
+
+    "must return Left(InvalidJson) when the response body is not a valid ETMP Enrolment Response Json" in {
+
+      running(application) {
+
+        server.stubFor(post(urlEqualTo(url))
+            .willReturn(aResponse.withStatus(CREATED)
+              .withBody(Json.toJson("test").toString())))
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
+
+        result mustBe Left(InvalidJson)
+      }
+    }
+
+    "must return Conflict when backend responds with Conflict" in {
+
+      running(application) {
+
+        server.stubFor(post(urlEqualTo(url))
+            .willReturn(aResponse.withStatus(CONFLICT)))
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
+
+        result mustBe Left(ConflictFound)
+      }
+    }
+
+    "must return Internal Server Error when backend responds with Internal Server Error" in {
+
+      running(application) {
+
+        server.stubFor(post(urlEqualTo(url))
+          .willReturn(aResponse.withStatus(INTERNAL_SERVER_ERROR)))
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
+
+        result mustBe Left(InternalServerError)
+      }
+    }
+
+    "must return UnexpectedResponseStatus when any other error is returned" in {
+
+      val status = 123
+
+      running(application) {
+
+        server.stubFor(post(urlEqualTo(url))
+          .willReturn(aResponse.withStatus(status)))
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val result = connector.createRegistration(etmpRegistrationRequest).futureValue
+
+        result mustBe Left(UnexpectedResponseStatus(status, s"Unexpected response, status $status returned"))
       }
     }
   }

@@ -14,69 +14,70 @@
  * limitations under the License.
  *@
 
-@import components.ButtonGroupProcessing
+@import pages.CheckYourAnswersPage
+@import views.html.components.ButtonGroupProcessing
 
 @this(
-        layout: templates.Layout,
         formHelper: FormWithCSRF,
+        layout: templates.Layout,
         govukSummaryList: GovukSummaryList,
-        govukErrorSummary: GovukErrorSummary,
         button: ButtonGroupProcessing,
+        govukErrorSummary: GovukErrorSummary,
         govukWarningText: GovukWarningText
 )
 
 @(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, isValid: Boolean)(implicit request: Request[_], messages: Messages)
 
-    @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
+@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
-        @if(!isValid) {
-            @govukWarningText(WarningText(
-                iconFallbackText = Option(messages("site.warning")),
-                content = Text(messages("error.missing_answers"))
-            ))
-        }
-
-        <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
-
-        <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
-
-        @govukSummaryList(
-            SummaryListViewModel(
-                vatRegistrationDetailsList.rows
-            ).withCssClass("govuk-body govuk-!-margin-bottom-9")
-        )
-
-        <p class="govuk-body govuk-!-margin-bottom-9">
-        @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA"))
-        </p>
-
-        <h2 class="govuk-heading-m">@messages("checkYourAnswers.details.heading")</h2>
-
-        @govukSummaryList(list)
-
-        <p class="govuk-body">@messages("checkYourAnswers.info.p1")</p>
-
-        <p class="govuk-body">@messages("checkYourAnswers.info.p2")</p>
-
-        @if(isValid) {
-            @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, false)) {
-                @button("site.submit", routes.CheckYourAnswersController.onPageLoad().url)
-            }
-        } else {
-            <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
-            <p class="govuk-body">@messages("error.missing_answers_prompt.general")</p>
-
-            @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, true)) {
-                @button("error.resolve_missing_answers", routes.CheckYourAnswersController.onPageLoad().url)
-            }
-        }
-
-        <div id="processing-wheel" hidden>
-            <div id="processing" aria-live="polite" class="govuk-!-margin-bottom-9">
-                <h2 class="govuk-heading-m">
-                    @messages("site.processing")
-                </h2>
-                <div class="processing-wheel-loader"></div>
-            </div>
-        </div>
+    @if(!isValid) {
+        @govukWarningText(WarningText(
+            iconFallbackText = Option(messages("site.warning")),
+            content = Text(messages("error.missing_answers"))
+        ))
     }
+
+    <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
+
+    <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
+
+    @govukSummaryList(
+        SummaryListViewModel(
+            vatRegistrationDetailsList.rows
+        ).withCssClass("govuk-body govuk-!-margin-bottom-9")
+    )
+
+    <p class="govuk-body govuk-!-margin-bottom-9">
+    @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA"))
+    </p>
+
+    <h2 class="govuk-heading-m">@messages("checkYourAnswers.details.heading")</h2>
+
+    @govukSummaryList(list)
+
+    <p class="govuk-body">@messages("checkYourAnswers.info.p1")</p>
+
+    <p class="govuk-body">@messages("checkYourAnswers.info.p2")</p>
+
+    @if(isValid) {
+        @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = false)) {
+            @button("site.submit", CheckYourAnswersPage.route(waypoints).url, waypoints)
+        }
+    } else {
+        <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+        <p class="govuk-body">@messages("error.missing_answers_prompt.general")</p>
+
+        @formHelper(action = routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true)) {
+            @button("error.resolve_missing_answers", CheckYourAnswersPage.route(waypoints).url, waypoints)
+        }
+    }
+
+    <div id="processing-wheel" hidden>
+        <div id="processing" aria-live="polite" class="govuk-!-margin-bottom-9">
+            <h2 class="govuk-heading-m">
+            @messages("site.processing")
+            </h2>
+            <div class="processing-wheel-loader"></div>
+        </div>
+    </div>
+}

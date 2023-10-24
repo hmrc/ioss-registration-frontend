@@ -19,8 +19,9 @@ package generators
 import connectors.SavedUserAnswers
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
-import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
+import models.etmp._
+import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
@@ -177,14 +178,6 @@ trait ModelGenerators extends EitherValues {
       } yield BusinessContactDetails(fullName, telephoneNumber, emailAddress)
     }
 
-  implicit def arbitraryVrn: Arbitrary[Vrn] = Arbitrary {
-    for {
-      chars <- Gen.listOfN(9, Gen.numChar)
-    } yield {
-      Vrn(chars.mkString(""))
-    }
-  }
-
   def ukPostcode(): Gen[String] =
     for {
       numberOfFirstLetters <- choose(1, 2)
@@ -232,14 +225,6 @@ trait ModelGenerators extends EitherValues {
     }
   }
 
-  implicit val arbitraryPeriod: Arbitrary[Period] =
-    Arbitrary {
-      for {
-        year <- Gen.choose(2022, 2099)
-        quarter <- Gen.oneOf(Quarter.values)
-      } yield Period(year, quarter)
-    }
-
   implicit lazy val arbitraryFixedEstablishment: Arbitrary[TradeDetails] =
     Arbitrary {
       for {
@@ -279,5 +264,59 @@ trait ModelGenerators extends EitherValues {
         data = JsObject(Seq("test" -> Json.toJson("test")))
         now = Instant.now
       } yield SavedUserAnswers(vrn, data, None, now)
+    }
+
+  implicit lazy val arbitraryVrn: Arbitrary[Vrn] =
+    Arbitrary {
+      for {
+        chars <- Gen.listOfN(9, Gen.numChar)
+      } yield Vrn(chars.mkString(""))
+    }
+
+  implicit lazy val arbitraryEtmpAdministration: Arbitrary[EtmpAdministration] =
+    Arbitrary {
+      for {
+        messageType <- Gen.oneOf(EtmpMessageType.values)
+      } yield EtmpAdministration(messageType, "IOSS")
+    }
+
+  implicit lazy val arbitraryEtmpCustomerIdentification: Arbitrary[EtmpCustomerIdentification] =
+    Arbitrary {
+      for {
+        vrn <- arbitraryVrn.arbitrary
+      } yield EtmpCustomerIdentification(vrn)
+    }
+
+  implicit lazy val arbitraryVatNumberTraderId: Arbitrary[VatNumberTraderId] =
+    Arbitrary {
+      for {
+        vatNumber <- Gen.alphaNumStr
+      } yield VatNumberTraderId(vatNumber)
+    }
+
+  implicit lazy val arbitraryTaxRefTraderID: Arbitrary[TaxRefTraderID] =
+    Arbitrary {
+      for {
+        taxReferenceNumber <- Gen.alphaNumStr
+      } yield TaxRefTraderID(taxReferenceNumber)
+    }
+
+  implicit lazy val arbitraryEtmpWebsite: Arbitrary[EtmpWebsite] =
+    Arbitrary {
+      for {
+        websiteAddress <- Gen.alphaStr
+      } yield EtmpWebsite(websiteAddress)
+    }
+
+  implicit lazy val arbitraryEtmpTradingName: Arbitrary[EtmpTradingName] =
+    Arbitrary {
+      for {
+        tradingName <- Gen.alphaStr
+      } yield EtmpTradingName(tradingName)
+    }
+
+  implicit lazy val arbitrarySchemeType: Arbitrary[SchemeType] =
+    Arbitrary {
+      Gen.oneOf(SchemeType.values)
     }
 }

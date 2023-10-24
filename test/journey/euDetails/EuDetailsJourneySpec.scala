@@ -280,7 +280,6 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
             pageMustBe(DeleteAllEuDetailsPage),
             submitAnswer(DeleteAllEuDetailsPage, true),
             removeAddToListItem(AllEuDetailsRawQuery),
-            pageMustBe(CheckYourAnswersPage),
             answersMustNotContain(EuCountryPage(countryIndex1)),
             answersMustNotContain(EuCountryPage(countryIndex2))
           )

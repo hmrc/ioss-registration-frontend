@@ -108,18 +108,18 @@ document.addEventListener('DOMContentLoaded', function (event) {
             }
         }
     }
-
-    function showTheSpinner() {
-
-        //make the spinning wheel visible
-        document.getElementById("processing-wheel").hidden = false;
-
-        //make the button hidden
-        document.getElementById("continue").style.visibility = 'hidden';
-        document.getElementById("saveProgress").style.visibility = 'hidden';
-
-
-        return false;
-    }
 });
 
+
+function showTheSpinner() {
+
+    //make the spinning wheel visible
+    document.getElementById("processing-wheel").hidden = false;
+
+    //make the button hidden
+    document.getElementById("continue").style.visibility = 'hidden';
+    document.getElementById("saveProgress").style.visibility = 'hidden';
+
+
+    return false;
+}

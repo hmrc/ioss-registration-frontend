@@ -32,5 +32,5 @@ object CheckYourAnswersPage extends CheckAnswersPage {
     routes.CheckYourAnswersController.onPageLoad()
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    CheckYourAnswersPage // TODO - to ApplicationComplete when created
+    ApplicationCompletePage
 }

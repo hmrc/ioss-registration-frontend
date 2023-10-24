@@ -19,12 +19,16 @@ package controllers
 import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
 import models.CheckMode
-import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import models.responses.ConflictFound
+import pages.filters.CannotRegisterAlreadyRegisteredPage
+import pages.{CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.etmp.EtmpEnrolmentResponseQuery
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
-import utils.FutureSyntax._
+import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
@@ -34,18 +38,20 @@ import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.CheckYourAnswersView
 
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             cc: AuthenticatedControllerComponents,
+                                            registrationService: RegistrationService,
                                             view: CheckYourAnswersView
-                                          ) extends FrontendBaseController with I18nSupport with Logging with CompletionChecks {
+                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
     implicit request =>
+
       val thisPage = CheckYourAnswersPage
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
@@ -111,20 +117,37 @@ class CheckYourAnswersController @Inject()(
           bankDetailsIbanSummaryRow
         ).flatten
       )
-
       val isValid = validate()
       Ok(view(waypoints, vatRegistrationDetailsList, list, isValid))
   }
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
+
       getFirstValidationErrorRedirect(waypoints) match {
         case Some(errorRedirect) => if (incompletePrompt) {
           errorRedirect.toFuture
         } else {
           Redirect(routes.CheckYourAnswersController.onPageLoad()).toFuture
         }
-        case None => Future.successful(Ok)
+
+        case None =>
+          registrationService.createRegistrationRequest(request.userAnswers, request.vrn).flatMap {
+            case Right(response) =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(EtmpEnrolmentResponseQuery, response))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+
+            case Left(ConflictFound) =>
+              logger.warn("Conflict found on registration creation submission")
+              Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints)).toFuture
+
+            case Left(error) =>
+              // TODO Add SaveAndContinue when created
+              logger.error(s"Unexpected result on registration creation submission: ${error.body}")
+              Redirect(ErrorSubmittingRegistrationPage.route(waypoints)).toFuture
+          }
       }
   }
 }

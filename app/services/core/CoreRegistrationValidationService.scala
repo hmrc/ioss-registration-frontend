@@ -18,7 +18,8 @@ package services.core
 
 import connectors.core.ValidateCoreRegistrationConnector
 import logging.Logging
-import models.{CountryWithValidationDetails, PreviousScheme}
+import models.CountryWithValidationDetails.convertTaxIdentifierForTransfer
+import models.PreviousScheme
 import models.audit.CoreRegistrationAuditModel
 import models.core.{CoreRegistrationRequest, Match, SourceType}
 import models.requests.AuthenticatedDataRequest
@@ -108,22 +109,6 @@ class CoreRegistrationValidationService @Inject()(
       case PreviousScheme.OSSNU => "OSS"
       case PreviousScheme.IOSSWOI => "IOSS"
       case PreviousScheme.IOSSWI => "IOSS"
-    }
-  }
-
-  private def convertTaxIdentifierForTransfer(identifier: String, countryCode: String): String = {
-
-    CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == countryCode) match {
-      case Some(countryValidationDetails) =>
-        if (identifier.matches(countryValidationDetails.vrnRegex)) {
-          identifier.substring(2)
-        } else {
-          identifier
-        }
-
-      case _ =>
-        logger.error("Error occurred while getting country code regex, unable to convert identifier")
-        throw new IllegalStateException("Error occurred while getting country code regex, unable to convert identifier")
     }
   }
 }

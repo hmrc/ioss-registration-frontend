@@ -23,11 +23,15 @@ import java.util.Locale
 object Format {
 
   val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  val dateMonthYearFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
   val dateHintFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d M yyyy")
 
   val eisDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z")
     .withLocale(Locale.UK)
     .withZone(ZoneId.of("GMT"))
 
+  val eisDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
   val dateOfRegistrationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
 }

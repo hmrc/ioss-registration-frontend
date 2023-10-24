@@ -17,35 +17,13 @@
 package models.domain
 
 import models.{Country, PreviousScheme}
-import play.api.libs.json.{Json, OFormat, Reads, Writes}
+import play.api.libs.json.{Json, OFormat}
 
-sealed trait PreviousRegistration
+case class PreviousRegistration(country: Country, previousSchemesDetails: Seq[PreviousSchemeDetails])
 
 object PreviousRegistration {
 
-  implicit val reads: Reads[PreviousRegistration] =
-    PreviousRegistrationNew.format.widen[PreviousRegistration] orElse
-      PreviousRegistrationLegacy.format.widen[PreviousRegistration]
-
-  implicit val writes: Writes[PreviousRegistration] = Writes {
-    case p: PreviousRegistrationNew => Json.toJson(p)(PreviousRegistrationNew.format)
-    case l: PreviousRegistrationLegacy => Json.toJson(l)(PreviousRegistrationLegacy.format)
-  }
-
-}
-
-case class PreviousRegistrationNew(country: Country, previousSchemesDetails: Seq[PreviousSchemeDetails]) extends PreviousRegistration
-
-object PreviousRegistrationNew {
-
-  implicit val format: OFormat[PreviousRegistrationNew] = Json.format[PreviousRegistrationNew]
-}
-
-case class PreviousRegistrationLegacy(country: Country, vatNumber: String) extends PreviousRegistration
-
-object PreviousRegistrationLegacy {
-
-  implicit val format: OFormat[PreviousRegistrationLegacy] = Json.format[PreviousRegistrationLegacy]
+  implicit val format: OFormat[PreviousRegistration] = Json.format[PreviousRegistration]
 }
 
 case class PreviousSchemeDetails(previousScheme: PreviousScheme, previousSchemeNumbers: PreviousSchemeNumbers)
