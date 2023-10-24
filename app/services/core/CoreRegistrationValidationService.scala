@@ -19,7 +19,7 @@ package services.core
 import connectors.core.ValidateCoreRegistrationConnector
 import logging.Logging
 import models.CountryWithValidationDetails.convertTaxIdentifierForTransfer
-import models.{CountryWithValidationDetails, PreviousScheme}
+import models.PreviousScheme
 import models.audit.CoreRegistrationAuditModel
 import models.core.{CoreRegistrationRequest, Match, SourceType}
 import models.requests.AuthenticatedDataRequest
