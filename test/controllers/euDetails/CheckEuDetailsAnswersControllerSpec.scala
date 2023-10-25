@@ -102,7 +102,7 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
       running(application) {
-        val request = FakeRequest(POST, routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex, false).url)
+        val request = FakeRequest(POST, routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex, incompletePromptShown = false).url)
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER

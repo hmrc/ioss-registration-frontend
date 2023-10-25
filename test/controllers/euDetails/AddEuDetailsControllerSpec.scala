@@ -42,8 +42,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
   private val countryIndex: Index = Index(0)
-  //private val country: Country = arbitraryCountry.arbitrary.sample.value
-  private val country: Country = Country.euCountries.head
+  private val country: Country = arbitraryCountry.arbitrary.sample.value
 
   val formProvider = new AddEuDetailsFormProvider()
   val form: Form[Boolean] = formProvider()

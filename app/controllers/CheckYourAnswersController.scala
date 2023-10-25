@@ -19,13 +19,14 @@ package controllers
 import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
 import models.CheckMode
+import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.responses.ConflictFound
 import pages.filters.CannotRegisterAlreadyRegisteredPage
 import pages.{CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.etmp.EtmpEnrolmentResponseQuery
-import services.RegistrationService
+import services.{AuditService, RegistrationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
@@ -44,6 +45,7 @@ class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             cc: AuthenticatedControllerComponents,
                                             registrationService: RegistrationService,
+                                            auditService: AuditService,
                                             view: CheckYourAnswersView
                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
@@ -134,16 +136,19 @@ class CheckYourAnswersController @Inject()(
         case None =>
           registrationService.createRegistrationRequest(request.userAnswers, request.vrn).flatMap {
             case Right(response) =>
+              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, request.userAnswers, SubmissionResult.Success))
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(EtmpEnrolmentResponseQuery, response))
                 _ <- cc.sessionRepository.set(updatedAnswers)
               } yield Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
 
             case Left(ConflictFound) =>
+              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, request.userAnswers, SubmissionResult.Duplicate))
               logger.warn("Conflict found on registration creation submission")
               Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints)).toFuture
 
             case Left(error) =>
+              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, request.userAnswers, SubmissionResult.Failure))
               // TODO Add SaveAndContinue when created
               logger.error(s"Unexpected result on registration creation submission: ${error.body}")
               Redirect(ErrorSubmittingRegistrationPage.route(waypoints)).toFuture
