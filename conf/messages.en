@@ -621,6 +621,11 @@ emailVerificationCodesExceeded.heading = You''ve entered too many incorrect code
 emailVerificationCodesExceeded.paragraph = We''ve saved your progress. You can try again in 24 hours or use a different email address.
 emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href="/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/business-contact-details">Return to contact details page</a>
 
+
+noMoreWelsh.title = Mae gweddill y gwasanaeth hwn yn Saesneg yn unig ar hyn o bryd
+noMoreWelsh.heading = Mae gweddill y gwasanaeth hwn yn Saesneg yn unig ar hyn o bryd
+noMoreWelsh.submit = Yn eich blaen
+
 applicationComplete.title = You are registered for the Import One Stop Shop scheme
 applicationComplete.heading = You are registered for the Import One Stop Shop scheme
 applicationComplete.reference = Your reference number is <br><span class="govuk-!-font-weight-bold">{0}</span>

@@ -16,7 +16,9 @@
 
 package controllers.filters
 
+import connectors.RegistrationConnector
 import controllers.actions._
+import logging.Logging
 import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -24,17 +26,25 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.filters.CannotRegisterAlreadyRegisteredView
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class CannotRegisterAlreadyRegisteredController @Inject()(
                                                            override val messagesApi: MessagesApi,
                                                            cc: UnauthenticatedControllerComponents,
+                                                           registrationConnector: RegistrationConnector,
                                                            view: CannotRegisterAlreadyRegisteredView
-                                                         ) extends FrontendBaseController with I18nSupport {
+                                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify).async {
     implicit request =>
-      Ok(view())
+      registrationConnector.getSavedExternalEntry().map {
+        case Right(response) =>
+          Ok(view(response.url))
+        case Left(e) =>
+          logger.warn(s"There was an error when getting saved external entry url ${e.body} but we didn't block the user from continuing the journey")
+          Ok(view(None))
+      }
   }
 }

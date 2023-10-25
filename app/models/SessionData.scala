@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.{JsError, JsObject, JsPath, JsResultException, JsSuccess, Json, OFormat, OWrites, Reads, Writes, __}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
@@ -25,7 +25,7 @@ import scala.util.{Failure, Success, Try}
 final case class SessionData(
                               userId: String,
                               data: JsObject = Json.obj(),
-                              lastUpdated: Instant = Instant.now()
+                              lastUpdated: Instant = Instant.now
                             ) {
 
   def get[A](key: JsPath)(implicit rds: Reads[A]): Option[A] =

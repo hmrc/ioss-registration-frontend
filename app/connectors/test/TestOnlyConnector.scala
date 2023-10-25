@@ -32,9 +32,6 @@ class TestOnlyConnector @Inject()(
 
   private val baseUrl = config.get[Service](s"microservice.services.ioss-registration")
 
-  private lazy val dropAccountsUrl = s"$baseUrl/test-only/delete-accounts"
-  def dropAccounts()(implicit hc: HeaderCarrier): Future[HttpResponse] = httpClient.DELETE[HttpResponse](dropAccountsUrl)
-
   def externalEntry(externalRequest: ExternalRequest, maybeLang: Option[String])(implicit hc: HeaderCarrier): Future[ExternalResponseResponse] = {
     val url =
       maybeLang match {

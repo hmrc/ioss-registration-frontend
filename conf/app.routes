@@ -50,6 +50,8 @@ GET         /answers-deleted                                                 con
 
 GET         /progress-saved                                                  controllers.SavedProgressController.onPageLoad(continueUrl: RedirectUrl)
 
+GET         /no-welsh-service                                                controllers.external.NoMoreWelshController.onPageLoad()
+
 # Filter questions section
 GET         /ioss-registered                                                 controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /ioss-registered                                                 controllers.filters.RegisteredForIossInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
