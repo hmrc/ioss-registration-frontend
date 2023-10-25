@@ -41,7 +41,7 @@ final case class SessionData(
     }
 
     updatedData.map {
-      d => copy (data = d)
+      d => copy(data = d)
     }
   }
 
@@ -55,7 +55,7 @@ final case class SessionData(
     }
 
     updatedData.map {
-      d => copy (data = d)
+      d => copy(data = d)
     }
   }
 }
@@ -70,7 +70,7 @@ object SessionData {
       (__ \ "userId").read[String] and
         (__ \ "data").read[JsObject] and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
-      ) (SessionData.apply _)
+      )(SessionData.apply _)
   }
 
   val writes: OWrites[SessionData] = {
@@ -81,7 +81,7 @@ object SessionData {
       (__ \ "userId").write[String] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
-      ) (unlift(SessionData.unapply))
+      )(unlift(SessionData.unapply))
   }
 
   implicit val format: OFormat[SessionData] = OFormat(reads, writes)
