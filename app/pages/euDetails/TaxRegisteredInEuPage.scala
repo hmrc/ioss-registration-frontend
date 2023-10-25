@@ -24,6 +24,8 @@ import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.euDetails.AllEuDetailsQuery
 
+import scala.util.Try
+
 case object TaxRegisteredInEuPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
@@ -47,4 +49,12 @@ case object TaxRegisteredInEuPage extends QuestionPage[Boolean] {
       case (Some(false), _) => CheckYourAnswersPage
       case _ => JourneyRecoveryPage
     }
+
+  override def cleanup(value: Option[Boolean], userAnswers: UserAnswers): Try[UserAnswers] = {
+    value match {
+      case Some(false) =>
+        userAnswers.remove(AllEuDetailsQuery)
+      case _ => super.cleanup(value, userAnswers)
+    }
+  }
 }
