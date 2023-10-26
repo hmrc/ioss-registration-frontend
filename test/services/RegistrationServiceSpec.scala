@@ -31,8 +31,6 @@ import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
 
-import java.time.LocalDateTime
-
 class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAndAfterEach {
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -44,16 +42,10 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
     reset(mockRegistrationConnector)
   }
 
-  // TODO -> Populate a userAnswers model from arbitrary request to use here eqTo
   "must create a registration request from user answers provided and return a successful ETMP enrolment response" in {
 
-    val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(
-      processingDateTime = LocalDateTime.now(stubClockAtArbitraryDate),
-      formBundleNumber = Some(arbitrary[String].sample.value),
-      vrn = vrn.vrn,
-      iossReference = arbitrary[TaxRefTraderID].sample.value.taxReferenceNumber,
-      businessPartner = arbitrary[String].sample.value
-    )
+    val etmpEnrolmentResponse: EtmpEnrolmentResponse =
+      EtmpEnrolmentResponse(iossReference = arbitrary[TaxRefTraderID].sample.value.taxReferenceNumber)
 
     when(mockRegistrationConnector.createRegistration(any())(any())) thenReturn Right(etmpEnrolmentResponse).toFuture
 

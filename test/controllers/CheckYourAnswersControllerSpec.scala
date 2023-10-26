@@ -23,13 +23,13 @@ import models.requests.AuthenticatedDataRequest
 import models.responses.etmp.EtmpEnrolmentResponse
 import models.responses.{ConflictFound, InternalServerError => ServerError}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito
-import org.mockito.Mockito.{doNothing, reset, times, verify, when}
+import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.filters.CannotRegisterAlreadyRegisteredPage
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.inject.bind
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.etmp.EtmpEnrolmentResponseQuery
@@ -49,10 +49,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
   private val mockAuditService: AuditService = mock[AuditService]
 
   override def beforeEach(): Unit = {
-    reset(
-      mockRegistrationService,
-      mockAuditService
-    )
+    reset(mockRegistrationService)
+    reset(mockAuditService)
+
+    super.beforeEach()
   }
 
   "Check Your Answers Controller" - {
@@ -85,13 +85,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
-        val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(
-          processingDateTime = LocalDateTime.now(),
-          formBundleNumber = None,
-          vrn = vrn.vrn,
-          iossReference = "",
-          businessPartner = ""
-        )
+        val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(iossReference = "123456789")
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
         when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Right(etmpEnrolmentResponse).toFuture
@@ -108,11 +102,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
-          val dataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
+          implicit val dataRequest: AuthenticatedDataRequest[AnyContentAsEmpty.type] =
+            AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
             RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, SubmissionResult.Success
-          )(dataRequest)
+          )
 
           val expectedAnswers = completeUserAnswersWithVatInfo
             .set(EtmpEnrolmentResponseQuery, etmpEnrolmentResponse).success.value
@@ -139,11 +134,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
-          val dataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
+          implicit val dataRequest: AuthenticatedDataRequest[AnyContentAsEmpty.type] =
+            AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
             RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, SubmissionResult.Duplicate
-          )(dataRequest)
+          )
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustEqual CannotRegisterAlreadyRegisteredPage.route(waypoints).url
@@ -167,11 +163,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           val result = route(application, request).value
 
-          val dataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
+          implicit val dataRequest: AuthenticatedDataRequest[AnyContentAsEmpty.type] =
+            AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
             RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, SubmissionResult.Failure
-          )(dataRequest)
+          )
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe ErrorSubmittingRegistrationPage.route(waypoints).url

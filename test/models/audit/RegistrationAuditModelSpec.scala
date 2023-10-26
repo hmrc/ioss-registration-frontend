@@ -52,5 +52,4 @@ class RegistrationAuditModelSpec extends SpecBase {
       registrationAuditModel.detail mustBe expectedJson
     }
   }
-
 }

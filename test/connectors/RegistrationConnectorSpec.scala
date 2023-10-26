@@ -17,7 +17,7 @@
 package connectors
 
 import base.SpecBase
-import com.github.tomakehurst.wiremock.client.WireMock.{ok, _}
+import com.github.tomakehurst.wiremock.client.WireMock._
 import models.domain.VatCustomerInfo
 import models.external.ExternalEntryUrl
 import models.responses._
@@ -30,8 +30,6 @@ import play.api.test.Helpers.running
 import testutils.RegistrationData.etmpRegistrationRequest
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
-
-import java.time.LocalDateTime
 
 
 class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
@@ -181,14 +179,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
       running(application) {
 
-        val etmpEnrolmentResponse: EtmpEnrolmentResponse =
-          EtmpEnrolmentResponse(
-            processingDateTime = LocalDateTime.now(),
-            formBundleNumber = Some("123456789"),
-            vrn = vrn.vrn,
-            iossReference = "123456789",
-            businessPartner = "Business partner"
-          )
+        val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(iossReference = "123456789")
 
         val responseBody = Json.toJson(etmpEnrolmentResponse).toString()
 

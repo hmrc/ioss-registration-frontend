@@ -26,7 +26,7 @@ import play.api.test.Helpers._
 import queries.etmp.EtmpEnrolmentResponseQuery
 import views.html.ApplicationCompleteView
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 
 class ApplicationCompleteControllerSpec extends SpecBase {
 
@@ -34,13 +34,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
   private val returnStartDate = commencementDate.withDayOfMonth(commencementDate.lengthOfMonth()).plusDays(1)
   private val includedSalesDate = commencementDate.withDayOfMonth(1)
 
-  private val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(
-    processingDateTime = LocalDateTime.now(stubClockAtArbitraryDate),
-    formBundleNumber = None,
-    vrn = vrn.vrn,
-    iossReference = "123456789",
-    businessPartner = "businessPartner"
-  )
+  private val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(iossReference = "123456789")
 
   private val userAnswers: UserAnswers = completeUserAnswersWithVatInfo
     .set(EtmpEnrolmentResponseQuery, etmpEnrolmentResponse).success.value

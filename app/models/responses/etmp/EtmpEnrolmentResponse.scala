@@ -18,15 +18,7 @@ package models.responses.etmp
 
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.LocalDateTime
-
-case class EtmpEnrolmentResponse(
-                                  processingDateTime: LocalDateTime,
-                                  formBundleNumber: Option[String],
-                                  vrn: String,
-                                  iossReference: String,
-                                  businessPartner: String
-                                )
+case class EtmpEnrolmentResponse(iossReference: String)
 
 object EtmpEnrolmentResponse {
 

@@ -23,7 +23,9 @@ sealed trait SubmissionResult
 object SubmissionResult extends Enumerable.Implicits {
 
   case object Success extends WithName("success") with SubmissionResult
+
   case object Failure extends WithName("failure") with SubmissionResult
+
   case object Duplicate extends WithName("failure-duplicate-submission") with SubmissionResult
 
   val values: Seq[SubmissionResult] = Seq(Success, Failure, Duplicate)

@@ -20,7 +20,7 @@ import config.Service
 import connectors.test.TestOnlyExternalResponseHttpParser.{ExternalResponseReads, ExternalResponseResponse}
 import models.external.ExternalRequest
 import play.api.Configuration
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
