@@ -141,6 +141,8 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
       val application =
         applicationBuilder(userAnswers = Some(baseUserAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
@@ -154,7 +156,8 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual DeletePreviousSchemePage(index, index).navigate(waypoints, emptyUserAnswers, baseUserAnswers).url
+        redirectLocation(result).value mustBe
+          DeletePreviousSchemePage(index, index).navigate(waypoints, baseUserAnswers, baseUserAnswers).url
         verifyNoInteractions(mockSessionRepository)
       }
     }
