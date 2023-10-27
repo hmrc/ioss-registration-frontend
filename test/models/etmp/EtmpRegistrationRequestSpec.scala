@@ -59,9 +59,9 @@ class EtmpRegistrationRequestSpec extends SpecBase {
 
   private def convertToTraderId(euDetails: EuDetails): Option[TraderId] = {
     euDetails.registrationType match {
-      case Some(RegistrationType.VatNumber) if euDetails.euVatNumber.isDefined =>
+      case Some(RegistrationType.VatNumber) =>
         Some(VatNumberTraderId(euDetails.euVatNumber.value))
-      case Some(RegistrationType.TaxId) if euDetails.euTaxReference.isDefined =>
+      case Some(RegistrationType.TaxId) =>
         Some(TaxRefTraderID(euDetails.euTaxReference.value))
       case _ => None
     }
