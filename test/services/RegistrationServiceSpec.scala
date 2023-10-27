@@ -44,7 +44,6 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
     reset(mockRegistrationConnector)
   }
 
-  // TODO -> Populate a userAnswers model from arbitrary request to use here eqTo
   "must create a registration request from user answers provided and return a successful ETMP enrolment response" in {
 
     val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(

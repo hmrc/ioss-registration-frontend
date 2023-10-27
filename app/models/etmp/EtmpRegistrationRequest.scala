@@ -41,13 +41,14 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
 
   implicit val format: OFormat[EtmpRegistrationRequest] = Json.format[EtmpRegistrationRequest]
 
-  def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDateTime): EtmpRegistrationRequest = EtmpRegistrationRequest(
-    administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
-    customerIdentification = EtmpCustomerIdentification(vrn),
-    tradingNames = getTradingNames(answers),
-    schemeDetails = getSchemeDetails(answers, commencementDate),
-    bankDetails = getBankDetails(answers)
-  )
+  def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDateTime): EtmpRegistrationRequest =
+    EtmpRegistrationRequest(
+      administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
+      customerIdentification = EtmpCustomerIdentification(vrn),
+      tradingNames = getTradingNames(answers),
+      schemeDetails = getSchemeDetails(answers, commencementDate),
+      bankDetails = getBankDetails(answers)
+    )
 
   private def getSchemeDetails(answers: UserAnswers, commencementDate: LocalDateTime): EtmpSchemeDetails = EtmpSchemeDetails(
     commencementDate = commencementDate.format(eisDateFormatter),

@@ -49,15 +49,6 @@ object PreviousScheme extends Enumerable.Implicits {
       )
   }
 
-  def iossOptions(implicit messages: Messages): Seq[RadioItem] = iossValues.zipWithIndex.map {
-    case (value, index) =>
-      RadioItem(
-        content = Text(messages(s"previousScheme.${value.toString}")),
-        value = Some(value.toString),
-        id = Some(s"value_$index")
-      )
-  }
-
   implicit val enumerable: Enumerable[PreviousScheme] =
     Enumerable(values.map(v => v.toString -> v): _*)
 }

@@ -103,6 +103,13 @@ trait ModelGenerators extends EitherValues {
       }
     }
 
+  implicit lazy val arbitraryWebsite: Arbitrary[Website] =
+    Arbitrary {
+      for {
+        site <- Gen.alphaStr
+      } yield Website(site)
+    }
+
   private def commonFieldString(maxLength: Int): Gen[String] = (for {
     length <- choose(1, maxLength)
     chars <- listOfN(length, commonFieldSafeInputs)
