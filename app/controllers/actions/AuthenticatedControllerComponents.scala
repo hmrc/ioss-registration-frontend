@@ -41,11 +41,14 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def checkOtherCountryRegistration: CheckOtherCountryRegistrationFilter
 
+  def checkRegistration: CheckRegistrationFilterProvider
+
   def checkEmailVerificationStatus: CheckEmailVerificationFilterProvider
 
   def authAndGetData(): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     actionBuilder andThen
       identify andThen
+      checkRegistration() andThen
       getData andThen
       requireData() andThen
       checkOtherCountryRegistration()
@@ -77,5 +80,6 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                requireData: AuthenticatedDataRequiredAction,
                                                                limitIndex: MaximumIndexFilterProvider,
                                                                checkOtherCountryRegistration: CheckOtherCountryRegistrationFilter,
-                                                               checkEmailVerificationStatus: CheckEmailVerificationFilterProvider
+                                                               checkEmailVerificationStatus: CheckEmailVerificationFilterProvider,
+                                                               checkRegistration: CheckRegistrationFilterProvider
                                                              ) extends AuthenticatedControllerComponents
