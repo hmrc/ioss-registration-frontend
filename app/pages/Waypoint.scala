@@ -21,6 +21,7 @@ import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.tradingNames.AddTradingNamePage
 import pages.previousRegistrations.AddPreviousRegistrationPage
 import pages.website.AddWebsitePage
+import pages.AmendYourAnswersPage
 
 case class Waypoint(
                      page: WaypointPage,
@@ -41,7 +42,8 @@ object Waypoint {
       AddWebsitePage().normalModeUrlFragment ->  AddWebsitePage().waypoint(NormalMode),
       AddWebsitePage().checkModeUrlFragment ->  AddWebsitePage().waypoint(CheckMode),
       // Continue journey
-      CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint
+      CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint,
+      AmendYourAnswersPage.urlFragment -> AmendYourAnswersPage.waypoint
     )
 
   def fromString(s: String): Option[Waypoint] =

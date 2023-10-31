@@ -50,12 +50,16 @@ object TradingNameSummary {
                      (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllTradingNames).map {
       tradingNames =>
+        println("Amend waypoint: " + waypoints)
+        println("Amend waypoint tradingNames: " + tradingNames)
+        println("Amend waypoint mode: " + waypoints.currentMode)
 
         val value = tradingNames.map {
           name =>
             HtmlFormat.escape(name.name)
         }.mkString("<br/>")
 
+        println("ChangeLink: " + AddTradingNamePage().changeLink(waypoints, sourcePage).url)
         SummaryListRowViewModel(
           key = "tradingName.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),

@@ -48,6 +48,7 @@ class AddTradingNameController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
+      println("AddTradingNameController")
       getDerivedItems(waypoints, DeriveNumberOfTradingNames) {
         number =>
 
