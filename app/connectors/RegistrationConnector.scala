@@ -41,7 +41,6 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
   }
 
   def createRegistration(registrationRequest: EtmpRegistrationRequest)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
-    logger.info(s"EtmpRegistrationRequest with : ${Json.toJson(registrationRequest)}")
     httpClient.POST[EtmpRegistrationRequest, RegistrationResultResponse](s"$baseUrl/create-registration", registrationRequest)
   }.map {
     result => result
