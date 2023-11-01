@@ -85,7 +85,7 @@ class WebSiteJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGener
             createWebSiteSubmission(0, submitAnother = false),
             goTo(AddWebsitePage()),
             createChangeAnswerSubmission(0),
-            pageMustBe(AddWebsitePage()),
+            pageMustBe(AddWebsitePage(Some(Index(0)))),
             answerMustEqual(WebsitePage(Index(0)), Website("updated-website-0"))
           )
       }
@@ -108,7 +108,7 @@ class WebSiteJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGener
           initialise,
           createChangeAnswerSubmission(1),
           createChangeAnswerSubmission(2),
-          pageMustBe(AddWebsitePage()),
+          pageMustBe(AddWebsitePage(Some(Index(2)))),
           answerMustEqual(WebsitePage(Index(0)), Website("website-0")),
           answerMustEqual(WebsitePage(Index(1)), Website("updated-website-1")),
           answerMustEqual(WebsitePage(Index(2)), Website("updated-website-2")),

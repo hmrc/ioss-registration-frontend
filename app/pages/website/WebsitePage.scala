@@ -17,7 +17,7 @@
 package pages.website
 
 import models.{Index, NormalMode, UserAnswers, Website}
-import pages.{AddToListQuestionPage, Page, QuestionPage, Waypoint, Waypoints}
+import pages.{AddToListQuestionPage, NonEmptyWaypoints, Page, QuestionPage, Waypoint, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.AllWebsites
@@ -34,6 +34,9 @@ case class WebsitePage(index: Index) extends QuestionPage[Website] with AddToLis
     controllers.website.routes.WebsiteController.onPageLoad(waypoints, index)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    AddWebsitePage(Some(index))
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     AddWebsitePage(Some(index))
 
   override def cleanup(value: Option[Website], userAnswers: UserAnswers): Try[UserAnswers] = {
