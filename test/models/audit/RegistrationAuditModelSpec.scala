@@ -18,6 +18,7 @@ package models.audit
 
 import base.SpecBase
 import models.requests.AuthenticatedDataRequest
+import models.responses.etmp.EtmpEnrolmentResponse
 import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
@@ -26,6 +27,7 @@ class RegistrationAuditModelSpec extends SpecBase {
 
   private val registrationAuditType: RegistrationAuditType = RegistrationAuditType.CreateRegistration
   private val submissionResult: SubmissionResult = SubmissionResult.values.head
+  private val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(iossReference = "123456789")
 
   "RegistrationAuditModelSpec" - {
 
@@ -38,6 +40,7 @@ class RegistrationAuditModelSpec extends SpecBase {
       val registrationAuditModel = RegistrationAuditModel.build(
         registrationAuditType = registrationAuditType,
         userAnswers = emptyUserAnswers,
+        etmpEnrolmentResponse = Some(etmpEnrolmentResponse),
         submissionResult = submissionResult
       )
 
@@ -46,6 +49,7 @@ class RegistrationAuditModelSpec extends SpecBase {
         "browserUserAgent" -> "",
         "requestersVrn" -> request.vrn.vrn,
         "userAnswersDetails" -> Json.toJson(emptyUserAnswers),
+        "etmpEnrolmentResponse" -> Json.toJson(etmpEnrolmentResponse),
         "submissionResult" -> submissionResult
       )
 

@@ -136,19 +136,25 @@ class CheckYourAnswersController @Inject()(
         case None =>
           registrationService.createRegistrationRequest(request.userAnswers, request.vrn).flatMap {
             case Right(response) =>
-              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, request.userAnswers, SubmissionResult.Success))
+              auditService.audit(RegistrationAuditModel.build(
+                RegistrationAuditType.CreateRegistration, request.userAnswers, Some(response), SubmissionResult.Success)
+              )
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(EtmpEnrolmentResponseQuery, response))
                 _ <- cc.sessionRepository.set(updatedAnswers)
               } yield Redirect(CheckYourAnswersPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
 
             case Left(ConflictFound) =>
-              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, request.userAnswers, SubmissionResult.Duplicate))
+              auditService.audit(RegistrationAuditModel.build(
+                RegistrationAuditType.CreateRegistration, request.userAnswers, None, SubmissionResult.Duplicate)
+              )
               logger.warn("Conflict found on registration creation submission")
               Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints)).toFuture
 
             case Left(error) =>
-              auditService.audit(RegistrationAuditModel.build(RegistrationAuditType.CreateRegistration, request.userAnswers, SubmissionResult.Failure))
+              auditService.audit(RegistrationAuditModel.build(
+                RegistrationAuditType.CreateRegistration, request.userAnswers, None, SubmissionResult.Failure)
+              )
               // TODO Add SaveAndContinue when created
               logger.error(s"Unexpected result on registration creation submission: ${error.body}")
               Redirect(ErrorSubmittingRegistrationPage.route(waypoints)).toFuture

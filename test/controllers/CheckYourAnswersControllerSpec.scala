@@ -39,7 +39,6 @@ import utils.FutureSyntax.FutureOps
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
-import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency with BeforeAndAfterEach {
@@ -106,7 +105,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
-            RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, SubmissionResult.Success
+            RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, Some(etmpEnrolmentResponse), SubmissionResult.Success
           )
 
           val expectedAnswers = completeUserAnswersWithVatInfo
@@ -138,7 +137,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
-            RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, SubmissionResult.Duplicate
+            RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, None, SubmissionResult.Duplicate
           )
 
           status(result) mustBe SEE_OTHER
@@ -167,7 +166,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
             AuthenticatedDataRequest(request, testCredentials, vrn, completeUserAnswersWithVatInfo)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
-            RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, SubmissionResult.Failure
+            RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, None, SubmissionResult.Failure
           )
 
           status(result) mustBe SEE_OTHER
