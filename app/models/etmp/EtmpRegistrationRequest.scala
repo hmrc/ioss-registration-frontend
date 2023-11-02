@@ -18,11 +18,15 @@ package models.etmp
 
 import formats.Format.eisDateFormatter
 import logging.Logging
+import models.previousRegistrations.NonCompliantDetails
+import models.{BusinessContactDetails, Index, UserAnswers}
+import pages.tradingNames.HasTradingNamePage
 import models.{BusinessContactDetails, UserAnswers}
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import pages.tradingNames.HasTradingNamePage
 import play.api.libs.json.{Json, OFormat}
 import queries.AllWebsites
+import queries.previousRegistration.NonCompliantDetailsQuery
 import queries.tradingNames.AllTradingNames
 import services.etmp.{EtmpEuRegistrations, EtmpPreviousEuRegistrations}
 import uk.gov.hmrc.domain.Vrn
@@ -58,8 +62,8 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
     contactName = getBusinessContactDetails(answers).fullName,
     businessTelephoneNumber = getBusinessContactDetails(answers).telephoneNumber,
     businessEmailId = getBusinessContactDetails(answers).emailAddress,
-    nonCompliantReturns = None, // TODO -> VEIOSS-256
-    nonCompliantPayments = None // TODO -> VEIOSS-256
+    nonCompliantReturns = getNonCompliantDetails(answers).nonCompliantReturns,
+    nonCompliantPayments = getNonCompliantDetails(answers).nonCompliantPayments
   )
 
   private def getTradingNames(answers: UserAnswers): List[EtmpTradingName] = {
@@ -116,5 +120,14 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
         val exception = new IllegalStateException("User must provide bank details")
         logger.error(exception.getMessage, exception)
         throw exception
+    }
+
+  private def getNonCompliantDetails(answers: UserAnswers, index: Index): NonCompliantDetails =
+    answers.get(NonCompliantDetailsQuery(index)) match {
+      case Some(nonCompliantDetails) =>
+        NonCompliantDetails(
+          nonCompliantReturns = nonCompliantDetails.nonCompliantReturns,
+          nonCompliantPayments = nonCompliantDetails.nonCompliantPayments
+        )
     }
 }

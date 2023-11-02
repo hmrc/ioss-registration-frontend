@@ -16,6 +16,7 @@
 
 package models.domain
 
+import models.previousRegistrations.NonCompliantDetails
 import models.{Country, PreviousScheme}
 import play.api.libs.json.{Json, OFormat}
 
@@ -26,7 +27,11 @@ object PreviousRegistration{
   implicit val format: OFormat[PreviousRegistration] = Json.format[PreviousRegistration]
 }
 
-case class PreviousSchemeDetails(previousScheme: PreviousScheme, previousSchemeNumbers: PreviousSchemeNumbers)
+case class PreviousSchemeDetails(
+                                  previousScheme: PreviousScheme,
+                                  previousSchemeNumbers: PreviousSchemeNumbers,
+                                  nonCompliantDetails: Option[NonCompliantDetails]
+                                )
 
 object PreviousSchemeDetails {
 
