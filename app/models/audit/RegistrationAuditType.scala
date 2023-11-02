@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package models.responses.etmp
+package models.audit
 
-import play.api.libs.json.{Json, OFormat}
+import models.{Enumerable, WithName}
 
-case class EtmpEnrolmentResponse(iossReference: String)
+sealed trait RegistrationAuditType {
+  val auditType: String
+  val transactionName: String
+}
 
-object EtmpEnrolmentResponse {
+object RegistrationAuditType extends Enumerable.Implicits {
+  case object CreateRegistration extends WithName("CreateRegistration") with RegistrationAuditType {
+    override val auditType: String = "RegistrationSubmitted"
+    override val transactionName: String = "registration-submitted"
+  }
 
-  implicit val format: OFormat[EtmpEnrolmentResponse] = Json.format[EtmpEnrolmentResponse]
+  // TODO -> AmendRegistration
 }

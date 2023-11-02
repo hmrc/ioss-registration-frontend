@@ -80,9 +80,7 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       val application =
         applicationBuilder(userAnswers = Some(answers))
-          .overrides(
-            bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
-          )
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
           .build()
 
       running(application) {
