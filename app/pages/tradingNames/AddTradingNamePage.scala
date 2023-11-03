@@ -40,7 +40,6 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
   override def toString: String = "addTradingName"
 
   override def route(waypoints: Waypoints): Call = {
-    println("AddTradingNameController route: " + waypoints)
     routes.AddTradingNameController.onPageLoad(waypoints)
   }
 

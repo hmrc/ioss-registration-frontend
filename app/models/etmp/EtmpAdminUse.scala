@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package pages
+package models.etmp
 
-import controllers.routes
-import models.UserAnswers
-import play.api.mvc.Call
+import play.api.libs.json.{Json, OFormat}
 
-object AmendYourAnswersPage extends CheckAnswersPage {
+import java.time.LocalDateTime
 
-  override def isTheSamePage(other: Page): Boolean = other match {
-    case AmendYourAnswersPage  => true
-    case _ => false
-  }
+case class EtmpAdminUse(changeDate: Option[LocalDateTime])
 
-  override val urlFragment: String = "amend-your-answers"
+object EtmpAdminUse {
 
-  override def route(waypoints: Waypoints): Call =
-    routes.TestChangeRegistrationController.onPageLoad()
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage
+  implicit val format: OFormat[EtmpAdminUse] = Json.format[EtmpAdminUse]
 }

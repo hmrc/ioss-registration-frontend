@@ -17,11 +17,11 @@
 package pages
 
 import models.{CheckMode, Mode, NormalMode}
+import pages.amend.AmendYourAnswersPage
 import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.tradingNames.AddTradingNamePage
 import pages.previousRegistrations.AddPreviousRegistrationPage
 import pages.website.AddWebsitePage
-import pages.AmendYourAnswersPage
 
 case class Waypoint(
                      page: WaypointPage,

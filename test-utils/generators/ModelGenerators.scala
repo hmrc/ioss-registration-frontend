@@ -27,9 +27,10 @@ import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.EitherValues
 import play.api.libs.json.{JsObject, Json}
+import testutils.RegistrationData.datesBetween
 import uk.gov.hmrc.domain.Vrn
 
-import java.time.Instant
+import java.time.{Instant, LocalDate}
 
 trait ModelGenerators extends EitherValues {
 
@@ -325,5 +326,30 @@ trait ModelGenerators extends EitherValues {
   implicit lazy val arbitrarySchemeType: Arbitrary[SchemeType] =
     Arbitrary {
       Gen.oneOf(SchemeType.values)
+    }
+
+  implicit lazy val arbitraryDate: Arbitrary[LocalDate] =
+    Arbitrary {
+      datesBetween(LocalDate.of(2021, 7, 1), LocalDate.of(2023, 12, 31))
+    }
+
+  implicit lazy val arbitraryEtmpExclusionReason: Arbitrary[EtmpExclusionReason] =
+    Arbitrary {
+      Gen.oneOf(EtmpExclusionReason.values)
+    }
+
+  implicit lazy val arbitraryEtmpExclusion: Arbitrary[EtmpExclusion] =
+    Arbitrary {
+      for {
+        exclusionReason <- arbitraryEtmpExclusionReason.arbitrary
+        effectiveDate <- arbitraryDate.arbitrary
+        decisionDateDate <- arbitraryDate.arbitrary
+        quarantine <- arbitrary[Boolean]
+      } yield EtmpExclusion(
+        exclusionReason = exclusionReason,
+        effectiveDate = effectiveDate,
+        decisionDate = decisionDateDate,
+        quarantine = quarantine
+      )
     }
 }

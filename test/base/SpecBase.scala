@@ -52,8 +52,7 @@ trait SpecBase
     with IntegrationPatience
     with Generators {
 
-  val arbitraryDate: LocalDate = datesBetween(LocalDate.of(2021, 7, 1), LocalDate.of(2022, 12, 31)).sample.value
-  val arbitraryInstant: Instant = arbitraryDate.atStartOfDay(ZoneId.systemDefault()).toInstant
+  val arbitraryInstant: Instant = arbitraryDate.arbitrary.sample.value.atStartOfDay(ZoneId.systemDefault()).toInstant
   val stubClockAtArbitraryDate: Clock = Clock.fixed(arbitraryInstant, ZoneId.systemDefault())
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())

@@ -17,8 +17,8 @@
 package connectors
 
 import logging.Logging
-import models.responses.etmp.EtmpEnrolmentResponse
 import models.responses._
+import models.responses.etmp.EtmpEnrolmentResponse
 import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR}
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}

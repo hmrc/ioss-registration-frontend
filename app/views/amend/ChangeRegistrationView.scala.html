@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
+@import controllers.amend.{routes => amendRoutes}
+@import pages.amend.AmendYourAnswersPage
 @import views.html.components.ButtonGroupProcessing
-@import pages.AmendYourAnswersPage
-
 
 @this(
         formHelper: FormWithCSRF,
@@ -29,9 +29,9 @@
 
 @(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("testChangeRegistration.title"))) {
+@layout(pageTitle = titleNoForm(messages("changeRegistration.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("testChangeRegistration.heading")</h1>
+    <h1 class="govuk-heading-l">@messages("changeRegistration.heading")</h1>
 
     <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 
@@ -45,16 +45,16 @@
     @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA"))
     </p>
 
-    <h2 class="govuk-heading-m">@messages("testChangeRegistration.details.heading")</h2>
+    <h2 class="govuk-heading-m">@messages("changeRegistration.details.heading")</h2>
 
     @govukSummaryList(list)
 
-    <p class="govuk-body">@messages("testChangeRegistration.info.p1")</p>
+    <p class="govuk-body">@messages("changeRegistration.info.p1")</p>
 
-    <p class="govuk-body">@messages("testChangeRegistration.info.p2")</p>
+    <p class="govuk-body">@messages("changeRegistration.info.p2")</p>
 
 
-    @formHelper(action = routes.TestChangeRegistrationController.onSubmit()) {
+    @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit()) {
         @button("site.submit", AmendYourAnswersPage.route(waypoints).url, waypoints)
     }
 

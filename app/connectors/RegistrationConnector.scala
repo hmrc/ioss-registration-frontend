@@ -21,10 +21,9 @@ import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, External
 import connectors.RegistrationHttpParser.{RegistrationResponseReads, RegistrationResultResponse}
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import logging.Logging
+import models.amend.RegistrationWrapper
 import models.etmp.EtmpRegistrationRequest
 import play.api.Configuration
-import play.api.libs.json.Json
-import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 
 import javax.inject.Inject
@@ -42,9 +41,10 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
 
   def createRegistration(registrationRequest: EtmpRegistrationRequest)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
     httpClient.POST[EtmpRegistrationRequest, RegistrationResultResponse](s"$baseUrl/create-registration", registrationRequest)
-  }.map {
-    result => result
   }
+
+  def getRegistration()(implicit hc: HeaderCarrier): Future[RegistrationWrapper] =
+    httpClient.GET[RegistrationWrapper](s"$baseUrl/registration")
 
   def getSavedExternalEntry()(implicit hc: HeaderCarrier): Future[ExternalEntryUrlResponse] = {
     httpClient.GET[ExternalEntryUrlResponse](s"$baseUrl/external-entry")

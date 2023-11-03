@@ -17,12 +17,14 @@
 package testutils
 
 import base.SpecBase
+import config.Constants.maxTradingNames
 import formats.Format.eisDateFormatter
 import models.etmp._
 import models.{Bic, Country, Iban}
 import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.Gen
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 object RegistrationData extends SpecBase {
 
@@ -68,6 +70,18 @@ object RegistrationData extends SpecBase {
     tradingNames = Seq(arbitrary[EtmpTradingName].sample.value),
     schemeDetails = etmpSchemeDetails,
     bankDetails = genBankDetails
+  )
+
+  val etmpAdminUse: EtmpAdminUse = EtmpAdminUse(
+    changeDate = Some(LocalDateTime.now())
+  )
+
+  val etmpDisplayRegistration: EtmpDisplayRegistration = EtmpDisplayRegistration(
+    tradingNames = Gen.listOfN(maxTradingNames, arbitraryEtmpTradingName.arbitrary).sample.value,
+    schemeDetails = etmpSchemeDetails,
+    bankDetails = genBankDetails,
+    exclusions = Gen.listOfN(3, arbitrary[EtmpExclusion]).sample.value,
+    adminUse = etmpAdminUse
   )
 }
 

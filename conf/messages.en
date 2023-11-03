@@ -646,8 +646,8 @@ errorSubmittingRegistration.tryAgainLater = We have saved your answers and you c
 errorSubmittingRegistration.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 errorSubmittingRegistration.your.account = Back to your account
 
-testChangeRegistration.title = Change Your Registration
-testChangeRegistration.heading = Change Your Registration
-testChangeRegistration.details.heading = Import One Stop Shop details
-testChangeRegistration.info.p1 = By registering for this scheme, you confirm that the information you are providing is correct and complete.
-testChangeRegistration.info.p2 = After registering, do not click the Back button or refresh the page.
+changeRegistration.title = Change Your Registration
+changeRegistration.heading = Change Your Registration
+changeRegistration.details.heading = Import One Stop Shop details
+changeRegistration.info.p1 = By registering for this scheme, you confirm that the information you are providing is correct and complete.
+changeRegistration.info.p2 = After registering, do not click the Back button or refresh the page.

@@ -18,6 +18,7 @@ package connectors
 
 import base.SpecBase
 import com.github.tomakehurst.wiremock.client.WireMock._
+import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.external.ExternalEntryUrl
 import models.responses._
@@ -27,7 +28,7 @@ import play.api.Application
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
-import testutils.RegistrationData.etmpRegistrationRequest
+import testutils.RegistrationData.{etmpDisplayRegistration, etmpRegistrationRequest}
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -257,5 +258,30 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
         result mustBe Left(UnexpectedResponseStatus(status, s"Unexpected response, status $status returned"))
       }
     }
+  }
+
+  ".getRegistration" - {
+
+    val url = "/ioss-registration/registration"
+
+    "must return a registration wrapper when the backend successfully returns one" in {
+
+      val registrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+
+      running(application) {
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val responseBody = Json.toJson(registrationWrapper).toString()
+
+        server.stubFor(get(urlEqualTo(url)).willReturn(ok().withBody(responseBody)))
+
+        val result = connector.getRegistration().futureValue
+
+        result mustBe registrationWrapper
+      }
+    }
+
+    // TODO Test for non-success
   }
 }
