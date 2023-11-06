@@ -19,6 +19,7 @@ package pages
 import cats.data.NonEmptyList
 import cats.implicits.toTraverseOps
 import models.{Mode, NormalMode}
+import pages.previousRegistrations.{AddPreviousRegistrationPage, DeletePreviousSchemePage, PreviouslyRegisteredPage}
 import play.api.mvc.QueryStringBindable
 
 sealed trait Waypoints {
@@ -50,7 +51,13 @@ case class NonEmptyWaypoints(waypoints: NonEmptyList[Waypoint]) extends Waypoint
 
   override def recalibrate(currentPage: Page, targetPage: Page): Waypoints =
     (currentPage, targetPage) match {
-      case (a: AddToListQuestionPage, b: AddToListQuestionPage) =>
+      case (_: DeletePreviousSchemePage, b: PreviouslyRegisteredPage.type) =>
+        waypoints.filter((a: Waypoint) => a.urlFragment != AddPreviousRegistrationPage().checkModeUrlFragment) match {
+          case ::(head, next) => NonEmptyWaypoints(head, next)
+          case Nil => EmptyWaypoints
+        }
+
+      case (a: AddToListQuestionPage, b: AddToListQuestionPage) if a.section == b.section =>
         this
 
       case (_, targetPage: AddToListQuestionPage) =>

@@ -88,7 +88,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = baseUserAnswers.copy().set(DeletePreviousSchemePage(index), true).success.value
+      val userAnswers = baseUserAnswers.copy().set(DeletePreviousSchemePage(index, index), true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -132,7 +132,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
         val expectedAnswers = baseUserAnswers.remove(PreviousSchemeForCountryQuery(index, index)).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual DeletePreviousSchemePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        redirectLocation(result).value mustEqual DeletePreviousSchemePage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -140,6 +140,8 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
     "must not delete a scheme and redirect to the next page when user answers No" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(baseUserAnswers))
@@ -154,7 +156,8 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual DeletePreviousSchemePage(index).navigate(waypoints, emptyUserAnswers, baseUserAnswers).url
+        redirectLocation(result).value mustBe
+          DeletePreviousSchemePage(index, index).navigate(waypoints, baseUserAnswers, baseUserAnswers).url
         verifyNoInteractions(mockSessionRepository)
       }
     }

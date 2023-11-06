@@ -16,12 +16,16 @@
 
 package pages.previousRegistrations
 
-import models.Index
+import models.{Index, NormalMode}
 import models.domain.PreviousSchemeNumbers
-import pages.QuestionPage
+import pages.{AddToListQuestionPage, AddToListSection, PreviousSchemeSection, QuestionPage, Waypoint}
 import play.api.libs.json.JsPath
 
-trait PreviousSchemeNumbersPage extends QuestionPage[PreviousSchemeNumbers] {
+trait PreviousSchemeNumbersPage extends QuestionPage[PreviousSchemeNumbers] with AddToListQuestionPage {
+
+  override val section: AddToListSection = PreviousSchemeSection
+
+  override val addItemWaypoint: Waypoint = CheckPreviousSchemeAnswersPage(countryIndex).waypoint(NormalMode)
 
   def countryIndex: Index
 

@@ -20,21 +20,24 @@ import generators.ModelGenerators
 import journey.JourneyHelpers
 import models.{Country, Index, PreviousSchemeType}
 import models.domain.PreviousSchemeNumbers
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations._
-import queries.previousRegistration.PreviousRegistrationQuery
+import queries.previousRegistration.{PreviousRegistrationQuery, PreviousSchemeForCountryQuery}
 
 
 class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGenerators {
 
-  private val index = Index(0)
-  private val index1 = Index(1)
-  private val country = Country.euCountries.head
+  private val index: Index = Index(0)
+  private val index1: Index = Index(1)
+  private val country1: Country = Country("AT", "Austria")
+  private val country2: Country = Country("HR", "Croatia")
   private val ossScheme = PreviousSchemeType.OSS
   private val schemeNumber = PreviousSchemeNumbers("123", None)
   private val iossScheme = PreviousSchemeType.IOSS
+  private val isSameCountry: Boolean = true
 
   "previously registered for IOSS scheme" - {
 
@@ -60,7 +63,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, true),
-          submitAnswer(PreviousEuCountryPage(index), country),
+          submitAnswer(PreviousEuCountryPage(index), country1),
           pageMustBe(PreviousSchemePage(index, index))
         )
     }
@@ -70,7 +73,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
         startingFrom(PreviouslyRegisteredPage)
           .run(
             submitAnswer(PreviouslyRegisteredPage, true),
-            submitAnswer(PreviousEuCountryPage(index), country),
+            submitAnswer(PreviousEuCountryPage(index), country1),
             goTo(PreviousSchemeTypePage(index, index)),
             submitAnswer(PreviousSchemeTypePage(index, index), ossScheme),
             pageMustBe(PreviousOssNumberPage(index, index))
@@ -81,7 +84,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
         startingFrom(PreviouslyRegisteredPage)
           .run(
             submitAnswer(PreviouslyRegisteredPage, true),
-            submitAnswer(PreviousEuCountryPage(index), country),
+            submitAnswer(PreviousEuCountryPage(index), country1),
             goTo(PreviousSchemeTypePage(index, index)),
             submitAnswer(PreviousSchemeTypePage(index, index), ossScheme),
             submitAnswer(PreviousOssNumberPage(index, index), schemeNumber),
@@ -95,7 +98,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
         startingFrom(PreviouslyRegisteredPage)
           .run(
             submitAnswer(PreviouslyRegisteredPage, true),
-            submitAnswer(PreviousEuCountryPage(index), country),
+            submitAnswer(PreviousEuCountryPage(index), country1),
             goTo(PreviousSchemeTypePage(index, index)),
             submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
             submitAnswer(PreviousIossSchemePage(index, index), true),
@@ -107,7 +110,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
         startingFrom(PreviouslyRegisteredPage)
           .run(
             submitAnswer(PreviouslyRegisteredPage, true),
-            submitAnswer(PreviousEuCountryPage(index), country),
+            submitAnswer(PreviousEuCountryPage(index), country1),
             goTo(PreviousSchemeTypePage(index, index)),
             submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
             submitAnswer(PreviousIossSchemePage(index, index), true),
@@ -121,7 +124,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
         startingFrom(PreviouslyRegisteredPage)
           .run(
             submitAnswer(PreviouslyRegisteredPage, true),
-            submitAnswer(PreviousEuCountryPage(index), country),
+            submitAnswer(PreviousEuCountryPage(index), country1),
             goTo(PreviousSchemeTypePage(index, index)),
             submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
             submitAnswer(PreviousIossSchemePage(index, index), false),
@@ -133,7 +136,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
         startingFrom(PreviouslyRegisteredPage)
           .run(
             submitAnswer(PreviouslyRegisteredPage, true),
-            submitAnswer(PreviousEuCountryPage(index), country),
+            submitAnswer(PreviousEuCountryPage(index), country1),
             goTo(PreviousSchemeTypePage(index, index)),
             submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
             submitAnswer(PreviousIossSchemePage(index, index), false),
@@ -148,13 +151,19 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, true),
-          submitAnswer(PreviousEuCountryPage(index), country),
+          submitAnswer(PreviousEuCountryPage(index), country1),
           goTo(PreviousSchemeTypePage(index, index)),
           submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
           submitAnswer(PreviousIossSchemePage(index, index), false),
           submitAnswer(PreviousIossNumberPage(index, index), schemeNumber),
           submitAnswer(CheckPreviousSchemeAnswersPage(index), true),
-          pageMustBe(PreviousSchemePage(index, index1))
+          pageMustBe(PreviousSchemePage(index, index1)),
+          goTo(PreviousSchemeTypePage(index, index1)),
+          submitAnswer(PreviousSchemeTypePage(index, index1), ossScheme),
+          submitAnswer(PreviousOssNumberPage(index, index1), schemeNumber),
+          pageMustBe(CheckPreviousSchemeAnswersPage(index)),
+          answersMustContain(PreviousSchemeTypePage(index, index)),
+          answersMustContain(PreviousSchemeTypePage(index, index1))
         )
     }
 
@@ -163,40 +172,37 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
         startingFrom(PreviouslyRegisteredPage)
           .run(
             submitAnswer(PreviouslyRegisteredPage, true),
-            submitAnswer(PreviousEuCountryPage(index), country),
+            submitAnswer(PreviousEuCountryPage(index), country1),
             goTo(PreviousSchemeTypePage(index, index)),
             submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
             submitAnswer(PreviousIossSchemePage(index, index), false),
             submitAnswer(PreviousIossNumberPage(index, index), schemeNumber),
             submitAnswer(CheckPreviousSchemeAnswersPage(index), true),
             goTo(PreviousSchemeTypePage(index, index1)),
-            submitAnswer(PreviousSchemeTypePage(index, index1), iossScheme),
-            submitAnswer(PreviousIossSchemePage(index, index1), false),
-            submitAnswer(PreviousIossNumberPage(index, index1), schemeNumber),
-            goTo(DeletePreviousSchemePage(index)),
+            submitAnswer(PreviousSchemeTypePage(index, index1), ossScheme),
+            submitAnswer(PreviousOssNumberPage(index, index1), schemeNumber),
+            goTo(DeletePreviousSchemePage(index, index)),
             removeAddToListItem(PreviousSchemeTypePage(index, index)),
-            pageMustBe(CheckPreviousSchemeAnswersPage(index)),
-            answersMustNotContain(PreviousSchemeTypePage(index, index))
+            pageMustBe(AddPreviousRegistrationPage()),
+            answersMustNotContain(PreviousSchemeForCountryQuery(index, index))
           )
       }
 
-      "remove if only one schemes" in {
+      "remove if only one scheme registered for that EU country" in {
         startingFrom(PreviouslyRegisteredPage)
           .run(
             submitAnswer(PreviouslyRegisteredPage, true),
-            submitAnswer(PreviousEuCountryPage(index), country),
+            submitAnswer(PreviousEuCountryPage(index), country1),
             goTo(PreviousSchemeTypePage(index, index)),
             submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
             submitAnswer(PreviousIossSchemePage(index, index), false),
             submitAnswer(PreviousIossNumberPage(index, index), schemeNumber),
-            goTo(DeletePreviousSchemePage(index)),
-            removeAddToListItem(PreviousSchemeTypePage(index, index)),
-            pageMustBe(CheckPreviousSchemeAnswersPage(index)),
-            answersMustNotContain(PreviousSchemeTypePage(index, index))
+            goTo(DeletePreviousSchemePage(index, index)),
+            removeAddToListItem(PreviousSchemeForCountryQuery(index, index)),
+            pageMustBe(PreviouslyRegisteredPage),
+            answersMustNotContain(PreviousSchemeForCountryQuery(index, index))
           )
       }
-
-
     }
 
 
@@ -204,7 +210,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, true),
-          submitAnswer(PreviousEuCountryPage(index), country),
+          submitAnswer(PreviousEuCountryPage(index), country1),
           goTo(PreviousSchemeTypePage(index, index)),
           submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
           submitAnswer(PreviousIossSchemePage(index, index), false),
@@ -219,7 +225,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, true),
-          submitAnswer(PreviousEuCountryPage(index), country),
+          submitAnswer(PreviousEuCountryPage(index), country1),
           goTo(PreviousSchemeTypePage(index, index)),
           submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
           submitAnswer(PreviousIossSchemePage(index, index), false),
@@ -235,7 +241,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, true),
-          submitAnswer(PreviousEuCountryPage(index), country),
+          submitAnswer(PreviousEuCountryPage(index), country1),
           goTo(PreviousSchemeTypePage(index, index)),
           submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
           submitAnswer(PreviousIossSchemePage(index, index), false),
@@ -251,7 +257,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, true),
-          submitAnswer(PreviousEuCountryPage(index), country),
+          submitAnswer(PreviousEuCountryPage(index), country1),
           goTo(PreviousSchemeTypePage(index, index)),
           submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
           submitAnswer(PreviousIossSchemePage(index, index), false),
@@ -269,7 +275,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
       startingFrom(PreviouslyRegisteredPage)
         .run(
           submitAnswer(PreviouslyRegisteredPage, true),
-          submitAnswer(PreviousEuCountryPage(index), country),
+          submitAnswer(PreviousEuCountryPage(index), country1),
           goTo(PreviousSchemeTypePage(index, index)),
           submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
           submitAnswer(PreviousIossSchemePage(index, index), false),
@@ -285,7 +291,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
 
         val initialise = journeyOf(
           setUserAnswerTo(PreviouslyRegisteredPage, true),
-          setUserAnswerTo(PreviousEuCountryPage(index), country),
+          setUserAnswerTo(PreviousEuCountryPage(index), country1),
           setUserAnswerTo(PreviousSchemeTypePage(index, index), iossScheme),
           setUserAnswerTo(PreviousIossSchemePage(index, index), false),
           setUserAnswerTo(PreviousIossNumberPage(index, index), schemeNumber),
@@ -313,7 +319,7 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
 
           val initialise = journeyOf(
             setUserAnswerTo(PreviouslyRegisteredPage, true),
-            setUserAnswerTo(PreviousEuCountryPage(index), country),
+            setUserAnswerTo(PreviousEuCountryPage(index), country1),
             setUserAnswerTo(PreviousSchemeTypePage(index, index), iossScheme),
             setUserAnswerTo(PreviousIossSchemePage(index, index), false),
             goTo(CheckYourAnswersPage)
@@ -329,6 +335,83 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
               pageMustBe(CheckYourAnswersPage),
               answersMustContain(PreviousSchemeTypePage(index, index))
             )
+        }
+      }
+    }
+
+    "must navigate to correct page when removing previous registrations" - {
+      "when the user removes all schemes and has no registrations for any other countries" - {
+        "must navigate to PreviouslyRegisteredPage" in {
+          startingFrom(PreviouslyRegisteredPage)
+            .run(
+              submitAnswer(PreviouslyRegisteredPage, true),
+              submitAnswer(PreviousEuCountryPage(index), country1),
+              goTo(PreviousSchemeTypePage(index, index)),
+              submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
+              submitAnswer(PreviousIossSchemePage(index, index), false),
+              submitAnswer(PreviousIossNumberPage(index, index), schemeNumber),
+              pageMustBe(CheckPreviousSchemeAnswersPage(index)),
+              answersMustContain(PreviousSchemeTypePage(index, index)),
+              goTo(DeletePreviousSchemePage(index, index)),
+              removeAddToListItem(PreviousSchemeForCountryQuery(index, index)),
+              pageMustBe(PreviouslyRegisteredPage),
+              answersMustNotContain(PreviousSchemeForCountryQuery(index, index))
+            )
+        }
+      }
+
+      "when the user removes all the schemes for one country but has a previous registration for another country" - {
+        "must navigate back to AddPreviousRegistrationPage" in {
+          startingFrom(PreviouslyRegisteredPage)
+            .run(
+              submitAnswer(PreviouslyRegisteredPage, true),
+              submitAnswer(PreviousEuCountryPage(index), country1),
+              goTo(PreviousSchemeTypePage(index, index)),
+              submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
+              submitAnswer(PreviousIossSchemePage(index, index), false),
+              submitAnswer(PreviousIossNumberPage(index, index), schemeNumber),
+              submitAnswer(CheckPreviousSchemeAnswersPage(index), false),
+              submitAnswer(AddPreviousRegistrationPage(), true),
+              submitAnswer(PreviousEuCountryPage(index1), country2),
+              goTo(PreviousSchemeTypePage(index1, index)),
+              submitAnswer(PreviousSchemeTypePage(index1, index), iossScheme),
+              submitAnswer(PreviousIossSchemePage(index1, index), false),
+              submitAnswer(PreviousIossNumberPage(index1, index), schemeNumber),
+              submitAnswer(CheckPreviousSchemeAnswersPage(index1), false),
+              goToChangeAnswer(CheckPreviousSchemeAnswersPage(index)),
+              goTo(DeletePreviousSchemePage(index, index)),
+              removeAddToListItem(PreviousSchemeForCountryQuery(index, index)),
+              pageMustBe(AddPreviousRegistrationPage()),
+              answersMustNotContain(PreviousSchemeForCountryQuery(index, index))
+            )
+        }
+      }
+
+      "when the user removes one scheme from a previously registered country but has another scheme for the same country" - {
+        "must navigate back to CheckPreviousSchemeAnswersPage" in {
+          startingFrom(PreviouslyRegisteredPage)
+            .run(
+              submitAnswer(PreviouslyRegisteredPage, true),
+              submitAnswer(PreviousEuCountryPage(index), country1),
+              goTo(PreviousSchemeTypePage(index, index)),
+              submitAnswer(PreviousSchemeTypePage(index, index), iossScheme),
+              submitAnswer(PreviousIossSchemePage(index, index), false),
+              submitAnswer(PreviousIossNumberPage(index, index), schemeNumber),
+              submitAnswer(CheckPreviousSchemeAnswersPage(index), true),
+              goTo(PreviousSchemeTypePage(index, index1)),
+              submitAnswer(PreviousSchemeTypePage(index, index1), ossScheme),
+              submitAnswer(PreviousOssNumberPage(index, index1), schemeNumber),
+              submitAnswer(CheckPreviousSchemeAnswersPage(index), false),
+              goToChangeAnswer(CheckPreviousSchemeAnswersPage(index)),
+              isSameCountry match {
+                case true =>
+                goTo(DeletePreviousSchemePage(index, index))
+                removeAddToListItem(PreviousSchemeForCountryQuery(index, index))
+                pageMustBe(CheckPreviousSchemeAnswersPage(index))
+                answersMustNotContain(PreviousSchemeForCountryQuery(index, index))
+              }
+            )
+
         }
       }
     }

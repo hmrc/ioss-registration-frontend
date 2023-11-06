@@ -17,7 +17,7 @@
 package pages.website
 
 import models.{Index, NormalMode, UserAnswers, Website}
-import pages.{AddToListQuestionPage, NonEmptyWaypoints, Page, QuestionPage, Waypoint, Waypoints}
+import pages.{AddToListQuestionPage, NonEmptyWaypoints,AddToListSection, Page, QuestionPage, Waypoint, Waypoints, WebsiteSection}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.AllWebsites
@@ -26,6 +26,7 @@ import scala.util.Try
 
 case class WebsitePage(index: Index) extends QuestionPage[Website] with AddToListQuestionPage {
 
+  override val section: AddToListSection = WebsiteSection
   override def path: JsPath = JsPath \ "websites" \ index.position
 
   override val addItemWaypoint: Waypoint = AddWebsitePage().waypoint(NormalMode)

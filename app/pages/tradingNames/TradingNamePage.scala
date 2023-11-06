@@ -18,7 +18,7 @@ package pages.tradingNames
 
 import controllers.tradingNames.routes
 import models.{Index, NormalMode, TradingName, UserAnswers}
-import pages.{AddToListQuestionPage, Page, QuestionPage, Waypoint, Waypoints}
+import pages.{AddToListQuestionPage, AddToListSection, Page, QuestionPage, TradingNameSection, Waypoint, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.tradingNames.AllTradingNames
@@ -27,6 +27,7 @@ import scala.util.Try
 
 case class TradingNamePage(index: Index) extends QuestionPage[TradingName] with AddToListQuestionPage {
 
+  override val section: AddToListSection = TradingNameSection
   override val addItemWaypoint: Waypoint = AddTradingNamePage().waypoint(NormalMode)
 
   override def path: JsPath = JsPath \ toString \ index.position

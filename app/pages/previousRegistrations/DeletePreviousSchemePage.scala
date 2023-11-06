@@ -21,20 +21,27 @@ import models.{Index, UserAnswers}
 import pages.{NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
-import queries.previousRegistration.{DeriveNumberOfPreviousRegistrations, DeriveNumberOfPreviousSchemes}
+import queries.previousRegistration.{DeriveNumberOfPreviousRegistrations, DeriveNumberOfPreviousSchemes, PreviousRegistrationQuery}
 
-case class DeletePreviousSchemePage(countryIndex: Index) extends QuestionPage[Boolean] {
+case class DeletePreviousSchemePage(countryIndex: Index, schemeIndex: Index) extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "deletePreviousScheme"
 
   override def route(waypoints: Waypoints): Call =
-    routes.DeletePreviousRegistrationController.onPageLoad(waypoints, countryIndex)
+    routes.DeletePreviousSchemeController.onPageLoad(waypoints, countryIndex, schemeIndex)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    (answers.get(DeriveNumberOfPreviousRegistrations), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
-      case (_, Some(numberOfSchemes)) if numberOfSchemes > 0 =>
+  override protected def nextPageNormalMode(waypoints: Waypoints, originalAnswers: UserAnswers, updatedAnswers: UserAnswers): Page = {
+    val isSameCountry: Boolean = {
+      val originalCountry = originalAnswers.get(PreviousRegistrationQuery(countryIndex)).map(_.previousEuCountry.code)
+      val updatedCountry = updatedAnswers.get(PreviousRegistrationQuery(countryIndex)).map(_.previousEuCountry.code)
+
+      originalCountry.exists(originalCountryCode => updatedCountry.contains(originalCountryCode))
+    }
+
+    (updatedAnswers.get(DeriveNumberOfPreviousRegistrations), updatedAnswers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
+      case (_, Some(numberOfSchemes)) if numberOfSchemes > 0 && isSameCountry =>
         CheckPreviousSchemeAnswersPage(countryIndex)
       case (Some(numberOfCountries), _) if numberOfCountries > 0 =>
         AddPreviousRegistrationPage()
@@ -43,9 +50,17 @@ case class DeletePreviousSchemePage(countryIndex: Index) extends QuestionPage[Bo
     }
   }
 
-  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
-    (answers.get(DeriveNumberOfPreviousRegistrations), answers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
-      case (_, Some(numberOfSchemes)) if numberOfSchemes > 0 =>
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, originalAnswers: UserAnswers, updatedAnswers: UserAnswers): Page = {
+
+    val isSameCountry: Boolean = {
+      val originalCountry = originalAnswers.get(PreviousRegistrationQuery(countryIndex)).map(_.previousEuCountry.code)
+      val updatedCountry = updatedAnswers.get(PreviousRegistrationQuery(countryIndex)).map(_.previousEuCountry.code)
+
+      originalCountry.exists(originalCountryCode => updatedCountry.contains(originalCountryCode))
+    }
+
+    (updatedAnswers.get(DeriveNumberOfPreviousRegistrations), updatedAnswers.get(DeriveNumberOfPreviousSchemes(countryIndex))) match {
+      case (_, Some(numberOfSchemes)) if numberOfSchemes > 0 && isSameCountry =>
         CheckPreviousSchemeAnswersPage(countryIndex)
       case (Some(numberOfCountries), _) if numberOfCountries > 0 =>
         AddPreviousRegistrationPage()

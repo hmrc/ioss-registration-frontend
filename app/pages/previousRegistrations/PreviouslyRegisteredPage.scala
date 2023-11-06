@@ -25,6 +25,7 @@ import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 
 case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
+
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "previouslyRegistered"

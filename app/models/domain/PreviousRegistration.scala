@@ -21,7 +21,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class PreviousRegistration(country: Country, previousSchemesDetails: Seq[PreviousSchemeDetails])
 
-object PreviousRegistration {
+object PreviousRegistration{
 
   implicit val format: OFormat[PreviousRegistration] = Json.format[PreviousRegistration]
 }
