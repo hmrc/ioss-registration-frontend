@@ -26,6 +26,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.AllWebsites
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.WebsiteView
 
 import javax.inject.Inject
@@ -41,7 +42,7 @@ class WebsiteController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] =
-    (cc.authAndGetData() andThen cc.limitIndex(index, Constants.maxWebsites)) {
+    (cc.authAndGetData(waypoints.inAmend) andThen cc.limitIndex(index, Constants.maxWebsites)) {
       implicit request =>
         val form = formProvider(index, request.userAnswers.get(AllWebsites).getOrElse(Seq.empty).map(_.site))
 
@@ -54,7 +55,7 @@ class WebsiteController @Inject()(
     }
 
   def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] =
-    (cc.authAndGetData() andThen cc.limitIndex(index, Constants.maxTradingNames)).async {
+    (cc.authAndGetData(waypoints.inAmend) andThen cc.limitIndex(index, Constants.maxTradingNames)).async {
       implicit request =>
 
         val form = formProvider(index, request.userAnswers.get(AllWebsites).getOrElse(Seq.empty).map(_.site))

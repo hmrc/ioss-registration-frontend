@@ -18,7 +18,7 @@ package pages.website
 
 import controllers.website
 import models.{Index, UserAnswers}
-import pages.{AddItemPage, BusinessContactDetailsPage, CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
+import pages.{AddItemPage, BusinessContactDetailsPage, JourneyRecoveryPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.{Derivable, DeriveNumberOfWebsites}
@@ -57,9 +57,10 @@ final case class AddWebsitePage(override val index: Option[Index] = None) extend
     }
   }
 
-  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
-    navigate(answers, nextPage = CheckYourAnswersPage)
-  }
+  // TODO -> Needed/Remove?
+//  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+//    navigate(answers, nextPage = CheckYourAnswersPage)
+//  }
 
   override def route(waypoints: Waypoints): Call =
     website.routes.AddWebsiteController.onPageLoad(waypoints)

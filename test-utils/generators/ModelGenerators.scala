@@ -29,7 +29,7 @@ import org.scalatest.EitherValues
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.domain.Vrn
 
-import java.time.Instant
+import java.time.{Instant, LocalDate, ZoneOffset}
 
 trait ModelGenerators extends EitherValues {
 
@@ -325,5 +325,41 @@ trait ModelGenerators extends EitherValues {
   implicit lazy val arbitrarySchemeType: Arbitrary[SchemeType] =
     Arbitrary {
       Gen.oneOf(SchemeType.values)
+    }
+
+  def datesBetween(min: LocalDate, max: LocalDate): Gen[LocalDate] = {
+
+    def toMillis(date: LocalDate): Long =
+      date.atStartOfDay.atZone(ZoneOffset.UTC).toInstant.toEpochMilli
+
+    Gen.choose(toMillis(min), toMillis(max)).map {
+      millis =>
+        Instant.ofEpochMilli(millis).atOffset(ZoneOffset.UTC).toLocalDate
+    }
+  }
+
+  implicit lazy val arbitraryDate: Arbitrary[LocalDate] =
+    Arbitrary {
+      datesBetween(LocalDate.of(2021, 7, 1), LocalDate.of(2023, 12, 31))
+    }
+
+  implicit lazy val arbitraryEtmpExclusionReason: Arbitrary[EtmpExclusionReason] =
+    Arbitrary {
+      Gen.oneOf(EtmpExclusionReason.values)
+    }
+
+  implicit lazy val arbitraryEtmpExclusion: Arbitrary[EtmpExclusion] =
+    Arbitrary {
+      for {
+        exclusionReason <- arbitraryEtmpExclusionReason.arbitrary
+        effectiveDate <- arbitraryDate.arbitrary
+        decisionDateDate <- arbitraryDate.arbitrary
+        quarantine <- arbitrary[Boolean]
+      } yield EtmpExclusion(
+        exclusionReason = exclusionReason,
+        effectiveDate = effectiveDate,
+        decisionDate = decisionDateDate,
+        quarantine = quarantine
+      )
     }
 }

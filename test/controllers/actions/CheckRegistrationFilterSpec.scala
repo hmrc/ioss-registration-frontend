@@ -37,7 +37,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
   private val iossEnrolmentKey = "HMRC-IOSS-ORG"
   private val enrolment: Enrolment = Enrolment(iossEnrolmentKey, Seq.empty, "test", None)
 
-  class Harness(config: FrontendAppConfig) extends CheckRegistrationFilterImpl(config) {
+  class Harness(inAmend: Boolean, config: FrontendAppConfig) extends CheckRegistrationFilterImpl(inAmend, config) {
     def callFilter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] = filter(request)
   }
 
@@ -51,7 +51,23 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty))
-        val controller = new Harness(config)
+        val controller = new Harness(false, config)
+
+        val result = controller.callFilter(request).futureValue
+
+        result mustBe None
+      }
+    }
+
+    "must return None when in amend" in {
+
+      val app = applicationBuilder(None).build()
+
+      running(app) {
+
+        val config = app.injector.instanceOf[FrontendAppConfig]
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)))
+        val controller = new Harness(true, config)
 
         val result = controller.callFilter(request).futureValue
 
@@ -67,7 +83,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)))
-        val controller = new Harness(config)
+        val controller = new Harness(false, config)
 
         val result = controller.callFilter(request).futureValue
 

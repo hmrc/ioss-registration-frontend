@@ -17,6 +17,7 @@
 package pages
 
 import models.{CheckMode, Mode, NormalMode}
+import pages.amend.AmendYourAnswersPage
 import pages.euDetails.{AddEuDetailsPage, CheckEuDetailsAnswersPage}
 import pages.tradingNames.AddTradingNamePage
 import pages.previousRegistrations.AddPreviousRegistrationPage
@@ -41,7 +42,8 @@ object Waypoint {
       AddWebsitePage().normalModeUrlFragment ->  AddWebsitePage().waypoint(NormalMode),
       AddWebsitePage().checkModeUrlFragment ->  AddWebsitePage().waypoint(CheckMode),
       // Continue journey
-      CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint
+      CheckYourAnswersPage.urlFragment -> CheckYourAnswersPage.waypoint,
+      AmendYourAnswersPage.urlFragment -> AmendYourAnswersPage.waypoint
     )
 
   def fromString(s: String): Option[Waypoint] =

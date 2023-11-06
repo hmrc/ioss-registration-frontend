@@ -17,9 +17,10 @@
 package connectors
 
 import logging.Logging
-import models.responses.etmp.EtmpEnrolmentResponse
+import models.amend.RegistrationWrapper
 import models.responses._
-import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR}
+import models.responses.etmp.EtmpEnrolmentResponse
+import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
@@ -27,8 +28,10 @@ import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 object RegistrationHttpParser extends Logging {
 
   type RegistrationResultResponse = Either[ErrorResponse, EtmpEnrolmentResponse]
+  type DisplayRegistrationResponse = Either[ErrorResponse, RegistrationWrapper]
 
   implicit object RegistrationResponseReads extends HttpReads[RegistrationResultResponse] {
+
     override def read(method: String, url: String, response: HttpResponse): RegistrationResultResponse =
       response.status match {
         case CREATED => response.json.validate[EtmpEnrolmentResponse] match {
@@ -46,6 +49,24 @@ object RegistrationHttpParser extends Logging {
         case status =>
           logger.error(s"Received unexpected error when trying to submit registration with status $status and body ${response.body}")
           Left(UnexpectedResponseStatus(response.status, s"Unexpected response, status $status returned"))
+      }
+  }
+
+  implicit object DisplayRegistrationResponseReads extends HttpReads[DisplayRegistrationResponse] {
+
+    override def read(method: String, url: String, response: HttpResponse): DisplayRegistrationResponse =
+      response.status match {
+        case OK => response.json.validate[RegistrationWrapper] match {
+          case JsSuccess(registrationWrapper, _) => Right(registrationWrapper)
+          case JsError(errors) =>
+            logger.error(s"Failed trying to parse display registration response JSON with body ${response.body}" +
+              s"and status ${response.status} with errors: $errors")
+            Left(InvalidJson)
+        }
+
+        case status =>
+          logger.error(s"Unknown error happened on display registration $status with body ${response.body}")
+          Left(InternalServerError)
       }
   }
 }

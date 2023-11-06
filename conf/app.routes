@@ -231,3 +231,12 @@ GET         /email-verification-codes-exceeded                               con
 GET         /successful                                                      controllers.ApplicationCompleteController.onPageLoad()
 
 GET         /error-submitting-registration                                   controllers.ErrorSubmittingRegistrationController.onPageLoad()
+
+# Amend registration
+GET         /start-amend-journey                                             controllers.amend.StartAmendJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /change-your-registration                                        controllers.amend.ChangeRegistrationController.onPageLoad()
+POST        /change-your-registration                                        controllers.amend.ChangeRegistrationController.onSubmit()
+
+GET         /cancel-amend-registration                                       controllers.amend.CancelAmendRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /cancel-amend-registration                                       controllers.amend.CancelAmendRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

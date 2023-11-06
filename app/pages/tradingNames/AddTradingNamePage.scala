@@ -39,8 +39,9 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
 
   override def toString: String = "addTradingName"
 
-  override def route(waypoints: Waypoints): Call =
+  override def route(waypoints: Waypoints): Call = {
     routes.AddTradingNameController.onPageLoad(waypoints)
+  }
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
@@ -63,6 +64,8 @@ final case class AddTradingNamePage(override val index: Option[Index] = None) ex
       case false =>
         PreviouslyRegisteredPage
     }.orRecover
+
+
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfTradingNames
 }
