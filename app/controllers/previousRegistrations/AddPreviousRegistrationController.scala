@@ -21,17 +21,17 @@ import forms.previousRegistrations.AddPreviousRegistrationFormProvider
 import logging.Logging
 import models.Country
 import models.previousRegistrations.PreviousRegistrationDetailsWithOptionalVatNumber
-import models.requests.AuthenticatedDataRequest
 import pages.previousRegistrations.AddPreviousRegistrationPage
-import pages.{JourneyRecoveryPage, Waypoints}
+import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
 import utils.CheckJourneyRecovery.determineJourneyRecovery
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
+import utils.ItemsHelper.getDerivedItems
 import viewmodels.checkAnswers.previousRegistrations.PreviousRegistrationSummary
 import views.html.previousRegistrations.AddPreviousRegistrationView
 
@@ -50,11 +50,10 @@ class AddPreviousRegistrationController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
-      getNumberOfPreviousRegistrations(waypoints) {
+      getDerivedItems(waypoints, DeriveNumberOfPreviousRegistrations) {
         number =>
 
           val canAddCountries = number < Country.euCountries.size
-
           val previousRegistrations = PreviousRegistrationSummary.row(request.userAnswers, Seq.empty, waypoints, AddPreviousRegistrationPage())
 
           withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
@@ -75,16 +74,15 @@ class AddPreviousRegistrationController @Inject()(
           if (incompletePromptShown) {
             incompletePreviousRegistrationRedirect(waypoints).map(
               redirectIncompletePage => redirectIncompletePage.toFuture
-            ).getOrElse(Redirect(determineJourneyRecovery(waypoints)).toFuture)
+            ).getOrElse(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()).toFuture)
           } else {
             Future.successful(Redirect(routes.AddPreviousRegistrationController.onPageLoad(waypoints)))
           }
         }) {
-        getNumberOfPreviousRegistrations(waypoints) {
+        getDerivedItems(waypoints, DeriveNumberOfPreviousRegistrations) {
           number =>
 
             val canAddCountries = number < Country.euCountries.size
-
             val previousRegistrations = PreviousRegistrationSummary.row(request.userAnswers, Seq.empty, waypoints, AddPreviousRegistrationPage())
 
             form.bindFromRequest().fold(
@@ -101,11 +99,5 @@ class AddPreviousRegistrationController @Inject()(
       }
   }
 
-  private def getNumberOfPreviousRegistrations(waypoints: Waypoints)(block: Int => Future[Result])
-                                              (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] =
-    request.userAnswers.get(DeriveNumberOfPreviousRegistrations).map {
-      number =>
-        block(number)
-    }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
 }
 

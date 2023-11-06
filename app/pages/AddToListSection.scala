@@ -21,6 +21,5 @@ trait AddToListSection
 object TradingNameSection extends AddToListSection
 object PreviousRegistrationsSection extends AddToListSection
 object PreviousSchemeSection extends AddToListSection
-
 object WebsiteSection extends AddToListSection
 
