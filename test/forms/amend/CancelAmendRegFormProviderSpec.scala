@@ -14,16 +14,33 @@
  * limitations under the License.
  */
 
-package models.amend
+package forms.amend
 
-import models.domain.VatCustomerInfo
-import models.etmp.EtmpDisplayRegistration
-import play.api.libs.json.{Json, OFormat}
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-// TODO -> Test
-case class RegistrationWrapper(vatInfo: VatCustomerInfo, registration: EtmpDisplayRegistration)
+class CancelAmendRegFormProviderSpec extends BooleanFieldBehaviours {
 
-object RegistrationWrapper {
+  val requiredKey = "cancelAmendRegistration.error.required"
+  val invalidKey = "error.boolean"
 
-  implicit val format: OFormat[RegistrationWrapper] = Json.format[RegistrationWrapper]
+  val form = new CancelAmendRegFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
+
 }

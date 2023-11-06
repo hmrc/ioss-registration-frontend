@@ -45,10 +45,10 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def checkEmailVerificationStatus: CheckEmailVerificationFilterProvider
 
-  def authAndGetData(): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+  def authAndGetData(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     actionBuilder andThen
       identify andThen
-      checkRegistration() andThen
+      checkRegistration(inAmend) andThen
       getData andThen
       requireData() andThen
       checkOtherCountryRegistration()

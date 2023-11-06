@@ -18,34 +18,104 @@ package controllers.amend
 
 import base.SpecBase
 import controllers.amend.{routes => amendRoutes}
-import pages.{EmptyWaypoints, Waypoints}
+import models.{CheckMode, UserAnswers}
+import pages.amend.AmendYourAnswersPage
+import pages.{EmptyWaypoints, Waypoint, Waypoints}
+import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
+import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
+import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
+import viewmodels.govuk.SummaryListFluency
 
-class ChangeRegistrationControllerSpec extends SpecBase {
+class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency {
 
-  private val waypoints: Waypoints = EmptyWaypoints
+  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(AmendYourAnswersPage, CheckMode, AmendYourAnswersPage.urlFragment))
+  private val amendYourAnswersPage = AmendYourAnswersPage
 
   "ChangeRegistration Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo)).build()
 
       running(application) {
         val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad().url)
-
+        implicit val msgs: Messages = messages(application)
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[ChangeRegistrationView]
 
-        val list = SummaryList(List.empty)
+        val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
+        val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(waypoints, list, list)(request, messages(application)).toString
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(waypoints, vatInfoList, list)(request, messages(application)).toString
       }
     }
+  }
+
+  private def getChangeRegistrationVatRegistrationDetailsSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
+    Seq(
+      VatRegistrationDetailsSummary.rowBusinessName(answers),
+      VatRegistrationDetailsSummary.rowPartOfVatUkGroup(answers),
+      VatRegistrationDetailsSummary.rowUkVatRegistrationDate(answers),
+      VatRegistrationDetailsSummary.rowBusinessAddress(answers)
+    ).flatten
+  }
+  private def getChangeRegistrationSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
+
+    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, waypoints, amendYourAnswersPage)
+    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, waypoints, amendYourAnswersPage)
+    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, waypoints, amendYourAnswersPage)
+    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, waypoints, amendYourAnswersPage)
+    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(answers, waypoints, amendYourAnswersPage)
+    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(answers, waypoints, amendYourAnswersPage)
+    val websiteSummaryRow = WebsiteSummary.checkAnswersRow(answers, waypoints, amendYourAnswersPage)
+    val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(answers, waypoints, amendYourAnswersPage)
+    val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(answers, waypoints, amendYourAnswersPage)
+    val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(answers, waypoints, amendYourAnswersPage)
+    val bankDetailsAccountNameSummaryRow = BankDetailsSummary.rowAccountName(answers, waypoints, amendYourAnswersPage)
+    val bankDetailsBicSummaryRow = BankDetailsSummary.rowBIC(answers, waypoints, amendYourAnswersPage)
+    val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(answers, waypoints, amendYourAnswersPage)
+
+    Seq(
+      hasTradingNameSummaryRow.map { sr =>
+        if (tradingNameSummaryRow.isDefined) {
+          sr.withCssClass("govuk-summary-list__row--no-border")
+        } else {
+          sr
+        }
+      },
+      tradingNameSummaryRow,
+      previouslyRegisteredSummaryRow.map { sr =>
+        if (previousRegistrationSummaryRow.isDefined) {
+          sr.withCssClass("govuk-summary-list__row--no-border")
+        } else {
+          sr
+        }
+      },
+      previousRegistrationSummaryRow,
+      taxRegisteredInEuSummaryRow.map { sr =>
+        if (euDetailsSummaryRow.isDefined) {
+          sr.withCssClass("govuk-summary-list__row--no-border")
+        } else {
+          sr
+        }
+      },
+      euDetailsSummaryRow,
+      websiteSummaryRow,
+      businessContactDetailsContactNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+      businessContactDetailsTelephoneSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+      businessContactDetailsEmailSummaryRow,
+      bankDetailsAccountNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+      bankDetailsBicSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+      bankDetailsIbanSummaryRow
+    ).flatten
   }
 }

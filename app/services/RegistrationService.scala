@@ -26,11 +26,12 @@ import models.etmp.EtmpRegistrationRequest.buildEtmpRegistrationRequest
 import models.etmp._
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
-import models.{Country, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
+import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -60,11 +61,13 @@ class RegistrationService @Inject()(
     val etmpPreviousRegistrations = registrationWrapper.registration.schemeDetails.previousEURegistrationDetails
     val etmpEuDetails = registrationWrapper.registration.schemeDetails.euRegistrationDetails
     val etmpWebsites = registrationWrapper.registration.schemeDetails.websites
+    val schemeDetails = registrationWrapper.registration.schemeDetails
+    val etmpBankDetails = registrationWrapper.registration.bankDetails
 
     val userAnswers = for {
       businessBasedInNi <- UserAnswers(
         id = userId,
-        vatInfo = Some(registrationWrapper.vatCustomerInfo)
+        vatInfo = Some(registrationWrapper.vatInfo)
       ).set(BusinessBasedInNiPage, true)
 
       hasTradingNamesUA <- businessBasedInNi.set(HasTradingNamePage, etmpTradingNames.nonEmpty)
@@ -90,7 +93,11 @@ class RegistrationService @Inject()(
 
       websitesUA <- taxRegistrationsInEuUA.set(AllWebsites, convertWebsite(etmpWebsites).toList)
 
-    } yield websitesUA
+      contactDetails <- websitesUA.set(BusinessContactDetailsPage, getBusinessContactDetails(schemeDetails))
+
+      bankDetails <- contactDetails.set(BankDetailsPage, convertBankDetails(etmpBankDetails))
+
+    } yield bankDetails
 
     Future.fromTry(userAnswers)
   }
@@ -129,6 +136,7 @@ class RegistrationService @Inject()(
       case SchemeType.OSSNonUnion => PreviousScheme.OSSNU
       case SchemeType.IOSSWithIntermediary => PreviousScheme.IOSSWI
       case SchemeType.IOSSWithoutIntermediary => PreviousScheme.IOSSWOI
+      case _ => throw new IllegalStateException("Not a recognised scheme type")
     }
 
   private def convertToEuDetails(etmpEuRegistrationDetails: Seq[EtmpEuRegistrationDetails]): Seq[EuDetails] =
@@ -182,5 +190,19 @@ class RegistrationService @Inject()(
     for {
       etmpWebsite <- etmpWebsites.toList
     } yield Website(site = etmpWebsite.websiteAddress)
+
+  private def getBusinessContactDetails(schemeDetails: EtmpSchemeDetails): BusinessContactDetails =
+    BusinessContactDetails(
+      fullName = schemeDetails.contactName,
+      telephoneNumber = schemeDetails.businessTelephoneNumber,
+      emailAddress = schemeDetails.businessEmailId
+    )
+
+  private def convertBankDetails(etmpBankDetails: EtmpBankDetails): BankDetails =
+    BankDetails(
+      accountName = etmpBankDetails.accountName,
+      bic = etmpBankDetails.bic,
+      iban = etmpBankDetails.iban
+    )
 }
 

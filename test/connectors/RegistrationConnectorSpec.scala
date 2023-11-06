@@ -278,10 +278,23 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
         val result = connector.getRegistration().futureValue
 
-        result mustBe registrationWrapper
+        result mustBe Right(registrationWrapper)
       }
     }
 
-    // TODO Test for non-success
+    "must return an Internal Server Error when the backend responds with Internal Server Error" in {
+
+      running(application) {
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        server.stubFor(get(urlEqualTo(url))
+          .willReturn(aResponse.withStatus(INTERNAL_SERVER_ERROR)))
+
+        val result = connector.getRegistration().futureValue
+
+        result mustBe Left(InternalServerError)
+      }
+    }
   }
 }

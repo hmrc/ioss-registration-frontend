@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package models.amend
+package utils
 
-import models.domain.VatCustomerInfo
-import models.etmp.EtmpDisplayRegistration
-import play.api.libs.json.{Json, OFormat}
+import pages.amend.AmendYourAnswersPage
+import pages.{NonEmptyWaypoints, Waypoints}
 
-// TODO -> Test
-case class RegistrationWrapper(vatInfo: VatCustomerInfo, registration: EtmpDisplayRegistration)
+object AmendWaypoints {
 
-object RegistrationWrapper {
-
-  implicit val format: OFormat[RegistrationWrapper] = Json.format[RegistrationWrapper]
+  implicit class AmendWaypointsOps(waypoints: Waypoints) {
+    def inAmend: Boolean = {
+      waypoints match {
+        case nonEmptyWaypoints: NonEmptyWaypoints =>
+          nonEmptyWaypoints.waypoints.toList.map(_.urlFragment).contains(AmendYourAnswersPage.urlFragment)
+        case _ =>
+          false
+      }
+    }
+  }
 }

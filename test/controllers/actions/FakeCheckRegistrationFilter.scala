@@ -25,7 +25,7 @@ import utils.FutureSyntax.FutureOps
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class FakeCheckRegistrationFilter extends CheckRegistrationFilterImpl(mock[FrontendAppConfig]) {
+class FakeCheckRegistrationFilter extends CheckRegistrationFilterImpl(inAmend = false, mock[FrontendAppConfig]) {
 
   override protected def filter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] =
     None.toFuture
@@ -33,5 +33,5 @@ class FakeCheckRegistrationFilter extends CheckRegistrationFilterImpl(mock[Front
 
 class FakeCheckRegistrationFilterProvider extends CheckRegistrationFilterProvider(mock[FrontendAppConfig]) {
 
-  override def apply(): CheckRegistrationFilterImpl = new FakeCheckRegistrationFilter()
+  override def apply(inAmend: Boolean): CheckRegistrationFilterImpl = new FakeCheckRegistrationFilter()
 }

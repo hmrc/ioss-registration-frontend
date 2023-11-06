@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package models.amend
+package forms.amend
 
-import models.domain.VatCustomerInfo
-import models.etmp.EtmpDisplayRegistration
-import play.api.libs.json.{Json, OFormat}
+import forms.mappings.Mappings
+import play.api.data.Form
 
-// TODO -> Test
-case class RegistrationWrapper(vatInfo: VatCustomerInfo, registration: EtmpDisplayRegistration)
+import javax.inject.Inject
 
-object RegistrationWrapper {
+class CancelAmendRegFormProvider @Inject() extends Mappings {
 
-  implicit val format: OFormat[RegistrationWrapper] = Json.format[RegistrationWrapper]
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("cancelAmendRegistration.error.required")
+    )
 }

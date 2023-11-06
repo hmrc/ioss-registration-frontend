@@ -53,6 +53,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val registrationService = new RegistrationService(stubClockAtArbitraryDate, mockRegistrationConnector)
+  private val etmpRegistration = etmpDisplayRegistration
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
@@ -81,7 +82,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
   ".toUserAnswers" - {
 
     val convertedTradingNames: List[TradingName] = for {
-      tradingName <- etmpDisplayRegistration.tradingNames.toList
+      tradingName <- etmpRegistration.tradingNames.toList
     } yield TradingName(name = tradingName.tradingName)
 
     def convertToPreviousRegistrationDetails(etmpPreviousEuRegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails]): Seq[PreviousRegistrationDetails] = {
@@ -116,7 +117,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
       }
     }
 
-    val previousRegistrations = convertToPreviousRegistrationDetails(etmpDisplayRegistration.schemeDetails.previousEURegistrationDetails)
+    val previousRegistrations = convertToPreviousRegistrationDetails(etmpRegistration.schemeDetails.previousEURegistrationDetails)
 
     def determineTraderId(traderId: TraderId): Option[String] = {
       traderId match {
@@ -135,7 +136,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
       }
 
     val euDetails: Seq[EuDetails] = for {
-      euCountryDetails <- etmpDisplayRegistration.schemeDetails.euRegistrationDetails
+      euCountryDetails <- etmpRegistration.schemeDetails.euRegistrationDetails
     } yield {
       EuDetails(
         euCountry = euCountries.filter(_.code == euCountryDetails.countryOfRegistration).head,
@@ -156,11 +157,11 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
     }
 
     val convertWebsites: List[Website] = for {
-        website <- etmpDisplayRegistration.schemeDetails.websites.toList
+        website <- etmpRegistration.schemeDetails.websites.toList
       } yield Website(site = website.websiteAddress)
 
     val convertedBankDetails: BankDetails = {
-      val etmpBankDetails = etmpDisplayRegistration.bankDetails
+      val etmpBankDetails = etmpRegistration.bankDetails
       BankDetails(
         accountName = etmpBankDetails.accountName,
         bic = etmpBankDetails.bic,
@@ -169,7 +170,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
     }
 
     val contactDetails: BusinessContactDetails = {
-      val etmpSchemeDetails = etmpDisplayRegistration.schemeDetails
+      val etmpSchemeDetails = etmpRegistration.schemeDetails
       BusinessContactDetails(
         fullName = etmpSchemeDetails.contactName,
         telephoneNumber = etmpSchemeDetails.businessTelephoneNumber,
@@ -191,11 +192,11 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
         .set(BusinessContactDetailsPage, contactDetails).success.value
         .set(BankDetailsPage, convertedBankDetails).success.value
 
-      val receivedRegistrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+      val receivedRegistrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpRegistration)
 
       val result = registrationService.toUserAnswers(userId = userAnswersId, registrationWrapper = receivedRegistrationWrapper).futureValue
 
-      result mustBe userAnswers
+      result mustBe userAnswers.copy(lastUpdated = result.lastUpdated)
     }
   }
 }

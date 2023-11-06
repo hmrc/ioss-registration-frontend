@@ -28,6 +28,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.DeriveNumberOfWebsites
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import viewmodels.WebsiteSummary
 import views.html.AddWebsiteView
@@ -45,7 +46,7 @@ class AddWebsiteController @Inject()(
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
       getNumberOfWebsites(waypoints) {
         number =>
@@ -71,7 +72,7 @@ class AddWebsiteController @Inject()(
     }
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
       getNumberOfWebsites(waypoints) {
         number =>

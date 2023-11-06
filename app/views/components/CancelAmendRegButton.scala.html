@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package models.amend
+@import controllers.amend.routes
 
-import models.domain.VatCustomerInfo
-import models.etmp.EtmpDisplayRegistration
-import play.api.libs.json.{Json, OFormat}
+@this(govukButton: GovukButton)
+@(continueMessage: String, continueUrl: String = "", waypoints: Waypoints)(implicit messages: Messages)
+<div class="govuk-button-group">
+    @govukButton(
+        ButtonViewModel(messages(continueMessage)).withAttribute(("id", "continue")).withAttribute("onclick", "showTheSpinner()")
+    )
 
-// TODO -> Test
-case class RegistrationWrapper(vatInfo: VatCustomerInfo, registration: EtmpDisplayRegistration)
-
-object RegistrationWrapper {
-
-  implicit val format: OFormat[RegistrationWrapper] = Json.format[RegistrationWrapper]
-}
+<a id="cancel" role="link" href="@routes.CancelAmendRegistrationController.onPageLoad(waypoints)" class="govuk-link" data-module="govuk-link">
+@messages("cancelAmendRegistration.link")
+</a>
+</div>

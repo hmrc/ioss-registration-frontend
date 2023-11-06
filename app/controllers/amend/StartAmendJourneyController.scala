@@ -18,9 +18,13 @@ package controllers.amend
 
 import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
+import logging.Logging
 import pages.Waypoints
+import pages.amend.AmendYourAnswersPage
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import repositories.AuthenticatedUserAnswersRepository
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
@@ -29,17 +33,29 @@ import scala.concurrent.ExecutionContext
 class StartAmendJourneyController @Inject()(
                                              override val messagesApi: MessagesApi,
                                              cc: AuthenticatedControllerComponents,
-                                             registrationConnector: RegistrationConnector
-                                           )(implicit ec: ExecutionContext) extends FrontendBaseController {
+                                             registrationConnector: RegistrationConnector,
+                                             registrationService: RegistrationService,
+                                             authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
+                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging {
   protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(inAmend = true).async {
     implicit request =>
-//      for {
-//        registrationWrapper <- registrationConnector.getRegistration()
-//      } yield {
-        Ok
-        //TODO -> Service convert to UA
-//      }
+      (for {
+        registrationWrapperResponse <- registrationConnector.getRegistration()
+      } yield {
+
+        registrationWrapperResponse match {
+          case Right(registrationWrapper) =>
+            for {
+              userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
+              _ <- authenticatedUserAnswersRepository.set(userAnswers)
+            } yield Redirect(AmendYourAnswersPage.route(waypoints).url)
+          case Left(error) =>
+            val exception = new Exception(error.body)
+            logger.error(exception.getMessage, exception)
+            throw exception
+        }
+      }).flatten
   }
 }

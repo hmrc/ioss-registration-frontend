@@ -237,3 +237,6 @@ GET         /start-amend-journey                                             con
 
 GET         /change-your-registration                                        controllers.amend.ChangeRegistrationController.onPageLoad()
 POST        /change-your-registration                                        controllers.amend.ChangeRegistrationController.onSubmit()
+
+GET         /cancel-amend-registration                                       controllers.amend.CancelAmendRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /cancel-amend-registration                                       controllers.amend.CancelAmendRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

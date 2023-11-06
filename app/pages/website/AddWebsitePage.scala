@@ -18,7 +18,7 @@ package pages.website
 
 import controllers.website
 import models.{Index, UserAnswers}
-import pages.{AddItemPage, BusinessContactDetailsPage, CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
+import pages.{AddItemPage, BusinessContactDetailsPage, JourneyRecoveryPage, Page, QuestionPage, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.{Derivable, DeriveNumberOfWebsites}

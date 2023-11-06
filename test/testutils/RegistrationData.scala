@@ -83,5 +83,7 @@ object RegistrationData extends SpecBase {
     exclusions = Gen.listOfN(3, arbitrary[EtmpExclusion]).sample.value,
     adminUse = etmpAdminUse
   )
+
+
 }
 

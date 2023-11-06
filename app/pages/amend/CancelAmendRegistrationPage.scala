@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package models.amend
+package pages.amend
 
-import models.domain.VatCustomerInfo
-import models.etmp.EtmpDisplayRegistration
-import play.api.libs.json.{Json, OFormat}
+import controllers.amend.{routes => amendRoutes}
+import pages.{Page, Waypoints}
+import play.api.mvc.Call
 
-// TODO -> Test
-case class RegistrationWrapper(vatInfo: VatCustomerInfo, registration: EtmpDisplayRegistration)
-
-object RegistrationWrapper {
-
-  implicit val format: OFormat[RegistrationWrapper] = Json.format[RegistrationWrapper]
+object CancelAmendRegistrationPage extends Page {
+  override def route(waypoints: Waypoints): Call =
+    amendRoutes.CancelAmendRegistrationController.onPageLoad()
 }

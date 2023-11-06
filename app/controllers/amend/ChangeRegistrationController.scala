@@ -23,7 +23,11 @@ import pages.{EmptyWaypoints, Waypoint}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.VatRegistrationDetailsSummary
+import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
+import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
+import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.govuk.summarylist._
 import views.html.amend.ChangeRegistrationView
 
@@ -37,7 +41,7 @@ class ChangeRegistrationController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad: Action[AnyContent] = cc.authAndGetData(inAmend = true) {
     implicit request =>
 
       val thisPage = AmendYourAnswersPage
@@ -54,60 +58,57 @@ class ChangeRegistrationController @Inject()(
         ).flatten
       )
 
+      val maybeHasTradingNameSummaryRow = HasTradingNameSummary.row(request.userAnswers, waypoints, thisPage)
+      val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
+
+      val websiteSummaryRow = WebsiteSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
+      val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(request.userAnswers, waypoints, thisPage)
+      val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(request.userAnswers, Seq.empty, waypoints, thisPage)
+      val maybeTaxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, thisPage)
+      val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
+      val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(request.userAnswers, waypoints, thisPage)
+      val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(request.userAnswers, waypoints, thisPage)
+      val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(request.userAnswers, waypoints, thisPage)
+      val bankDetailsAccountNameSummaryRow = BankDetailsSummary.rowAccountName(request.userAnswers, waypoints, thisPage)
+      val bankDetailsBicSummaryRow = BankDetailsSummary.rowBIC(request.userAnswers, waypoints, thisPage)
+      val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(request.userAnswers, waypoints, thisPage)
 
 
-//      val maybeHasTradingNameSummaryRow = HasTradingNameSummary.row(request.userAnswers, waypoints, thisPage)
-//      val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
-//
-//      val websiteSummaryRow = WebsiteSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
-//      val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(request.userAnswers, waypoints, thisPage)
-//      val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(request.userAnswers, Seq.empty, waypoints, thisPage)
-//      val maybeTaxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, thisPage)
-//      val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(request.userAnswers, waypoints, thisPage)
-//      val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(request.userAnswers, waypoints, thisPage)
-//      val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(request.userAnswers, waypoints, thisPage)
-//      val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(request.userAnswers, waypoints, thisPage)
-//      val bankDetailsAccountNameSummaryRow = BankDetailsSummary.rowAccountName(request.userAnswers, waypoints, thisPage)
-//      val bankDetailsBicSummaryRow = BankDetailsSummary.rowBIC(request.userAnswers, waypoints, thisPage)
-//      val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(request.userAnswers, waypoints, thisPage)
-
-
-      val list = SummaryListViewModel(Seq.empty)
-//      val list = SummaryListViewModel(
-//        rows = Seq(
-//          maybeHasTradingNameSummaryRow.map { hasTradingNameSummaryRow =>
-//            if (tradingNameSummaryRow.nonEmpty) {
-//              hasTradingNameSummaryRow.withCssClass("govuk-summary-list__row--no-border")
-//            } else {
-//              hasTradingNameSummaryRow
-//            }
-//          },
-//          tradingNameSummaryRow,
-//          previouslyRegisteredSummaryRow.map { sr =>
-//            if (previousRegistrationSummaryRow.isDefined) {
-//              sr.withCssClass("govuk-summary-list__row--no-border")
-//            } else {
-//              sr
-//            }
-//          },
-//          previousRegistrationSummaryRow,
-//          maybeTaxRegisteredInEuSummaryRow.map { taxRegisteredInEuSummaryRow =>
-//            if (euDetailsSummaryRow.nonEmpty) {
-//              taxRegisteredInEuSummaryRow.withCssClass("govuk-summary-list__row--no-border")
-//            } else {
-//              taxRegisteredInEuSummaryRow
-//            }
-//          },
-//          euDetailsSummaryRow,
-//          websiteSummaryRow,
-//          businessContactDetailsContactNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
-//          businessContactDetailsTelephoneSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
-//          businessContactDetailsEmailSummaryRow,
-//          bankDetailsAccountNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
-//          bankDetailsBicSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
-//          bankDetailsIbanSummaryRow
-//        ).flatten
-//      )
+      val list = SummaryListViewModel(
+        rows = Seq(
+          maybeHasTradingNameSummaryRow.map { hasTradingNameSummaryRow =>
+            if (tradingNameSummaryRow.nonEmpty) {
+              hasTradingNameSummaryRow.withCssClass("govuk-summary-list__row--no-border")
+            } else {
+              hasTradingNameSummaryRow
+            }
+          },
+          tradingNameSummaryRow,
+          previouslyRegisteredSummaryRow.map { sr =>
+            if (previousRegistrationSummaryRow.isDefined) {
+              sr.withCssClass("govuk-summary-list__row--no-border")
+            } else {
+              sr
+            }
+          },
+          previousRegistrationSummaryRow,
+          maybeTaxRegisteredInEuSummaryRow.map { taxRegisteredInEuSummaryRow =>
+            if (euDetailsSummaryRow.nonEmpty) {
+              taxRegisteredInEuSummaryRow.withCssClass("govuk-summary-list__row--no-border")
+            } else {
+              taxRegisteredInEuSummaryRow
+            }
+          },
+          euDetailsSummaryRow,
+          websiteSummaryRow,
+          businessContactDetailsContactNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+          businessContactDetailsTelephoneSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+          businessContactDetailsEmailSummaryRow,
+          bankDetailsAccountNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+          bankDetailsBicSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+          bankDetailsIbanSummaryRow
+        ).flatten
+      )
       Ok(view(waypoints, vatRegistrationDetailsList, list))
   }
 

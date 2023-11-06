@@ -24,6 +24,7 @@ import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.euDetails.AllEuDetailsQuery
+import utils.AmendWaypoints.AmendWaypointsOps
 
 case object TaxRegisteredInEuPage extends QuestionPage[Boolean] {
 
@@ -45,8 +46,8 @@ case object TaxRegisteredInEuPage extends QuestionPage[Boolean] {
       case (Some(true), Some(euDetails)) if euDetails.nonEmpty => AddEuDetailsPage()
       case (Some(true), _) => EuCountryPage(Index(0))
       case (Some(false), Some(euDetails)) if euDetails.nonEmpty => DeleteAllEuDetailsPage
-      case (Some(false), _) if waypoints.waypoints.head.urlFragment == CheckYourAnswersPage.urlFragment => CheckYourAnswersPage
-      case (Some(false), _) if waypoints.waypoints.head.urlFragment == AmendYourAnswersPage.urlFragment => AmendYourAnswersPage
+      case (Some(false), _) if waypoints.inAmend => AmendYourAnswersPage
+      case (Some(false), _) => CheckYourAnswersPage
       case _ => JourneyRecoveryPage
     }
 }

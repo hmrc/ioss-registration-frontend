@@ -27,10 +27,9 @@ import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.EitherValues
 import play.api.libs.json.{JsObject, Json}
-import testutils.RegistrationData.datesBetween
 import uk.gov.hmrc.domain.Vrn
 
-import java.time.{Instant, LocalDate}
+import java.time.{Instant, LocalDate, ZoneOffset}
 
 trait ModelGenerators extends EitherValues {
 
@@ -327,6 +326,17 @@ trait ModelGenerators extends EitherValues {
     Arbitrary {
       Gen.oneOf(SchemeType.values)
     }
+
+  def datesBetween(min: LocalDate, max: LocalDate): Gen[LocalDate] = {
+
+    def toMillis(date: LocalDate): Long =
+      date.atStartOfDay.atZone(ZoneOffset.UTC).toInstant.toEpochMilli
+
+    Gen.choose(toMillis(min), toMillis(max)).map {
+      millis =>
+        Instant.ofEpochMilli(millis).atOffset(ZoneOffset.UTC).toLocalDate
+    }
+  }
 
   implicit lazy val arbitraryDate: Arbitrary[LocalDate] =
     Arbitrary {

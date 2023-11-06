@@ -141,7 +141,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           )
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual CannotRegisterAlreadyRegisteredPage.route(waypoints).url
+          redirectLocation(result).value mustBe CannotRegisterAlreadyRegisteredPage.route(waypoints).url
           verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
         }
       }

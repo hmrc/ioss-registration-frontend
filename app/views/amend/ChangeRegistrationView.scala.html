@@ -16,13 +16,14 @@
 
 @import controllers.amend.{routes => amendRoutes}
 @import pages.amend.AmendYourAnswersPage
-@import views.html.components.ButtonGroupProcessing
+@import views.html.components.CancelAmendRegButton
+
 
 @this(
         formHelper: FormWithCSRF,
         layout: templates.Layout,
         govukSummaryList: GovukSummaryList,
-        button: ButtonGroupProcessing,
+        button: CancelAmendRegButton,
         govukErrorSummary: GovukErrorSummary,
         govukWarningText: GovukWarningText
 )
