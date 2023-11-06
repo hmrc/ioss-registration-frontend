@@ -405,10 +405,13 @@ class PreviousRegistrationsJourneySpec extends AnyFreeSpec with JourneyHelpers w
               goToChangeAnswer(CheckPreviousSchemeAnswersPage(index)),
               isSameCountry match {
                 case true =>
-                goTo(DeletePreviousSchemePage(index, index))
-                removeAddToListItem(PreviousSchemeForCountryQuery(index, index))
-                pageMustBe(CheckPreviousSchemeAnswersPage(index))
-                answersMustNotContain(PreviousSchemeForCountryQuery(index, index))
+                  goTo(DeletePreviousSchemePage(index, index))
+                  removeAddToListItem(PreviousSchemeForCountryQuery(index, index))
+                  pageMustBe(CheckPreviousSchemeAnswersPage(index))
+                  answersMustNotContain(PreviousSchemeForCountryQuery(index, index))
+
+                case _ =>
+                  fail("expected isSameCountry to be true")
               }
             )
 

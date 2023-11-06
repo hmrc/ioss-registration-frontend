@@ -18,11 +18,13 @@ package pages.tradingNames
 
 import controllers.tradingNames.routes
 import models.{Index, UserAnswers}
+import pages.amend.ChangeRegistrationPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.{JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
+import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.tradingNames.AllTradingNames
+import utils.AmendWaypoints.AmendWaypointsOps
 
 case object HasTradingNamePage extends QuestionPage[Boolean] {
 
@@ -38,12 +40,15 @@ case object HasTradingNamePage extends QuestionPage[Boolean] {
       case false => PreviouslyRegisteredPage
     }.orRecover
 
-  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
     (answers.get(this), answers.get(AllTradingNames)) match {
       case (Some(true), Some(tradingNames)) if tradingNames.nonEmpty => AddTradingNamePage()
       case (Some(true), _) => TradingNamePage(Index(0))
       case (Some(false), Some(tradingNames)) if tradingNames.nonEmpty => DeleteAllTradingNamesPage
+      case (Some(false), _) if waypoints.inAmend => ChangeRegistrationPage
+      case (Some(false), _) if waypoints.inCheck => CheckYourAnswersPage
       case (Some(false), _) => PreviouslyRegisteredPage
       case _ => JourneyRecoveryPage
     }
+  }
 }

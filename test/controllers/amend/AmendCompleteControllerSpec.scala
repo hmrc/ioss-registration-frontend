@@ -23,7 +23,6 @@ import controllers.amend.{routes => amendRoutes}
 import controllers.routes
 import models.UserAnswers
 import models.external.ExternalEntryUrl
-import models.requests.AuthenticatedDataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
