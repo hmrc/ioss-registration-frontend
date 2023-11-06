@@ -24,6 +24,7 @@ import pages.previousRegistrations.{PreviousIossSchemePage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.previousRegistrations.PreviousIossSchemeView
 
 import javax.inject.Inject
@@ -39,7 +40,7 @@ class PreviousIossSchemeController @Inject()(
   val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(PreviousIossSchemePage(countryIndex, schemeIndex)) match {
@@ -50,7 +51,7 @@ class PreviousIossSchemeController @Inject()(
       Ok(view(preparedForm, waypoints, countryIndex, schemeIndex))
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       form.bindFromRequest().fold(

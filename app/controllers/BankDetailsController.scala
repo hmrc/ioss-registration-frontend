@@ -22,6 +22,7 @@ import pages.{BankDetailsPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.BankDetailsView
 
 import javax.inject.Inject
@@ -37,7 +38,7 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
 
   override protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(waypoints.inAmend) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(BankDetailsPage) match {
@@ -48,7 +49,7 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
       Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       form.bindFromRequest().fold(

@@ -25,6 +25,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.previousRegistrations.PreviousEuCountryView
 
 import javax.inject.Inject
@@ -39,7 +40,7 @@ class PreviousEuCountryController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
     implicit request =>
 
       val form = formProvider(index, request.userAnswers.get(AllPreviousRegistrationsQuery). getOrElse(Seq.empty).map(_.previousEuCountry))
@@ -52,7 +53,7 @@ class PreviousEuCountryController @Inject()(
       Ok(view(preparedForm, waypoints, index))
   }
 
-  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       val form = formProvider(index, request.userAnswers.get(AllPreviousRegistrationsQuery). getOrElse(Seq.empty).map(_.previousEuCountry))

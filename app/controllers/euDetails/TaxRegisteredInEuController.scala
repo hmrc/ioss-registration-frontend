@@ -28,6 +28,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.euDetails.{AllEuDetailsRawQuery, DeriveNumberOfEuRegistrations}
 import queries.{Derivable, Settable}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import views.html.euDetails.TaxRegisteredInEuView
 
@@ -46,7 +47,7 @@ class TaxRegisteredInEuController @Inject()(
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(TaxRegisteredInEuPage) match {
@@ -57,7 +58,7 @@ class TaxRegisteredInEuController @Inject()(
       Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
