@@ -18,12 +18,12 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.{Country, Index, UserAnswers}
-import pages.{Page, Waypoints}
+import pages.{Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
 
-case class PreviousEuCountryPage(index: Index) extends PreviouslyRegisteredQuestionPage[Country] {
+case class PreviousEuCountryPage(index: Index) extends QuestionPage[Country] {
 
   override def path: JsPath = JsPath \ "previousRegistrations" \ index.position \ toString
 
