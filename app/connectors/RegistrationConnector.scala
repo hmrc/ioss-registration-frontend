@@ -18,7 +18,7 @@ package connectors
 
 import config.Service
 import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, ExternalEntryUrlResponseReads}
-import connectors.RegistrationHttpParser.{DisplayRegistrationResponse, DisplayRegistrationResponseReads, RegistrationResponseReads, RegistrationResultResponse}
+import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, AmendRegistrationResultResponseReads, DisplayRegistrationResponse, DisplayRegistrationResponseReads, RegistrationResponseReads, RegistrationResultResponse}
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import logging.Logging
 import models.etmp.EtmpRegistrationRequest
@@ -40,6 +40,10 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
 
   def createRegistration(registrationRequest: EtmpRegistrationRequest)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
     httpClient.POST[EtmpRegistrationRequest, RegistrationResultResponse](s"$baseUrl/create-registration", registrationRequest)
+  }
+
+  def amendRegistration(registrationRequest: EtmpRegistrationRequest)(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
+    httpClient.POST[EtmpRegistrationRequest, AmendRegistrationResultResponse](s"$baseUrl/amend", registrationRequest)
   }
 
   def getRegistration()(implicit hc: HeaderCarrier): Future[DisplayRegistrationResponse] =

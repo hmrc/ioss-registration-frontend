@@ -17,27 +17,32 @@
 package controllers.amend
 
 import controllers.actions._
+import logging.Logging
 import models.CheckMode
-import pages.amend.AmendYourAnswersPage
+import controllers.amend.routes
 import pages.{EmptyWaypoints, Waypoint}
+import pages.amend.AmendYourAnswersPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
-import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
-import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
+import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviouslyRegisteredSummary, PreviousRegistrationSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.govuk.summarylist._
 import views.html.amend.ChangeRegistrationView
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class ChangeRegistrationController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       cc: AuthenticatedControllerComponents,
-                                       view: ChangeRegistrationView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                              override val messagesApi: MessagesApi,
+                                              cc: AuthenticatedControllerComponents,
+                                              registrationService: RegistrationService,
+                                              view: ChangeRegistrationView
+                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
@@ -112,9 +117,14 @@ class ChangeRegistrationController @Inject()(
       Ok(view(waypoints, vatRegistrationDetailsList, list))
   }
 
-  def onSubmit(): Action[AnyContent] = Action {
-    // TODO
-    println("Amend submit")
-    Ok
+  def onSubmit(): Action[AnyContent] = cc.authAndGetData(inAmend = true).async {
+    implicit request =>
+      registrationService.amendRegistration(request.userAnswers, request.vrn).map {
+        case Right(_) =>
+          Ok("") // TODO view
+        case Left(e) =>
+          logger.error(s"Unexpected result on submit: ${e.body}")
+          Redirect(routes.ErrorSubmittingAmendmentController.onPageLoad())
+      }
   }
 }

@@ -240,3 +240,7 @@ POST        /change-your-registration                                        con
 
 GET         /cancel-amend-registration                                       controllers.amend.CancelAmendRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /cancel-amend-registration                                       controllers.amend.CancelAmendRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /error-submitting-amendment                                      controllers.amend.ErrorSubmittingAmendmentController.onPageLoad()
+
+GET         /successful-amend                                                controllers.amend.AmendCompleteController.onPageLoad()
