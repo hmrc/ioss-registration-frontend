@@ -27,6 +27,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import viewmodels.checkAnswers.previousRegistrations.{PreviousIntermediaryNumberSummary, PreviousSchemeNumberSummary, PreviousSchemeSummary}
 import viewmodels.govuk.summarylist._
 import views.html.previousRegistrations.CheckPreviousSchemeAnswersView
@@ -44,7 +45,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData().async {
+  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
       getPreviousCountry(waypoints, index) {
         country =>
@@ -72,7 +73,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
       getPreviousCountry(waypoints, index) { country =>
