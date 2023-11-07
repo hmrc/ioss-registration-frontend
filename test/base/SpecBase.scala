@@ -123,11 +123,13 @@ trait SpecBase
   val emailVerificationRequest: EmailVerificationRequest = EmailVerificationRequest(
     credId = userAnswersId,
     continueUrl = "/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/bank-details",
-    origin = "OSS",
+    origin = "IOSS",
     deskproServiceName = Some("one-stop-shop-registration-frontend"),
     accessibilityStatementUrl = "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",
     pageTitle = Some("ioss-registration-frontend"),
     backUrl = Some("/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"),
     email = Some(verifyEmail)
   )
+
+  val yourAccountUrl = "http://localhost:10193/pay-vat-on-goods-sold-to-eu/import-one-stop-shop-returns-payments"
 }

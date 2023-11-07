@@ -87,7 +87,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
         val etmpEnrolmentResponse: EtmpEnrolmentResponse = EtmpEnrolmentResponse(iossReference = "123456789")
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-        when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Right(etmpEnrolmentResponse).toFuture
+        when(mockRegistrationService.createRegistration(any(), any())(any())) thenReturn Right(etmpEnrolmentResponse).toFuture
         doNothing().when(mockAuditService).audit(any())(any(), any())
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
@@ -120,7 +120,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
       "must audit the event and redirect to the correct page when back end returns ConflictFound" in {
 
-        when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Left(ConflictFound).toFuture
+        when(mockRegistrationService.createRegistration(any(), any())(any())) thenReturn Left(ConflictFound).toFuture
         doNothing().when(mockAuditService).audit(any())(any(), any())
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
@@ -149,7 +149,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
       // TODO Add SaveAndContinue when created
       "must audit the event and redirect to the correct page when back end returns any other Error Response" in {
 
-        when(mockRegistrationService.createRegistrationRequest(any(), any())(any())) thenReturn Left(ServerError).toFuture
+        when(mockRegistrationService.createRegistration(any(), any())(any())) thenReturn Left(ServerError).toFuture
         doNothing().when(mockAuditService).audit(any())(any(), any())
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))

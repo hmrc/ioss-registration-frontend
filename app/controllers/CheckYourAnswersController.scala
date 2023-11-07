@@ -134,7 +134,7 @@ class CheckYourAnswersController @Inject()(
         }
 
         case None =>
-          registrationService.createRegistrationRequest(request.userAnswers, request.vrn).flatMap {
+          registrationService.createRegistration(request.userAnswers, request.vrn).flatMap {
             case Right(response) =>
               auditService.audit(RegistrationAuditModel.build(
                 RegistrationAuditType.CreateRegistration, request.userAnswers, Some(response), SubmissionResult.Success)

@@ -29,6 +29,7 @@ object RegistrationHttpParser extends Logging {
 
   type RegistrationResultResponse = Either[ErrorResponse, EtmpEnrolmentResponse]
   type DisplayRegistrationResponse = Either[ErrorResponse, RegistrationWrapper]
+  type AmendRegistrationResultResponse = Either[ErrorResponse, Any]
 
   implicit object RegistrationResponseReads extends HttpReads[RegistrationResultResponse] {
 
@@ -69,4 +70,14 @@ object RegistrationHttpParser extends Logging {
           Left(InternalServerError)
       }
   }
+
+  implicit object AmendRegistrationResultResponseReads extends HttpReads[AmendRegistrationResultResponse] {
+    override def read(method: String, url: String, response: HttpResponse): AmendRegistrationResultResponse = {
+      response.status match {
+        case OK => Right(())
+        case status => Left(UnexpectedResponseStatus(response.status, s"Unexpected amend response, status $status returned"))
+      }
+    }
+  }
+
 }

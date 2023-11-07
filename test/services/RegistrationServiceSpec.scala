@@ -59,7 +59,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
     reset(mockRegistrationConnector)
   }
 
-  ".createRegistrationRequest" - {
+  ".createRegistration" - {
 
     "must create a registration request from user answers provided and return a successful ETMP enrolment response" in {
 
@@ -73,8 +73,26 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
 
       running(app) {
 
-        registrationService.createRegistrationRequest(completeUserAnswersWithVatInfo, vrn).futureValue mustBe Right(etmpEnrolmentResponse)
+        registrationService.createRegistration(completeUserAnswersWithVatInfo, vrn).futureValue mustBe Right(etmpEnrolmentResponse)
         verify(mockRegistrationConnector, times(1)).createRegistration(any())(any())
+      }
+    }
+  }
+
+  ".amendRegistration" - {
+
+    "must create a registration request from user answers provided and return a successful response" in {
+
+
+      when(mockRegistrationConnector.amendRegistration(any())(any())) thenReturn Right(()).toFuture
+
+      val app = applicationBuilder(Some(completeUserAnswersWithVatInfo), Some(stubClockAtArbitraryDate))
+        .build()
+
+      running(app) {
+
+        registrationService.amendRegistration(completeUserAnswersWithVatInfo, vrn).futureValue mustBe Right(())
+        verify(mockRegistrationConnector, times(1)).amendRegistration(any())(any())
       }
     }
   }

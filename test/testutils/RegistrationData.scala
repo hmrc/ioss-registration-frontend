@@ -21,6 +21,7 @@ import config.Constants.maxTradingNames
 import formats.Format.eisDateFormatter
 import models.etmp._
 import models.{Bic, Country, Iban}
+import models.etmp.amend.{EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 
@@ -82,6 +83,20 @@ object RegistrationData extends SpecBase {
     bankDetails = genBankDetails,
     exclusions = Gen.listOfN(3, arbitrary[EtmpExclusion]).sample.value,
     adminUse = etmpAdminUse
+  )
+
+  val etmpAmendRegistrationRequest: EtmpAmendRegistrationRequest = EtmpAmendRegistrationRequest(
+    administration = etmpRegistrationRequest.administration.copy(messageType = EtmpMessageType.IOSSSubscriptionAmend),
+    changeLog = EtmpAmendRegistrationChangeLog(
+      tradingNames = true,
+      fixedEstablishments = true,
+      contactDetails = true,
+      bankDetails = true
+    ),
+    customerIdentification = etmpRegistrationRequest.customerIdentification,
+    tradingNames = etmpRegistrationRequest.tradingNames,
+    schemeDetails = etmpRegistrationRequest.schemeDetails,
+    bankDetails = etmpRegistrationRequest.bankDetails
   )
 
 

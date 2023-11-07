@@ -22,8 +22,8 @@ import forms.amend.CancelAmendRegFormProvider
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.amend.{AmendYourAnswersPage, CancelAmendRegistrationPage}
 import pages.{EmptyWaypoints, Waypoints}
+import pages.amend.ChangeRegistrationPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -109,7 +109,7 @@ class CancelAmendRegistrationControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual AmendYourAnswersPage.route(waypoints).url
+        redirectLocation(result).value mustEqual ChangeRegistrationPage.route(waypoints).url
         verify(mockSessionRepository, never()).set(eqTo(basicUserAnswersWithVatInfo))
       }
     }

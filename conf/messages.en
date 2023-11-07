@@ -651,3 +651,18 @@ changeRegistration.heading = Change Your Registration
 changeRegistration.details.heading = Import One Stop Shop details
 changeRegistration.info.p1 = By registering for this scheme, you confirm that the information you are providing is correct and complete.
 changeRegistration.info.p2 = After registering, do not click the Back button or refresh the page.
+
+amendComplete.title = Registration details changed
+amendComplete.heading = Registration details changed
+amendComplete.info = You changed the following details:
+amendComplete.link.BTA = Manage your Import One Stop Shop returns in your account.
+amendComplete.link.yourAccount = Manage your Import One Stop Shop returns in your account.
+amendComplete.contact.text = We will contact you if we need to check any information.
+amendComplete.feedback.link.text = What did you think of this service?
+amendComplete.feedback.30seconds = (takes 30 seconds)
+
+errorSubmittingAmendment.title = We have a problem with our service right now
+errorSubmittingAmendment.heading = We cannot update your registration
+errorSubmittingAmendment.tryAgainLater = You can <a class="govuk-link" href="{0}">try again later</a>.
+errorSubmittingAmendment.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
+errorSubmittingAmendment.yourAccount = Back to your account

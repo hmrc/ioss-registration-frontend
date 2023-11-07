@@ -18,21 +18,21 @@ package pages.amend
 
 import controllers.amend.{routes => amendRoutes}
 import models.UserAnswers
-import pages.{ApplicationCompletePage, CheckAnswersPage, Page, Waypoints}
+import pages.{CheckAnswersPage, Page, Waypoints}
 import play.api.mvc.Call
 
-object AmendYourAnswersPage extends CheckAnswersPage {
+object ChangeRegistrationPage extends CheckAnswersPage {
 
   override def isTheSamePage(other: Page): Boolean = other match {
-    case AmendYourAnswersPage => true
+    case ChangeRegistrationPage => true
     case _ => false
   }
 
-  override val urlFragment: String = "amend-your-answers"
+  override val urlFragment: String = "change-your-registration"
 
   override def route(waypoints: Waypoints): Call =
     amendRoutes.ChangeRegistrationController.onPageLoad()
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    ApplicationCompletePage // TODO -> ???
+    AmendCompletePage
 }

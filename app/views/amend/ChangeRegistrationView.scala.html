@@ -15,7 +15,7 @@
  *@
 
 @import controllers.amend.{routes => amendRoutes}
-@import pages.amend.AmendYourAnswersPage
+@import pages.amend.ChangeRegistrationPage
 @import views.html.components.CancelAmendRegButton
 
 
@@ -56,7 +56,7 @@
 
 
     @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit()) {
-        @button("site.submit", AmendYourAnswersPage.route(waypoints).url, waypoints)
+        @button("site.submit", ChangeRegistrationPage.route(waypoints).url, waypoints)
     }
 
     <div id="processing-wheel" hidden>

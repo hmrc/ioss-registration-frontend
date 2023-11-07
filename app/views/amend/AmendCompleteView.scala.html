@@ -1,0 +1,60 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.domain.Vrn
+
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton
+)
+
+@(
+    vrn: Vrn,
+    feedbackLink: String,
+    externalUrl: Option[String] = None,
+    yourAccountUrl: String,
+    organisationName: String
+)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("amendComplete.title")), showBackLink = false) {
+    <div class="grid-row column-two-thirds" id="application_complete_id">
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title">@messages("amendComplete.heading")</h1>
+        </div>
+
+        @*<div class="govuk-body">@messages("amendComplete.info")</div>*@
+
+        @externalUrl match {
+          case Some(url) => {
+            @Html(
+            s"""<p class="govuk-body"><a href=$url id="back-to-your-account" class="govuk-link">""" + messages("amendComplete.link.BTA") + "</a></p>"
+            )
+          }
+          case _ => {
+            @Html(
+              s"""<p class="govuk-body"><a href=$yourAccountUrl id="back-to-your-account" class="govuk-link">""" + messages("amendComplete.link.yourAccount") + "</a></p>"
+            )
+          }
+        }
+
+        <p class="govuk-body">@messages("amendComplete.contact.text")</p>
+
+        <p class="govuk-body">
+            <a href="@feedbackLink" class="govuk-link">@messages("applicationComplete.feedback.link.text")</a>
+            @messages("applicationComplete.feedback.30seconds")
+        </p>
+    </div>
+}

@@ -21,7 +21,7 @@ import controllers.actions._
 import forms.amend.CancelAmendRegFormProvider
 import logging.Logging
 import pages.Waypoints
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -58,7 +58,7 @@ class CancelAmendRegistrationController @Inject()(
               _ <- cc.sessionRepository.clear(request.userId)
             } yield Redirect(appConfig.iossYourAccountUrl)
           } else {
-            Future.successful(Redirect(AmendYourAnswersPage.route(waypoints).url))
+            Future.successful(Redirect(ChangeRegistrationPage.route(waypoints).url))
           }
       )
   }

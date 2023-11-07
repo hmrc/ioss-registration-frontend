@@ -18,10 +18,11 @@ package connectors
 
 import config.Service
 import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, ExternalEntryUrlResponseReads}
-import connectors.RegistrationHttpParser.{DisplayRegistrationResponse, DisplayRegistrationResponseReads, RegistrationResponseReads, RegistrationResultResponse}
+import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, AmendRegistrationResultResponseReads, DisplayRegistrationResponse, DisplayRegistrationResponseReads, RegistrationResponseReads, RegistrationResultResponse}
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import logging.Logging
 import models.etmp.EtmpRegistrationRequest
+import models.etmp.amend.EtmpAmendRegistrationRequest
 import play.api.Configuration
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 
@@ -40,6 +41,10 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
 
   def createRegistration(registrationRequest: EtmpRegistrationRequest)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
     httpClient.POST[EtmpRegistrationRequest, RegistrationResultResponse](s"$baseUrl/create-registration", registrationRequest)
+  }
+
+  def amendRegistration(registrationRequest: EtmpAmendRegistrationRequest)(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
+    httpClient.POST[EtmpAmendRegistrationRequest, AmendRegistrationResultResponse](s"$baseUrl/amend", registrationRequest)
   }
 
   def getRegistration()(implicit hc: HeaderCarrier): Future[DisplayRegistrationResponse] =

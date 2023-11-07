@@ -17,7 +17,7 @@
 package services
 
 import connectors.RegistrationConnector
-import connectors.RegistrationHttpParser.RegistrationResultResponse
+import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, RegistrationResultResponse}
 import logging.Logging
 import models.Country.euCountries
 import models.amend.RegistrationWrapper
@@ -27,6 +27,7 @@ import models.etmp._
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
+import models.etmp.amend.EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
@@ -50,9 +51,14 @@ class RegistrationService @Inject()(
                                      registrationConnector: RegistrationConnector
                                    ) extends EtmpEuRegistrations with EtmpPreviousEuRegistrations with Logging {
 
-  def createRegistrationRequest(answers: UserAnswers, vrn: Vrn)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
+  def createRegistration(answers: UserAnswers, vrn: Vrn)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
     val commencementDate = LocalDateTime.now(clock)
     registrationConnector.createRegistration(buildEtmpRegistrationRequest(answers, vrn, commencementDate))
+  }
+
+  def amendRegistration(answers: UserAnswers, vrn: Vrn)(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
+    val commencementDate = LocalDateTime.now(clock)
+    registrationConnector.amendRegistration(buildEtmpAmendRegistrationRequest(answers, vrn, commencementDate))
   }
 
   def toUserAnswers(userId: String, registrationWrapper: RegistrationWrapper): Future[UserAnswers] = {

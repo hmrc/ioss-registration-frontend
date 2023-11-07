@@ -20,7 +20,7 @@ import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
 import pages.Waypoints
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.AuthenticatedUserAnswersRepository
@@ -50,7 +50,7 @@ class StartAmendJourneyController @Inject()(
             for {
               userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
               _ <- authenticatedUserAnswersRepository.set(userAnswers)
-            } yield Redirect(AmendYourAnswersPage.route(waypoints).url)
+            } yield Redirect(ChangeRegistrationPage.route(waypoints).url)
           case Left(error) =>
             val exception = new Exception(error.body)
             logger.error(exception.getMessage, exception)
