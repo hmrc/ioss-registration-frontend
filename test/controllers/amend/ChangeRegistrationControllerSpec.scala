@@ -19,7 +19,7 @@ package controllers.amend
 import base.SpecBase
 import controllers.amend.{routes => amendRoutes}
 import models.{CheckMode, UserAnswers}
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.Messages
 import play.api.test.FakeRequest
@@ -35,8 +35,8 @@ import viewmodels.govuk.SummaryListFluency
 
 class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency {
 
-  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(AmendYourAnswersPage, CheckMode, AmendYourAnswersPage.urlFragment))
-  private val amendYourAnswersPage = AmendYourAnswersPage
+  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
+  private val amendYourAnswersPage = ChangeRegistrationPage
 
   "ChangeRegistration Controller" - {
 

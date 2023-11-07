@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package utils
+package models.etmp.amend
 
-import pages.amend.ChangeRegistrationPage
-import pages.{NonEmptyWaypoints, Waypoints}
+import play.api.libs.json.{Json, OFormat}
 
-object AmendWaypoints {
+case class EtmpAmendRegistrationChangeLog (
+                                   tradingNames: Boolean,
+                                   fixedEstablishments: Boolean,
+                                   contactDetails: Boolean,
+                                   bankDetails: Boolean,
+                                 )
 
-  implicit class AmendWaypointsOps(waypoints: Waypoints) {
-    def inAmend: Boolean = {
-      waypoints match {
-        case nonEmptyWaypoints: NonEmptyWaypoints =>
-          nonEmptyWaypoints.waypoints.toList.map(_.urlFragment).contains(ChangeRegistrationPage.urlFragment)
-        case _ =>
-          false
-      }
-    }
-  }
+object EtmpAmendRegistrationChangeLog {
+
+  implicit val format: OFormat[EtmpAmendRegistrationChangeLog] = Json.format[EtmpAmendRegistrationChangeLog]
+
 }

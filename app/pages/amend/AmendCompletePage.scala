@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package utils
+package pages.amend
 
-import pages.amend.ChangeRegistrationPage
-import pages.{NonEmptyWaypoints, Waypoints}
+import controllers.amend.{routes => amendRoutes}
+import pages.{Page, Waypoints}
+import play.api.mvc.Call
 
-object AmendWaypoints {
-
-  implicit class AmendWaypointsOps(waypoints: Waypoints) {
-    def inAmend: Boolean = {
-      waypoints match {
-        case nonEmptyWaypoints: NonEmptyWaypoints =>
-          nonEmptyWaypoints.waypoints.toList.map(_.urlFragment).contains(ChangeRegistrationPage.urlFragment)
-        case _ =>
-          false
-      }
-    }
-  }
+object AmendCompletePage extends Page {
+  override def route(waypoints: Waypoints): Call =
+    amendRoutes.AmendCompleteController.onPageLoad()
 }

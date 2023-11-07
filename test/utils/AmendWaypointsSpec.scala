@@ -19,7 +19,7 @@ package utils
 import base.SpecBase
 import cats.data.NonEmptyList
 import models.{CheckMode, NormalMode}
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import pages.tradingNames.AddTradingNamePage
 import pages.{NonEmptyWaypoints, Waypoint}
 import utils.AmendWaypoints.AmendWaypointsOps
@@ -28,7 +28,7 @@ class AmendWaypointsSpec extends SpecBase {
 
   "must return true if waypoints contains amend-your-answers url fragment" in {
 
-    val waypoint: Waypoint = Waypoint(AmendYourAnswersPage, CheckMode, AmendYourAnswersPage.urlFragment)
+    val waypoint: Waypoint = Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
     val waypoints = NonEmptyWaypoints(NonEmptyList(waypoint, List.empty))
 
     implicit val amendWaypointsOps: AmendWaypointsOps = AmendWaypointsOps(waypoints)

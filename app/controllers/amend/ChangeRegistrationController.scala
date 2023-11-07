@@ -21,7 +21,7 @@ import logging.Logging
 import models.CheckMode
 import controllers.amend.routes
 import pages.{EmptyWaypoints, Waypoint}
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.RegistrationService
@@ -49,9 +49,9 @@ class ChangeRegistrationController @Inject()(
   def onPageLoad: Action[AnyContent] = cc.authAndGetData(inAmend = true) {
     implicit request =>
 
-      val thisPage = AmendYourAnswersPage
+      val thisPage = ChangeRegistrationPage
 
-      val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, AmendYourAnswersPage.urlFragment))
+      val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
       val vatRegistrationDetailsList = SummaryListViewModel(
         rows = Seq(
@@ -121,7 +121,7 @@ class ChangeRegistrationController @Inject()(
     implicit request =>
       registrationService.amendRegistration(request.userAnswers, request.vrn).map {
         case Right(_) =>
-          Ok("") // TODO view
+          Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
         case Left(e) =>
           logger.error(s"Unexpected result on submit: ${e.body}")
           Redirect(routes.ErrorSubmittingAmendmentController.onPageLoad())

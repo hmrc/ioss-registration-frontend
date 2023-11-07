@@ -24,7 +24,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoSugar.when
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import pages.{EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -73,7 +73,7 @@ class StartAmendJourneyControllerSpec extends SpecBase with BeforeAndAfterEach {
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe AmendYourAnswersPage.route(waypoints).url
+        redirectLocation(result).value mustBe ChangeRegistrationPage.route(waypoints).url
       }
     }
   }

@@ -27,6 +27,7 @@ import models.etmp._
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
+import models.etmp.amend.EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
@@ -57,7 +58,7 @@ class RegistrationService @Inject()(
 
   def amendRegistration(answers: UserAnswers, vrn: Vrn)(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
     val commencementDate = LocalDateTime.now(clock)
-    registrationConnector.amendRegistration(buildEtmpRegistrationRequest(answers, vrn, commencementDate))
+    registrationConnector.amendRegistration(buildEtmpAmendRegistrationRequest(answers, vrn, commencementDate))
   }
 
   def toUserAnswers(userId: String, registrationWrapper: RegistrationWrapper): Future[UserAnswers] = {
