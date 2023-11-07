@@ -28,7 +28,7 @@ import play.api.Application
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
-import testutils.RegistrationData.{etmpDisplayRegistration, etmpRegistrationRequest}
+import testutils.RegistrationData.{etmpAmendRegistrationRequest, etmpDisplayRegistration, etmpRegistrationRequest}
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -308,7 +308,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
         server.stubFor(post(urlEqualTo(url)).willReturn(ok()))
 
-        val result = connector.amendRegistration(etmpRegistrationRequest).futureValue
+        val result = connector.amendRegistration(etmpAmendRegistrationRequest).futureValue
 
         result mustBe Right(())
       }
@@ -321,7 +321,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
         server.stubFor(post(urlEqualTo(url)).willReturn(aResponse().withStatus(123)))
 
-        val result = connector.amendRegistration(etmpRegistrationRequest).futureValue
+        val result = connector.amendRegistration(etmpAmendRegistrationRequest).futureValue
 
         result mustBe Left(UnexpectedResponseStatus(123, "Unexpected amend response, status 123 returned"))
       }
