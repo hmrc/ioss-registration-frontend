@@ -73,7 +73,6 @@ object RegistrationHttpParser extends Logging {
 
   implicit object AmendRegistrationResultResponseReads extends HttpReads[AmendRegistrationResultResponse] {
     override def read(method: String, url: String, response: HttpResponse): AmendRegistrationResultResponse = {
-      println("LOOOOOL")
       response.status match {
         case OK => Right(())
         case status => Left(UnexpectedResponseStatus(response.status, s"Unexpected amend response, status $status returned"))
