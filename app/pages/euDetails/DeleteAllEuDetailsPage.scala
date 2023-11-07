@@ -18,7 +18,7 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.UserAnswers
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
@@ -41,7 +41,7 @@ case object DeleteAllEuDetailsPage extends QuestionPage[Boolean] {
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     answers.get(this) match {
-      case Some(_) if waypoints.inAmend => AmendYourAnswersPage
+      case Some(_) if waypoints.inAmend => ChangeRegistrationPage
       case Some(_) => CheckYourAnswersPage
       case _ => JourneyRecoveryPage
     }

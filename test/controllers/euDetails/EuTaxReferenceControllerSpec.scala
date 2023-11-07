@@ -24,7 +24,7 @@ import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoint, Waypoints}
 import pages.euDetails._
 import play.api.data.Form
@@ -60,7 +60,7 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
 
   private val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
-  private val amendWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(AmendYourAnswersPage, CheckMode, AmendYourAnswersPage.urlFragment))
+  private val amendWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
   private val genericMatch = Match(
     MatchType.FixedEstablishmentActiveNETP,

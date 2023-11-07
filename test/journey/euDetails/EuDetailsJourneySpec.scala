@@ -23,7 +23,7 @@ import models.{CheckMode, Country, Index}
 import org.scalacheck.Gen
 import org.scalatest.freespec.AnyFreeSpec
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
-import pages.amend.AmendYourAnswersPage
+import pages.amend.ChangeRegistrationPage
 import pages.euDetails._
 import pages.website.WebsitePage
 import queries.euDetails.{AllEuDetailsRawQuery, EuDetailsQuery}
@@ -45,7 +45,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
 
   private val euTaxReference = stringsWithMaxLength(20).sample.value
 
-  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(AmendYourAnswersPage, CheckMode, AmendYourAnswersPage.urlFragment))
+  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
   private val initialise = journeyOf(
     setUserAnswerTo(TaxRegisteredInEuPage, true),
@@ -316,7 +316,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
 
         "but answer yes when asked if they want to remove all EU registrations from the scheme" in {
 
-          startingFrom(AmendYourAnswersPage, waypoints)
+          startingFrom(ChangeRegistrationPage, waypoints)
             .run(
               initialise,
               goToChangeAnswer(TaxRegisteredInEuPage),
@@ -331,14 +331,14 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
 
         "but answer no when asked if they want to remove all EU registrations from the scheme" in {
 
-          startingFrom(AmendYourAnswersPage, waypoints)
+          startingFrom(ChangeRegistrationPage, waypoints)
             .run(
               initialise,
               goToChangeAnswer(TaxRegisteredInEuPage),
               submitAnswer(TaxRegisteredInEuPage, false),
               pageMustBe(DeleteAllEuDetailsPage),
               submitAnswer(DeleteAllEuDetailsPage, false),
-              pageMustBe(AmendYourAnswersPage),
+              pageMustBe(ChangeRegistrationPage),
               answersMustContain(EuCountryPage(countryIndex1)),
               answersMustContain(EuCountryPage(countryIndex2))
             )
