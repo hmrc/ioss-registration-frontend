@@ -67,6 +67,7 @@ class IossRequiredActionSpec extends SpecBase {
 
         val expectResult = AuthenticatedMandatoryIossRequest(request, testCredentials, vrn, iossNumber, emptyUserAnswersWithVatInfo)
 
+        println("Result " + result)
         result mustBe Right(expectResult)
       }
     }

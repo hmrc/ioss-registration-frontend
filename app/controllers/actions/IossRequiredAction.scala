@@ -25,7 +25,7 @@ import utils.FutureSyntax.FutureOps
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class IossRequiredAction @Inject()()(implicit val executionContext: ExecutionContext)
+class IossRequiredAction @Inject()(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest] with Logging {
   override protected def refine[A](request: AuthenticatedDataRequest[A]):
   Future[Either[Result, AuthenticatedMandatoryIossRequest[A]]] =
