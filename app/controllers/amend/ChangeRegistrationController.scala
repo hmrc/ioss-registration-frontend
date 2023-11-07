@@ -56,7 +56,7 @@ class ChangeRegistrationController @Inject()(
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
-      val iossReferenceNumber: String = request.iossNumber
+      val iossNumber: String = request.iossNumber
 
       val vatRegistrationDetailsList = SummaryListViewModel(
         rows = Seq(
@@ -69,7 +69,7 @@ class ChangeRegistrationController @Inject()(
       )
 
       val list = detailsList(waypoints, thisPage)
-      Ok(view(waypoints, vatRegistrationDetailsList, list, iossReferenceNumber))
+      Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber))
   }
 
   def onSubmit(): Action[AnyContent] = cc.authAndRequireIoss().async {
@@ -112,7 +112,6 @@ class ChangeRegistrationController @Inject()(
 
   private def getPreviouslyRegisteredRows(waypoints: Waypoints, sourcePage: CheckAnswersPage)
                                          (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
-    // TODO -> Seq.empty existingPrevReg
     val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(request.userAnswers, Seq.empty, waypoints, sourcePage)
     Seq(
       PreviouslyRegisteredSummary.row(request.userAnswers, waypoints, sourcePage).map { sr =>
