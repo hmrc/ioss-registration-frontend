@@ -17,7 +17,7 @@
 package controllers.actions
 
 import base.SpecBase
-import models.requests.{AuthenticatedIdentifierRequest, AuthenticatedIdentifierRequestWithMandatoryIossReference}
+import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import play.api.mvc.Result
 import play.api.mvc.Results.Unauthorized
 import play.api.test.FakeRequest
@@ -30,8 +30,8 @@ class IossRequiredActionSpec extends SpecBase {
 
   class Harness() extends IossRequiredAction {
 
-    def callRefine[A](request: AuthenticatedIdentifierRequest[A]):
-    Future[Either[Result, AuthenticatedIdentifierRequestWithMandatoryIossReference[A]]] = refine(request)
+    def callRefine[A](request: AuthenticatedDataRequest[A]):
+    Future[Either[Result, AuthenticatedMandatoryIossRequest[A]]] = refine(request)
   }
 
   "Ioss Required Action" - {
@@ -42,12 +42,12 @@ class IossRequiredActionSpec extends SpecBase {
 
         val action = new Harness()
         val request = FakeRequest(GET, "/test/url?k=session-id")
-        val result = action.callRefine(AuthenticatedIdentifierRequest(
+        val result = action.callRefine(AuthenticatedDataRequest(
           request,
           testCredentials,
           vrn,
-          enrolments,
-          None
+          None,
+          emptyUserAnswersWithVatInfo
         )).futureValue
 
         result mustBe Left(Unauthorized)
@@ -57,15 +57,15 @@ class IossRequiredActionSpec extends SpecBase {
 
         val action = new Harness()
         val request = FakeRequest(GET, "/test/url?k=session-id")
-        val result = action.callRefine(AuthenticatedIdentifierRequest(
+        val result = action.callRefine(AuthenticatedDataRequest(
           request,
           testCredentials,
           vrn,
-          enrolments,
-          Some(iossNumber)
+          Some(iossNumber),
+          emptyUserAnswersWithVatInfo
         )).futureValue
 
-        val expectResult = AuthenticatedIdentifierRequestWithMandatoryIossReference(request, testCredentials, vrn, enrolments, iossNumber)
+        val expectResult = AuthenticatedMandatoryIossRequest(request, testCredentials, vrn, iossNumber, emptyUserAnswersWithVatInfo)
 
         result mustBe Right(expectResult)
       }

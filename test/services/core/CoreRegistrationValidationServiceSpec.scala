@@ -18,8 +18,8 @@ package services.core
 
 import base.SpecBase
 import connectors.core.ValidateCoreRegistrationConnector
-import models.core.{CoreRegistrationValidationResult, Match, MatchType}
 import models.PreviousScheme
+import models.core.{CoreRegistrationValidationResult, Match, MatchType}
 import models.requests.AuthenticatedDataRequest
 import models.responses.UnexpectedResponseStatus
 import org.mockito.ArgumentMatchers.any
@@ -69,9 +69,9 @@ class CoreRegistrationValidationServiceSpec extends SpecBase with MockitoSugar w
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, emptyUserAnswers)
+  private val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers)
 
-  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, emptyUserAnswers)
+  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, None, emptyUserAnswers)
 
   "coreRegistrationValidationService.searchUkVrn" - {
 

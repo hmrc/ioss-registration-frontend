@@ -36,7 +36,8 @@ extends AuthenticatedDataRetrievalAction(mockSessionRepository, mockMigrationSer
       AuthenticatedOptionalDataRequest(
         request,
         request.credentials,
-        request.vrn,
+        vrn,
+        request.iossNumber,
         dataToReturn
       )
     ).toFuture
