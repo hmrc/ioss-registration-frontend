@@ -94,6 +94,9 @@ class EuVatNumberController @Inject()(
                     )
                   )
 
+                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && waypoints.inAmend =>
+                  Future.successful(Redirect(controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(waypoints, countryIndex)))
+
                 case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
                   Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
 
