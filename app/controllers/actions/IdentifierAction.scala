@@ -70,7 +70,7 @@ class AuthenticatedIdentifierAction @Inject()(
 
       case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == User =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
-          case (Some(vrn), Some(iossNumber)) => Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, Some(iossNumber))).toFuture
+          case (Some(vrn), iossNumber) => Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, iossNumber)).toFuture
           case _ => throw InsufficientEnrolments()
         }
 
@@ -79,9 +79,9 @@ class AuthenticatedIdentifierAction @Inject()(
 
       case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
-          case (Some(vrn), Some(iossNumber)) =>
+          case (Some(vrn), iossNumber) =>
             if (confidence >= ConfidenceLevel.L200) {
-              Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, Some(iossNumber))).toFuture
+              Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, iossNumber)).toFuture
             } else {
               throw InsufficientConfidenceLevel()
             }
