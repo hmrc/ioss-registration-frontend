@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest}
+import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest, AuthenticatedOptionalDataRequest}
 import play.api.http.FileMimeTypes
 import play.api.i18n.{Langs, MessagesApi}
 import play.api.mvc._
@@ -45,6 +45,8 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def checkEmailVerificationStatus: CheckEmailVerificationFilterProvider
 
+  def requireIoss: IossRequiredAction
+
   def authAndGetData(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     actionBuilder andThen
       identify andThen
@@ -64,6 +66,10 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
     authAndGetData(inAmend) andThen
       checkEmailVerificationStatus()
 
+  def authAndRequireIoss(): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
+      authAndGetDataAndCheckVerifyEmail(inAmend = true) andThen
+      requireIoss
+  }
 }
 
 case class DefaultAuthenticatedControllerComponents @Inject()(
@@ -81,5 +87,6 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                limitIndex: MaximumIndexFilterProvider,
                                                                checkOtherCountryRegistration: CheckOtherCountryRegistrationFilter,
                                                                checkEmailVerificationStatus: CheckEmailVerificationFilterProvider,
-                                                               checkRegistration: CheckRegistrationFilterProvider
+                                                               checkRegistration: CheckRegistrationFilterProvider,
+                                                               requireIoss: IossRequiredAction
                                                              ) extends AuthenticatedControllerComponents

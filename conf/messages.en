@@ -12,6 +12,7 @@ site.signIn = Sign in
 site.govuk = GOV.UK
 site.tryAgain = Try again
 site.submit = Register
+site.confirm = Confirm
 site.processing = We are processing your registration.
 
 site.back.BTA = Return to Business Tax Account
@@ -231,7 +232,7 @@ vatRegistrationDetails.checkYourAnswers.individualName = Name
 vatRegistrationDetails.checkYourAnswers.partOfVatGroup = Part of a VAT group
 vatRegistrationDetails.checkYourAnswers.vatRegistrationDate = UK VAT registration date
 vatRegistrationDetails.checkYourAnswers.businessAddress = Business address
-vatRegistrationDetails.checkYourAnswers.manageVatBTA = <a class="govuk-link" href="/business-account">Manage your VAT registration in your BTA account</a>
+vatRegistrationDetails.checkYourAnswers.manageVatBTA = <a class="govuk-link" href="/business-account">Manage your UK VAT registration in your BTA account</a>
 
 updateVatDetails.title = Update your VAT details
 updateVatDetails.heading = Update your VAT details
@@ -621,7 +622,6 @@ emailVerificationCodesExceeded.heading = You''ve entered too many incorrect code
 emailVerificationCodesExceeded.paragraph = We''ve saved your progress. You can try again in 24 hours or use a different email address.
 emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href="/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/business-contact-details">Return to contact details page</a>
 
-
 noMoreWelsh.title = Mae gweddill y gwasanaeth hwn yn Saesneg yn unig ar hyn o bryd
 noMoreWelsh.heading = Mae gweddill y gwasanaeth hwn yn Saesneg yn unig ar hyn o bryd
 noMoreWelsh.submit = Yn eich blaen
@@ -648,9 +648,17 @@ errorSubmittingRegistration.your.account = Back to your account
 
 changeRegistration.title = Change Your Registration
 changeRegistration.heading = Change Your Registration
+changeRegistration.reference = IOSS number: {0}
 changeRegistration.details.heading = Import One Stop Shop details
-changeRegistration.info.p1 = By registering for this scheme, you confirm that the information you are providing is correct and complete.
-changeRegistration.info.p2 = After registering, do not click the Back button or refresh the page.
+changeRegistration.info.p1 = Confirm these changes to save them to your account.
+
+cancelAmendRegistration.title = Do you want to delete your changes?
+cancelAmendRegistration.heading = Do you want to delete your changes?
+cancelAmendRegistration.warning = This will delete any changes that you have not saved.
+cancelAmendRegistration.link = Cancel
+cancelAmendRegistration.button.continue = Continue
+cancelAmendRegistration.button.btr = Back
+cancelAmendRegistration.error.required = Select yes if you want to remove your amended changes from this scheme
 
 amendComplete.title = Registration details changed
 amendComplete.heading = Registration details changed

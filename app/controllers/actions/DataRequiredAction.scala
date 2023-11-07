@@ -38,7 +38,7 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
       case None =>
         Left(Redirect(routes.JourneyRecoveryController.onPageLoad())).toFuture
       case Some(data) =>
-        Right(AuthenticatedDataRequest(request.request, request.credentials, request.vrn, data)).toFuture
+        Right(AuthenticatedDataRequest(request.request, request.credentials, request.vrn, request.iossNumber, data)).toFuture
     }
   }
 }

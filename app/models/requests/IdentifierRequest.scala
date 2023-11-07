@@ -16,6 +16,7 @@
 
 package models.requests
 
+import models.UserAnswers
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.Credentials
@@ -26,7 +27,8 @@ case class AuthenticatedIdentifierRequest[A](
                                               request: Request[A],
                                               credentials: Credentials,
                                               vrn: Vrn,
-                                              enrolments: Enrolments
+                                              enrolments: Enrolments,
+                                              iossNumber: Option[String]
                                             ) extends WrappedRequest[A](request) {
 
   val userId: String = credentials.providerId

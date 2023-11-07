@@ -69,8 +69,8 @@ class AuthenticatedIdentifierAction @Inject()(
         Retrievals.credentialRole) {
 
       case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == User =>
-        findVrnFromEnrolments(enrolments) match {
-          case Some(vrn) => Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments)).toFuture
+        (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
+          case (Some(vrn), Some(iossNumber)) => Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, Some(iossNumber))).toFuture
           case _ => throw InsufficientEnrolments()
         }
 
@@ -78,10 +78,10 @@ class AuthenticatedIdentifierAction @Inject()(
         throw UnsupportedCredentialRole()
 
       case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
-        findVrnFromEnrolments(enrolments) match {
-          case Some(vrn) =>
+        (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
+          case (Some(vrn), Some(iossNumber)) =>
             if (confidence >= ConfidenceLevel.L200) {
-              Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments)).toFuture
+              Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, Some(iossNumber))).toFuture
             } else {
               throw InsufficientConfidenceLevel()
             }
@@ -143,6 +143,9 @@ class AuthenticatedIdentifierAction @Inject()(
         enrolment =>
           enrolment.identifiers.find(_.key == "VATRegNo").map(e => Vrn(e.value))
       }
+
+  private def findIossNumberFromEnrolments(enrolments: Enrolments): Option[String] =
+    enrolments.enrolments.find(_.key == config.iossEnrolment).flatMap(_.identifiers.find(_.key == "IOSSNumber").map(_.value))
 
   private def upliftCredentialStrength[A](request: Request[A]): IdentifierActionResult[A] =
     Left(Redirect(
