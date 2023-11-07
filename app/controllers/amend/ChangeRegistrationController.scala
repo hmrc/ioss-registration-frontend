@@ -72,7 +72,7 @@ class ChangeRegistrationController @Inject()(
 
   def onSubmit(): Action[AnyContent] = cc.authAndRequireIoss().async {
     implicit request =>
-      registrationService.amendRegistration(request.userAnswers, request.vrn).map {
+      registrationService.amendRegistration(request.userAnswers, request.registrationWrapper.registration, request.vrn).map {
         case Right(_) =>
           Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
         case Left(e) =>

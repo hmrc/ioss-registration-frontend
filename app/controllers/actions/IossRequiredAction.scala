@@ -16,16 +16,21 @@
 
 package controllers.actions
 
+import connectors.RegistrationConnector
 import logging.Logging
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
-import play.api.mvc.Results.Unauthorized
 import play.api.mvc.{ActionRefiner, Result}
+import play.api.mvc.Results._
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class IossRequiredAction @Inject()(implicit val executionContext: ExecutionContext)
+class IossRequiredActionImpl @Inject()(
+                                        registrationConnector: RegistrationConnector
+                                      )(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest] with Logging {
   override protected def refine[A](request: AuthenticatedDataRequest[A]):
   Future[Either[Result, AuthenticatedMandatoryIossRequest[A]]] =
@@ -35,10 +40,31 @@ class IossRequiredAction @Inject()(implicit val executionContext: ExecutionConte
         Left(Unauthorized).toFuture
 
       case Some(iossNumber) =>
-        Right(
-          AuthenticatedMandatoryIossRequest(
-            request.request, request.credentials, request.vrn, iossNumber, request.userAnswers
-          )
-        ).toFuture
+        implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request.request, request.request.session)
+        registrationConnector.getRegistration().map {
+          case Right(registrationWrapper) =>
+            Right(
+              AuthenticatedMandatoryIossRequest(
+                request.request,
+                request.credentials,
+                request.vrn,
+                iossNumber,
+                registrationWrapper,
+                request.userAnswers
+              )
+            )
+          case Left(error) =>
+            logger.error(s"Error getting registration when IOSS enrolment was present: ${error.body}")
+            Left(InternalServerError)
+        }
     }
+}
+
+class IossRequiredAction @Inject()(
+                                    registrationConnector: RegistrationConnector
+                                  )(implicit executionContext: ExecutionContext) {
+
+  def apply(): IossRequiredActionImpl = {
+    new IossRequiredActionImpl(registrationConnector)
+  }
 }

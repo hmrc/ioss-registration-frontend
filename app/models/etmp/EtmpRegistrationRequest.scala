@@ -19,15 +19,15 @@ package models.etmp
 import formats.Format.eisDateFormatter
 import logging.Logging
 import models.{BusinessContactDetails, UserAnswers}
-import pages.tradingNames.HasTradingNamePage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
+import pages.tradingNames.HasTradingNamePage
 import play.api.libs.json.{Json, OFormat}
 import queries.AllWebsites
 import queries.tradingNames.AllTradingNames
 import services.etmp.{EtmpEuRegistrations, EtmpPreviousEuRegistrations}
 import uk.gov.hmrc.domain.Vrn
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 final case class EtmpRegistrationRequest(
                                           administration: EtmpAdministration,
@@ -41,7 +41,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
 
   implicit val format: OFormat[EtmpRegistrationRequest] = Json.format[EtmpRegistrationRequest]
 
-  def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDateTime): EtmpRegistrationRequest =
+  def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDate): EtmpRegistrationRequest =
     EtmpRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
       customerIdentification = EtmpCustomerIdentification(vrn),
@@ -50,7 +50,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
       bankDetails = getBankDetails(answers)
     )
 
-  private def getSchemeDetails(answers: UserAnswers, commencementDate: LocalDateTime): EtmpSchemeDetails = EtmpSchemeDetails(
+  private def getSchemeDetails(answers: UserAnswers, commencementDate: LocalDate): EtmpSchemeDetails = EtmpSchemeDetails(
     commencementDate = commencementDate.format(eisDateFormatter),
     euRegistrationDetails = getEuTaxRegistrations(answers),
     previousEURegistrationDetails = getPreviousRegistrationDetails(answers),

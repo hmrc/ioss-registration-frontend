@@ -91,7 +91,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
 
       running(app) {
 
-        registrationService.amendRegistration(completeUserAnswersWithVatInfo, vrn).futureValue mustBe Right(())
+        registrationService.amendRegistration(completeUserAnswersWithVatInfo, etmpDisplayRegistration, vrn).futureValue mustBe Right(())
         verify(mockRegistrationConnector, times(1)).amendRegistration(any())(any())
       }
     }

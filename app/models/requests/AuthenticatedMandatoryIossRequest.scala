@@ -17,6 +17,7 @@
 package models.requests
 
 import models.UserAnswers
+import models.amend.RegistrationWrapper
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
@@ -27,6 +28,7 @@ case class AuthenticatedMandatoryIossRequest[A](
                                                  credentials: Credentials,
                                                  vrn: Vrn,
                                                  iossNumber: String,
+                                                 registrationWrapper: RegistrationWrapper,
                                                  userAnswers: UserAnswers
                                                ) extends WrappedRequest[A](request) {
 
