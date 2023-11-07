@@ -98,7 +98,5 @@ object RegistrationData extends SpecBase {
     schemeDetails = etmpRegistrationRequest.schemeDetails,
     bankDetails = etmpRegistrationRequest.bankDetails
   )
-
-
 }
 

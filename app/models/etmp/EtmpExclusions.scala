@@ -21,7 +21,6 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-// TODO -> Test
 case class EtmpExclusion(
                           exclusionReason: EtmpExclusionReason,
                           effectiveDate: LocalDate,
@@ -34,7 +33,6 @@ object EtmpExclusion {
   implicit val format: OFormat[EtmpExclusion] = Json.format[EtmpExclusion]
 }
 
-// TODO Test
 sealed trait EtmpExclusionReason
 
 object EtmpExclusionReason extends Enumerable.Implicits {

@@ -27,13 +27,13 @@
         govukWarningText: GovukWarningText
 )
 
-@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, iossReference: String)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, iossNumber: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
 
     <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
 
-    <h2 class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossReference)</h2>
+    <h2 class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</h2>
 
     <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 
