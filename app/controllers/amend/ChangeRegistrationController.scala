@@ -19,7 +19,6 @@ package controllers.amend
 import controllers.actions._
 import logging.Logging
 import models.CheckMode
-import controllers.amend.routes
 import pages.{EmptyWaypoints, Waypoint}
 import pages.amend.ChangeRegistrationPage
 import models.requests.AuthenticatedMandatoryIossRequest
@@ -161,5 +160,5 @@ class ChangeRegistrationController @Inject()(
       BankDetailsSummary.rowBIC(request.userAnswers, waypoints, sourcePage).map(_.withCssClass("govuk-summary-list__row--no-border")),
       BankDetailsSummary.rowIBAN(request.userAnswers, waypoints, sourcePage)
     )
-
+  }
 }
