@@ -21,7 +21,7 @@ import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequ
 import play.api.mvc.Result
 import play.api.mvc.Results.Unauthorized
 import play.api.test.FakeRequest
-import play.api.test.Helpers.GET
+import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -67,7 +67,6 @@ class IossRequiredActionSpec extends SpecBase {
 
         val expectResult = AuthenticatedMandatoryIossRequest(request, testCredentials, vrn, iossNumber, emptyUserAnswersWithVatInfo)
 
-        println("Result " + result)
         result mustBe Right(expectResult)
       }
     }

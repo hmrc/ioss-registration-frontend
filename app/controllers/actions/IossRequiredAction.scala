@@ -37,7 +37,7 @@ class IossRequiredAction @Inject()(implicit val executionContext: ExecutionConte
       case Some(iossNumber) =>
         Right(
           AuthenticatedMandatoryIossRequest(
-            request, request.credentials, request.vrn, iossNumber, request.userAnswers
+            request.request, request.credentials, request.vrn, iossNumber, request.userAnswers
           )
         ).toFuture
     }
