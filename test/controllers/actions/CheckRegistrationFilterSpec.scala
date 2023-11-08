@@ -59,6 +59,22 @@ class CheckRegistrationFilterSpec extends SpecBase {
       }
     }
 
+    "must return None when an existing IOSS enrolment is found and is inAmend" in {
+
+      val app = applicationBuilder(None).build()
+
+      running(app) {
+
+        val config = app.injector.instanceOf[FrontendAppConfig]
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
+        val controller = new Harness(true, config)
+
+        val result = controller.callFilter(request).futureValue
+
+        result mustBe None
+      }
+    }
+
     "must return None when in amend" in {
 
       val app = applicationBuilder(None).build()

@@ -273,6 +273,5 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
         }
       }
     }
-
   }
 }

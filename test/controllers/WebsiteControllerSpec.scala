@@ -23,8 +23,8 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Gen
 import org.scalatestplus.mockito.MockitoSugar
-import pages.EmptyWaypoints
 import pages.website.WebsitePage
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -36,11 +36,12 @@ import scala.concurrent.Future
 class WebsiteControllerSpec extends SpecBase with MockitoSugar {
 
   private val index = Index(0)
+  private val waypoints: Waypoints = EmptyWaypoints
 
   private val formProvider = new WebsiteFormProvider()
   private val form = formProvider(index, Seq.empty)
 
-  private lazy val websiteRoute = website.routes.WebsiteController.onPageLoad(EmptyWaypoints, index).url
+  private lazy val websiteRoute = website.routes.WebsiteController.onPageLoad(waypoints, index).url
 
   "Website Controller" - {
 
@@ -56,7 +57,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[WebsiteView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, EmptyWaypoints, index)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, waypoints, index)(request, messages(application)).toString
       }
     }
 
@@ -74,7 +75,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), EmptyWaypoints, index)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill("answer"), waypoints, index)(request, messages(application)).toString
       }
     }
 
@@ -98,7 +99,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
         val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("www.example.com")).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual WebsitePage(index).navigate(EmptyWaypoints, emptyUserAnswers, expectedAnswers).url
+        redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -119,7 +120,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, EmptyWaypoints, index)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, waypoints, index)(request, messages(application)).toString
       }
     }
 
@@ -160,7 +161,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
 
-        val request = FakeRequest(GET, website.routes.WebsiteController.onPageLoad(EmptyWaypoints, highIndex).url)
+        val request = FakeRequest(GET, website.routes.WebsiteController.onPageLoad(waypoints, highIndex).url)
 
         val result = route(application, request).value
 
@@ -189,7 +190,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
 
         val request =
-          FakeRequest(POST, website.routes.WebsiteController.onPageLoad(EmptyWaypoints, highIndex).url)
+          FakeRequest(POST, website.routes.WebsiteController.onPageLoad(waypoints, highIndex).url)
             .withFormUrlEncodedBody(("value", "answer"))
 
         val result = route(application, request).value
