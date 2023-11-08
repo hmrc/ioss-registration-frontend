@@ -19,8 +19,8 @@ package controllers.actions
 import base.SpecBase
 import config.FrontendAppConfig
 import models.requests.AuthenticatedIdentifierRequest
-import pages.{EmptyWaypoints, Waypoints}
 import pages.filters.CannotRegisterAlreadyRegisteredPage
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest

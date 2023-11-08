@@ -74,6 +74,7 @@ trait SpecBase
     )
 
   val vrn: Vrn = Vrn("123456789")
+  val iossNumber: String = "IM9001234567"
 
   val userAnswersId: String = "12345-credId"
 
@@ -132,8 +133,6 @@ trait SpecBase
     backUrl = Some("/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"),
     email = Some(verifyEmail)
   )
-
-  protected val iossNumber: String = "IM9001234567"
 
   val enrolments: Enrolments = Enrolments(
     Set(Enrolment(key = "HMRC-IOSS-ORG", Seq.empty, "test", None))
