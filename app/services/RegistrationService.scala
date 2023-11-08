@@ -19,20 +19,20 @@ package services
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, RegistrationResultResponse}
 import logging.Logging
+import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
 import models.Country.euCountries
 import models.amend.RegistrationWrapper
 import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
-import models.etmp.EtmpRegistrationRequest.buildEtmpRegistrationRequest
 import models.etmp._
+import models.etmp.EtmpRegistrationRequest.buildEtmpRegistrationRequest
+import models.etmp.amend.EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
-import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
-import models.etmp.amend.EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -41,7 +41,7 @@ import services.etmp.{EtmpEuRegistrations, EtmpPreviousEuRegistrations}
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.Future
 import scala.util.Try
@@ -52,13 +52,21 @@ class RegistrationService @Inject()(
                                    ) extends EtmpEuRegistrations with EtmpPreviousEuRegistrations with Logging {
 
   def createRegistration(answers: UserAnswers, vrn: Vrn)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
-    val commencementDate = LocalDateTime.now(clock)
+    val commencementDate = LocalDate.now(clock)
     registrationConnector.createRegistration(buildEtmpRegistrationRequest(answers, vrn, commencementDate))
   }
 
-  def amendRegistration(answers: UserAnswers, vrn: Vrn)(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
-    val commencementDate = LocalDateTime.now(clock)
-    registrationConnector.amendRegistration(buildEtmpAmendRegistrationRequest(answers, vrn, commencementDate))
+  def amendRegistration(
+                         answers: UserAnswers,
+                         registration: EtmpDisplayRegistration,
+                         vrn: Vrn
+                       )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
+    registrationConnector.amendRegistration(buildEtmpAmendRegistrationRequest(
+      answers,
+      registration,
+      vrn,
+      LocalDate.parse(registration.schemeDetails.commencementDate)
+    ))
   }
 
   def toUserAnswers(userId: String, registrationWrapper: RegistrationWrapper): Future[UserAnswers] = {

@@ -17,16 +17,20 @@
 package controllers.amend
 
 import base.SpecBase
+import controllers.actions.{FakeIossRequiredAction, IossRequiredAction, IossRequiredActionImpl}
 import controllers.amend.{routes => amendRoutes}
 import models.{CheckMode, UserAnswers}
+import models.amend.RegistrationWrapper
 import pages.amend.ChangeRegistrationPage
 import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.Messages
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
-import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviouslyRegisteredSummary, PreviousRegistrationSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.SummaryListFluency
@@ -42,7 +46,11 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo)).build()
+      val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+
+      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
+        .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+        .build()
 
       running(application) {
 
@@ -70,6 +78,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
       VatRegistrationDetailsSummary.rowBusinessAddress(answers)
     ).flatten
   }
+
   private def getChangeRegistrationSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
 
     val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, waypoints, amendYourAnswersPage)
