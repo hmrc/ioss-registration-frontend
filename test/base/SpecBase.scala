@@ -60,6 +60,7 @@ trait SpecBase
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
   val contactDetails: BusinessContactDetails = BusinessContactDetails("name", "0111 2223334", "email@example.com")
+  val amendedContactDetails: BusinessContactDetails = BusinessContactDetails("name", "0111 2223334", "email@example.co.uk")
 
   val vatCustomerInfo: VatCustomerInfo =
     VatCustomerInfo(
