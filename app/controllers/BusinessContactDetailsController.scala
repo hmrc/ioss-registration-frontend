@@ -79,7 +79,7 @@ class BusinessContactDetailsController @Inject()(
 
           val continueUrl = if (waypoints.inAmend) {
             controllers.amend.routes.ChangeRegistrationController.onPageLoad().url
-          }else if (waypoints.currentMode == CheckMode) {
+          } else if (waypoints.currentMode == CheckMode) {
             routes.CheckYourAnswersController.onPageLoad().url
           } else {
             routes.BankDetailsController.onPageLoad(waypoints).url
