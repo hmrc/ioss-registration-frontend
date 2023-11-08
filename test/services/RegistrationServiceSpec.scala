@@ -137,15 +137,19 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
 
     val previousRegistrations = convertToPreviousRegistrationDetails(etmpRegistration.schemeDetails.previousEURegistrationDetails)
 
-    def determineTraderId(traderId: TraderId): Option[String] = {
+    def getVatNumber(traderId: TraderId): Option[String] =
       traderId match {
         case vatNumberTraderId: VatNumberTraderId =>
           Some(vatNumberTraderId.vatNumber)
+        case _ => None
+      }
+
+    def getTaxId(traderId: TraderId): Option[String] =
+      traderId match {
         case taxRefTraderID: TaxRefTraderID =>
           Some(taxRefTraderID.taxReferenceNumber)
         case _ => None
       }
-    }
 
     def determineRegistrationType(traderId: TraderId): Option[RegistrationType] =
       traderId match {
@@ -160,8 +164,8 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
         euCountry = euCountries.filter(_.code == euCountryDetails.countryOfRegistration).head,
         sellsGoodsToEuConsumerMethod = Some(EuConsumerSalesMethod.FixedEstablishment),
         registrationType = determineRegistrationType(euCountryDetails.traderId),
-        euVatNumber = determineTraderId(euCountryDetails.traderId),
-        euTaxReference = determineTraderId(euCountryDetails.traderId),
+        euVatNumber = getVatNumber(euCountryDetails.traderId),
+        euTaxReference = getTaxId(euCountryDetails.traderId),
         fixedEstablishmentTradingName = Some(euCountryDetails.tradingName),
         fixedEstablishmentAddress = Some(InternationalAddress(
           line1 = euCountryDetails.fixedEstablishmentAddressLine1,

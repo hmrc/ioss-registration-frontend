@@ -18,7 +18,6 @@ package models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 
-// TODO -> Test
 case class EtmpDisplayRegistration(
                                     tradingNames: Seq[EtmpTradingName],
                                     schemeDetails: EtmpSchemeDetails,

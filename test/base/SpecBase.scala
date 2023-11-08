@@ -38,10 +38,12 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.{Enrolment, Enrolments}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
 
 import java.time.{Clock, Instant, LocalDate, ZoneId}
+import scala.collection.immutable.Seq
 
 trait SpecBase
   extends AnyFreeSpec
@@ -72,6 +74,7 @@ trait SpecBase
     )
 
   val vrn: Vrn = Vrn("123456789")
+  val iossNumber: String = "IM9001234567"
 
   val userAnswersId: String = "12345-credId"
 
@@ -129,6 +132,10 @@ trait SpecBase
     pageTitle = Some("ioss-registration-frontend"),
     backUrl = Some("/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"),
     email = Some(verifyEmail)
+  )
+
+  val enrolments: Enrolments = Enrolments(
+    Set(Enrolment(key = "HMRC-IOSS-ORG", Seq.empty, "test", None))
   )
 
   val yourAccountUrl = "http://localhost:10193/pay-vat-on-goods-sold-to-eu/import-one-stop-shop-returns-payments"

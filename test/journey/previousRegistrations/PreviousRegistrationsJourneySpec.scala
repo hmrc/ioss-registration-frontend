@@ -20,7 +20,6 @@ import generators.ModelGenerators
 import journey.JourneyHelpers
 import models.{Country, Index, PreviousSchemeType}
 import models.domain.PreviousSchemeNumbers
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.freespec.AnyFreeSpec
 import pages.CheckYourAnswersPage
 import pages.euDetails.TaxRegisteredInEuPage

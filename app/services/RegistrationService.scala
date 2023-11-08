@@ -153,8 +153,8 @@ class RegistrationService @Inject()(
         euCountry = getCountry(etmpPreviousEuCountryRegistrationDetails.countryOfRegistration),
         sellsGoodsToEuConsumerMethod = Some(EuConsumerSalesMethod.FixedEstablishment),
         registrationType = determineRegistrationType(etmpPreviousEuCountryRegistrationDetails.traderId),
-        euVatNumber = determineTraderId(etmpPreviousEuCountryRegistrationDetails.traderId),
-        euTaxReference = determineTraderId(etmpPreviousEuCountryRegistrationDetails.traderId),
+        euVatNumber = getVatNumber(etmpPreviousEuCountryRegistrationDetails.traderId),
+        euTaxReference = getTaxId(etmpPreviousEuCountryRegistrationDetails.traderId),
         fixedEstablishmentTradingName = Some(etmpPreviousEuCountryRegistrationDetails.tradingName),
         fixedEstablishmentAddress = Some(InternationalAddress(
           line1 = etmpPreviousEuCountryRegistrationDetails.fixedEstablishmentAddressLine1,
@@ -168,10 +168,15 @@ class RegistrationService @Inject()(
       )
     }
 
-  private def determineTraderId(traderId: TraderId): Option[String] =
+  private def getVatNumber(traderId: TraderId): Option[String] =
     traderId match {
       case vatNumberTraderId: VatNumberTraderId =>
         Some(vatNumberTraderId.vatNumber)
+      case _ => None
+    }
+
+  private def getTaxId(traderId: TraderId): Option[String] =
+    traderId match {
       case taxRefTraderID: TaxRefTraderID =>
         Some(taxRefTraderID.taxReferenceNumber)
       case _ => None

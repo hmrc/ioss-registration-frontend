@@ -29,9 +29,9 @@ import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSum
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
+import viewmodels.govuk.SummaryListFluency
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
-import viewmodels.govuk.SummaryListFluency
 
 class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency {
 
@@ -45,7 +45,9 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
       val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo)).build()
 
       running(application) {
+
         val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad().url)
+
         implicit val msgs: Messages = messages(application)
         val result = route(application, request).value
 
@@ -55,7 +57,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
         val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(waypoints, vatInfoList, list)(request, messages(application)).toString
+        contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber)(request, messages(application)).toString
       }
     }
   }

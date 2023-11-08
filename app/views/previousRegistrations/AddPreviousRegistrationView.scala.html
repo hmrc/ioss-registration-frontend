@@ -65,7 +65,7 @@
                         <input type="hidden" name="value" id="value" value="false"/>
                     }
 
-                    @button("site.continue")
+                    @button("site.continue", waypoints = waypoints)
 
                 }
             } else {
@@ -74,7 +74,7 @@
 
                 @formHelper(action = controllers.previousRegistrations.routes.AddPreviousRegistrationController.onSubmit(waypoints, incompletePromptShown = true)) {
 
-                    @button("error.resolve_missing_answers")
+                    @button("error.resolve_missing_answers", waypoints = waypoints)
 
                 }
             }

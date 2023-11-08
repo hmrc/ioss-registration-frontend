@@ -19,8 +19,8 @@ package controllers.actions
 import base.SpecBase
 import config.FrontendAppConfig
 import models.requests.AuthenticatedIdentifierRequest
-import pages.{EmptyWaypoints, Waypoints}
 import pages.filters.CannotRegisterAlreadyRegisteredPage
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
@@ -50,7 +50,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty))
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
         val controller = new Harness(false, config)
 
         val result = controller.callFilter(request).futureValue
@@ -66,7 +66,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)))
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
         val controller = new Harness(true, config)
 
         val result = controller.callFilter(request).futureValue
@@ -82,7 +82,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)))
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
         val controller = new Harness(false, config)
 
         val result = controller.callFilter(request).futureValue

@@ -20,7 +20,6 @@ import models.domain.VatCustomerInfo
 import models.etmp.EtmpDisplayRegistration
 import play.api.libs.json.{Json, OFormat}
 
-// TODO -> Test
 case class RegistrationWrapper(vatInfo: VatCustomerInfo, registration: EtmpDisplayRegistration)
 
 object RegistrationWrapper {

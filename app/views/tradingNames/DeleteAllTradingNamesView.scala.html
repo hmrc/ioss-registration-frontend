@@ -14,8 +14,8 @@
  * limitations under the License.
  *@
 
-@import controllers.tradingNames.routes
 @import components.ButtonGroup
+@import controllers.tradingNames.routes
 @import pages.tradingNames.DeleteAllTradingNamesPage
 
 @this(
@@ -49,6 +49,6 @@
                 content = Text(messages("deleteAllTradingNames.warning"))
             ))
 
-            @button("site.continue", DeleteAllTradingNamesPage.route(waypoints).url)
+            @button("site.continue", DeleteAllTradingNamesPage.route(waypoints).url, waypoints)
         }
     }

@@ -84,6 +84,6 @@
             .withAutocomplete("postal-code")
         )
 
-        @button("site.continue", controllers.euDetails.routes.FixedEstablishmentAddressController.onPageLoad(waypoints, countryIndex).url)
+        @button("site.continue", FixedEstablishmentAddressPage(countryIndex).route(waypoints).url, waypoints)
     }
 }

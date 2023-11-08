@@ -14,8 +14,9 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth._
 @import components.ButtonGroup
+@import pages.BusinessContactDetailsPage
+@import viewmodels.InputWidth._
 
 @this(
     layout: templates.Layout,
@@ -70,6 +71,6 @@
             .asEmail()
         )
 
-        @button("site.continue", routes.BusinessContactDetailsController.onPageLoad(waypoints).url)
+        @button("site.continue", BusinessContactDetailsPage.route(waypoints).url, waypoints)
     }
 }

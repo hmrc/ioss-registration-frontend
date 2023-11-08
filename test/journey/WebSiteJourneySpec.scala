@@ -27,6 +27,7 @@ class WebSiteJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGener
   private val firstPage = WebsitePage(Index(0))
 
   "users with one or more websites" - {
+
     "can add websites up to the max number of websites" in {
       val calls = generateWebsites(10) :+
         pageMustBe(BusinessContactDetailsPage)
@@ -47,8 +48,8 @@ class WebSiteJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGener
 
     }
 
-
     "must be able to remove them" - {
+
       "when there is only one" in {
         startingFrom(firstPage)
           .run(

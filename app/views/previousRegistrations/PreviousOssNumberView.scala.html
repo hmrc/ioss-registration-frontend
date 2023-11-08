@@ -14,9 +14,10 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth._
-@import models.previousRegistrations.PreviousSchemeHintText
 @import components.ButtonGroup
+@import models.previousRegistrations.PreviousSchemeHintText
+@import pages.previousRegistrations.PreviousOssNumberPage
+@import viewmodels.InputWidth._
 
 @this(
     layout: templates.Layout,
@@ -54,6 +55,6 @@
             ))
         )
 
-        @button("site.continue",  controllers.previousRegistrations.routes.PreviousOssNumberController.onPageLoad(waypoints, countryIndex, schemeIndex).url)
+        @button("site.continue", PreviousOssNumberPage(countryIndex, schemeIndex).route(waypoints).url, waypoints)
     }
 }
