@@ -18,13 +18,14 @@ package controllers.euDetails
 
 import base.SpecBase
 import forms.euDetails.EuTaxReferenceFormProvider
-import models.{Country, Index, UserAnswers}
+import models.{CheckMode, Country, Index, UserAnswers}
 import models.core.{Match, MatchType}
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
+import pages.amend.ChangeRegistrationPage
+import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoint, Waypoints}
 import pages.euDetails._
 import play.api.data.Form
 import play.api.inject.bind
@@ -55,8 +56,11 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
 
   private lazy val euTaxReferenceRoute: String = routes.EuTaxReferenceController.onPageLoad(waypoints, countryIndex).url
   private lazy val euTaxReferenceSubmitRoute: String = routes.EuTaxReferenceController.onSubmit(waypoints, countryIndex).url
+  private lazy val amendEuTaxReferenceSubmitRoute: String = routes.EuTaxReferenceController.onSubmit(amendWaypoints, countryIndex).url
 
   private val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+  private val amendWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
   private val genericMatch = Match(
     MatchType.FixedEstablishmentActiveNETP,
@@ -422,5 +426,87 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
+  }
+
+  "inAmend" - {
+
+    "must not redirect to ExcludedVRNController page when the vat number is excluded for match FixedEstablishmentQuarantinedNETP " in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+      }
+    }
+
+    "must not redirect to ExcludedVRNController page when the vat number is excluded for match TraderIdQuarantinedNETP " in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+      }
+    }
+
+    "must not redirect to ExcludedVRNController page when the vat number is excluded for match OtherMSNETPQuarantinedNETP " in {
+
+      val taxReferenceNumber: String = "333333333"
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
+          .withFormUrlEncodedBody(("value", taxReferenceNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+      }
+    }
+
   }
 }
