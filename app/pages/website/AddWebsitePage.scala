@@ -57,11 +57,6 @@ final case class AddWebsitePage(override val index: Option[Index] = None) extend
     }
   }
 
-  // TODO -> Needed/Remove?
-//  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
-//    navigate(answers, nextPage = CheckYourAnswersPage)
-//  }
-
   override def route(waypoints: Waypoints): Call =
     website.routes.AddWebsiteController.onPageLoad(waypoints)
 
