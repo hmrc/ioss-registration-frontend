@@ -69,13 +69,23 @@ class BusinessContactDetailsController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
         value => {
-          val continueUrl = if (waypoints.currentMode == CheckMode) {
+          val emailAddress = value.emailAddress
+          val isMatchingEmailAddress = request.userAnswers.get(BusinessContactDetailsPage) match {
+            case Some(businessContactDetails) if waypoints.inAmend =>
+              businessContactDetails.emailAddress.contains(emailAddress)
+            case _ =>
+              false
+          }
+
+          val continueUrl = if (waypoints.inAmend) {
+            controllers.amend.routes.ChangeRegistrationController.onPageLoad().url
+          }else if (waypoints.currentMode == CheckMode) {
             routes.CheckYourAnswersController.onPageLoad().url
           } else {
             routes.BankDetailsController.onPageLoad(waypoints).url
           }
 
-          if (config.emailVerificationEnabled) {
+          if (config.emailVerificationEnabled && !isMatchingEmailAddress) {
             verifyEmailAndRedirect(waypoints, messages, continueUrl, value)
           } else {
             for {
