@@ -19,16 +19,16 @@ package controllers
 import base.SpecBase
 import forms.BankDetailsFormProvider
 import models.{BankDetails, Bic, Iban}
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
+import org.scalatestplus.mockito.MockitoSugar
 import pages.{BankDetailsPage, EmptyWaypoints, Waypoints}
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.BankDetailsView
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, when}
-import play.api.inject.bind
 
 import scala.concurrent.Future
 

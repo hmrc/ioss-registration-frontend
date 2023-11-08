@@ -232,6 +232,15 @@ trait ModelGenerators extends EitherValues {
     }
   }
 
+  implicit lazy val arbitraryBankDetails: Arbitrary[BankDetails] =
+    Arbitrary {
+      for {
+        accountName <- arbitrary[String]
+        bic         <- Gen.option(arbitrary[Bic])
+        iban        <- arbitrary[Iban]
+      } yield BankDetails(accountName, bic, iban)
+    }
+
   implicit lazy val arbitraryFixedEstablishment: Arbitrary[TradeDetails] =
     Arbitrary {
       for {
