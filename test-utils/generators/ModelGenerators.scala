@@ -21,6 +21,7 @@ import models._
 import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
 import models.etmp._
+import models.etmp.amend.EtmpAmendRegistrationChangeLog
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN}
@@ -355,6 +356,16 @@ trait ModelGenerators extends EitherValues {
   implicit lazy val arbitraryEtmpExclusionReason: Arbitrary[EtmpExclusionReason] =
     Arbitrary {
       Gen.oneOf(EtmpExclusionReason.values)
+    }
+
+  implicit lazy val arbitraryEtmpAmendRegistrationChangeLog: Arbitrary[EtmpAmendRegistrationChangeLog] =
+    Arbitrary {
+      for {
+        tradingNames <- arbitrary[Boolean]
+        fixedEstablishments <- arbitrary[Boolean]
+        contactDetails <- arbitrary[Boolean]
+        bankDetails <- arbitrary[Boolean]
+      } yield EtmpAmendRegistrationChangeLog(tradingNames, fixedEstablishments, contactDetails, bankDetails)
     }
 
   implicit lazy val arbitraryEtmpExclusion: Arbitrary[EtmpExclusion] =

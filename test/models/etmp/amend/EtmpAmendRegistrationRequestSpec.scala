@@ -19,7 +19,7 @@ package models.etmp.amend
 import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
 import formats.Format.eisDateFormatter
-import models.{BankDetails, Bic, BusinessContactDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
+import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
 import models.etmp._
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
@@ -46,6 +46,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
   private val tradingNames = etmpRegistrationRequest.tradingNames
   private val schemeDetails = etmpRegistrationRequest.schemeDetails
   private val bankDetails = etmpRegistrationRequest.bankDetails
+  private val changeLog = arbitrary[EtmpAmendRegistrationChangeLog].sample.value
 
   private val numberOfRegistrations: Int = 8
 
@@ -61,27 +62,30 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
   private def convertToTraderId(euDetails: EuDetails): Option[TraderId] = {
     euDetails.registrationType match {
       case Some(RegistrationType.VatNumber) =>
-        Some(VatNumberTraderId(euDetails.euVatNumber.value))
+        val convertedVatNumber = CountryWithValidationDetails.convertTaxIdentifierForTransfer(euDetails.euVatNumber.value, euDetails.euCountry.code)
+        Some(VatNumberTraderId(convertedVatNumber))
       case Some(RegistrationType.TaxId) =>
         Some(TaxRefTraderID(euDetails.euTaxReference.value))
       case _ => None
     }
   }
 
-  "EtmpRegistrationRequest" - {
+  "EtmpAmendRegistrationRequest" - {
 
-    "must deserialise/serialise to and from EtmpRegistrationRequest" in {
+    "must deserialise/serialise to and from EtmpAmendRegistrationRequest" in {
 
       val json = Json.obj(
         "administration" -> administration,
+        "changeLog" -> changeLog,
         "customerIdentification" -> customerIdentification,
         "tradingNames" -> tradingNames,
         "schemeDetails" -> schemeDetails,
         "bankDetails" -> bankDetails
       )
 
-      val expectedResult = EtmpRegistrationRequest(
+      val expectedResult = EtmpAmendRegistrationRequest(
         administration = administration,
+        changeLog = changeLog,
         customerIdentification = customerIdentification,
         tradingNames = tradingNames,
         schemeDetails = schemeDetails,
@@ -89,7 +93,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
       )
 
       Json.toJson(expectedResult) mustBe json
-      json.validate[EtmpRegistrationRequest] mustBe JsSuccess(expectedResult)
+      json.validate[EtmpAmendRegistrationRequest] mustBe JsSuccess(expectedResult)
     }
 
     ".buildEtmpAmendRegistrationRequest" - {
@@ -136,7 +140,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
         .set(BusinessContactDetailsPage, genBusinessContactDetails).success.value
         .set(BankDetailsPage, bankDetails).success.value
 
-      "must convert userAnswers to an EtmpRegistrationRequest" in {
+      "must convert userAnswers to an EtmpAmendRegistrationRequest" in {
 
         val convertToEtmpTradingNames: List[EtmpTradingName] =
           for {
@@ -172,7 +176,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
         val etmpEuRegistrationDetails: List[EtmpEuRegistrationDetails] = {
           for {
             euDetails <- euRegistrations
-            traderId <-  convertToTraderId(euDetails)
+            traderId <- convertToTraderId(euDetails)
           } yield {
             EtmpEuRegistrationDetails(
               countryOfRegistration = euDetails.euCountry.code,
@@ -199,7 +203,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
           nonCompliantPayments = None
         )
 
-        val etmpRegistrationRequest: EtmpAmendRegistrationRequest = EtmpAmendRegistrationRequest(
+        val etmpAmendRegistrationRequest: EtmpAmendRegistrationRequest = EtmpAmendRegistrationRequest(
           administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),
           changeLog = EtmpAmendRegistrationChangeLog(
             tradingNames = true,
@@ -217,7 +221,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
           etmpDisplayRegistration,
           vrn,
           LocalDate.now(stubClockAtArbitraryDate)
-        ) mustBe etmpRegistrationRequest
+        ) mustBe etmpAmendRegistrationRequest
       }
     }
   }
