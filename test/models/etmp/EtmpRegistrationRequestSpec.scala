@@ -19,7 +19,7 @@ package models.etmp
 import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
 import formats.Format.eisDateFormatter
-import models.{BankDetails, Bic, BusinessContactDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
+import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
@@ -60,7 +60,8 @@ class EtmpRegistrationRequestSpec extends SpecBase {
   private def convertToTraderId(euDetails: EuDetails): Option[TraderId] = {
     euDetails.registrationType match {
       case Some(RegistrationType.VatNumber) =>
-        Some(VatNumberTraderId(euDetails.euVatNumber.value))
+        val convertedVatNumber = CountryWithValidationDetails.convertTaxIdentifierForTransfer(euDetails.euVatNumber.value, euDetails.euCountry.code)
+        Some(VatNumberTraderId(convertedVatNumber))
       case Some(RegistrationType.TaxId) =>
         Some(TaxRefTraderID(euDetails.euTaxReference.value))
       case _ => None
