@@ -30,7 +30,7 @@
 
 @layout(pageTitle = title(form, messages("bankDetails.title"))) {
 
-    @formHelper(action = routes.BankDetailsController.onSubmit(), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.BankDetailsController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
@@ -68,6 +68,6 @@
             .withHint(HintViewModel(messages("bankDetails.iban.hint")))
         )
 
-        @button("site.continue", routes.BankDetailsController.onPageLoad(waypoints).url)
+        @button("site.continue")
     }
 }
