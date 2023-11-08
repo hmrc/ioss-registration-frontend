@@ -30,8 +30,10 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckEmailVerificationFilterImpl(frontendAppConfig: FrontendAppConfig,
-                                       emailVerificationService: EmailVerificationService
+class CheckEmailVerificationFilterImpl(
+                                        inAmend: Boolean,
+                                        frontendAppConfig: FrontendAppConfig,
+                                        emailVerificationService: EmailVerificationService
                                       )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
 
@@ -39,7 +41,8 @@ class CheckEmailVerificationFilterImpl(frontendAppConfig: FrontendAppConfig,
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    if (frontendAppConfig.emailVerificationEnabled) {
+    // TODO -> Remove inAmend check as part of VEIOSS-224
+    if (frontendAppConfig.emailVerificationEnabled && !inAmend) {
       request.userAnswers.get(BusinessContactDetailsPage) match {
         case Some(contactDetails) =>
           emailVerificationService.isEmailVerified(contactDetails.emailAddress, request.userId).map {
@@ -70,8 +73,8 @@ class CheckEmailVerificationFilterProvider @Inject()(
                                                       frontendAppConfig: FrontendAppConfig,
                                                       emailVerificationService: EmailVerificationService
                                                     )(implicit val executionContext: ExecutionContext) {
-  def apply(): CheckEmailVerificationFilterImpl = {
-    new CheckEmailVerificationFilterImpl(frontendAppConfig, emailVerificationService)
+  def apply(inAmend: Boolean): CheckEmailVerificationFilterImpl = {
+    new CheckEmailVerificationFilterImpl(inAmend, frontendAppConfig, emailVerificationService)
   }
 }
 

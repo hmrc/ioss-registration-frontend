@@ -28,7 +28,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
-import utils.CheckJourneyRecovery.determineJourneyRecovery
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
 import utils.ItemsHelper.getDerivedItems

@@ -15,6 +15,7 @@
  *@
 
 @import components.ButtonGroup
+@import pages.previousRegistrations.CheckPreviousSchemeAnswersPage
 @import viewmodels.LegendSize
 
 @this(
@@ -57,6 +58,6 @@
             <input type="hidden" name="value" id="value" value="false"/>
         }
 
-        @button("site.continue",  controllers.previousRegistrations.routes.CheckPreviousSchemeAnswersController.onPageLoad(waypoints, index).url)
+        @button("site.continue", CheckPreviousSchemeAnswersPage(index).route(waypoints).url, waypoints)
     }
 }

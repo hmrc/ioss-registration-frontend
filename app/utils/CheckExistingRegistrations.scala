@@ -24,7 +24,6 @@ import queries.{Derivable, Settable}
 
 import scala.util.Try
 
-
 object CheckExistingRegistrations extends Logging {
 
   def existingPreviousRegistration(country: Country, existingPreviousRegistration: Seq[PreviousRegistration]): Boolean = {

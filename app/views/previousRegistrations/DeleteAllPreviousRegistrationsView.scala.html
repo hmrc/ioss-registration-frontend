@@ -49,7 +49,7 @@
             content = Text(messages("deleteAllPreviousRegistrations.warning"))
         ))
 
-        @button("site.continue", DeleteAllPreviousRegistrationsPage.route(waypoints).url)
+        @button("site.continue", DeleteAllPreviousRegistrationsPage.route(waypoints).url, waypoints)
 
     }
 }

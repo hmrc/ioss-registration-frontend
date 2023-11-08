@@ -19,13 +19,14 @@ package controllers.euDetails
 import base.SpecBase
 import forms.euDetails.EuVatNumberFormProvider
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
-import models.{Country, CountryWithValidationDetails, Index, UserAnswers}
+import models.{CheckMode, Country, CountryWithValidationDetails, Index, UserAnswers}
 import models.core.{Match, MatchType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
+import pages.amend.ChangeRegistrationPage
 import pages.euDetails._
-import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
+import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoint, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -57,8 +58,11 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
 
   private lazy val euVatNumberRoute: String = routes.EuVatNumberController.onPageLoad(waypoints, countryIndex).url
   private lazy val euVatNumberSubmitRoute: String = routes.EuVatNumberController.onSubmit(waypoints, countryIndex).url
+  private lazy val amendEuVatNumberSubmitRoute: String = routes.EuVatNumberController.onSubmit(amendWaypoints, countryIndex).url
 
   private val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+  private val amendWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
   private val genericMatch = Match(
     MatchType.FixedEstablishmentActiveNETP,
@@ -415,6 +419,81 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
+      }
+    }
+  }
+
+  "inAmend" - {
+
+    "must not redirect to ExcludedVRNController page when the vat number is excluded for match FixedEstablishmentQuarantinedNETP when in Amend" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
+          .withFormUrlEncodedBody(("value", euVatNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+      }
+    }
+
+    "must not redirect to ExcludedVRNController page when the vat number is excluded for match TraderIdQuarantinedNETP " in {
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
+          .withFormUrlEncodedBody(("value", euVatNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+      }
+    }
+
+    "must not redirect to ExcludedVRNController page when the vat number is excluded for match OtherMSNETPQuarantinedNETP " in {
+
+      val application = applicationBuilder(userAnswers = Some(answers))
+        .overrides(
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+        ).build()
+
+      running(application) {
+
+        val expectedResponse = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP)
+
+        when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
+          Future.successful(Option(expectedResponse))
+
+        val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
+          .withFormUrlEncodedBody(("value", euVatNumber))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
       }
     }
   }

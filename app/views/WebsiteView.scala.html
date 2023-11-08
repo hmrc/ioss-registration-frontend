@@ -14,8 +14,8 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth._
 @import components.ButtonGroup
+@import viewmodels.InputWidth._
 
 @this(
     layout: templates.Layout,
@@ -43,7 +43,7 @@
             .withWidth(Full)
         )
 
-    @button("site.continue")
+    @button("site.continue", waypoints = waypoints)
 
     }
 }

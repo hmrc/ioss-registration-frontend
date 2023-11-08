@@ -38,7 +38,7 @@ class AnswerExtractorSpec extends SpecBase {
   }
 
   private def buildRequest(answers: UserAnswers): AuthenticatedDataRequest[AnyContent] =
-    AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, answers)
+    AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, answers)
 
   private class TestController extends AnswerExtractor {
 

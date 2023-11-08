@@ -39,6 +39,7 @@ class FakeAuthenticatedIdentifierAction extends AuthenticatedIdentifierAction(
       request,
       Credentials("12345-credId", "GGW"),
       Vrn("123456789"),
-      Enrolments(Set.empty)
+      Enrolments(Set.empty),
+      Some("IM9001234567")
     )).toFuture
 }

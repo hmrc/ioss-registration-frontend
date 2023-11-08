@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package models.etmp
+package models.etmp.amend
 
 import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
 import formats.Format.eisDateFormatter
 import models.{BankDetails, Bic, BusinessContactDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
+import models.etmp._
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
 import org.scalacheck.Arbitrary.arbitrary
@@ -34,11 +35,11 @@ import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
-import testutils.RegistrationData.etmpRegistrationRequest
+import testutils.RegistrationData.{etmpDisplayRegistration, etmpRegistrationRequest}
 
 import java.time.LocalDate
 
-class EtmpRegistrationRequestSpec extends SpecBase {
+class EtmpAmendRegistrationRequestSpec extends SpecBase {
 
   private val administration = etmpRegistrationRequest.administration
   private val customerIdentification = etmpRegistrationRequest.customerIdentification
@@ -91,7 +92,7 @@ class EtmpRegistrationRequestSpec extends SpecBase {
       json.validate[EtmpRegistrationRequest] mustBe JsSuccess(expectedResult)
     }
 
-    ".buildEtmpRegistrationRequest" - {
+    ".buildEtmpAmendRegistrationRequest" - {
 
       val tradingNames: List[TradingName] = Gen.listOfN(maxTradingNames, arbitrary[TradingName]).sample.value
       val previousRegistration: PreviousRegistrationDetails = PreviousRegistrationDetails(
@@ -198,15 +199,22 @@ class EtmpRegistrationRequestSpec extends SpecBase {
           nonCompliantPayments = None
         )
 
-        val etmpRegistrationRequest: EtmpRegistrationRequest = EtmpRegistrationRequest(
-          administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
+        val etmpRegistrationRequest: EtmpAmendRegistrationRequest = EtmpAmendRegistrationRequest(
+          administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),
+          changeLog = EtmpAmendRegistrationChangeLog(
+            tradingNames = true,
+            fixedEstablishments = true,
+            contactDetails = true,
+            bankDetails = true
+          ),
           customerIdentification = EtmpCustomerIdentification(vrn),
           tradingNames = convertToEtmpTradingNames,
           schemeDetails = etmpSchemeDetails,
           bankDetails = convertToEtmpBankDetails
         )
 
-        EtmpRegistrationRequest.buildEtmpRegistrationRequest(userAnswers,
+        EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest(userAnswers,
+          etmpDisplayRegistration,
           vrn,
           LocalDate.now(stubClockAtArbitraryDate)
         ) mustBe etmpRegistrationRequest

@@ -18,7 +18,6 @@
 @import pages.amend.ChangeRegistrationPage
 @import views.html.components.CancelAmendRegButton
 
-
 @this(
         formHelper: FormWithCSRF,
         layout: templates.Layout,
@@ -28,11 +27,13 @@
         govukWarningText: GovukWarningText
 )
 
-@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, iossNumber: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("changeRegistration.title"))) {
+@layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
 
-    <h1 class="govuk-heading-l">@messages("changeRegistration.heading")</h1>
+    <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
+
+    <h2 class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</h2>
 
     <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 
@@ -51,9 +52,6 @@
     @govukSummaryList(list)
 
     <p class="govuk-body">@messages("changeRegistration.info.p1")</p>
-
-    <p class="govuk-body">@messages("changeRegistration.info.p2")</p>
-
 
     @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit()) {
         @button("site.submit", ChangeRegistrationPage.route(waypoints).url, waypoints)

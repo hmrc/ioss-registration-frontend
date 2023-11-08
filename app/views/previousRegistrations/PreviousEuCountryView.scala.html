@@ -14,8 +14,9 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth
 @import components.ButtonGroup
+@import pages.previousRegistrations.PreviousEuCountryPage
+@import viewmodels.InputWidth
 
 @this(
     layout: templates.Layout,
@@ -46,6 +47,6 @@
             .withCssClass("autocomplete")
         )
 
-        @button("site.continue",  controllers.previousRegistrations.routes.PreviousEuCountryController.onPageLoad(waypoints, index).url)
+        @button("site.continue",  PreviousEuCountryPage(index).route(waypoints).url, waypoints)
     }
 }

@@ -15,6 +15,7 @@
  *@
 
 @import controllers.tradingNames.routes
+@import pages.tradingNames.AddTradingNamePage
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.Long
 @import viewmodels.{LegendSize, ListItemWrapper}
 @import views.html.components.ButtonGroup
@@ -70,6 +71,6 @@
             <input type="hidden" name="value" id="value" value="false"/>
         }
 
-        @button("site.continue", routes.AddTradingNameController.onPageLoad(waypoints).url)
+        @button("site.continue", AddTradingNamePage().route(waypoints).url, waypoints)
     }
 }

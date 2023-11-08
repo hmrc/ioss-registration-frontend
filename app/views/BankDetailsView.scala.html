@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth._
 @import components.ButtonGroup
-
+@import pages.BankDetailsPage
+@import viewmodels.InputWidth._
 
 @this(
     layout: templates.Layout,
@@ -68,6 +68,6 @@
             .withHint(HintViewModel(messages("bankDetails.iban.hint")))
         )
 
-        @button("site.continue")
+        @button("site.continue", BankDetailsPage.route(waypoints).url, waypoints)
     }
 }

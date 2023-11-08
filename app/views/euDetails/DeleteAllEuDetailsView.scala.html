@@ -49,6 +49,6 @@
             content = Text(messages("deleteAllEuDetails.warning"))
         ))
 
-        @button("site.continue", DeleteAllEuDetailsPage.route(waypoints).url)
+        @button("site.continue", DeleteAllEuDetailsPage.route(waypoints).url, waypoints)
     }
 }

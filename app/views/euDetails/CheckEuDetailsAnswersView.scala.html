@@ -41,18 +41,18 @@
         <h1 class="govuk-heading-xl">@messages("checkEuDetailsAnswers.heading", country.name)</h1>
 
         @if(!incompleteDetails){
-            @formHelper(action = controllers.euDetails.routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex, false)) {
+            @formHelper(action = routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex, incompletePromptShown = false)) {
                 @govukSummaryList(list)
 
-                @button("site.continue",  controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex).url)
+                @button("site.continue", CheckEuDetailsAnswersPage(countryIndex).route(waypoints).url, waypoints)
             }
         } else {
             <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
             <p class="govuk-body">@messages("error.missing_answers_prompt", country.name)</p>
 
-            @formHelper(action = controllers.euDetails.routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex, true)) {
+            @formHelper(action = routes.CheckEuDetailsAnswersController.onSubmit(waypoints, countryIndex, incompletePromptShown = true)) {
 
-                @button("error.resolve_missing_answers",  controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex).url)
+                @button("error.resolve_missing_answers", CheckEuDetailsAnswersPage(countryIndex).route(waypoints).url, waypoints)
 
             }
 

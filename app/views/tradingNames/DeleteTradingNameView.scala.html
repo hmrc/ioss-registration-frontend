@@ -15,6 +15,7 @@
  *@
 
 @import controllers.tradingNames.routes
+@import pages.tradingNames.DeleteTradingNamePage
 @import views.html.components.ButtonGroup
 
 @this(
@@ -42,6 +43,6 @@
                 )
             )
 
-            @button("site.continue", routes.DeleteTradingNameController.onPageLoad(waypoints, index).url)
+            @button("site.continue", DeleteTradingNamePage(index).route(waypoints).url, waypoints)
         }
     }

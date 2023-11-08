@@ -25,6 +25,7 @@ case class AuthenticatedOptionalDataRequest[A](
                                                 request: Request[A],
                                                 credentials: Credentials,
                                                 vrn: Vrn,
+                                                iossNumber: Option[String],
                                                 userAnswers: Option[UserAnswers]
                                               ) extends WrappedRequest[A](request) {
 
@@ -35,6 +36,7 @@ case class AuthenticatedDataRequest[A](
                                         request: Request[A],
                                         credentials: Credentials,
                                         vrn: Vrn,
+                                        iossNumber: Option[String],
                                         userAnswers: UserAnswers
                                       ) extends WrappedRequest[A](request) {
 

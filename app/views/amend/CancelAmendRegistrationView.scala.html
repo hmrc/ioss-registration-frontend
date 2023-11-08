@@ -49,6 +49,6 @@
             content = Text(messages("cancelAmendRegistration.warning"))
         ))
 
-        @button("site.continue",  CancelAmendRegistrationPage.route(waypoints).url)
+        @button("site.continue",  CancelAmendRegistrationPage.route(waypoints).url, waypoints)
     }
 }

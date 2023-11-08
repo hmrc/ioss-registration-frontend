@@ -22,36 +22,53 @@ import models.UserAnswers
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Vrn
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 case class EtmpAmendRegistrationRequest(
-                                    administration: EtmpAdministration,
-                                    changeLog: EtmpAmendRegistrationChangeLog,
-                                    customerIdentification: EtmpCustomerIdentification,
-                                    tradingNames: Seq[EtmpTradingName],
-                                    schemeDetails: EtmpSchemeDetails,
-                                    bankDetails: EtmpBankDetails,
-                                  )
+                                         administration: EtmpAdministration,
+                                         changeLog: EtmpAmendRegistrationChangeLog,
+                                         customerIdentification: EtmpCustomerIdentification,
+                                         tradingNames: Seq[EtmpTradingName],
+                                         schemeDetails: EtmpSchemeDetails,
+                                         bankDetails: EtmpBankDetails,
+                                       )
 
 object EtmpAmendRegistrationRequest {
 
   implicit val format: OFormat[EtmpAmendRegistrationRequest] = Json.format[EtmpAmendRegistrationRequest]
 
-  def buildEtmpAmendRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDateTime): EtmpAmendRegistrationRequest = {
+  def buildEtmpAmendRegistrationRequest(
+                                         answers: UserAnswers,
+                                         registration: EtmpDisplayRegistration,
+                                         vrn: Vrn,
+                                         commencementDate: LocalDate): EtmpAmendRegistrationRequest = {
     val etmpRegistrationRequest = buildEtmpRegistrationRequest(answers, vrn, commencementDate)
+
     EtmpAmendRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),
-      changeLog = EtmpAmendRegistrationChangeLog( // TODO this needs calculating based on original registration
-        tradingNames = false,
-        fixedEstablishments = false,
-        contactDetails = false,
-        bankDetails = false
+      changeLog = EtmpAmendRegistrationChangeLog(
+        tradingNames =
+          registration.tradingNames != etmpRegistrationRequest.tradingNames,
+        fixedEstablishments =
+          registration.schemeDetails.euRegistrationDetails != etmpRegistrationRequest.schemeDetails.euRegistrationDetails,
+        contactDetails =
+          contactDetailsDiff(registration.schemeDetails, etmpRegistrationRequest.schemeDetails),
+        bankDetails = registration.bankDetails != etmpRegistrationRequest.bankDetails
       ),
       customerIdentification = etmpRegistrationRequest.customerIdentification,
       tradingNames = etmpRegistrationRequest.tradingNames,
       schemeDetails = etmpRegistrationRequest.schemeDetails,
       bankDetails = etmpRegistrationRequest.bankDetails
     )
+  }
+
+  private def contactDetailsDiff(
+                                  registrationSchemeDetails: EtmpSchemeDetails,
+                                  amendSchemeDetails: EtmpSchemeDetails
+                                ): Boolean = {
+    registrationSchemeDetails.contactName != amendSchemeDetails.contactName ||
+      registrationSchemeDetails.businessTelephoneNumber != amendSchemeDetails.businessTelephoneNumber ||
+      registrationSchemeDetails.businessEmailId != amendSchemeDetails.businessEmailId
   }
 
 }
