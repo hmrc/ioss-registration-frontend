@@ -116,10 +116,8 @@ function showTheSpinner() {
     //make the spinning wheel visible
     document.getElementById("processing-wheel").hidden = false;
 
-    //make the button hidden
-    document.getElementById("continue").style.visibility = 'hidden';
-    document.getElementById("saveProgress").style.visibility = 'hidden';
-
+    //make the elements hidden
+    document.getElementById("processing-button-group").style.visibility = 'hidden';
 
     return false;
 }
