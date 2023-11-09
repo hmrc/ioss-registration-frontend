@@ -52,8 +52,8 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
     None
   )
 
-  class Harness(service: CoreRegistrationValidationService) extends
-    CheckOtherCountryRegistrationFilterImpl(service) {
+  class Harness(inAmend: Boolean, service: CoreRegistrationValidationService) extends
+    CheckOtherCountryRegistrationFilterImpl(inAmend, service) {
     def callFilter(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = filter(request)
   }
 
@@ -61,242 +61,239 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
   ".filter" - {
 
-    "when other country registration validation toggle is true" - {
+    Seq(true, false).foreach {
+      inAmend =>
 
-      "when matchType is FixedEstablishmentActiveNETP" - {
+        s"when inAmend is $inAmend" - {
 
-        "must redirect to AlreadyRegisteredOtherCountry page when the user is registered in another OSS service" in {
+          "when matchType is FixedEstablishmentActiveNETP" - {
 
-          val vrn = Vrn("333333331")
-          val app = applicationBuilder(None)
-            .configure(
-              "features.other-country-reg-validation-enabled" -> true
-            )
-            .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
-            ).build()
+            "must redirect to AlreadyRegisteredOtherCountry page when the user is registered in another OSS service" in {
 
-          running(app) {
+              val vrn = Vrn("333333331")
+              val app = applicationBuilder(None)
+                .configure(
+                  "features.other-country-reg-validation-enabled" -> true
+                )
+                .overrides(
+                  bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+                ).build()
 
-            when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(genericMatch))
+              running(app) {
 
-            val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
-            
-            val controller = new Harness(mockCoreRegistrationValidationService)
+                when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(genericMatch))
 
-            val result = controller.callFilter(request).futureValue
+                val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
 
-            result mustBe Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(genericMatch.memberState).url))
-          }
-        }
-      }
+                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
 
-      "when matchType is OtherMSNETPActiveNETP" - {
+                val result = controller.callFilter(request).futureValue
 
-        "must redirect to AlreadyRegisteredOtherCountry page when the user is registered in another OSS service" in {
-
-          val vrn = Vrn("333333331")
-          val app = applicationBuilder(None)
-            .configure(
-              "features.other-country-reg-validation-enabled" -> true
-            )
-            .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
-            ).build()
-
-          running(app) {
-
-            val expectedMatch = genericMatch.copy(matchType = MatchType.OtherMSNETPActiveNETP)
-
-            when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
-
-            val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
-            
-            val controller = new Harness(mockCoreRegistrationValidationService)
-
-            val result = controller.callFilter(request).futureValue
-
-            result mustBe Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(expectedMatch.memberState).url))
-          }
-        }
-      }
-
-      "when matchType = OtherMSNETPQuarantinedNETP" - {
-
-        "must redirect to OtherCountryExcludedAndQuarantinedController page when the user is excluded and quarantined from OSS" in {
-
-          val vrn = Vrn("333333331")
-          val app = applicationBuilder(None)
-            .configure(
-              "features.other-country-reg-validation-enabled" -> true
-            )
-            .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
-            ).build()
-
-          running(app) {
-
-            val expectedMatch = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP, exclusionEffectiveDate = Some(LocalDate.of(2022, 10, 10).toString))
-            when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
-
-            val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
-            
-            val controller = new Harness(mockCoreRegistrationValidationService)
-
-            val result = controller.callFilter(request).futureValue
-
-            result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
-              expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
-          }
-        }
-      }
-
-      "when matchType = FixedEstablishmentQuarantinedNETP" - {
-
-        "must redirect to OtherCountryExcludedAndQuarantinedController page when the user is excluded and quarantined from OSS" in {
-
-          val vrn = Vrn("333333331")
-          val app = applicationBuilder(None)
-            .configure(
-              "features.other-country-reg-validation-enabled" -> true
-            )
-            .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
-            ).build()
-
-          running(app) {
-
-            val expectedMatch = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP, exclusionEffectiveDate = Some(LocalDate.of(2022, 10, 10).toString))
-            when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
-
-            val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
-            
-            val controller = new Harness(mockCoreRegistrationValidationService)
-
-            val result = controller.callFilter(request).futureValue
-
-            result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
-              expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
-          }
-        }
-      }
-
-      "when any matchType and exclusion code is 4" - {
-
-        "must redirect to OtherCountryExcludedAndQuarantinedController page when the user is excluded and quarantined from OSS" in {
-
-          val vrn = Vrn("333333331")
-          val app = applicationBuilder(None)
-            .configure(
-              "features.other-country-reg-validation-enabled" -> true
-            )
-            .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
-            ).build()
-
-          running(app) {
-
-            val expectedMatch = genericMatch.copy(matchType = MatchType.TransferringMSID,
-              exclusionEffectiveDate = Some(LocalDate.of(2022, 10, 10).toString), exclusionStatusCode = Some(4))
-            when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
-
-            val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
-            
-            val controller = new Harness(mockCoreRegistrationValidationService)
-
-            val result = controller.callFilter(request).futureValue
-
-            result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
-              expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
-          }
-        }
-      }
-
-      "when there is no exclusion effective date" - {
-
-        "must throw an illegal state exception" in {
-
-          val timeout = 30
-
-          val vrn = Vrn("333333331")
-          val app = applicationBuilder(None)
-            .configure(
-              "features.other-country-reg-validation-enabled" -> true
-            )
-            .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
-            ).build()
-
-          running(app) {
-
-            val expectedMatch = genericMatch.copy(matchType = MatchType.TransferringMSID,
-              exclusionEffectiveDate = None, exclusionStatusCode = Some(4))
-            when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
-
-            val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
-            
-            val controller = new Harness(mockCoreRegistrationValidationService)
-
-            val result = controller.callFilter(request).failed
-
-            whenReady(result, Timeout(Span(timeout, Seconds))) { exp =>
-              exp mustBe a[IllegalStateException]
-              exp.getMessage must include(s"MatchType ${expectedMatch.matchType} didn't include an expected exclusion effective date")
+                if (!inAmend) {
+                  result mustBe Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(genericMatch.memberState).url))
+                } else {
+                  result mustBe None
+                }
+              }
             }
+          }
 
+          "when matchType is OtherMSNETPActiveNETP" - {
+
+            "must redirect to AlreadyRegisteredOtherCountry page when the user is registered in another OSS service" in {
+
+              val vrn = Vrn("333333331")
+              val app = applicationBuilder(None)
+                .configure(
+                  "features.other-country-reg-validation-enabled" -> true
+                )
+                .overrides(
+                  bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+                ).build()
+
+              running(app) {
+
+                val expectedMatch = genericMatch.copy(matchType = MatchType.OtherMSNETPActiveNETP)
+
+                when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
+
+                val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
+
+                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+
+                val result = controller.callFilter(request).futureValue
+
+                if (!inAmend) {
+                  result mustBe Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(expectedMatch.memberState).url))
+                } else {
+                  result mustBe None
+                }
+              }
+            }
+          }
+
+          "when matchType = OtherMSNETPQuarantinedNETP" - {
+
+            "must redirect to OtherCountryExcludedAndQuarantinedController page when the user is excluded and quarantined from OSS" in {
+
+              val vrn = Vrn("333333331")
+              val app = applicationBuilder(None)
+                .configure(
+                  "features.other-country-reg-validation-enabled" -> true
+                )
+                .overrides(
+                  bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+                ).build()
+
+              running(app) {
+
+                val expectedMatch = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP, exclusionEffectiveDate = Some(LocalDate.of(2022, 10, 10).toString))
+                when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
+
+                val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
+
+                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+
+                val result = controller.callFilter(request).futureValue
+
+                if (!inAmend) {
+                  result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
+                    expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
+                } else {
+                  result mustBe None
+                }
+              }
+            }
+          }
+
+          "when matchType = FixedEstablishmentQuarantinedNETP" - {
+
+            "must redirect to OtherCountryExcludedAndQuarantinedController page when the user is excluded and quarantined from OSS" in {
+
+              val vrn = Vrn("333333331")
+              val app = applicationBuilder(None)
+                .configure(
+                  "features.other-country-reg-validation-enabled" -> true
+                )
+                .overrides(
+                  bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+                ).build()
+
+              running(app) {
+
+                val expectedMatch = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP, exclusionEffectiveDate = Some(LocalDate.of(2022, 10, 10).toString))
+                when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
+
+                val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
+
+                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+
+                val result = controller.callFilter(request).futureValue
+
+                if (!inAmend) {
+                  result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
+                    expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
+                } else {
+                  result mustBe None
+                }
+              }
+            }
+          }
+
+          "when any matchType and exclusion code is 4" - {
+
+            "must redirect to OtherCountryExcludedAndQuarantinedController page when the user is excluded and quarantined from OSS" in {
+
+              val vrn = Vrn("333333331")
+              val app = applicationBuilder(None)
+                .configure(
+                  "features.other-country-reg-validation-enabled" -> true
+                )
+                .overrides(
+                  bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+                ).build()
+
+              running(app) {
+
+                val expectedMatch = genericMatch.copy(matchType = MatchType.TransferringMSID,
+                  exclusionEffectiveDate = Some(LocalDate.of(2022, 10, 10).toString), exclusionStatusCode = Some(4))
+                when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
+
+                val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
+
+                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+
+                val result = controller.callFilter(request).futureValue
+
+                if (!inAmend) {
+                  result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
+                    expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
+                } else {
+                  result mustBe None
+                }
+              }
+            }
+          }
+
+          "must return none when the user is not registered in another OSS service" in {
+
+            val vrn = Vrn("333333331")
+            val app = applicationBuilder(None)
+              .configure(
+                "features.other-country-reg-validation-enabled" -> true
+              )
+              .overrides(
+                bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+              ).build()
+
+            running(app) {
+
+              when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(None)
+
+              val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
+
+              val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+
+              val result = controller.callFilter(request).futureValue
+
+              result mustBe None
+            }
           }
         }
-      }
     }
 
-    "must return none when the user is not registered in another OSS service" in {
+    "when there is no exclusion effective date" - {
 
-      val vrn = Vrn("333333331")
-      val app = applicationBuilder(None)
-        .configure(
-          "features.other-country-reg-validation-enabled" -> true
-        )
-        .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
-        ).build()
+      "must throw an illegal state exception" in {
 
-      running(app) {
+        val timeout = 30
 
-        when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(None)
+        val vrn = Vrn("333333331")
+        val app = applicationBuilder(None)
+          .configure(
+            "features.other-country-reg-validation-enabled" -> true
+          )
+          .overrides(
+            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          ).build()
 
-        val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
-        
-        val controller = new Harness(mockCoreRegistrationValidationService)
+        running(app) {
 
-        val result = controller.callFilter(request).futureValue
+          val expectedMatch = genericMatch.copy(matchType = MatchType.TransferringMSID,
+            exclusionEffectiveDate = None, exclusionStatusCode = Some(4))
+          when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
 
-        result mustBe None
-      }
-    }
-  }
+          val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
 
-  "when other country registration validation toggle is false" - {
+          val controller = new Harness(inAmend = false, mockCoreRegistrationValidationService)
 
-    "must return None" in {
+          val result = controller.callFilter(request).failed
 
-      val vrn = Vrn("333333331")
-      val app = applicationBuilder(None)
-        .configure(
-          "features.other-country-reg-validation-enabled" -> false
-        )
-        .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
-        ).build()
-
-      running(app) {
-
-        val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers)
-        
-        val controller = new Harness(mockCoreRegistrationValidationService)
-
-        val result = controller.callFilter(request).futureValue
-
-        result mustBe None
+          whenReady(result, Timeout(Span(timeout, Seconds))) { exp =>
+            exp mustBe a[IllegalStateException]
+            exp.getMessage must include(s"MatchType ${expectedMatch.matchType} didn't include an expected exclusion effective date")
+          }
+        }
       }
     }
   }

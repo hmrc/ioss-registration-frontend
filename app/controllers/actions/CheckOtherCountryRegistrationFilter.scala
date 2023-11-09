@@ -19,16 +19,18 @@ package controllers.actions
 import logging.Logging
 import models.core.{Match, MatchType}
 import models.requests.AuthenticatedDataRequest
-import play.api.mvc.{ActionFilter, Result}
 import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionFilter, Result}
 import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckOtherCountryRegistrationFilterImpl @Inject()(
+                                                         inAmend: Boolean,
                                                          service: CoreRegistrationValidationService
                                                        )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
@@ -49,24 +51,28 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
       }
     }
 
-    service.searchUkVrn(request.vrn)(hc, request).map {
+    if (!inAmend) {
+      service.searchUkVrn(request.vrn)(hc, request).map {
 
-      case Some(activeMatch)
-        if activeMatch.matchType == MatchType.OtherMSNETPActiveNETP ||
-          activeMatch.matchType == MatchType.FixedEstablishmentActiveNETP =>
-        Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(activeMatch.memberState)))
+        case Some(activeMatch)
+          if activeMatch.matchType == MatchType.OtherMSNETPActiveNETP ||
+            activeMatch.matchType == MatchType.FixedEstablishmentActiveNETP =>
+          Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(activeMatch.memberState)))
 
-      case Some(activeMatch)
-        if activeMatch.exclusionStatusCode.contains(exclusionStatusCode) ||
-          activeMatch.matchType == MatchType.OtherMSNETPQuarantinedNETP ||
-          activeMatch.matchType == MatchType.FixedEstablishmentQuarantinedNETP =>
-        Some(Redirect(
-          controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
-            activeMatch.memberState,
-            getEffectiveDate(activeMatch))
-        ))
+        case Some(activeMatch)
+          if activeMatch.exclusionStatusCode.contains(exclusionStatusCode) ||
+            activeMatch.matchType == MatchType.OtherMSNETPQuarantinedNETP ||
+            activeMatch.matchType == MatchType.FixedEstablishmentQuarantinedNETP =>
+          Some(Redirect(
+            controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
+              activeMatch.memberState,
+              getEffectiveDate(activeMatch))
+          ))
 
-      case _ => None
+        case _ => None
+      }
+    } else {
+      None.toFuture
     }
   }
 }
@@ -74,7 +80,7 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
 class CheckOtherCountryRegistrationFilter @Inject()(
                                                      service: CoreRegistrationValidationService
                                                    )(implicit val executionContext: ExecutionContext) {
-  def apply(): CheckOtherCountryRegistrationFilterImpl = {
-    new CheckOtherCountryRegistrationFilterImpl(service)
+  def apply(inAmend: Boolean): CheckOtherCountryRegistrationFilterImpl = {
+    new CheckOtherCountryRegistrationFilterImpl(inAmend, service)
   }
 }

@@ -19,7 +19,7 @@ package controllers.actions
 import connectors.RegistrationConnector
 import models.UserAnswers
 import models.amend.RegistrationWrapper
-import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest, AuthenticatedOptionalDataRequest}
+import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
 import utils.FutureSyntax.FutureOps
