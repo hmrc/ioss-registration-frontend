@@ -39,21 +39,21 @@ object ItemsHelper {
 
   def determineRemoveAllItemsAndRedirect[A](
                                              waypoints: Waypoints,
-                                             value: Boolean,
+                                             doRemoveItems: Boolean,
                                              cc: AuthenticatedControllerComponents,
                                              query: Settable[A],
                                              hasItems: QuestionPage[Boolean],
-                                             deleteAllItems: QuestionPage[Boolean]
+                                             deleteAllItemsPage: QuestionPage[Boolean]
                                            )(implicit ec: ExecutionContext, request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
-    val removeItems = if (value) {
+    val removeItems = if (doRemoveItems) {
       request.userAnswers.remove(query)
     } else {
       request.userAnswers.set(hasItems, true)
     }
     for {
       updatedAnswers <- Future.fromTry(removeItems)
-      calculatedAnswers <- Future.fromTry(updatedAnswers.set(deleteAllItems, value))
+      calculatedAnswers <- Future.fromTry(updatedAnswers.set(deleteAllItemsPage, doRemoveItems))
       _ <- cc.sessionRepository.set(calculatedAnswers)
-    } yield Redirect(deleteAllItems.navigate(waypoints, request.userAnswers, calculatedAnswers).route)
+    } yield Redirect(deleteAllItemsPage.navigate(waypoints, request.userAnswers, calculatedAnswers).route)
   }
 }

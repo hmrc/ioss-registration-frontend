@@ -33,34 +33,56 @@ import views.html.previousRegistrations.DeleteAllPreviousRegistrationsView
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
+class InvalidAmendModeOperationException(message: String) extends RuntimeException(message)
+
+
 class DeleteAllPreviousRegistrationsController @Inject()(
                                                           override val messagesApi: MessagesApi,
                                                           cc: AuthenticatedControllerComponents,
                                                           formProvider: DeleteAllPreviousRegistrationsFormProvider,
                                                           view: DeleteAllPreviousRegistrationsView
-                                                        )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
-
+                                                        )(implicit ec: ExecutionContext)
+  extends FrontendBaseController
+    with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
   val form: Form[Boolean] = formProvider()
+
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
     implicit request =>
-
-      Ok(view(form, waypoints))
+      protectAgainstAmendMode(waypoints) {
+        Ok(view(form, waypoints))
+      }
   }
+
+  private def protectAgainstAmendMode[A](waypoints: Waypoints)(action: => A): A = {
+    if (waypoints.inAmend) {
+      throw new InvalidAmendModeOperationException("Cannot do this action while in amend mode")
+    } else {
+      action
+    }
+  }
+
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
+      protectAgainstAmendMode(waypoints) {
+        form.bindFromRequest().fold(
+          formWithErrors =>
+            BadRequest(view(formWithErrors, waypoints)).toFuture,
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          BadRequest(view(formWithErrors, waypoints)).toFuture,
-
-        value =>
-
-          determineRemoveAllItemsAndRedirect(waypoints, value, cc, AllPreviousRegistrationsQuery, PreviouslyRegisteredPage, DeleteAllPreviousRegistrationsPage)
-      )
+          doRemoveItems =>
+            determineRemoveAllItemsAndRedirect(
+              waypoints = waypoints,
+              doRemoveItems = doRemoveItems,
+              cc = cc,
+              query = AllPreviousRegistrationsQuery,
+              hasItems = PreviouslyRegisteredPage,
+              deleteAllItemsPage = DeleteAllPreviousRegistrationsPage
+            )
+        )
+      }
   }
 
 }

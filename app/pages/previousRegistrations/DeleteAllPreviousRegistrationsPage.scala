@@ -18,9 +18,11 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.UserAnswers
+import pages.amend.ChangeRegistrationPage
 import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
+import utils.AmendWaypoints.AmendWaypointsOps
 
 case object DeleteAllPreviousRegistrationsPage extends QuestionPage[Boolean] {
 
@@ -33,7 +35,13 @@ case object DeleteAllPreviousRegistrationsPage extends QuestionPage[Boolean] {
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     answers.get(this) match {
-      case Some(_) => CheckYourAnswersPage
+      case Some(_) =>
+        if (waypoints.inAmend) {
+          ChangeRegistrationPage
+        } else {
+          CheckYourAnswersPage
+        }
+
       case _ => JourneyRecoveryPage
     }
 }
