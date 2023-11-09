@@ -117,9 +117,10 @@ function showTheSpinner() {
     document.getElementById("processing-wheel").hidden = false;
 
     //make the elements hidden
-    document.getElementById("continue").style.visibility = 'hidden';
-    document.getElementById("saveProgress").style.visibility = 'hidden';
-    document.getElementById("cancel").style.visibility = 'hidden';
+    // document.getElementById("continue").style.visibility = 'hidden';
+    // document.getElementById("saveProgress").style.visibility = 'hidden';
+    document.getElementById("processing-button-group").style.visibility = 'hidden';
+    document.getElementById("cancel-amend-button-group").style.visibility = 'hidden';
 
     return false;
 }

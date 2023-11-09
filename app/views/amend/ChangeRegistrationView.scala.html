@@ -54,7 +54,7 @@
     <p class="govuk-body">@messages("changeRegistration.info.p1")</p>
 
     @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit()) {
-        @button("site.submit", ChangeRegistrationPage.route(waypoints).url, waypoints)
+        @button("site.confirm", ChangeRegistrationPage.route(waypoints).url, waypoints)
     }
 
     <div id="processing-wheel" hidden>
