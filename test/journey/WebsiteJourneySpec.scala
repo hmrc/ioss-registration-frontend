@@ -151,7 +151,7 @@ class WebsiteJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGener
             answerMustEqual(WebsitePage(Index(1)), Website("www.website-1.com")),
             answerMustEqual(WebsitePage(Index(2)), Website("www.website-2.com")),
             answerMustEqual(WebsitePage(Index(3)), Website("updated-www.website-3.com")),
-            answerMustEqual(WebsitePage(Index(4)), Website("www.website-4.com")),
+            answerMustEqual(WebsitePage(Index(4)), Website("www.website-4.com"))
           )
       }
 
@@ -169,7 +169,7 @@ class WebsiteJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGener
             answerMustEqual(WebsitePage(Index(2)), Website("www.website-2.com")),
             answerMustEqual(WebsitePage(Index(3)), Website("www.website-3.com")),
             answerMustEqual(WebsitePage(Index(4)), Website("www.website-4.com")),
-            answerMustEqual(WebsitePage(Index(5)), Website("www.website-5.com")),
+            answerMustEqual(WebsitePage(Index(5)), Website("www.website-5.com"))
           )
       }
 
