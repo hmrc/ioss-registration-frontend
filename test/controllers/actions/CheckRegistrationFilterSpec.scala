@@ -106,5 +106,20 @@ class CheckRegistrationFilterSpec extends SpecBase {
         result mustBe Some(Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints).url))
       }
     }
+
+    "must redirect to Not Registered Controller when a registration is not found" in {
+      val app = applicationBuilder(None).build()
+
+      running(app) {
+
+        val config = app.injector.instanceOf[FrontendAppConfig]
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val controller = new Harness(true, config)
+
+        val result = controller.callFilter(request).futureValue
+
+        result mustBe Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url))
+      }
+    }
   }
 }

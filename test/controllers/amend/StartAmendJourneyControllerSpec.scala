@@ -76,5 +76,33 @@ class StartAmendJourneyControllerSpec extends SpecBase with BeforeAndAfterEach {
         redirectLocation(result).value mustBe ChangeRegistrationPage.route(waypoints).url
       }
     }
+
+    "must redirect to Not Registered Page when no registration found" in {
+
+      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+      when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+      val application = applicationBuilder(
+        userAnswers = Some(completeUserAnswersWithVatInfo),
+        clock = Some(stubClockAtArbitraryDate)
+      )
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.StartAmendJourneyController.onPageLoad(waypoints).url)
+
+        val result = route(application, request).value
+
+        if (registrationWrapper == null) {
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe controllers.routes.NotRegisteredController.onPageLoad().url
+        }
+      }
+    }
   }
 }

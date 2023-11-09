@@ -16,7 +16,7 @@
 
 package base
 
-import controllers.actions._
+import controllers.actions.{FakeCheckEmailVerificationFilter, _}
 import generators.Generators
 import models.domain.VatCustomerInfo
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
@@ -111,7 +111,8 @@ trait SpecBase
         bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers)),
         bind[AuthenticatedDataRequiredActionImpl].toInstance(FakeAuthenticatedDataRequiredAction(userAnswers)),
         bind[CheckOtherCountryRegistrationFilter].toInstance(new FakeCheckOtherCountryRegistrationFilter()),
-        bind[CheckRegistrationFilterImpl].toInstance(new FakeCheckRegistrationFilter()),
+        bind[CheckRegistrationFilterProvider].toInstance(new FakeCheckRegistrationFilterProvider()),
+        bind[CheckEmailVerificationFilterProvider].toInstance(new FakeCheckEmailVerificationFilter()),
         bind[Clock].toInstance(clockToBind)
       )
   }

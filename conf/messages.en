@@ -674,3 +674,7 @@ errorSubmittingAmendment.heading = We cannot update your registration
 errorSubmittingAmendment.tryAgainLater = You can <a class="govuk-link" href="{0}">try again later</a>.
 errorSubmittingAmendment.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 errorSubmittingAmendment.yourAccount = Back to your account
+
+notRegistered.title = You cannot use this service
+notRegistered.heading = You cannot use this service
+notRegistered.label = You must register for the VAT Import One Stop Shop scheme to use this service.

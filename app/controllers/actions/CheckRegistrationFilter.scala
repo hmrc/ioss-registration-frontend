@@ -37,6 +37,8 @@ class CheckRegistrationFilterImpl(
     (hasIossEnrolment(request), inAmend) match {
       case (true, false) =>
         Some(Redirect(CannotRegisterAlreadyRegisteredPage.route(EmptyWaypoints).url)).toFuture
+      case (false, true) =>
+        Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url)).toFuture
       case _ =>
         None.toFuture
     }
