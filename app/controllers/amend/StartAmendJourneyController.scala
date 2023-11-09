@@ -56,6 +56,9 @@ class StartAmendJourneyController @Inject()(
             logger.error(exception.getMessage, exception)
             throw exception
         }
-      }).flatten
+      }).flatten.recover {
+        case _ =>
+          Redirect(controllers.routes.NotRegisteredController.onPageLoad().url)
+      }
   }
 }

@@ -244,3 +244,5 @@ POST        /cancel-amend-registration                                       con
 GET         /error-submitting-amendment                                      controllers.amend.ErrorSubmittingAmendmentController.onPageLoad()
 
 GET         /successful-amend                                                controllers.amend.AmendCompleteController.onPageLoad()
+
+GET        /cannot-use-not-registered                                        controllers.NotRegisteredController.onPageLoad()
