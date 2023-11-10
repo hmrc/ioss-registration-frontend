@@ -84,7 +84,7 @@ class EuVatNumberController @Inject()(
 
               coreRegistrationValidationService.searchEuVrn(value, country.code).flatMap {
 
-                case Some(activeMatch) if activeMatch.matchType.isActiveTrader =>
+                case Some(activeMatch) if activeMatch.matchType.isActiveTrader && !waypoints.inAmend =>
                   Future.successful(
                     Redirect(
                       controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(
@@ -94,19 +94,14 @@ class EuVatNumberController @Inject()(
                     )
                   )
 
-                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && waypoints.inAmend =>
+                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && !waypoints.inAmend =>
+                  Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
+
+                case _ =>
                   for {
                     updatedAnswers <- Future.fromTry(request.userAnswers.set(EuVatNumberPage(countryIndex), value))
                     _ <- cc.sessionRepository.set(updatedAnswers)
                   } yield Redirect(EuVatNumberPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
-
-                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
-                  Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
-
-                case _ => for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(EuVatNumberPage(countryIndex), value))
-                  _ <- cc.sessionRepository.set(updatedAnswers)
-                } yield Redirect(EuVatNumberPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
               }
           )
       }
