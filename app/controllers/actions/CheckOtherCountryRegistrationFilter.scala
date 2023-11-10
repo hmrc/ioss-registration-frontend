@@ -24,7 +24,6 @@ import play.api.mvc.{ActionFilter, Result}
 import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
-import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,29 +50,33 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
       }
     }
 
-    if (!inAmend) {
-      service.searchUkVrn(request.vrn)(hc, request).map {
+    service.searchUkVrn(request.vrn)(hc, request).map {
 
-        case Some(activeMatch)
-          if activeMatch.matchType == MatchType.OtherMSNETPActiveNETP ||
-            activeMatch.matchType == MatchType.FixedEstablishmentActiveNETP =>
-          Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(activeMatch.memberState)))
+      case Some(activeMatch)
+        if isActiveNotInAmend(activeMatch) =>
+        Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(activeMatch.memberState)))
 
-        case Some(activeMatch)
-          if activeMatch.exclusionStatusCode.contains(exclusionStatusCode) ||
-            activeMatch.matchType == MatchType.OtherMSNETPQuarantinedNETP ||
-            activeMatch.matchType == MatchType.FixedEstablishmentQuarantinedNETP =>
-          Some(Redirect(
-            controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
-              activeMatch.memberState,
-              getEffectiveDate(activeMatch))
-          ))
+      case Some(activeMatch)
+        if isQuarantinedNotInAmend(activeMatch) =>
+        Some(Redirect(
+          controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
+            activeMatch.memberState,
+            getEffectiveDate(activeMatch))
+        ))
 
-        case _ => None
-      }
-    } else {
-      None.toFuture
+      case _ => None
     }
+  }
+
+  private def isQuarantinedNotInAmend(activeMatch: Match) = {
+    !inAmend && (activeMatch.exclusionStatusCode.contains(exclusionStatusCode) ||
+      activeMatch.matchType == MatchType.OtherMSNETPQuarantinedNETP ||
+      activeMatch.matchType == MatchType.FixedEstablishmentQuarantinedNETP)
+  }
+
+  private def isActiveNotInAmend(activeMatch: Match) = {
+    !inAmend && (activeMatch.matchType == MatchType.OtherMSNETPActiveNETP ||
+      activeMatch.matchType == MatchType.FixedEstablishmentActiveNETP)
   }
 }
 

@@ -21,7 +21,7 @@ import models.core.{Match, MatchType}
 import models.requests.AuthenticatedDataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
@@ -51,6 +51,10 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
     None,
     None
   )
+
+  override def beforeEach(): Unit = {
+    reset(mockCoreRegistrationValidationService)
+  }
 
   class Harness(inAmend: Boolean, service: CoreRegistrationValidationService) extends
     CheckOtherCountryRegistrationFilterImpl(inAmend, service) {
@@ -94,6 +98,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
                 } else {
                   result mustBe None
                 }
+                verify(mockCoreRegistrationValidationService, times(1)).searchUkVrn(any())(any(), any())
               }
             }
           }
@@ -128,6 +133,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
                 } else {
                   result mustBe None
                 }
+                verify(mockCoreRegistrationValidationService, times(1)).searchUkVrn(any())(any(), any())
               }
             }
           }
@@ -162,6 +168,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
                 } else {
                   result mustBe None
                 }
+                verify(mockCoreRegistrationValidationService, times(1)).searchUkVrn(any())(any(), any())
               }
             }
           }
@@ -196,6 +203,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
                 } else {
                   result mustBe None
                 }
+                verify(mockCoreRegistrationValidationService, times(1)).searchUkVrn(any())(any(), any())
               }
             }
           }
@@ -231,6 +239,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
                 } else {
                   result mustBe None
                 }
+                verify(mockCoreRegistrationValidationService, times(1)).searchUkVrn(any())(any(), any())
               }
             }
           }
@@ -257,6 +266,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
               val result = controller.callFilter(request).futureValue
 
               result mustBe None
+              verify(mockCoreRegistrationValidationService, times(1)).searchUkVrn(any())(any(), any())
             }
           }
         }
@@ -292,6 +302,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
           whenReady(result, Timeout(Span(timeout, Seconds))) { exp =>
             exp mustBe a[IllegalStateException]
             exp.getMessage must include(s"MatchType ${expectedMatch.matchType} didn't include an expected exclusion effective date")
+            verify(mockCoreRegistrationValidationService, times(1)).searchUkVrn(any())(any(), any())
           }
         }
       }
