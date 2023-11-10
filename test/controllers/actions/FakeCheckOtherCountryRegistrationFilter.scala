@@ -24,6 +24,7 @@ import services.core.CoreRegistrationValidationService
 import scala.concurrent.{ExecutionContext, Future}
 
 class FakeCheckOtherCountryRegistrationFilterImpl() extends CheckOtherCountryRegistrationFilterImpl(
+  inAmend = false,
   mock[CoreRegistrationValidationService]
 )(ExecutionContext.Implicits.global) {
 
@@ -36,5 +37,5 @@ class FakeCheckOtherCountryRegistrationFilterImpl() extends CheckOtherCountryReg
 class FakeCheckOtherCountryRegistrationFilter() extends CheckOtherCountryRegistrationFilter(
   mock[CoreRegistrationValidationService]
 )(ExecutionContext.Implicits.global) {
-  override def apply(): CheckOtherCountryRegistrationFilterImpl = new FakeCheckOtherCountryRegistrationFilterImpl
+  override def apply(inAmend: Boolean): CheckOtherCountryRegistrationFilterImpl = new FakeCheckOtherCountryRegistrationFilterImpl
 }

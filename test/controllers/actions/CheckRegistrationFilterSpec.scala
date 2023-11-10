@@ -51,7 +51,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
-        val controller = new Harness(false, config)
+        val controller = new Harness(inAmend = false, config)
 
         val result = controller.callFilter(request).futureValue
 
@@ -67,7 +67,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
-        val controller = new Harness(true, config)
+        val controller = new Harness(inAmend = true, config)
 
         val result = controller.callFilter(request).futureValue
 
@@ -83,7 +83,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
-        val controller = new Harness(true, config)
+        val controller = new Harness(inAmend = true, config)
 
         val result = controller.callFilter(request).futureValue
 
@@ -99,7 +99,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
-        val controller = new Harness(false, config)
+        val controller = new Harness(inAmend = false, config)
 
         val result = controller.callFilter(request).futureValue
 
@@ -114,7 +114,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
-        val controller = new Harness(true, config)
+        val controller = new Harness(inAmend = true, config)
 
         val result = controller.callFilter(request).futureValue
 
