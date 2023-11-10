@@ -28,7 +28,7 @@ import pages.Waypoints
 import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
+import queries.previousRegistration.{AllPreviousSchemesForCountryWithOptionalVatNumberQuery, NonCompliantQuery}
 import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
@@ -161,22 +161,21 @@ class PreviousOssNumberController @Inject()(
         PreviousSchemePage(countryIndex, schemeIndex),
         previousScheme
       ))
-      updatedAnswersWithSchemeAndNonCompliantDetails <- getNonCompliantAnswers(nonCompliantDetails, updatedAnswersWithScheme)
-      _ <- cc.sessionRepository.set(updatedAnswersWithScheme)
+      updatedAnswersWithSchemeAndNonCompliantDetails <- setNonCompliantAnswers(countryIndex, schemeIndex, nonCompliantDetails, updatedAnswersWithScheme)
+      _ <- cc.sessionRepository.set(updatedAnswersWithSchemeAndNonCompliantDetails)
     } yield Redirect(PreviousOssNumberPage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswersWithSchemeAndNonCompliantDetails).route)
   }
 
   // TODO
-  private def getNonCompliantAnswers(
+  private def setNonCompliantAnswers(
+                                      countryIndex: Index,
+                                      schemeIndex: Index,
                                       nonCompliantDetails: Option[NonCompliantDetails],
                                       updatedAnswersWithScheme: UserAnswers
                                     ): Future[UserAnswers] = {
     nonCompliantDetails match {
       case Some(value) =>
-        Future.fromTry(updatedAnswersWithScheme.set(
-          PreviousSchemeDetails(, _, nonCompliantDetails),
-          value
-        ))
+        Future.fromTry(updatedAnswersWithScheme.set(NonCompliantQuery(countryIndex, schemeIndex), value))
       case _ => updatedAnswersWithScheme.toFuture
     }
   }

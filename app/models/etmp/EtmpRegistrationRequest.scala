@@ -19,14 +19,12 @@ package models.etmp
 import formats.Format.eisDateFormatter
 import logging.Logging
 import models.previousRegistrations.NonCompliantDetails
-import models.{BusinessContactDetails, Index, UserAnswers}
-import pages.tradingNames.HasTradingNamePage
 import models.{BusinessContactDetails, UserAnswers}
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import pages.tradingNames.HasTradingNamePage
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import play.api.libs.json.{Json, OFormat}
 import queries.AllWebsites
-import queries.previousRegistration.NonCompliantDetailsQuery
+import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
 import services.etmp.{EtmpEuRegistrations, EtmpPreviousEuRegistrations}
 import uk.gov.hmrc.domain.Vrn
@@ -54,17 +52,22 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
       bankDetails = getBankDetails(answers)
     )
 
-  private def getSchemeDetails(answers: UserAnswers, commencementDate: LocalDate): EtmpSchemeDetails = EtmpSchemeDetails(
-    commencementDate = commencementDate.format(eisDateFormatter),
-    euRegistrationDetails = getEuTaxRegistrations(answers),
-    previousEURegistrationDetails = getPreviousRegistrationDetails(answers),
-    websites = getWebsites(answers),
-    contactName = getBusinessContactDetails(answers).fullName,
-    businessTelephoneNumber = getBusinessContactDetails(answers).telephoneNumber,
-    businessEmailId = getBusinessContactDetails(answers).emailAddress,
-    nonCompliantReturns = getNonCompliantDetails(answers).nonCompliantReturns,
-    nonCompliantPayments = getNonCompliantDetails(answers).nonCompliantPayments
-  )
+  private def getSchemeDetails(answers: UserAnswers, commencementDate: LocalDate): EtmpSchemeDetails = {
+
+    val nonCompliantDetailsAnswers = getNonCompliantDetails(answers)
+
+    EtmpSchemeDetails(
+      commencementDate = commencementDate.format(eisDateFormatter),
+      euRegistrationDetails = getEuTaxRegistrations(answers),
+      previousEURegistrationDetails = getPreviousRegistrationDetails(answers),
+      websites = getWebsites(answers),
+      contactName = getBusinessContactDetails(answers).fullName,
+      businessTelephoneNumber = getBusinessContactDetails(answers).telephoneNumber,
+      businessEmailId = getBusinessContactDetails(answers).emailAddress,
+      nonCompliantReturns = nonCompliantDetailsAnswers.flatMap(_.nonCompliantReturns.map(_.toString)),
+      nonCompliantPayments = nonCompliantDetailsAnswers.flatMap(_.nonCompliantPayments.map(_.toString))
+    )
+  }
 
   private def getTradingNames(answers: UserAnswers): List[EtmpTradingName] = {
     answers.get(HasTradingNamePage) match {
@@ -122,12 +125,12 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
         throw exception
     }
 
-  private def getNonCompliantDetails(answers: UserAnswers, index: Index): NonCompliantDetails =
-    answers.get(NonCompliantDetailsQuery(index)) match {
-      case Some(nonCompliantDetails) =>
-        NonCompliantDetails(
-          nonCompliantReturns = nonCompliantDetails.nonCompliantReturns,
-          nonCompliantPayments = nonCompliantDetails.nonCompliantPayments
-        )
+  private def getNonCompliantDetails(answers: UserAnswers): Option[NonCompliantDetails] = {
+    answers.get(AllPreviousRegistrationsQuery).map {
+      allPreviousReg =>
+        allPreviousReg.flatMap(_.previousSchemesDetails
+          .flatMap(_.nonCompliantDetails))
+          .maxBy(x => x.nonCompliantReturns.getOrElse(0) + x.nonCompliantPayments.getOrElse(0))
     }
+  }
 }
