@@ -77,15 +77,10 @@ class EuTaxReferenceController @Inject()(
 
             coreRegistrationValidationService.searchEuTaxId(value, country.code).flatMap {
 
-              case Some(activeMatch) if activeMatch.matchType.isActiveTrader =>
+              case Some(activeMatch) if activeMatch.matchType.isActiveTrader && !waypoints.inAmend =>
                 Future.successful(Redirect(controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints, countryIndex)))
 
-              case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && waypoints.inAmend => for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(EuTaxReferencePage(countryIndex), value))
-                _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(EuTaxReferencePage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
-
-              case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
+              case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && !waypoints.inAmend =>
                 Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
 
               case _ => for {
