@@ -26,7 +26,7 @@ import pages.{CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationP
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.etmp.EtmpEnrolmentResponseQuery
-import services.{AuditService, RegistrationService}
+import services.{AuditService, RegistrationService, SaveForLaterService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
@@ -45,6 +45,7 @@ class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             cc: AuthenticatedControllerComponents,
                                             registrationService: RegistrationService,
+                                            saveForLaterService: SaveForLaterService,
                                             auditService: AuditService,
                                             view: CheckYourAnswersView
                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
@@ -152,12 +153,14 @@ class CheckYourAnswersController @Inject()(
               Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints)).toFuture
 
             case Left(error) =>
+              logger.error(s"Unexpected result on registration creation submission: ${error.body}")
               auditService.audit(RegistrationAuditModel.build(
                 RegistrationAuditType.CreateRegistration, request.userAnswers, None, SubmissionResult.Failure)
               )
-              // TODO Add SaveAndContinue when created
-              logger.error(s"Unexpected result on registration creation submission: ${error.body}")
-              Redirect(ErrorSubmittingRegistrationPage.route(waypoints)).toFuture
+              saveForLaterService.saveAnswers(
+                ErrorSubmittingRegistrationPage.route(waypoints),
+                CheckYourAnswersPage.route(waypoints)
+              )
           }
       }
   }
