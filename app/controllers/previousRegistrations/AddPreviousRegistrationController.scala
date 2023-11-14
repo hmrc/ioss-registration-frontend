@@ -19,7 +19,10 @@ package controllers.previousRegistrations
 import controllers.actions._
 import forms.previousRegistrations.AddPreviousRegistrationFormProvider
 import logging.Logging
+import models.domain.PreviousRegistration
+import models.etmp.EtmpPreviousEuRegistrationDetails
 import models.previousRegistrations.PreviousRegistrationDetailsWithOptionalVatNumber
+import models.requests.AuthenticatedDataRequest
 import models.{CheckMode, Country}
 import pages.previousRegistrations.AddPreviousRegistrationPage
 import pages.{Waypoint, Waypoints}
@@ -42,28 +45,57 @@ class AddPreviousRegistrationController @Inject()(
                                                    cc: AuthenticatedControllerComponents,
                                                    formProvider: AddPreviousRegistrationFormProvider,
                                                    view: AddPreviousRegistrationView
-                                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with CompletionChecks {
+                                                 )(implicit ec: ExecutionContext)
+  extends FrontendBaseController
+    with I18nSupport
+    with Logging
+    with CompletionChecks {
 
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
+    implicit request: AuthenticatedDataRequest[AnyContent] =>
+
+      val previousRegistrations: Seq[PreviousRegistration] = getPreviousRegistrationsWhenInAmend(waypoints, request)
       getDerivedItems(waypoints, DeriveNumberOfPreviousRegistrations) {
         number =>
           val canAddCountries = number < Country.euCountries.size
-          val previousRegistrations = PreviousRegistrationSummary.row(request.userAnswers, Seq.empty, waypoints, AddPreviousRegistrationPage())
+          val previousRegistrationRows = PreviousRegistrationSummary.row(
+            answers = request.userAnswers,
+            existingPreviousRegistrations = previousRegistrations,
+            waypoints = waypoints,
+            sourcePage = AddPreviousRegistrationPage()
+          )
 
           val failureCall: Seq[PreviousRegistrationDetailsWithOptionalVatNumber] => Future[Result] =
             (incomplete: Seq[PreviousRegistrationDetailsWithOptionalVatNumber]) => {
-              Future.successful(Ok(view(form, waypoints, previousRegistrations, canAddCountries, incomplete)))
+              Future.successful(Ok(view(form, waypoints, previousRegistrationRows, canAddCountries, incomplete)))
             }
 
           withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
             data = getAllIncompleteDeregisteredDetails _, onFailure = failureCall) {
-            Future.successful(Ok(view(form, waypoints, previousRegistrations, canAddCountries)))
+            Future.successful(Ok(view(form, waypoints, previousRegistrationRows, canAddCountries)))
           }
       }
+  }
+
+  private def getPreviousRegistrationsWhenInAmend(waypoints: Waypoints, request: AuthenticatedDataRequest[AnyContent]): Seq[PreviousRegistration] = {
+    if (waypoints.inAmend) {
+      val allExistingRegistrations: Seq[EtmpPreviousEuRegistrationDetails] = request.previousEURegistrationDetails
+      allExistingRegistrations.map { existingRegistrationDetails =>
+        val countryOfRegistrationCode = existingRegistrationDetails.issuedBy
+        val country = Country.fromCountryCode(countryOfRegistrationCode) match {
+          case Some(country: Country) => country
+          case None =>
+            throw new RuntimeException(s"$countryOfRegistrationCode could not be found in ${Country.euCountries.map(_.code).mkString(",")}")
+        }
+
+        PreviousRegistration.fromEtmpPreviousEuRegistrationDetailsByCountry(country, allExistingRegistrations)
+      }
+    } else {
+      Seq.empty
+    }
   }
 
   def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {

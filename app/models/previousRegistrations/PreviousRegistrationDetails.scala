@@ -18,6 +18,7 @@ package models.previousRegistrations
 
 import models.Country
 import models.domain._
+import models.etmp.EtmpPreviousEuRegistrationDetails
 import play.api.libs.json.{Json, OFormat}
 
 case class PreviousRegistrationDetails(
@@ -26,6 +27,17 @@ case class PreviousRegistrationDetails(
                                       )
 
 object PreviousRegistrationDetails {
+
+  def fromEtmpPreviousEuRegistrationDetails(country: Country,
+                                            etmpPreviousEuRegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails]): PreviousRegistrationDetails = {
+
+    val previousRegistrationDetails = etmpPreviousEuRegistrationDetails.collect {
+      case registrationDetails: EtmpPreviousEuRegistrationDetails if registrationDetails.issuedBy == country.code =>
+        PreviousSchemeDetails.fromEtmpPreviousEuRegistrationDetails(registrationDetails)
+    }
+
+    PreviousRegistrationDetails(country, previousRegistrationDetails)
+  }
 
   implicit val format: OFormat[PreviousRegistrationDetails] = Json.format[PreviousRegistrationDetails]
 }

@@ -18,11 +18,11 @@ package controllers.previousRegistrations
 
 import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.DeletePreviousRegistrationFormProvider
+import models.Index
 import models.previousRegistrations.PreviousRegistrationDetailsWithOptionalVatNumber
 import models.requests.AuthenticatedDataRequest
-import models.Index
-import pages.{JourneyRecoveryPage, Waypoints}
 import pages.previousRegistrations.DeletePreviousRegistrationPage
+import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.{PreviousRegistrationQuery, PreviousRegistrationWithOptionalVatNumberQuery}
@@ -35,29 +35,47 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DeletePreviousRegistrationController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        cc: AuthenticatedControllerComponents,
-                                        formProvider: DeletePreviousRegistrationFormProvider,
-                                        view: DeletePreviousRegistrationView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                                      override val messagesApi: MessagesApi,
+                                                      cc: AuthenticatedControllerComponents,
+                                                      formProvider: DeletePreviousRegistrationFormProvider,
+                                                      view: DeletePreviousRegistrationView
+                                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
+    implicit request: AuthenticatedDataRequest[AnyContent] =>
       getPreviousRegistration(waypoints, index) {
         details =>
-
-        Future.successful(Ok(view(form, waypoints, index, details.previousEuCountry.name)))
+          if (waypoints.inAmend && request.hasCountryRegistered(details.previousEuCountry)) {
+            Future.successful(Redirect(pages.CannotRemoveExistingPreviousRegistrationsPage.route(waypoints)))
+          } else {
+            Future.successful(Ok(view(form, waypoints, index, details.previousEuCountry.name)))
+          }
       }
   }
+
+  private def getPreviousRegistration(waypoints: Waypoints, index: Index)
+                                     (block: PreviousRegistrationDetailsWithOptionalVatNumber => Future[Result])
+                                     (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] =
+    request.userAnswers.get(PreviousRegistrationWithOptionalVatNumberQuery(index)).map {
+      details =>
+        block(details)
+    }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
+
 
   def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
       getPreviousRegistration(waypoints, index) {
         details =>
-          saveAndRedirect(waypoints, index, details.previousEuCountry.name)
+          if (waypoints.inAmend && request.hasCountryRegistered(details.previousEuCountry)) {
+            Future.failed(
+              new InvalidAmendModeOperationException(s"The country ${details.previousEuCountry.code} has been registered so cannot be deleted")
+            )
+          } else {
+            saveAndRedirect(waypoints, index, details.previousEuCountry.name)
+          }
       }
   }
 
@@ -81,14 +99,5 @@ class DeletePreviousRegistrationController @Inject()(
         }
     )
   }
-
-
-  private def getPreviousRegistration(waypoints: Waypoints, index: Index)
-                                     (block: PreviousRegistrationDetailsWithOptionalVatNumber => Future[Result])
-                                     (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] =
-    request.userAnswers.get(PreviousRegistrationWithOptionalVatNumberQuery(index)).map {
-      details =>
-        block(details)
-    }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
 
 }

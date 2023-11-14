@@ -16,13 +16,42 @@
 
 package models.domain
 
+import models.etmp.EtmpPreviousEuRegistrationDetails
 import models.previousRegistrations.NonCompliantDetails
 import models.{Country, PreviousScheme}
 import play.api.libs.json.{Json, OFormat}
 
 case class PreviousRegistration(country: Country, previousSchemesDetails: Seq[PreviousSchemeDetails])
 
-object PreviousRegistration{
+object PreviousRegistration {
+
+  def fromEtmpPreviousEuRegistrationDetailsByCountry(country: Country,
+                                                     etmpPreviousEuRegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails]): PreviousRegistration = {
+    val previousSchemeDetails = etmpPreviousEuRegistrationDetails.collect {
+      case registrationDetails if registrationDetails.issuedBy == country.code =>
+        PreviousSchemeDetails.fromEtmpPreviousEuRegistrationDetails(registrationDetails)
+    }
+
+    PreviousRegistration(country, previousSchemeDetails)
+
+  }
+
+  def fromEtmpPreviousEuRegistrationDetails(allEtmpPreviousEuRegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails]): List[PreviousRegistration] = {
+    val countrySchemaDetailsMapping: Map[Country, Seq[(Country, PreviousSchemeDetails)]] =
+      allEtmpPreviousEuRegistrationDetails.map { etmpPreviousEuRegistrationDetails =>
+        val country = Country.fromCountryCodeUnsafe(etmpPreviousEuRegistrationDetails.issuedBy)
+        val details: PreviousSchemeDetails = PreviousSchemeDetails.fromEtmpPreviousEuRegistrationDetails(etmpPreviousEuRegistrationDetails)
+
+        country -> details
+
+      }.groupBy(_._1)
+
+    countrySchemaDetailsMapping.map { case (country, countryPreviousSchemaDetails) =>
+      PreviousRegistration(country = country, previousSchemesDetails = countryPreviousSchemaDetails.map(_._2))
+    }.toList
+
+  }
+
 
   implicit val format: OFormat[PreviousRegistration] = Json.format[PreviousRegistration]
 }
@@ -34,6 +63,17 @@ case class PreviousSchemeDetails(
                                 )
 
 object PreviousSchemeDetails {
+
+  def fromEtmpPreviousEuRegistrationDetails(etmpPreviousEuRegistrationDetails: EtmpPreviousEuRegistrationDetails): PreviousSchemeDetails = {
+    PreviousSchemeDetails(
+      previousScheme = PreviousScheme.fromEmtpSchemaType(etmpPreviousEuRegistrationDetails.schemeType),
+      previousSchemeNumbers = PreviousSchemeNumbers(
+        previousSchemeNumber = etmpPreviousEuRegistrationDetails.registrationNumber,
+        previousIntermediaryNumber = etmpPreviousEuRegistrationDetails.intermediaryNumber,
+      ),
+      None
+    )
+  }
 
   implicit val format: OFormat[PreviousSchemeDetails] = Json.format[PreviousSchemeDetails]
 }

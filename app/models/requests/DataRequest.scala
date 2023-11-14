@@ -16,7 +16,9 @@
 
 package models.requests
 
-import models.UserAnswers
+import models.amend.RegistrationWrapper
+import models.etmp.{EtmpPreviousEuRegistrationDetails, SchemeType}
+import models.{Country, UserAnswers}
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
@@ -37,10 +39,29 @@ case class AuthenticatedDataRequest[A](
                                         credentials: Credentials,
                                         vrn: Vrn,
                                         iossNumber: Option[String],
-                                        userAnswers: UserAnswers
+                                        userAnswers: UserAnswers,
+                                        registrationWrapper: Option[RegistrationWrapper],
                                       ) extends WrappedRequest[A](request) {
 
   val userId: String = credentials.providerId
+
+  lazy val previousEURegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails] =
+    registrationWrapper.map(_.registration.schemeDetails.previousEURegistrationDetails).toList.flatten
+
+  lazy val hasExistingPreviousEURegistrationDetails: Boolean =
+    registrationWrapper.exists(_.registration.schemeDetails.previousEURegistrationDetails.nonEmpty)
+
+  def hasCountryRegistered(country: Country): Boolean =
+    registrationWrapper.exists(
+      _.registration.schemeDetails.previousEURegistrationDetails
+        .exists(_.issuedBy == country.code)
+    )
+
+  def hasSchemeRegisteredInCountry(country: Country, schemeType: SchemeType): Boolean =
+    registrationWrapper.exists(
+      _.registration.schemeDetails.previousEURegistrationDetails
+        .exists(details => details.issuedBy == country.code && details.schemeType == schemeType)
+    )
 }
 
 case class UnauthenticatedOptionalDataRequest[A](

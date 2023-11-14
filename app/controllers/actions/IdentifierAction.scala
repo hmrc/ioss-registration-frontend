@@ -169,6 +169,7 @@ class AuthenticatedIdentifierAction @Inject()(
     ).toFuture
 }
 
+
 class SessionIdentifierAction @Inject()()(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[Request, SessionRequest] with ActionFunction[Request, SessionRequest] {
 

@@ -3,6 +3,7 @@ service.name = VAT Import One Stop Shop Scheme
 site.back = Back
 site.remove = Remove
 site.change = Change
+site.add = Add
 site.no = No
 site.yes = Yes
 site.continue = Continue

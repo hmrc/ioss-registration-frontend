@@ -98,7 +98,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
         val list = EuDetailsSummary.countryAndVatNumberList(userAnswers, waypoints, AddEuDetailsPage())
 
         val authenticatedDataRequest: AuthenticatedDataRequest[AnyContent] =
-          AuthenticatedDataRequest(request, testCredentials, vrn, None, userAnswers)
+          AuthenticatedDataRequest(request, testCredentials, vrn, None, userAnswers, None)
 
         val incomplete = getAllIncompleteEuDetails()(authenticatedDataRequest)
 
@@ -126,7 +126,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
         val list = EuDetailsSummary.countryAndVatNumberList(userAnswers, waypoints, AddEuDetailsPage())
 
         val authenticatedDataRequest: AuthenticatedDataRequest[AnyContent] =
-          AuthenticatedDataRequest(request, testCredentials, vrn, None, userAnswers)
+          AuthenticatedDataRequest(request, testCredentials, vrn, None, userAnswers, None)
 
         val incomplete = getAllIncompleteEuDetails()(authenticatedDataRequest)
 

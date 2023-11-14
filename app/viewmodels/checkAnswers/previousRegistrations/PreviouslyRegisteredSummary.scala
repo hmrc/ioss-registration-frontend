@@ -29,14 +29,15 @@ object PreviouslyRegisteredSummary {
   def row(answers: UserAnswers,
           waypoints: Waypoints,
           sourcePage: CheckAnswersPage,
-          inAmendMode: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+          lockEditing: Boolean)(implicit messages: Messages): Option[SummaryListRow] =
 
     answers.get(PreviouslyRegisteredPage).map {
       otherOneStopRegistrations: Boolean =>
         val value = if (otherOneStopRegistrations) "site.yes" else "site.no"
-        val actions = if (inAmendMode && otherOneStopRegistrations) {
+        val actions = if (lockEditing) {
           Nil
         } else {
+
           Seq(
             ActionItemViewModel("site.change", PreviouslyRegisteredPage.changeLink(waypoints, sourcePage).url)
               .withVisuallyHiddenText(messages("previouslyRegistered.change.hidden"))

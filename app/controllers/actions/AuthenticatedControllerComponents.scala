@@ -55,7 +55,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       identify andThen
       checkRegistration(inAmend) andThen
       getData andThen
-      requireData() andThen
+      requireData(inAmend) andThen
       checkOtherCountryRegistration(inAmend)
   }
 
@@ -70,7 +70,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       checkEmailVerificationStatus(inAmend)
 
   def authAndRequireIoss(): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
-      authAndGetDataAndCheckVerifyEmail(inAmend = true) andThen
+    authAndGetDataAndCheckVerifyEmail(inAmend = true) andThen
       requireIoss()
   }
 }

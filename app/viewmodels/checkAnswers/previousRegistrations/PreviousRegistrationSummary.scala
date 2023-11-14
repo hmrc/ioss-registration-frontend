@@ -16,7 +16,7 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Index, UserAnswers}
+import models.{Country, Index, UserAnswers}
 import models.domain.PreviousRegistration
 import pages.previousRegistrations._
 import pages.{AddItemPage, CheckAnswersPage, Waypoints}
@@ -29,20 +29,25 @@ import viewmodels.implicits._
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
+import utils.CheckExistingRegistrations
 import utils.CheckExistingRegistrations.existingPreviousRegistration
 
 object PreviousRegistrationSummary {
 
-  def row(answers: UserAnswers, existingPreviousRegistrations: Seq[PreviousRegistration], waypoints: Waypoints, sourcePage: AddItemPage): Seq[ListItemWrapper] =
+  def row(answers: UserAnswers,
+          existingPreviousRegistrations: Seq[PreviousRegistration],
+          waypoints: Waypoints,
+          sourcePage: AddItemPage): Seq[ListItemWrapper] =
     answers.get(AllPreviousRegistrationsWithOptionalVatNumberQuery).getOrElse(List.empty).zipWithIndex.map {
       case (details, index) =>
+
         ListItemWrapper(
           ListItem(
             name = HtmlFormat.escape(details.previousEuCountry.name).toString,
             changeUrl = CheckPreviousSchemeAnswersPage(Index(index)).changeLink(waypoints, sourcePage).url,
             removeUrl = DeletePreviousRegistrationPage(Index(index)).route(waypoints).url
           ),
-          !existingPreviousRegistration(details.previousEuCountry, existingPreviousRegistrations)
+          !CheckExistingRegistrations.existingPreviousRegistration(details.previousEuCountry, existingPreviousRegistrations)
         )
     }
 
@@ -61,9 +66,7 @@ object PreviousRegistrationSummary {
 
 
         val currentAnswerCountries = previousRegistrations.map(_.previousEuCountry)
-
         val existingCountries = existingPreviousRegistrations.map(previousRegistration => previousRegistration.country)
-
         val sameListOfCountries: Boolean = currentAnswerCountries.sortBy(_.code) == existingCountries.sortBy(_.code)
 
         SummaryListRowViewModel(

@@ -18,6 +18,7 @@ package models.requests
 
 import models.UserAnswers
 import models.amend.RegistrationWrapper
+import models.etmp.EtmpPreviousEuRegistrationDetails
 import play.api.mvc.WrappedRequest
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
@@ -33,5 +34,8 @@ case class AuthenticatedMandatoryIossRequest[A](
                                                ) extends WrappedRequest[A](request) {
 
   val userId: String = credentials.providerId
+
+  val previousEURegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails] =
+    registrationWrapper.registration.schemeDetails.previousEURegistrationDetails
 
 }

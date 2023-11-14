@@ -17,6 +17,7 @@
 package controllers.amend
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import controllers.actions.{FakeIossRequiredAction, IossRequiredAction}
 import controllers.amend.{routes => amendRoutes}
 import models.amend.RegistrationWrapper
@@ -45,6 +46,8 @@ import viewmodels.govuk.SummaryListFluency
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
+import scala.concurrent.Future
+
 class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with SummaryListFluency {
 
   private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
@@ -57,10 +60,13 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
     ".onPageLoad" - {
       "must return OK and the correct view for a GET" in {
 
-        val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+        val registrationConnector = mock[RegistrationConnector]
+
+        when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
           .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
           .build()
 
         running(application) {
@@ -85,10 +91,14 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
       "when the user has answered all necessary data and submission of the registration succeeds" - {
         "redirect to the next page" in {
-          val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+
+          val registrationConnector = mock[RegistrationConnector]
+          when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
           val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
             .overrides(bind[RegistrationService].toInstance(registrationService))
+            .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .build()
 
           when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Right(()).toFuture
@@ -105,10 +115,14 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         "when the user has answered all necessary data but submission of the registration fails" - {
           "redirect to error submitting amendment" in {
-            val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+
+            val registrationConnector = mock[RegistrationConnector]
+            when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
             val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
               .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
               .overrides(bind[RegistrationService].toInstance(registrationService))
+              .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
               .build()
 
             when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Left(InternalServerError).toFuture
@@ -127,10 +141,13 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
       "when the user has not answered all necessary data" - {
 
         "the page is refreshed when the incomplete prompt was not shown" in {
-          val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+          val registrationConnector = mock[RegistrationConnector]
+          when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
           val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
             .overrides(bind[RegistrationService].toInstance(registrationService))
+            .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .build()
 
           running(application) {
@@ -145,10 +162,13 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         "the user is redirected when the incomplete prompt is shown" - {
 
           "to Has Trading Name when trading names are not populated correctly" in {
-            val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+            val registrationConnector = mock[RegistrationConnector]
+            when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
             val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
               .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
               .overrides(bind[RegistrationService].toInstance(registrationService))
+              .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
               .build()
 
             running(application) {
@@ -161,7 +181,9 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           }
 
           "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
-            val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+            val registrationConnector = mock[RegistrationConnector]
+            val registrationWrapper   = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+            when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
 
             val answers = completeUserAnswers
               .set(TaxRegisteredInEuPage, true).success.value
@@ -170,6 +192,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
             val application = applicationBuilder(userAnswers = Some(answers))
               .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+              .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
               .build()
 
             running(application) {
@@ -198,7 +221,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
     val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, waypoints, amendYourAnswersPage)
     val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, waypoints, amendYourAnswersPage)
-    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, waypoints, amendYourAnswersPage)
+    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, waypoints, amendYourAnswersPage, lockEditing = false)
     val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, waypoints, amendYourAnswersPage)
     val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(answers, waypoints, amendYourAnswersPage)
     val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(answers, waypoints, amendYourAnswersPage)

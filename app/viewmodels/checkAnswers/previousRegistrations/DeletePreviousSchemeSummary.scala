@@ -17,7 +17,7 @@
 package viewmodels.checkAnswers.previousRegistrations
 
 
-import models.{Index, UserAnswers}
+import models.{Index, PreviousScheme, UserAnswers}
 import pages.previousRegistrations.PreviousSchemePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
@@ -30,11 +30,10 @@ object DeletePreviousSchemeSummary  {
 
   def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
-      answer =>
-
+      previousScheme: PreviousScheme =>
         val value = ValueViewModel(
           HtmlContent(
-            HtmlFormat.escape(messages(s"previousScheme.$answer"))
+            HtmlFormat.escape(messages(s"previousScheme.$previousScheme"))
           )
         )
 

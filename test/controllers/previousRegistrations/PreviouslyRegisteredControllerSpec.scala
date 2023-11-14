@@ -17,6 +17,7 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import controllers.routes
 import forms.previousRegistrations.PreviouslyRegisteredFormProvider
 import models.UserAnswers
@@ -32,6 +33,7 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
+import services.core.CoreRegistrationValidationService
 import views.html.previousRegistrations.PreviouslyRegisteredView
 
 import scala.concurrent.Future
@@ -47,24 +49,29 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
     controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints).url
 
   private val nonAmendModeWaypoints = Table(
-    ("description", "non amend waypoints"),
-    ("empty waypoints", EmptyWaypoints),
-    ("check answers waypoints", createCheckModeWayPoint(CheckYourAnswersPage))
+    ("description", "non amend waypoints", "times registration is called"),
+    ("empty waypoints", EmptyWaypoints, 0),
+    ("check answers waypoints", createCheckModeWayPoint(CheckYourAnswersPage), 0)
   )
 
   private val amendModeWaypoints: NonEmptyWaypoints = createCheckModeWayPoint(ChangeRegistrationPage)
   private val allModeWaypoints = nonAmendModeWaypoints ++
-    List("amend mode waypoints" -> amendModeWaypoints)
+    List(Tuple3("amend mode waypoints", amendModeWaypoints, 1))
 
   "PreviouslyRegistered Controller" - {
 
-    "must return OK and the correct view for a GET when no question has been answered for all modes" in {
-
-      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
+    "must return OK and the correct view for a GET when no question has been answered for all modes except amend" in {
+      val mockRegistrationConnector = mock[RegistrationConnector]
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+        .overrides(
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+        ).build()
 
       running(application) {
 
-        forAll(allModeWaypoints) { case (_, waypoints) =>
+        forAll(allModeWaypoints) { case (_, waypoints, timesRegistrationIsCalled) =>
+          when(mockRegistrationConnector.getRegistration()(any()))
+            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request = FakeRequest(GET, previouslyRegisteredRoute(waypoints))
 
@@ -75,6 +82,8 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(form, waypoints)(request, messages(application)).toString
 
+          verify(mockRegistrationConnector, times(timesRegistrationIsCalled)).getRegistration()(any())
+
         }
       }
     }
@@ -84,7 +93,7 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        forAll(nonAmendModeWaypoints) { case (_, waypoints) =>
+        forAll(nonAmendModeWaypoints) { case (_, waypoints, _) =>
           val request = FakeRequest(GET, previouslyRegisteredRoute(waypoints))
 
           val view = application.injector.instanceOf[PreviouslyRegisteredView]
@@ -98,29 +107,42 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
     }
 
     "must fail on GET when the existing answer is true when in Amend mode" in {
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val userAnswers = UserAnswers(userAnswersId).set(PreviouslyRegisteredPage, true).success.value
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[RegistrationConnector]
+          .toInstance(mockRegistrationConnector)).build()
+
+      when(mockRegistrationConnector.getRegistration()(any()))
+        .thenReturn(Future.successful(Right(registrationWrapper)))
 
       running(application) {
         val request = FakeRequest(GET, previouslyRegisteredRoute(amendModeWaypoints))
         val result = route(application, request).value
 
         result.failed.futureValue mustBe an[InvalidAmendModeOperationException]
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must save the answer and redirect to the next page when valid data is submitted when the answer is originally true" in {
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val application =
         applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
-        forAll(allModeWaypoints) { case (_, waypoints) =>
+        forAll(allModeWaypoints) { case (_, waypoints, timesRegistrationIsCalled) =>
           Mockito.reset(mockSessionRepository)
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+          when(mockRegistrationConnector.getRegistration()(any()))
+            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request =
             FakeRequest(POST, previouslyRegisteredRoute(waypoints))
@@ -132,6 +154,7 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual PreviouslyRegisteredPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+          verify(mockRegistrationConnector, times(timesRegistrationIsCalled)).getRegistration()(any())
         }
       }
     }

@@ -61,7 +61,8 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
           testCredentials,
           vrn,
           None,
-          emptyUserAnswersWithVatInfo
+          emptyUserAnswersWithVatInfo,
+          None
         )).futureValue
 
         result mustBe Left(Unauthorized)
@@ -79,7 +80,8 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
           testCredentials,
           vrn,
           Some(iossNumber),
-          emptyUserAnswersWithVatInfo
+          emptyUserAnswersWithVatInfo,
+          None
         )).futureValue
 
         result mustBe Left(InternalServerError)
@@ -97,8 +99,10 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
           testCredentials,
           vrn,
           Some(iossNumber),
-          emptyUserAnswersWithVatInfo
+          emptyUserAnswersWithVatInfo,
+          None
         )
+
         val result = action.callRefine(request).futureValue
 
         val expectResult = AuthenticatedMandatoryIossRequest(

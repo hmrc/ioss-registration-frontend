@@ -84,7 +84,6 @@ class PreviousOssNumberController @Inject()(
 
           val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
             case Some(previousSchemeDetails) =>
-
               val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
               formProvider(country, previousSchemes)
 
@@ -127,7 +126,7 @@ class PreviousOssNumberController @Inject()(
         intermediaryNumber = None,
         countryCode = country.code
       ).flatMap {
-        case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
+        case Some(activeMatch) if !waypoints.inAmend && activeMatch.matchType.isQuarantinedTrader =>
           Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
 
         case _ =>

@@ -89,14 +89,14 @@ class PreviousIossNumberController @Inject()(
                   intermediaryNumber = value.previousIntermediaryNumber,
                   countryCode = country.code
                 ).flatMap {
-                  case Some(activeMatch) if activeMatch.matchType.isActiveTrader =>
+                  case Some(activeMatch) if !waypoints.inAmend && activeMatch.matchType.isActiveTrader =>
                     Future.successful(
                       Redirect(controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
                         waypoints,
                         activeMatch.memberState))
                     )
 
-                  case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
+                  case Some(activeMatch) if !waypoints.inAmend && activeMatch.matchType.isQuarantinedTrader =>
                     Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
 
                   case Some(activeMatch) if activeMatch.matchType == MatchType.TransferringMSID =>

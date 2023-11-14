@@ -41,7 +41,7 @@ case class NonEmptyWaypoints(waypoints: NonEmptyList[Waypoint]) extends Waypoint
   val next: Waypoint = waypoints.head
   override val currentMode: Mode = next.mode
 
-  override def setNextWaypoint(waypoint: Waypoint): Waypoints = {
+  override def setNextWaypoint(waypoint: Waypoint): NonEmptyWaypoints = {
     if (next == waypoint) {
       this
     } else {

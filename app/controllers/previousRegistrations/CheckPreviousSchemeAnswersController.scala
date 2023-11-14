@@ -20,7 +20,8 @@ import config.Constants
 import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.CheckPreviousSchemeAnswersFormProvider
-import models.Index
+import models.requests.AuthenticatedDataRequest
+import models.{Country, Index, PreviousScheme}
 import pages.Waypoints
 import pages.previousRegistrations.CheckPreviousSchemeAnswersPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -36,11 +37,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckPreviousSchemeAnswersController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        cc: AuthenticatedControllerComponents,
-                                        formProvider: CheckPreviousSchemeAnswersFormProvider,
-                                        view: CheckPreviousSchemeAnswersView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry  {
+                                                      override val messagesApi: MessagesApi,
+                                                      cc: AuthenticatedControllerComponents,
+                                                      formProvider: CheckPreviousSchemeAnswersFormProvider,
+                                                      view: CheckPreviousSchemeAnswersView
+                                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -48,13 +49,11 @@ class CheckPreviousSchemeAnswersController @Inject()(
   def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
       getPreviousCountry(waypoints, index) {
-        country =>
+        country: Country =>
+          val existingSchemes: Seq[PreviousScheme] = getExistingSchemesForTheCountryInAmend(waypoints, country, request)
+
           request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(index)).map { previousSchemes =>
-
             val canAddScheme = previousSchemes.size < Constants.maxSchemes
-
-            val existingSchemes = Seq.empty
-
             val lists = previousSchemes.zipWithIndex.map { case (_, schemeIndex) =>
               SummaryListViewModel(
                 rows = Seq(
@@ -71,6 +70,19 @@ class CheckPreviousSchemeAnswersController @Inject()(
 
           }.getOrElse(Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())))
       }
+  }
+
+  private def getExistingSchemesForTheCountryInAmend(waypoints: Waypoints,
+                                                     country: Country,
+                                                     request: AuthenticatedDataRequest[AnyContent]): Seq[PreviousScheme] = {
+    if (waypoints.inAmend) {
+      request.previousEURegistrationDetails.collect {
+        case previousEURegistrationDetails if previousEURegistrationDetails.issuedBy == country.code =>
+          PreviousScheme.fromEmtpSchemaType(previousEURegistrationDetails.schemeType)
+      }
+    } else {
+      Seq.empty
+    }
   }
 
   def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {

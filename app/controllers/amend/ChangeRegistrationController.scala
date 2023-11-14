@@ -19,8 +19,10 @@ package controllers.amend
 import controllers.actions._
 import logging.Logging
 import models.CheckMode
+import models.domain.PreviousRegistration
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.ChangeRegistrationPage
+import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -36,6 +38,7 @@ import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummar
 import viewmodels.govuk.summarylist._
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
+import utils.AmendWaypoints.AmendWaypointsOps
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -50,7 +53,8 @@ class ChangeRegistrationController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss() {
-    implicit request =>
+    implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
+
       val thisPage = ChangeRegistrationPage
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
@@ -120,10 +124,19 @@ class ChangeRegistrationController @Inject()(
   }
 
   private def getPreviouslyRegisteredRows(waypoints: Waypoints, sourcePage: CheckAnswersPage)
-                                         (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
-    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(request.userAnswers, Seq.empty, waypoints, sourcePage)
+                                         (implicit request: AuthenticatedMandatoryIossRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
+
+    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(
+      answers = request.userAnswers,
+      existingPreviousRegistrations = PreviousRegistration.fromEtmpPreviousEuRegistrationDetails(request.previousEURegistrationDetails),
+      waypoints = waypoints, sourcePage =
+        sourcePage
+    )
+
+    val lockEditing: Boolean = request.userAnswers.get(PreviouslyRegisteredPage).contains(true)
+
     Seq(
-      PreviouslyRegisteredSummary.row(request.userAnswers, waypoints, sourcePage).map { sr =>
+      PreviouslyRegisteredSummary.row(request.userAnswers, waypoints, sourcePage, lockEditing).map { sr =>
         if (previousRegistrationSummaryRow.isDefined) {
           sr.withCssClass("govuk-summary-list__row--no-border")
         } else {
