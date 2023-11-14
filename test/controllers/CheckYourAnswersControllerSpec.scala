@@ -30,11 +30,12 @@ import pages.filters.CannotRegisterAlreadyRegisteredPage
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.mvc.AnyContentAsEmpty
+import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.etmp.EtmpEnrolmentResponseQuery
 import repositories.AuthenticatedUserAnswersRepository
-import services.{AuditService, RegistrationService}
+import services.{AuditService, RegistrationService, SaveForLaterService}
 import utils.FutureSyntax.FutureOps
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
@@ -46,6 +47,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
   private val waypoints: Waypoints = EmptyWaypoints
   private val mockRegistrationService: RegistrationService = mock[RegistrationService]
   private val mockAuditService: AuditService = mock[AuditService]
+  private val mockSaveForLaterService: SaveForLaterService = mock[SaveForLaterService]
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationService)
@@ -146,14 +148,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
         }
       }
 
-      // TODO Add SaveAndContinue when created
-      "must audit the event and redirect to the correct page when back end returns any other Error Response" in {
+      "must save the answers and audit the event and redirect the Error Submitting Registration page when back end returns any other Error Response" in {
 
         when(mockRegistrationService.createRegistration(any(), any())(any())) thenReturn Left(ServerError).toFuture
+        when(mockSaveForLaterService.saveAnswers(any(), any())(any(), any(), any())) thenReturn
+          Redirect(ErrorSubmittingRegistrationPage.route(waypoints).url).toFuture
         doNothing().when(mockAuditService).audit(any())(any(), any())
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[SaveForLaterService].toInstance(mockSaveForLaterService))
           .overrides(bind[AuditService].toInstance(mockAuditService))
           .build()
 
@@ -172,6 +176,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe ErrorSubmittingRegistrationPage.route(waypoints).url
           verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
+          verify(mockSaveForLaterService, times(1)).saveAnswers(any(), any())(any(), any(), any())
         }
       }
     }
