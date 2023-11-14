@@ -692,3 +692,7 @@ errorSubmittingAmendment.yourAccount = Back to your account
 notRegistered.title = You cannot use this service
 notRegistered.heading = You cannot use this service
 notRegistered.label = You must register for the VAT Import One Stop Shop scheme to use this service.
+
+noRegistrationInProgress.title = We did not find a registration in progress
+noRegistrationInProgress.heading = We did not find a registration in progress
+noRegistrationInProgress.sessionExpired = Your previous session may have expired.

@@ -18,7 +18,7 @@ package controllers.auth
 
 import base.SpecBase
 import config.FrontendAppConfig
-import connectors.{RegistrationConnector, SaveForLaterConnector}
+import connectors.{RegistrationConnector, SaveForLaterConnector, SavedUserAnswers}
 import controllers.auth.{routes => authRoutes}
 import models.{UserAnswers, VatApiCallResult, responses}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -38,7 +38,7 @@ import utils.FutureSyntax.FutureOps
 import views.html.auth.{InsufficientEnrolmentsView, UnsupportedAffinityGroupView, UnsupportedAuthProviderView, UnsupportedCredentialRoleView}
 
 import java.net.URLEncoder
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 import scala.concurrent.Future
 
 class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
@@ -646,6 +646,42 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
         status(result) mustBe SEE_OTHER
 
         redirectLocation(result).value mustEqual "http://localhost:9553/bas-gateway/sign-in?origin=IOSS&continue=http%3A%2F%2Flocalhost%2Ffoo"
+      }
+    }
+  }
+
+  "continueOnSignIn" - {
+
+    "must redirect to the ContinueRegistration page if saved url was retrieved from saved answers" in {
+
+      val answers = emptyUserAnswers.set(VatApiCallResultQuery, VatApiCallResult.Success).success.value
+        .set(SavedProgressPage, "/url").success.value
+
+      val application = applicationBuilder(Some(answers)).build()
+      when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful((Right(Some(SavedUserAnswers(vrn, answers.data, None, Instant.now)))))
+
+      running(application) {
+        val request = FakeRequest(GET, routes.AuthController.continueOnSignIn().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.ContinueRegistrationController.onPageLoad().url
+      }
+    }
+
+    "must redirect to NoRegistrationInProgress when there is no saved answers" in {
+
+      val application = applicationBuilder(None).build()
+      when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(None))
+
+      running(application) {
+        val request = FakeRequest(GET, routes.AuthController.continueOnSignIn().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.NoRegistrationInProgressController.onPageLoad().url
       }
     }
   }
