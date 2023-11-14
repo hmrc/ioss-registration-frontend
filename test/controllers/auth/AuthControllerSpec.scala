@@ -658,7 +658,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
         .set(SavedProgressPage, "/url").success.value
 
       val application = applicationBuilder(Some(answers)).build()
-      when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful((Right(Some(SavedUserAnswers(vrn, answers.data, None, Instant.now)))))
+      when(mockSavedAnswersConnector.get()(any())) thenReturn Future.successful(Right(Some(SavedUserAnswers(vrn, answers.data, None, Instant.now))))
 
       running(application) {
         val request = FakeRequest(GET, routes.AuthController.continueOnSignIn().url)
