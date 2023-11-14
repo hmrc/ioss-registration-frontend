@@ -18,15 +18,16 @@
 @import viewmodels.{LegendSize, ListItemWrapper}
 @import models.previousRegistrations._
 @import components.ButtonGroup
+@import pages.previousRegistrations.AddPreviousRegistrationPage
 
 @this(
-    layout: templates.Layout,
-    formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
-    govukRadios: GovukRadios,
-    button: ButtonGroup,
-    addToList: components.addToList,
-    govukWarningText: GovukWarningText
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukRadios: GovukRadios,
+        button: ButtonGroup,
+        addToList: components.addToList,
+        govukWarningText: GovukWarningText
 )
 
 @(form: Form[_], waypoints: Waypoints, list: Seq[ListItemWrapper], canAddCountries: Boolean, incompleteCountries: Seq[PreviousRegistrationDetailsWithOptionalVatNumber] = List.empty)(implicit request: Request[_], messages: Messages)
@@ -34,47 +35,47 @@
 
     @layout(pageTitle = title(form, messages("addPreviousRegistration.title" + messageSuffix, list.size))) {
 
-            @if(form.errors.nonEmpty) {
-                @govukErrorSummary(ErrorSummaryViewModel(form))
-            }
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
 
-            @if(incompleteCountries.nonEmpty) {
-                @govukWarningText(WarningText(
-                    iconFallbackText = Option(messages("site.warning")),
-                    content = Text(messages("error.missing_answers"))
-                ))
-            }
+        @if(incompleteCountries.nonEmpty) {
+            @govukWarningText(WarningText(
+                iconFallbackText = Option(messages("site.warning")),
+                content = Text(messages("error.missing_answers"))
+            ))
+        }
 
-            <h1 class="govuk-heading-xl">@messages("addPreviousRegistration.heading" + messageSuffix, list.size)</h1>
+        <h1 class="govuk-heading-xl">@messages("addPreviousRegistration.heading" + messageSuffix, list.size)</h1>
 
-            @addToList(list, Long, "addPreviousRegistration.change.hidden", "addPreviousRegistration.remove.hidden")
+        @addToList(list, Long, "addPreviousRegistration.change.hidden", "addPreviousRegistration.remove.hidden")
 
-            @if(incompleteCountries.isEmpty) {
-                @formHelper(action = controllers.previousRegistrations.routes.AddPreviousRegistrationController.onSubmit(waypoints, incompletePromptShown = false), Symbol("autoComplete") -> "off") {
-                    @if(canAddCountries) {
-                        @govukRadios(
-                            RadiosViewModel.yesNo(
+        @if(incompleteCountries.isEmpty) {
+            @formHelper(action = controllers.previousRegistrations.routes.AddPreviousRegistrationController.onSubmit(waypoints, incompletePromptShown = false), Symbol("autoComplete") -> "off") {
+                @if(canAddCountries) {
+                    @govukRadios(
+                        RadiosViewModel.yesNo(
                             field = form("value"),
                             legend = LegendViewModel(
                                 HtmlContent(Html("""<h2 class="govuk-fieldset__heading">""" + messages("addPreviousRegistration.addAnother") + "</h2>"))
-                                ).withSize(LegendSize.Medium)
-                            ).withHint(HintViewModel(messages("addPreviousRegistration.addAnother.hint")))
-                        )
-                    } else {
-                        <p class="govuk-body">@messages("addPreviousRegistration.maximumReached")</p>
-                        <input type="hidden" name="value" id="value" value="false"/>
-                    }
-
-                    @button("site.continue", waypoints = waypoints)
-
+                            ).withSize(LegendSize.Medium)
+                        ).withHint(HintViewModel(messages("addPreviousRegistration.addAnother.hint")))
+                    )
+                } else {
+                    <p class="govuk-body">@messages("addPreviousRegistration.maximumReached")</p>
+                    <input type="hidden" name="value" id="value" value="false"/>
                 }
-            } else {
-                <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
-                <p class="govuk-body">@messages("error.missing_answers_prompt", if(incompleteCountries.size > 1) {incompleteCountries.map(_.previousEuCountry.name).reverse.tail.mkString(", ") + " and " + incompleteCountries.last.previousEuCountry.name} else {incompleteCountries.head.previousEuCountry.name})</p>
+
+                @button("site.continue", AddPreviousRegistrationPage().route(waypoints).url, waypoints)
+
+            }
+        } else {
+            <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+            <p class="govuk-body">@messages("error.missing_answers_prompt", if(incompleteCountries.size > 1) {incompleteCountries.map(_.previousEuCountry.name).reverse.tail.mkString(", ") + " and " + incompleteCountries.last.previousEuCountry.name} else {incompleteCountries.head.previousEuCountry.name})</p>
 
                 @formHelper(action = controllers.previousRegistrations.routes.AddPreviousRegistrationController.onSubmit(waypoints, incompletePromptShown = true)) {
 
-                    @button("error.resolve_missing_answers", waypoints = waypoints)
+                    @button("error.resolve_missing_answers", AddPreviousRegistrationPage().route(waypoints).url, waypoints)
 
                 }
             }

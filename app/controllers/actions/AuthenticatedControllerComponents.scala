@@ -45,6 +45,9 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def checkEmailVerificationStatus: CheckEmailVerificationFilterProvider
 
+  def retrieveSavedAnswers: SavedAnswersRetrievalActionProvider
+
+
   def requireIoss: IossRequiredAction
 
   def authAndGetData(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
@@ -87,6 +90,7 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                limitIndex: MaximumIndexFilterProvider,
                                                                checkOtherCountryRegistration: CheckOtherCountryRegistrationFilter,
                                                                checkEmailVerificationStatus: CheckEmailVerificationFilterProvider,
+                                                               retrieveSavedAnswers: SavedAnswersRetrievalActionProvider,
                                                                checkRegistration: CheckRegistrationFilterProvider,
                                                                requireIoss: IossRequiredAction
                                                              ) extends AuthenticatedControllerComponents

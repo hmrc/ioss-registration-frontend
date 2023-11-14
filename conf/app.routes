@@ -232,6 +232,8 @@ GET         /successful                                                      con
 
 GET         /error-submitting-registration                                   controllers.ErrorSubmittingRegistrationController.onPageLoad()
 
+GET         /continue-registration                                           controllers.ContinueRegistrationController.onPageLoad()
+POST        /continue-registration                                           controllers.ContinueRegistrationController.onSubmit()
 # Amend registration
 GET         /start-amend-journey                                             controllers.amend.StartAmendJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 

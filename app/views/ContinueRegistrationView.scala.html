@@ -14,38 +14,38 @@
  * limitations under the License.
  *@
 
-@import components.ButtonGroup
-@import pages.website.WebsitePage
-@import viewmodels.InputWidth._
+@import uk.gov.hmrc.hmrcfrontend.views.config.HmrcPageHeadingLegend
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
-    govukInput: GovukInput,
-    button: ButtonGroup
+    govukRadios: GovukRadios,
+    govukButton: GovukButton
 )
 
+@(form: Form[_])(implicit request: Request[_], messages: Messages)
 
-@(form: Form[_], waypoints: Waypoints, index: Index)(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = title(form, messages("continueRegistration.title"))) {
 
-@layout(pageTitle = title(form, messages("website.title"))) {
-
-    @formHelper(action = controllers.website.routes.WebsiteController.onSubmit(waypoints, index)) {
+    @formHelper(action = routes.ContinueRegistrationController.onSubmit(), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        @govukInput(
-            InputViewModel(
-                field = form("value"),
-                label = LabelViewModel(messages("website.heading")).asPageHeading()
+        @govukRadios(
+            RadiosViewModel(
+                field  = form("value"),
+                legend = HmrcPageHeadingLegend(
+                    content = messages("continueRegistration.heading")
+                ),
+                items  = ContinueRegistration.options
             )
-            .withWidth(Full)
         )
 
-    @button("site.continue",  WebsitePage(index).route(waypoints).url, waypoints)
-
+        @govukButton(
+            ButtonViewModel(messages("site.continue")).withAttribute(("id", "continue"))
+        )
     }
 }
