@@ -24,21 +24,29 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object PreviouslyRegisteredSummary  {
+object PreviouslyRegisteredSummary {
 
-  def row(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(answers: UserAnswers,
+          waypoints: Waypoints,
+          sourcePage: CheckAnswersPage,
+          inAmendMode: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+
     answers.get(PreviouslyRegisteredPage).map {
-      answer =>
-
-        val value = if (answer) "site.yes" else "site.no"
-
-        SummaryListRowViewModel(
-          key     = "previouslyRegistered.checkYourAnswersLabel",
-          value   = ValueViewModel(value),
-          actions = Seq(
+      otherOneStopRegistrations: Boolean =>
+        val value = if (otherOneStopRegistrations) "site.yes" else "site.no"
+        val actions = if (inAmendMode && otherOneStopRegistrations) {
+          Nil
+        } else {
+          Seq(
             ActionItemViewModel("site.change", PreviouslyRegisteredPage.changeLink(waypoints, sourcePage).url)
               .withVisuallyHiddenText(messages("previouslyRegistered.change.hidden"))
           )
+        }
+
+        SummaryListRowViewModel(
+          key = "previouslyRegistered.checkYourAnswersLabel",
+          value = ValueViewModel(value),
+          actions = actions
         )
     }
 }

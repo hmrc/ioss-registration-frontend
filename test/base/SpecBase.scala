@@ -20,7 +20,7 @@ import controllers.actions.{FakeCheckEmailVerificationFilter, _}
 import generators.Generators
 import models.domain.VatCustomerInfo
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
-import models.{BankDetails, Bic, BusinessContactDetails, Iban, Index, UserAnswers, Website}
+import models.{BankDetails, Bic, BusinessContactDetails, CheckMode, Iban, Index, UserAnswers, Website}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -30,7 +30,7 @@ import pages.filters.RegisteredForIossInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
 import pages.website.WebsitePage
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
+import pages.{BankDetailsPage, BusinessContactDetailsPage, CheckAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoint}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
@@ -141,4 +141,8 @@ trait SpecBase
   )
 
   val yourAccountUrl = "http://localhost:10193/pay-vat-on-goods-sold-to-eu/import-one-stop-shop-returns-payments"
+
+ protected def createCheckModeWayPoint(checkAnswersPage: CheckAnswersPage): NonEmptyWaypoints =
+    EmptyWaypoints.setNextWaypoint(Waypoint(checkAnswersPage, CheckMode, checkAnswersPage.urlFragment))
+
 }

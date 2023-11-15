@@ -19,12 +19,12 @@ package controllers.previousRegistrations
 import controllers.actions._
 import forms.previousRegistrations.AddPreviousRegistrationFormProvider
 import logging.Logging
-import models.Country
 import models.previousRegistrations.PreviousRegistrationDetailsWithOptionalVatNumber
+import models.{CheckMode, Country}
 import pages.previousRegistrations.AddPreviousRegistrationPage
-import pages.Waypoints
+import pages.{Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
@@ -38,11 +38,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddPreviousRegistrationController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        cc: AuthenticatedControllerComponents,
-                                        formProvider: AddPreviousRegistrationFormProvider,
-                                        view: AddPreviousRegistrationView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with CompletionChecks {
+                                                   override val messagesApi: MessagesApi,
+                                                   cc: AuthenticatedControllerComponents,
+                                                   formProvider: AddPreviousRegistrationFormProvider,
+                                                   view: AddPreviousRegistrationView
+                                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with CompletionChecks {
 
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -51,15 +51,16 @@ class AddPreviousRegistrationController @Inject()(
     implicit request =>
       getDerivedItems(waypoints, DeriveNumberOfPreviousRegistrations) {
         number =>
-
           val canAddCountries = number < Country.euCountries.size
           val previousRegistrations = PreviousRegistrationSummary.row(request.userAnswers, Seq.empty, waypoints, AddPreviousRegistrationPage())
 
-          withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
-            data = getAllIncompleteDeregisteredDetails _,
-            onFailure = (incomplete: Seq[PreviousRegistrationDetailsWithOptionalVatNumber]) => {
+          val failureCall: Seq[PreviousRegistrationDetailsWithOptionalVatNumber] => Future[Result] =
+            (incomplete: Seq[PreviousRegistrationDetailsWithOptionalVatNumber]) => {
               Future.successful(Ok(view(form, waypoints, previousRegistrations, canAddCountries, incomplete)))
-            }) {
+            }
+
+          withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
+            data = getAllIncompleteDeregisteredDetails _, onFailure = failureCall) {
             Future.successful(Ok(view(form, waypoints, previousRegistrations, canAddCountries)))
           }
       }
@@ -69,7 +70,7 @@ class AddPreviousRegistrationController @Inject()(
     implicit request =>
       withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
         data = getAllIncompleteDeregisteredDetails _,
-        onFailure = (incomplete: Seq[PreviousRegistrationDetailsWithOptionalVatNumber]) => {
+        onFailure = (_: Seq[PreviousRegistrationDetailsWithOptionalVatNumber]) => {
           if (incompletePromptShown) {
             incompletePreviousRegistrationRedirect(waypoints).map(
               redirectIncompletePage => redirectIncompletePage.toFuture
@@ -88,14 +89,27 @@ class AddPreviousRegistrationController @Inject()(
               formWithErrors =>
                 Future.successful(BadRequest(view(formWithErrors, waypoints, previousRegistrations, canAddCountries))),
 
-              value =>
+              (addAnotherRegistration: Boolean) =>
                 for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(AddPreviousRegistrationPage(), value))
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(AddPreviousRegistrationPage(), addAnotherRegistration))
                   _ <- cc.sessionRepository.set(updatedAnswers)
-                } yield Redirect(AddPreviousRegistrationPage().navigate(waypoints, request.userAnswers, updatedAnswers).url)
+                } yield Redirect(AddPreviousRegistrationPage().navigate(
+                  calculateNextStepWaypoints(waypoints, addAnotherRegistration),
+                  request.userAnswers,
+                  updatedAnswers).url
+                )
             )
         }
       }
+  }
+
+  private def calculateNextStepWaypoints(waypoints: Waypoints, addAnotherRegistration: Boolean) = {
+    val thisPage = AddPreviousRegistrationPage()
+    if (addAnotherRegistration && (waypoints.inCheck || waypoints.inAmend)) {
+      waypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, AddPreviousRegistrationPage.checkModeUrlFragment))
+    } else {
+      waypoints
+    }
   }
 
 }

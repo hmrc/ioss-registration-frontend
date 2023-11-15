@@ -33,11 +33,13 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PreviouslyRegisteredController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         cc: AuthenticatedControllerComponents,
-                                         formProvider: PreviouslyRegisteredFormProvider,
-                                         view: PreviouslyRegisteredView
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                                override val messagesApi: MessagesApi,
+                                                cc: AuthenticatedControllerComponents,
+                                                formProvider: PreviouslyRegisteredFormProvider,
+                                                view: PreviouslyRegisteredView
+                                              )(implicit ec: ExecutionContext)
+  extends FrontendBaseController
+    with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
@@ -48,7 +50,12 @@ class PreviouslyRegisteredController @Inject()(
 
       val preparedForm = request.userAnswers.get(PreviouslyRegisteredPage) match {
         case None => form
-        case Some(value) => form.fill(value)
+        case Some(otherOneStopRegistrations: Boolean) =>
+          if (otherOneStopRegistrations && waypoints.inAmend) {
+            throw new InvalidAmendModeOperationException("Cannot change otherOneStopRegistrations to false when in amend mode")
+          } else {
+            form.fill(otherOneStopRegistrations)
+          }
       }
 
       Ok(view(preparedForm, waypoints))
@@ -65,7 +72,7 @@ class PreviouslyRegisteredController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviouslyRegisteredPage, value))
             finalAnswers <- Future.fromTry(cleanup(updatedAnswers, DeriveNumberOfPreviousRegistrations, AllPreviousRegistrationsRawQuery))
-            _              <- cc.sessionRepository.set(finalAnswers)
+            _ <- cc.sessionRepository.set(finalAnswers)
           } yield Redirect(PreviouslyRegisteredPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
       )
   }

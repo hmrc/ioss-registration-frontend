@@ -18,11 +18,13 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
+import pages.amend.ChangeRegistrationPage
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
+import utils.AmendWaypoints.AmendWaypointsOps
 
 case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
 
@@ -43,6 +45,7 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
       case (Some(true), Some(size)) if size > 0   => AddPreviousRegistrationPage()
       case (Some(true), _)                        => PreviousEuCountryPage(Index(0))
       case (Some(false), Some(size)) if size > 0  => DeleteAllPreviousRegistrationsPage
+      case (Some(false), _) if waypoints.inAmend  => ChangeRegistrationPage
       case (Some(false), _)                       => CheckYourAnswersPage
       case _                                      => JourneyRecoveryPage
     }

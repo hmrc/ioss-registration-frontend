@@ -22,11 +22,14 @@ import controllers.routes
 import forms.previousRegistrations.AddPreviousRegistrationFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.{PreviousRegistrationDetailsWithOptionalVatNumber, SchemeDetailsWithOptionalVatNumber}
-import models.{Country, Index, PreviousScheme, PreviousSchemeType}
+import models.{CheckMode, Country, Index, PreviousScheme, PreviousSchemeType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
+import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
-import pages.EmptyWaypoints
+import pages.amend.ChangeRegistrationPage
+import pages.{CheckAnswersPage, CheckYourAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
 import pages.previousRegistrations._
 import play.api.i18n.Messages
 import play.api.inject.bind
@@ -38,13 +41,15 @@ import views.html.previousRegistrations.AddPreviousRegistrationView
 
 import scala.concurrent.Future
 
-class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
+class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar with TableDrivenPropertyChecks {
 
   private val formProvider = new AddPreviousRegistrationFormProvider()
   private val form = formProvider()
 
   private lazy val addPreviousRegistrationRoute = prevRoutes.AddPreviousRegistrationController.onPageLoad(EmptyWaypoints).url
-  private def addPreviousRegistrationRoutePost(prompt: Boolean) = prevRoutes.AddPreviousRegistrationController.onSubmit(EmptyWaypoints, prompt).url
+
+  private def addPreviousRegistrationRoutePost(prompt: Boolean, waypoints: Waypoints = EmptyWaypoints): String =
+    prevRoutes.AddPreviousRegistrationController.onSubmit(waypoints, prompt).url
 
   private val baseAnswers =
     basicUserAnswersWithVatInfo
@@ -107,7 +112,7 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must save the answer and redirect to the next page when valid data is submitted" in {
+    "must save the answer and redirect to the next page when valid data is submitted when not in check mode" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
@@ -131,6 +136,51 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar {
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
+
+    "must save the answer and redirect to the next page when valid data is submitted when not in check mode with the waypoints amended" in {
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      val application =
+        applicationBuilder(userAnswers = Some(baseAnswers))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      def createWaypoints(checkAnswersPage: CheckAnswersPage): NonEmptyWaypoints = {
+        EmptyWaypoints.setNextWaypoint(Waypoint(checkAnswersPage, CheckMode, checkAnswersPage.urlFragment))
+      }
+
+      val checkModeOptions = Table(
+        ("description", "waypoints"),
+        ("change registration", createWaypoints(ChangeRegistrationPage)),
+        ("check your answers", createWaypoints(CheckYourAnswersPage))
+      )
+
+      val expectedAnswers = baseAnswers.set(AddPreviousRegistrationPage(), true).success.value
+
+      running(application) {
+
+        forAll(checkModeOptions) { case (_, checkModeWaypoints) =>
+          Mockito.reset(mockSessionRepository)
+          when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+          val request =
+            FakeRequest(POST, addPreviousRegistrationRoutePost(prompt = false, waypoints = checkModeWaypoints))
+              .withFormUrlEncodedBody(("value", "true"))
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+
+          val expectedWaypoints = checkModeWaypoints
+            .setNextWaypoint(Waypoint(AddPreviousRegistrationPage(), CheckMode, AddPreviousRegistrationPage.checkModeUrlFragment))
+
+          redirectLocation(result).value mustEqual AddPreviousRegistrationPage().navigate(expectedWaypoints, baseAnswers, expectedAnswers).url
+
+          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+        }
+      }
+    }
+
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 

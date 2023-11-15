@@ -21,8 +21,8 @@ import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.CheckPreviousSchemeAnswersFormProvider
 import models.Index
-import pages.Waypoints
-import pages.previousRegistrations.CheckPreviousSchemeAnswersPage
+import pages.{Waypoint, Waypoints}
+import pages.previousRegistrations.{AddPreviousRegistrationPage, CheckPreviousSchemeAnswersPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
