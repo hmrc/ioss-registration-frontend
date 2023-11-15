@@ -45,7 +45,7 @@ class IossRequiredActionImpl @Inject()(
           case Right(registrationWrapper) =>
             Right(
               AuthenticatedMandatoryIossRequest(
-                request.request,
+                request,
                 request.credentials,
                 request.vrn,
                 iossNumber,

@@ -27,6 +27,8 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.RegistrationService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.CompletionChecks
+import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
@@ -43,13 +45,12 @@ class ChangeRegistrationController @Inject()(
                                               cc: AuthenticatedControllerComponents,
                                               registrationService: RegistrationService,
                                               view: ChangeRegistrationView
-                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss() {
     implicit request =>
-
       val thisPage = ChangeRegistrationPage
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
@@ -67,17 +68,27 @@ class ChangeRegistrationController @Inject()(
       )
 
       val list = detailsList(waypoints, thisPage)
-      Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber))
+      val isValid = validate()(request.request)
+      Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid))
   }
 
-  def onSubmit(): Action[AnyContent] = cc.authAndRequireIoss().async {
+  def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndRequireIoss().async {
     implicit request =>
-      registrationService.amendRegistration(request.userAnswers, request.registrationWrapper.registration, request.vrn).map {
-        case Right(_) =>
-          Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
-        case Left(e) =>
-          logger.error(s"Unexpected result on submit: ${e.body}")
-          Redirect(routes.ErrorSubmittingAmendmentController.onPageLoad())
+      getFirstValidationErrorRedirect(waypoints)(request.request) match {
+        case Some(errorRedirect) => if (incompletePrompt) {
+          errorRedirect.toFuture
+        } else {
+          Redirect(routes.ChangeRegistrationController.onPageLoad()).toFuture
+        }
+
+        case None =>
+          registrationService.amendRegistration(request.userAnswers, request.registrationWrapper.registration, request.vrn).map {
+            case Right(_) =>
+              Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
+            case Left(e) =>
+              logger.error(s"Unexpected result on submit: ${e.body}")
+              Redirect(routes.ErrorSubmittingAmendmentController.onPageLoad())
+          }
       }
   }
 
