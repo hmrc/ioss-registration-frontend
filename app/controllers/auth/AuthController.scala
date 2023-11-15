@@ -89,7 +89,7 @@ class AuthController @Inject()(
     implicit request =>
       val answers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId, lastUpdated = Instant.now(clock)))
       answers.get(SavedProgressPage).map {
-        savedUrl => Redirect(controllers.routes.ContinueRegistrationController.onPageLoad())
+        _ => Redirect(controllers.routes.ContinueRegistrationController.onPageLoad())
       }.getOrElse(
         Redirect(controllers.routes.NoRegistrationInProgressController.onPageLoad())
       )
