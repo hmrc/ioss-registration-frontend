@@ -16,19 +16,20 @@
 
 package controllers.previousRegistrations
 
-import config.FrontendAppConfig
 import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.PreviousIossNumberFormProvider
 import logging.Logging
+import models.core.MatchType
 import models.domain.PreviousSchemeNumbers
-import models.previousRegistrations.{IntermediaryIdentificationNumberValidation, IossRegistrationNumberValidation}
+import models.previousRegistrations.{IntermediaryIdentificationNumberValidation, IossRegistrationNumberValidation, NonCompliantDetails}
 import models.requests.AuthenticatedDataRequest
-import models.{Country, Index, PreviousScheme}
-import pages.{JourneyRecoveryPage, Waypoints}
+import models.{Country, Index, PreviousScheme, UserAnswers}
 import pages.previousRegistrations.{PreviousIossNumberPage, PreviousIossSchemePage, PreviousSchemePage}
+import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import queries.previousRegistration.NonCompliantQuery
 import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
@@ -43,7 +44,6 @@ class PreviousIossNumberController @Inject()(
                                               cc: AuthenticatedControllerComponents,
                                               formProvider: PreviousIossNumberFormProvider,
                                               coreRegistrationValidationService: CoreRegistrationValidationService,
-                                              appConfig: FrontendAppConfig,
                                               view: PreviousIossNumberView
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with GetCountry {
 
@@ -95,10 +95,18 @@ class PreviousIossNumberController @Inject()(
                         waypoints,
                         activeMatch.memberState))
                     )
+
                   case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
                     Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
+
+                  case Some(activeMatch) if activeMatch.matchType == MatchType.TransferringMSID =>
+                    saveAndRedirect(countryIndex, schemeIndex, value,
+                      Some(NonCompliantDetails(activeMatch.nonCompliantPayments, activeMatch.nonCompliantReturns)),
+                      waypoints
+                    )
+
                   case _ =>
-                    saveAndRedirect(countryIndex, schemeIndex, value, waypoints)
+                    saveAndRedirect(countryIndex, schemeIndex, value, None, waypoints)
                 }
             )
           }
@@ -106,12 +114,33 @@ class PreviousIossNumberController @Inject()(
       }
   }
 
-  private def saveAndRedirect(countryIndex: Index, schemeIndex: Index, previousSchemeNumbers: PreviousSchemeNumbers, waypoints: Waypoints)
+  private def saveAndRedirect(
+                               countryIndex: Index,
+                               schemeIndex: Index,
+                               previousSchemeNumbers: PreviousSchemeNumbers,
+                               nonCompliantDetails: Option[NonCompliantDetails],
+                               waypoints: Waypoints)
                              (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviousIossNumberPage(countryIndex, schemeIndex), previousSchemeNumbers))
-      _ <- cc.sessionRepository.set(updatedAnswers)
-    } yield Redirect(PreviousIossNumberPage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+      updatedAnswersWithNonCompliantDetails <- setNonCompliantAnswers(countryIndex, schemeIndex, nonCompliantDetails, updatedAnswers)
+      _ <- cc.sessionRepository.set(updatedAnswersWithNonCompliantDetails)
+    } yield {
+      Redirect(PreviousIossNumberPage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswersWithNonCompliantDetails).route)
+    }
+  }
+
+  private def setNonCompliantAnswers(
+                                      countryIndex: Index,
+                                      schemeIndex: Index,
+                                      nonCompliantDetails: Option[NonCompliantDetails],
+                                      updatedAnswers: UserAnswers
+                                    ): Future[UserAnswers] = {
+    nonCompliantDetails match {
+      case Some(value) =>
+        Future.fromTry(updatedAnswers.set(NonCompliantQuery(countryIndex, schemeIndex), value))
+      case _ => updatedAnswers.toFuture
+    }
   }
 
   private def getHasIntermediary(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index)

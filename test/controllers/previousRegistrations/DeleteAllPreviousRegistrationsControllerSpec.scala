@@ -19,7 +19,7 @@ package controllers.previousRegistrations
 import base.SpecBase
 import forms.previousRegistrations.DeleteAllPreviousRegistrationsFormProvider
 import models.domain.PreviousSchemeNumbers
-import models.{CheckMode, Country, Index}
+import models.{Country, Index}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito
@@ -28,7 +28,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
 import pages.previousRegistrations.{DeleteAllPreviousRegistrationsPage, PreviousEuCountryPage, PreviousOssNumberPage, PreviouslyRegisteredPage}
-import pages.{CheckYourAnswersPage, EmptyWaypoints, JourneyRecoveryPage, Waypoint, Waypoints}
+import pages.{CheckYourAnswersPage, EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
