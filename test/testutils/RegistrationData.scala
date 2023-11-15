@@ -55,8 +55,8 @@ object RegistrationData extends SpecBase {
     contactName = arbitrary[String].sample.value,
     businessTelephoneNumber = arbitrary[String].sample.value,
     businessEmailId = arbitrary[String].sample.value,
-    nonCompliantReturns = Some(arbitrary[String].sample.value),
-    nonCompliantPayments = Some(arbitrary[String].sample.value)
+    nonCompliantReturns = Some(arbitraryNonCompliantDetails.arbitrary.sample.value.nonCompliantReturns.toString),
+    nonCompliantPayments = Some(arbitraryNonCompliantDetails.arbitrary.sample.value.nonCompliantPayments.toString)
   )
 
   val genBankDetails: EtmpBankDetails = EtmpBankDetails(

@@ -23,8 +23,9 @@ import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumber
 import models.etmp._
 import models.etmp.amend.EtmpAmendRegistrationChangeLog
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
+import models.previousRegistrations.NonCompliantDetails
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.Gen.{choose, listOfN}
+import org.scalacheck.Gen.{choose, listOfN, option}
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.EitherValues
 import play.api.libs.json.{JsObject, Json}
@@ -381,5 +382,18 @@ trait ModelGenerators extends EitherValues {
         decisionDate = decisionDateDate,
         quarantine = quarantine
       )
+    }
+
+  implicit lazy val arbitraryNonCompliantDetails: Arbitrary[NonCompliantDetails] =
+    Arbitrary {
+      for {
+        nonCompliantReturns <- option(Gen.chooseNum(1, 2))
+        nonCompliantPayments <- option(Gen.chooseNum(1, 2))
+      } yield {
+        NonCompliantDetails(
+          nonCompliantReturns = nonCompliantReturns,
+          nonCompliantPayments = nonCompliantPayments
+        )
+      }
     }
 }

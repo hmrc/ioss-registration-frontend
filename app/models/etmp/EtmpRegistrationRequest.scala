@@ -126,11 +126,19 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
     }
 
   private def getNonCompliantDetails(answers: UserAnswers): Option[NonCompliantDetails] = {
-    answers.get(AllPreviousRegistrationsQuery).map {
+    answers.get(AllPreviousRegistrationsQuery).flatMap {
       allPreviousReg =>
-        allPreviousReg.flatMap(_.previousSchemesDetails
+        val maybeNonCompliantDetailsList = allPreviousReg.flatMap(_.previousSchemesDetails
           .flatMap(_.nonCompliantDetails))
-          .maxBy(x => x.nonCompliantReturns.getOrElse(0) + x.nonCompliantPayments.getOrElse(0))
+        maybeNonCompliantDetailsList match {
+          case Nil =>
+            None
+          case nonCompliantDetailsList =>
+            Some(nonCompliantDetailsList.maxBy(
+              nonCompliantDetails => nonCompliantDetails.nonCompliantReturns.getOrElse(0) +
+                nonCompliantDetails.nonCompliantPayments.getOrElse(0)
+            ))
+        }
     }
   }
 }

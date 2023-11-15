@@ -20,7 +20,7 @@ import controllers.GetCountry
 import controllers.actions._
 import forms.previousRegistrations.PreviousOssNumberFormProvider
 import models.core.MatchType
-import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
+import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.{NonCompliantDetails, PreviousSchemeHintText}
 import models.requests.AuthenticatedDataRequest
 import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, UserAnswers, WithName}
@@ -31,8 +31,8 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.{AllPreviousSchemesForCountryWithOptionalVatNumberQuery, NonCompliantQuery}
 import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.FutureSyntax.FutureOps
 import utils.AmendWaypoints.AmendWaypointsOps
+import utils.FutureSyntax.FutureOps
 import views.html.previousRegistrations.PreviousOssNumberView
 
 import javax.inject.Inject
@@ -166,7 +166,6 @@ class PreviousOssNumberController @Inject()(
     } yield Redirect(PreviousOssNumberPage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswersWithSchemeAndNonCompliantDetails).route)
   }
 
-  // TODO
   private def setNonCompliantAnswers(
                                       countryIndex: Index,
                                       schemeIndex: Index,
