@@ -696,3 +696,7 @@ notRegistered.label = You must register for the VAT Import One Stop Shop scheme 
 noRegistrationInProgress.title = We did not find a registration in progress
 noRegistrationInProgress.heading = We did not find a registration in progress
 noRegistrationInProgress.sessionExpired = Your previous session may have expired.
+
+alreadyRegistered.title = This account is already registered for the Import One Stop Shop scheme
+alreadyRegistered.heading = This account is already registered for the Import One Stop Shop scheme
+alreadyRegistered.continue = Continue to your account

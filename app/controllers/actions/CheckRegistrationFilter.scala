@@ -19,8 +19,6 @@ package controllers.actions
 import config.FrontendAppConfig
 import logging.Logging
 import models.requests.AuthenticatedIdentifierRequest
-import pages.EmptyWaypoints
-import pages.filters.CannotRegisterAlreadyRegisteredPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import utils.FutureSyntax.FutureOps
@@ -36,7 +34,7 @@ class CheckRegistrationFilterImpl(
   override protected def filter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] = {
     (hasIossEnrolment(request), inAmend) match {
       case (true, false) =>
-        Some(Redirect(CannotRegisterAlreadyRegisteredPage.route(EmptyWaypoints).url)).toFuture
+        Some(Redirect(controllers.routes.AlreadyRegisteredController.onPageLoad().url)).toFuture
       case (false, true) =>
         Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url)).toFuture
       case _ =>

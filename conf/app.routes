@@ -236,7 +236,7 @@ GET         /error-submitting-registration                                   con
 GET         /continue-registration                                           controllers.ContinueRegistrationController.onPageLoad()
 POST        /continue-registration                                           controllers.ContinueRegistrationController.onSubmit()
 
-GET        /no-registration-in-progress                                      controllers.NoRegistrationInProgressController.onPageLoad()
+GET        /no-saved-registration                                            controllers.NoRegistrationInProgressController.onPageLoad()
 
 GET        /already-registered                                               controllers.AlreadyRegisteredController.onPageLoad()
 

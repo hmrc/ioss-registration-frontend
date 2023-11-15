@@ -21,7 +21,6 @@ import logging.Logging
 import models.CheckMode
 import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.responses.ConflictFound
-import pages.filters.CannotRegisterAlreadyRegisteredPage
 import pages.{CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -150,7 +149,7 @@ class CheckYourAnswersController @Inject()(
                 RegistrationAuditType.CreateRegistration, request.userAnswers, None, SubmissionResult.Duplicate)
               )
               logger.warn("Conflict found on registration creation submission")
-              Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints)).toFuture
+              Redirect(routes.AlreadyRegisteredController.onPageLoad()).toFuture
 
             case Left(error) =>
               logger.error(s"Unexpected result on registration creation submission: ${error.body}")

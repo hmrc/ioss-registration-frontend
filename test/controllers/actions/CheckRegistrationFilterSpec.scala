@@ -103,7 +103,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(CannotRegisterAlreadyRegisteredPage.route(waypoints).url))
+        result mustBe Some(Redirect(controllers.routes.AlreadyRegisteredController.onPageLoad().url))
       }
     }
 
