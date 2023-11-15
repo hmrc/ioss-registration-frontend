@@ -19,20 +19,20 @@ package services
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, RegistrationResultResponse}
 import logging.Logging
-import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
 import models.Country.euCountries
 import models.amend.RegistrationWrapper
 import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
-import models.etmp._
 import models.etmp.EtmpRegistrationRequest.buildEtmpRegistrationRequest
+import models.etmp._
 import models.etmp.amend.EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
+import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -140,8 +140,10 @@ class RegistrationService @Inject()(
       previousScheme = convertedSchemeType(etmpPreviousEURegistrationDetails.schemeType),
       previousSchemeNumbers = PreviousSchemeNumbers(
         previousSchemeNumber = etmpPreviousEURegistrationDetails.registrationNumber,
-        previousIntermediaryNumber = etmpPreviousEURegistrationDetails.intermediaryNumber
-      )
+        previousIntermediaryNumber = etmpPreviousEURegistrationDetails.intermediaryNumber,
+      ),
+      // TODO -> nonCompliantDetails to be implemented at a later date
+      nonCompliantDetails = None
     )
 
   private def convertedSchemeType(schemeType: SchemeType): PreviousScheme =

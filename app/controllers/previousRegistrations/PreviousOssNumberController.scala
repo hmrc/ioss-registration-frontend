@@ -19,18 +19,20 @@ package controllers.previousRegistrations
 import controllers.GetCountry
 import controllers.actions._
 import forms.previousRegistrations.PreviousOssNumberFormProvider
-import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, WithName}
+import models.core.MatchType
 import models.domain.PreviousSchemeNumbers
-import models.previousRegistrations.PreviousSchemeHintText
+import models.previousRegistrations.{NonCompliantDetails, PreviousSchemeHintText}
 import models.requests.AuthenticatedDataRequest
+import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, UserAnswers, WithName}
 import pages.Waypoints
 import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
+import queries.previousRegistration.{AllPreviousSchemesForCountryWithOptionalVatNumberQuery, NonCompliantQuery}
 import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
+import utils.FutureSyntax.FutureOps
 import views.html.previousRegistrations.PreviousOssNumberView
 
 import javax.inject.Inject
@@ -129,11 +131,16 @@ class PreviousOssNumberController @Inject()(
       ).flatMap {
         case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
           Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
+        case Some(activeMatch) if activeMatch.matchType == MatchType.TransferringMSID =>
+          saveAndRedirect(countryIndex, schemeIndex, value, previousScheme,
+            Some(NonCompliantDetails(activeMatch.nonCompliantPayments, activeMatch.nonCompliantReturns)),
+            waypoints
+          )
         case _ =>
-          saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)
+          saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, None, waypoints)
       }
     } else {
-      saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)
+      saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, None, waypoints)
     }
   }
 
@@ -142,19 +149,34 @@ class PreviousOssNumberController @Inject()(
                                schemeIndex: Index,
                                registrationNumber: String,
                                previousScheme: PreviousScheme,
+                               nonCompliantDetails: Option[NonCompliantDetails],
                                waypoints: Waypoints
                              )(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(
         PreviousOssNumberPage(countryIndex, schemeIndex),
-        PreviousSchemeNumbers(registrationNumber, None)
+        PreviousSchemeNumbers(registrationNumber, None),
       ))
       updatedAnswersWithScheme <- Future.fromTry(updatedAnswers.set(
         PreviousSchemePage(countryIndex, schemeIndex),
         previousScheme
       ))
-      _ <- cc.sessionRepository.set(updatedAnswersWithScheme)
-    } yield Redirect(PreviousOssNumberPage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswersWithScheme).route)
+      updatedAnswersWithSchemeAndNonCompliantDetails <- setNonCompliantAnswers(countryIndex, schemeIndex, nonCompliantDetails, updatedAnswersWithScheme)
+      _ <- cc.sessionRepository.set(updatedAnswersWithSchemeAndNonCompliantDetails)
+    } yield Redirect(PreviousOssNumberPage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswersWithSchemeAndNonCompliantDetails).route)
+  }
+
+  private def setNonCompliantAnswers(
+                                      countryIndex: Index,
+                                      schemeIndex: Index,
+                                      nonCompliantDetails: Option[NonCompliantDetails],
+                                      updatedAnswersWithScheme: UserAnswers
+                                    ): Future[UserAnswers] = {
+    nonCompliantDetails match {
+      case Some(value) =>
+        Future.fromTry(updatedAnswersWithScheme.set(NonCompliantQuery(countryIndex, schemeIndex), value))
+      case _ => updatedAnswersWithScheme.toFuture
+    }
   }
 
   private def determinePreviousSchemeHintText(countryIndex: Index)(implicit request: AuthenticatedDataRequest[AnyContent]): PreviousSchemeHintText = {

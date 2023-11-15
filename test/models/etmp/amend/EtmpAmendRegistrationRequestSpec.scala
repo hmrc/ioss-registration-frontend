@@ -19,18 +19,18 @@ package models.etmp.amend
 import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
 import formats.Format.eisDateFormatter
-import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
 import models.etmp._
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
+import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
-import play.api.libs.json.{Json, JsSuccess}
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
+import play.api.libs.json.{JsSuccess, Json}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -103,7 +103,8 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
         previousEuCountry = arbitraryCountry.arbitrary.sample.value,
         previousSchemesDetails = Gen.listOfN(maxSchemes, PreviousSchemeDetails(
           previousScheme = arbitraryPreviousScheme.arbitrary.sample.value,
-          previousSchemeNumbers = arbitraryPreviousIossSchemeDetails.arbitrary.sample.value
+          previousSchemeNumbers = arbitraryPreviousIossSchemeDetails.arbitrary.sample.value,
+          nonCompliantDetails = None
         )).sample.value
       )
       val previousEuRegistrations: List[PreviousRegistrationDetails] = Gen.listOfN(numberOfRegistrations, previousRegistration).sample.value

@@ -21,10 +21,9 @@ import controllers.routes
 import forms.previousRegistrations.PreviousOssNumberFormProvider
 import models.core.{Match, MatchType}
 import models.domain.PreviousSchemeNumbers
-import models.previousRegistrations.PreviousSchemeHintText
+import models.previousRegistrations.{NonCompliantDetails, PreviousSchemeHintText}
 import models.{Country, CountryWithValidationDetails, Index, PreviousScheme}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.previousRegistrations.{PreviousEuCountryPage, PreviousOssNumberPage, PreviousSchemePage}
@@ -32,8 +31,10 @@ import pages.{EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import queries.previousRegistration.NonCompliantQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.core.CoreRegistrationValidationService
+import utils.FutureSyntax.FutureOps
 import views.html.previousRegistrations.PreviousOssNumberView
 
 import scala.concurrent.Future
@@ -198,6 +199,50 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar {
               index
             ).url
           verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
+        }
+      }
+
+      "must save non-compliant details from the active scheme and redirect to the next page when match type is TransferringMSID" in {
+
+        val previousSchemeNumber: String = "SI12345678"
+        val transferringMsidMatch = genericMatch.copy(matchType = MatchType.TransferringMSID, nonCompliantReturns = Some(1), nonCompliantPayments = Some(1))
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
+          Some(transferringMsidMatch).toFuture
+
+        val application =
+          applicationBuilder(userAnswers = Some(baseAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousOssNumberRoute)
+              .withFormUrlEncodedBody(("value", previousSchemeNumber))
+
+          val result = route(application, request).value
+
+          val expectedAnswers = baseAnswers
+            .set(PreviousOssNumberPage(index, index),
+              PreviousSchemeNumbers(previousSchemeNumber = previousSchemeNumber, previousIntermediaryNumber = None)).success.value
+            .set(PreviousSchemePage(index, index), PreviousScheme.OSSU).success.value
+            .set(NonCompliantQuery(index, index),
+            NonCompliantDetails(nonCompliantReturns = Some(1), nonCompliantPayments = Some(1))
+          ).success.value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual
+            controllers.previousRegistrations.routes.CheckPreviousSchemeAnswersController.onPageLoad(
+              waypoints,
+              index
+            ).url
+          verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
+          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
         }
       }
 
