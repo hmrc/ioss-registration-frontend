@@ -65,7 +65,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency 
         val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber)(request, messages(application)).toString
+        contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber, isValid = true)(request, messages(application)).toString
       }
     }
   }

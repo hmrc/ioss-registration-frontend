@@ -92,14 +92,14 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
         val action = new Harness(mockRegistrationConnector)
-        val request = FakeRequest(GET, "/test/url?k=session-id")
-        val result = action.callRefine(AuthenticatedDataRequest(
-          request,
+        val request = AuthenticatedDataRequest(
+          FakeRequest(GET, "/test/url?k=session-id"),
           testCredentials,
           vrn,
           Some(iossNumber),
           emptyUserAnswersWithVatInfo
-        )).futureValue
+        )
+        val result = action.callRefine(request).futureValue
 
         val expectResult = AuthenticatedMandatoryIossRequest(
           request,
