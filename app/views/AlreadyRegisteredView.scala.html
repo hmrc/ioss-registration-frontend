@@ -17,6 +17,7 @@
 @this(layout: templates.Layout, govukButton: GovukButton)
 
 @(
+    yourAccountUrl: String,
     feedbackLink: String,
     externalUrl: Option[String] = None
 )(implicit request: Request[_], messages: Messages)
@@ -27,8 +28,10 @@
 
         <h1 class="govuk-heading-xl">@messages("alreadyRegistered.heading")</h1>
 
-        <a class="govuk-button" id="continue" data-module="govuk-button" href="/pay-vat-on-goods-sold-to-eu/northern-ireland-returns-payments">
-            @messages("alreadyRegistered.continue")
-        </a>
+        @govukButton(
+            ButtonViewModel(messages("alreadyRegistered.continue"))
+                .asLink(yourAccountUrl)
+                .withAttribute(("id", "backToYourAccount"))
+        )
     </div>
 }

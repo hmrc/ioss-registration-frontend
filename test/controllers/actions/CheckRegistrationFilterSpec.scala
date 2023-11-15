@@ -19,8 +19,6 @@ package controllers.actions
 import base.SpecBase
 import config.FrontendAppConfig
 import models.requests.AuthenticatedIdentifierRequest
-import pages.filters.CannotRegisterAlreadyRegisteredPage
-import pages.{EmptyWaypoints, Waypoints}
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
@@ -33,7 +31,6 @@ import scala.concurrent.Future
 
 class CheckRegistrationFilterSpec extends SpecBase {
 
-  private val waypoints: Waypoints = EmptyWaypoints
   private val iossEnrolmentKey = "HMRC-IOSS-ORG"
   private val enrolment: Enrolment = Enrolment(iossEnrolmentKey, Seq.empty, "test", None)
 

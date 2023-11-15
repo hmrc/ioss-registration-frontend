@@ -51,6 +51,7 @@ class AlreadyRegisteredController @Inject()(
           case Right(_) =>
             Ok(
               view(
+                config.iossYourAccountUrl,
                 config.feedbackUrl,
                 savedUrl
               )
