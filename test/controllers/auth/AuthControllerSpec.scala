@@ -104,7 +104,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
 
-            verify(mockSavedAnswersConnector, times(1)).get()(any())
             verifyNoInteractions(mockRegistrationConnector)
             verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
           }
@@ -132,7 +131,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 status(result) mustBe SEE_OTHER
 
-                verify(mockSavedAnswersConnector, times(1)).get()(any())
                 redirectLocation(result).value mustBe ExpiredVrnDatePage.route(waypoints).url
                 verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
               }
@@ -165,7 +163,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
                 status(result) mustBe SEE_OTHER
 
-                verify(mockSavedAnswersConnector, times(1)).get()(any())
                 redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
                 verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
               }
@@ -197,7 +194,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                 status(result) mustBe SEE_OTHER
                 redirectLocation(result).value mustBe CannotRegisterNoNiProtocolPage.route(waypoints).url
 
-                verify(mockSavedAnswersConnector, times(1)).get()(any())
                 verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
               }
             }
@@ -253,7 +249,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                 status(result) mustBe SEE_OTHER
                 redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
 
-                verify(mockSavedAnswersConnector, times(1)).get()(any())
                 verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
               }
             }
@@ -289,7 +284,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                     status(result) mustBe SEE_OTHER
                     redirectLocation(result).value mustBe CannotRegisterNotNorwegianBasedBusinessPage.route(waypoints).url
 
-                    verify(mockSavedAnswersConnector, times(1)).get()(any())
                     verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
                   }
                 }
@@ -325,7 +319,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                     status(result) mustBe SEE_OTHER
                     redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
 
-                    verify(mockSavedAnswersConnector, times(1)).get()(any())
                     verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
                   }
                 }
@@ -357,7 +350,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                   status(result) mustBe SEE_OTHER
                   redirectLocation(result).value mustBe CannotRegisterNonEstablishedTaxablePersonPage.route(waypoints).url
 
-                  verify(mockSavedAnswersConnector, times(1)).get()(any())
                   verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
                 }
               }
@@ -395,7 +387,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                   status(result) mustBe SEE_OTHER
                   redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
 
-                  verify(mockSavedAnswersConnector, times(1)).get()(any())
                   verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
                 }
               }
@@ -423,7 +414,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                   status(result) mustBe SEE_OTHER
                   redirectLocation(result).value mustBe CannotRegisterNonEstablishedTaxablePersonPage.route(waypoints).url
 
-                  verify(mockSavedAnswersConnector, times(1)).get()(any())
                   verifyNoInteractions(mockAuthenticatedUserAnswersRepository)
                 }
               }
@@ -460,7 +450,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
                     status(result) mustBe SEE_OTHER
                     redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
 
-                    verify(mockSavedAnswersConnector, times(1)).get()(any())
                     verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
                   }
                 }
@@ -491,7 +480,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
               status(result) mustBe SEE_OTHER
               redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
 
-              verify(mockSavedAnswersConnector, times(1)).get()(any())
               verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
             }
           }
@@ -519,7 +507,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
               status(result) mustBe SEE_OTHER
               redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
 
-              verify(mockSavedAnswersConnector, times(1)).get()(any())
               verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
             }
           }
@@ -552,7 +539,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe CheckVatDetailsPage.route(waypoints).url
 
-            verify(mockSavedAnswersConnector, times(1)).get()(any())
             verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }
@@ -578,7 +564,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
 
-            verify(mockSavedAnswersConnector, times(1)).get()(any())
             verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }
@@ -606,7 +591,6 @@ class AuthControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe VatApiDownPage.route(waypoints).url
 
-            verify(mockSavedAnswersConnector, times(1)).get()(any())
             verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
           }
         }

@@ -17,7 +17,7 @@
 package controllers.actions
 
 import connectors.SaveForLaterConnector
-import controllers.actions.FakeSavedAnswersRetrievalAction.{mockSessionRepository, mockSaveForLaterConnector}
+import controllers.actions.FakeSavedAnswersRetrievalAction.{mockSaveForLaterConnector, mockSessionRepository}
 import models.UserAnswers
 import models.requests.AuthenticatedOptionalDataRequest
 import repositories.AuthenticatedUserAnswersRepository
@@ -38,6 +38,13 @@ class FakeSavedAnswersRetrievalAction(dataToReturn: Option[UserAnswers], vrn: Vr
         request.iossNumber,
         dataToReturn
       ))
+}
+
+class FakeSavedAnswersRetrievalActionProvider(dataToReturn: Option[UserAnswers], vrn: Vrn)
+  extends SavedAnswersRetrievalActionProvider(mockSessionRepository, mockSaveForLaterConnector)(ExecutionContext.Implicits.global){
+
+  override def apply(): SavedAnswersRetrievalAction = new FakeSavedAnswersRetrievalAction(dataToReturn, vrn)
+
 }
 
 object FakeSavedAnswersRetrievalAction {
