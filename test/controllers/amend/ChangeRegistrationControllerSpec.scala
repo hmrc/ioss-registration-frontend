@@ -20,15 +20,21 @@ import base.SpecBase
 import controllers.actions.{FakeIossRequiredAction, IossRequiredAction}
 import controllers.amend.{routes => amendRoutes}
 import models.amend.RegistrationWrapper
+import models.responses.InternalServerError
 import models.{CheckMode, UserAnswers}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
+import org.scalatestplus.mockito.MockitoSugar
+import pages._
 import pages.amend.ChangeRegistrationPage
-import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.{running, _}
+import services._
 import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
@@ -37,35 +43,118 @@ import viewmodels.govuk.SummaryListFluency
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
-class ChangeRegistrationControllerSpec extends SpecBase with SummaryListFluency {
+class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with SummaryListFluency {
 
   private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
   private val amendYourAnswersPage = ChangeRegistrationPage
+  private val registrationService = mock[RegistrationService]
 
   "ChangeRegistration Controller" - {
 
-    "must return OK and the correct view for a GET" in {
+    ".onPageLoad" - {
+      "must return OK and the correct view for a GET" in {
 
-      val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+        val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
 
-      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
-        .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
-        .build()
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
+          .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+          .build()
 
-      running(application) {
+        running(application) {
 
-        val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad().url)
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad().url)
 
-        implicit val msgs: Messages = messages(application)
-        val result = route(application, request).value
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
 
-        val view = application.injector.instanceOf[ChangeRegistrationView]
+          val view = application.injector.instanceOf[ChangeRegistrationView]
 
-        val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
-        val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
+          val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
 
-        status(result) mustBe OK
-        contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber, isValid = true)(request, messages(application)).toString
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber, isValid = true)(request, messages(application)).toString
+        }
+      }
+    }
+
+    ".onSubmit" - {
+
+      "when the user has answered all necessary data and submission of the registration succeeds" - {
+        "redirect to the next page" in {
+          val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+          val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
+            .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+            .overrides(bind[RegistrationService].toInstance(registrationService))
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
+            val result = route(application, request).value
+
+            when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Right(()).toFuture
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe
+              ChangeRegistrationPage.navigate(EmptyWaypoints, completeUserAnswersWithVatInfo, completeUserAnswersWithVatInfo).route.url
+          }
+        }
+
+        "when the user has answered all necessary data but submission of the registration fails" in {
+          val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+          val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
+            .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+            .overrides(bind[RegistrationService].toInstance(registrationService))
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
+            val result = route(application, request).value
+
+            when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Left(InternalServerError).toFuture
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe routes.ErrorSubmittingAmendmentController.onPageLoad().url
+          }
+        }
+      }
+
+      "when the user has not answered all necessary data" - {
+
+        "the page is refreshed when the incomplete prompt was not shown" in {
+          val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+            .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+            .overrides(bind[RegistrationService].toInstance(registrationService))
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
+            val result = route(application, request).value
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe routes.ChangeRegistrationController.onPageLoad().url
+          }
+        }
+
+        "the user is redirected when the incomplete prompt is shown" - {
+
+          "to Has Trading Name when trading names are not populated correctly" in {
+            val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+            val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+              .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+              .overrides(bind[RegistrationService].toInstance(registrationService))
+              .build()
+
+            running(application) {
+              val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = true).url)
+              val result = route(application, request).value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustEqual controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints).url
+            }
+          }
+        }
       }
     }
   }
