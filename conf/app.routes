@@ -41,6 +41,7 @@ GET         /credential-unsupported                                          con
 GET         /account/role-unsupported                                        controllers.auth.AuthController.unsupportedCredentialRole()
 
 GET         /on-sign-in                                                      controllers.auth.AuthController.onSignIn()
+GET         /continue-on-sign-in                                             controllers.auth.AuthController.continueOnSignIn()
 
 GET         /unauthorised                                                    controllers.UnauthorisedController.onPageLoad()
 
@@ -234,6 +235,11 @@ GET         /error-submitting-registration                                   con
 
 GET         /continue-registration                                           controllers.ContinueRegistrationController.onPageLoad()
 POST        /continue-registration                                           controllers.ContinueRegistrationController.onSubmit()
+
+GET        /no-saved-registration                                            controllers.NoRegistrationInProgressController.onPageLoad()
+
+GET        /already-registered                                               controllers.AlreadyRegisteredController.onPageLoad()
+
 # Amend registration
 GET         /start-amend-journey                                             controllers.amend.StartAmendJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 

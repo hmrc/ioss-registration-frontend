@@ -26,7 +26,6 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.filters.CannotRegisterAlreadyRegisteredPage
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.mvc.AnyContentAsEmpty
@@ -143,7 +142,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           )
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe CannotRegisterAlreadyRegisteredPage.route(waypoints).url
+          redirectLocation(result).value mustBe controllers.routes.AlreadyRegisteredController.onPageLoad().url
           verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
         }
       }

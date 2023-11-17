@@ -85,6 +85,16 @@ class AuthController @Inject()(
     }
   }
 
+  def continueOnSignIn: Action[AnyContent] = (cc.authAndGetOptionalData() andThen cc.retrieveSavedAnswers()) {
+    implicit request =>
+      val answers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId, lastUpdated = Instant.now(clock)))
+      answers.get(SavedProgressPage).map {
+        _ => Redirect(controllers.routes.ContinueRegistrationController.onPageLoad())
+      }.getOrElse(
+        Redirect(controllers.routes.NoRegistrationInProgressController.onPageLoad())
+      )
+  }
+
   private def checkNiOrNorwayAndRedirect(vatInfo: VatCustomerInfo, answers: UserAnswers): Boolean = {
     (vatInfo.singleMarketIndicator, answers.get(BusinessBasedInNiPage)) match {
       case (true, Some(true)) => false

@@ -14,24 +14,23 @@
  * limitations under the License.
  *@
 
-@this(layout: templates.Layout, govukButton: GovukButton)
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton
+)
 
-@(
-    yourAccountUrl: String,
-    feedbackLink: String,
-    externalUrl: Option[String] = None
-)(implicit request: Request[_], messages: Messages)
+@(redirectURL: String = controllers.routes.AlreadyRegisteredController.onPageLoad().url)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("alreadyRegistered.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("noRegistrationInProgress.title"))) {
 
-    <div class="grid-row column-two-thirds">
+    <h1 class="govuk-heading-l">@messages("noRegistrationInProgress.heading")</h1>
 
-        <h1 class="govuk-heading-xl">@messages("alreadyRegistered.heading")</h1>
+    <p class="govuk-body">@messages("noRegistrationInProgress.sessionExpired")</p>
 
+    <p class="govuk-body">
         @govukButton(
-            ButtonViewModel(messages("alreadyRegistered.continue"))
-                .asLink(yourAccountUrl)
-                .withAttribute(("id", "backToYourAccount"))
+        ButtonViewModel(messages("site.startAgain"))
+        .asLink(redirectURL)
         )
-    </div>
+    </p>
 }
