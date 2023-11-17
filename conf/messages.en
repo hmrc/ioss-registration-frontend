@@ -383,8 +383,8 @@ checkEuDetailsAnswers.title = Check your answers for {0}
 checkEuDetailsAnswers.heading = Check your answers for {0}
 
 addEuDetails.title.singular = You added tax details for one EU country
-addEuDetails.title.plural = You added tax details for {0} EU country
-addEuDetails.heading.singular = You added tax details for one EU countries
+addEuDetails.title.plural = You added tax details for {0} EU countries
+addEuDetails.heading.singular = You added tax details for one EU country
 addEuDetails.heading.plural = You added tax details for {0} EU countries
 addEuDetails.maximumReached = You have added details for every EU country
 addEuDetails.error.required = Select yes if you need to add VAT details for another EU country
