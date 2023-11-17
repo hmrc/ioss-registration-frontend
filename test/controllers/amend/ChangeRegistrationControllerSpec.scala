@@ -88,11 +88,11 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .build()
 
+          when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Right(()).toFuture
+
           running(application) {
             val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
             val result = route(application, request).value
-
-            when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Right(()).toFuture
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe
@@ -107,11 +107,11 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .build()
 
+          when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Left(InternalServerError).toFuture
+
           running(application) {
             val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
             val result = route(application, request).value
-
-            when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Left(InternalServerError).toFuture
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustBe routes.ErrorSubmittingAmendmentController.onPageLoad().url
