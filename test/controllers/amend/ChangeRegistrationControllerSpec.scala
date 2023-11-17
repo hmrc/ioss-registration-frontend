@@ -100,21 +100,23 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           }
         }
 
-        "when the user has answered all necessary data but submission of the registration fails" in {
-          val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
-          val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
-            .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
-            .overrides(bind[RegistrationService].toInstance(registrationService))
-            .build()
+        "when the user has answered all necessary data but submission of the registration fails" - {
+          "redirect to error submitting amendment" in {
+            val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+            val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
+              .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+              .overrides(bind[RegistrationService].toInstance(registrationService))
+              .build()
 
-          when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Left(InternalServerError).toFuture
+            when(registrationService.amendRegistration(any(), any(), any())(any())) thenReturn Left(InternalServerError).toFuture
 
-          running(application) {
-            val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
-            val result = route(application, request).value
+            running(application) {
+              val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
+              val result = route(application, request).value
 
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result).value mustBe routes.ErrorSubmittingAmendmentController.onPageLoad().url
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe routes.ErrorSubmittingAmendmentController.onPageLoad().url
+            }
           }
         }
       }
