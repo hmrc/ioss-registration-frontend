@@ -571,10 +571,10 @@ bankDetails.error.accountName.required = Enter the name on the account
 bankDetails.error.bic.required = Enter your BIC or SWIFT code
 bankDetails.error.iban.required = Enter your IBAN
 bankDetails.error.accountName.length = Name on the account name must be 70 characters or less
-bankDetails.error.iban.invalid = Enter a real IBAN
-bankDetails.error.iban.checksum = Enter a real IBAN
+bankDetails.error.iban.invalid = Enter a valid IBAN
+bankDetails.error.iban.checksum = Enter a valid IBAN
 bankDetails.error.accountName.invalid = Name on the account must only include letters, numbers, hyphens, spaces and apostrophes
-bankDetails.error.bic.invalid = Enter a real BIC
+bankDetails.error.bic.invalid = Enter a valid BIC
 bankDetails.change.hidden = your bank account details
 
 error.missing_answers = Some of your information is missing. You must complete this before you can submit your changes.
