@@ -31,14 +31,14 @@
             </dt>
             <dd class="hmrc-add-to-a-list__change">
                 <a class="govuk-link" href="@item.listItem.changeUrl">
-                    <span aria-hidden="true">@messages("site.change")</span>
+                    <span>@messages("site.change")</span>
                     <span class="govuk-visually-hidden">@messages(changePrefix, item.listItem.name)</span>
                 </a>
             </dd>
             @if(item.removeButtonEnabled) {
                 <dd class="hmrc-add-to-a-list__remove">
                     <a class="govuk-link" href="@item.listItem.removeUrl">
-                        <span aria-hidden="true">@messages("site.remove")</span>
+                        <span>@messages("site.remove")</span>
                         <span class="govuk-visually-hidden">@messages(removePrefix, item.listItem.name)</span>
                     </a>
                 </dd>

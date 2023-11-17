@@ -285,8 +285,8 @@ addTradingName.heading.singular = You have added one UK trading name
 addTradingName.heading.plural = You have added {0} UK trading names
 addTradingName.maximumReached = You have added the maximum number of trading names.
 addTradingName.error.required = Select yes if you need to add another UK trading name
-addTradingName.change.hidden = Change {0}
-addTradingName.remove.hidden = Remove {0}
+addTradingName.change.hidden = {0}
+addTradingName.remove.hidden = {0}
 addTradingName.addAnother = Add another trading name?
 addTradingName.addAnother.hint = You can add up to 10 trading names.
 
@@ -331,7 +331,7 @@ registrationType.vatNumber = VAT number
 registrationType.taxId = Tax ID number
 registrationType.checkYourAnswersLabel = Tax registration type
 registrationType.error.required = Select a registration type
-registrationType.change.hidden = Your registration type
+registrationType.change.hidden = your registration type
 
 euVatNumber.title = What is your VAT registration number for {0}?
 euVatNumber.heading = What is your VAT registration number for {0}?
@@ -395,9 +395,9 @@ addEuDetails.addAnother.hint = You must tell us your tax details for all EU coun
 
 euDetails.checkYourAnswersLabel = EU tax details added
 euDetails.change.hidden = EU tax registration details added
-euDetails.remove.hidden = Remove tax details for {0}
+euDetails.remove.hidden = tax details for {0}
 
-change.euDetails.hidden = Change VAT registration number for {0}
+change.euDetails.hidden = VAT registration number for {0}
 
 deleteEuDetails.title = Are you sure you need to remove the tax details for {0}?
 deleteEuDetails.heading = Are you sure you need to remove the tax details for {0}?
@@ -407,7 +407,6 @@ deleteAllEuDetails.title = Remove all your EU tax information from this scheme?
 deleteAllEuDetails.heading = Remove all your EU tax information from this scheme?
 deleteAllEuDetails.warning = This will delete all the countries you have added tax information for.
 deleteAllEuDetails.error.required = Select yes if you want to remove all the countries you have added tax information for from this scheme
-deleteAllEuDetails.change.hidden = Remove all the countries you have added tax information for from this scheme
 
 fixedEstablishmentVRNAlreadyRegistered.title = You cannot register using this VAT number
 fixedEstablishmentVRNAlreadyRegistered.heading = You cannot register using this VAT number
@@ -467,7 +466,7 @@ previousScheme.change.hidden = which scheme did your business register for
 previousScheme.oss.exceed.error = Cannot select another OSS registration for {0}
 previousScheme.oss.schemes.exceed.error = Cannot select another {0} OSS registration for {1}
 previousScheme.ioss.exceed.error = Cannot select another IOSS registration for {0}
-previousScheme.remove.hidden = Remove tax details for {0} {1} scheme
+previousScheme.remove.hidden = tax details for {0} {1} scheme
 
 previousOssNumber.title = Enter your registration number for {0}?
 previousOssNumber.heading = Enter your registration number for {0}?
@@ -498,15 +497,14 @@ previousIossNumber.error.previousScheme.required = Enter your scheme number
 previousIossNumber.error.schemeNumber.required = Enter your IOSS registration number
 previousIossNumber.error.intermediaryNumber.required = Enter your intermediary number
 previousIossNumber.error.length = PreviousIossNumber must be 100 characters or less
-previousIossNumber.change.hidden = PreviousIossNumber
 previousIossNumber.error.invalid = Enter a valid IOSS registration number
 previousIntermediaryNumber.error.invalid = Enter a valid intermediary identification number
 
 previousSchemeNumber.checkYourAnswersLabel = Registration number
 
 previousRegistrations.checkYourAnswersLabel = Countries registered in
-previousRegistrations.change.hidden = Countries registered in
-previousRegistrations.add.hidden = Countries registered in
+previousRegistrations.change.hidden = countries registered in
+previousRegistrations.add.hidden = countries registered in
 
 checkPreviousSchemeAnswers.title = Check your answers for {0}
 checkPreviousSchemeAnswers.heading = Check your answers for {0}
@@ -531,7 +529,7 @@ addPreviousRegistration.heading = You added registration details for {0} countri
 addPreviousRegistration.maximumReached = You have added details for every country
 addPreviousRegistration.error.required = Select yes if you need to add another registration
 addPreviousRegistration.change.hidden = if you have registered in {0}
-addPreviousRegistration.remove.hidden = Remove registration details in {0}
+addPreviousRegistration.remove.hidden = registration details in {0}
 addPreviousRegistration.addAnother = Add another registration?
 addPreviousRegistration.addAnother.hint = You must tell us about all previous and current registrations from all OSS and IOSS schemes.
 
@@ -544,7 +542,6 @@ deleteAllPreviousRegistrations.title = Remove all your previous registrations in
 deleteAllPreviousRegistrations.heading = Remove all your previous registrations information from this scheme?
 deleteAllPreviousRegistrations.warning = This will delete all your previous registrations you have added.
 deleteAllPreviousRegistrations.error.required = Select yes if you want to remove all your previous registrations from this scheme
-deleteAllPreviousRegistrations.change.hidden = Remove all your previous registrations information from this scheme
 
 schemeStillActive.title = You cannot register for this service
 schemeStillActive.heading = You cannot register for this service
@@ -605,8 +602,8 @@ addWebsite.maximumReached = You have added the maximum number of website address
 addWebsite.addAnother = Add another website address?
 addWebsite.error.required = Select yes if you need to add a website address
 addWebsite.addAnother.hint = You can add up to 10 websites that you use to sell your goods.
-addWebsite.change.hidden = Change {0}
-addWebsite.remove.hidden = Remove {0}
+addWebsite.change.hidden = {0}
+addWebsite.remove.hidden = {0}
 
 deleteWebsite.title = Are you sure you need to remove {0}?
 deleteWebsite.heading = Are you sure you need to remove {0}?
