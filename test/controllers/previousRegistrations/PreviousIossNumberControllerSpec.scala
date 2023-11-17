@@ -19,20 +19,23 @@ package controllers.previousRegistrations
 import base.SpecBase
 import controllers.routes
 import forms.previousRegistrations.PreviousIossNumberFormProvider
-import models.domain.PreviousSchemeNumbers
-import models.{Country, Index, PreviousScheme}
 import models.core.{Match, MatchType}
+import models.domain.PreviousSchemeNumbers
+import models.previousRegistrations.NonCompliantDetails
+import models.{Country, Index, PreviousScheme}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, Waypoints}
 import pages.previousRegistrations.{PreviousEuCountryPage, PreviousIossNumberPage, PreviousIossSchemePage, PreviousSchemePage}
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import queries.previousRegistration.NonCompliantQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.core.CoreRegistrationValidationService
+import utils.FutureSyntax.FutureOps
 import views.html.previousRegistrations.PreviousIossNumberView
 
 import scala.concurrent.Future
@@ -228,6 +231,50 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar {
               waypoints
             ).url
           verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
+        }
+      }
+
+      "must save non-compliant details from the active scheme and redirect to the next page when match type is TransferringMSID" in {
+
+        val userAnswers = emptyUserAnswers
+          .set(PreviousEuCountryPage(index), country).success.value
+          .set(PreviousSchemePage(index, index), PreviousScheme.IOSSWOI).success.value
+          .set(PreviousIossSchemePage(index, index), false).success.value
+
+        val previousIossSchemeNumber: String = "IM0401234567"
+        val transferringMsidMatch = genericMatch.copy(matchType = MatchType.TransferringMSID, nonCompliantReturns = Some(1), nonCompliantPayments = Some(1))
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
+          Some(transferringMsidMatch).toFuture
+
+        val application =
+          applicationBuilder(userAnswers = Some(userAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+            .build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, previousIossNumberSubmitRoute)
+              .withFormUrlEncodedBody(("previousSchemeNumber", previousIossSchemeNumber))
+
+          val result = route(application, request).value
+
+          val expectedAnswers = userAnswers
+            .set(PreviousIossNumberPage(index, index),
+              PreviousSchemeNumbers(previousSchemeNumber = previousIossSchemeNumber, previousIntermediaryNumber = None)).success.value
+            .set(NonCompliantQuery(index, index),
+              NonCompliantDetails(nonCompliantReturns = Some(1), nonCompliantPayments = Some(1))
+            ).success.value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual PreviousIossNumberPage(index, index).navigate(waypoints, userAnswers, expectedAnswers).url
+          verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
+          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
         }
       }
     }

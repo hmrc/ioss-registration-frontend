@@ -48,7 +48,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
   private val form = formProvider(country)
   private val index = Index(0)
   private val previousSchemeNumbers = PreviousSchemeNumbers("012345678", None)
-  private val previousScheme = PreviousSchemeDetails(PreviousScheme.OSSU, previousSchemeNumbers)
+  private val previousScheme = PreviousSchemeDetails(PreviousScheme.OSSU, previousSchemeNumbers, None)
   private val previousRegistration = PreviousRegistrationDetails(country, Seq(previousScheme))
 
   private val baseUserAnswers =

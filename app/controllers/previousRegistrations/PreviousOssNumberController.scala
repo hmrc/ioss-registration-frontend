@@ -19,10 +19,10 @@ package controllers.previousRegistrations
 import controllers.GetCountry
 import controllers.actions._
 import forms.previousRegistrations.PreviousOssNumberFormProvider
-import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, WithName}
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.PreviousSchemeHintText
 import models.requests.AuthenticatedDataRequest
+import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, WithName}
 import pages.Waypoints
 import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -129,6 +129,7 @@ class PreviousOssNumberController @Inject()(
       ).flatMap {
         case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader =>
           Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
+
         case _ =>
           saveAndRedirect(countryIndex, schemeIndex, value, previousScheme, waypoints)
       }
@@ -147,7 +148,7 @@ class PreviousOssNumberController @Inject()(
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(
         PreviousOssNumberPage(countryIndex, schemeIndex),
-        PreviousSchemeNumbers(registrationNumber, None)
+        PreviousSchemeNumbers(registrationNumber, None),
       ))
       updatedAnswersWithScheme <- Future.fromTry(updatedAnswers.set(
         PreviousSchemePage(countryIndex, schemeIndex),

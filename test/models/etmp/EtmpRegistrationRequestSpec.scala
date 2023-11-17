@@ -22,14 +22,14 @@ import formats.Format.eisDateFormatter
 import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
-import models.previousRegistrations.PreviousRegistrationDetails
+import models.previousRegistrations.{NonCompliantDetails, PreviousRegistrationDetails}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
-import play.api.libs.json.{Json, JsSuccess}
+import play.api.libs.json.{JsSuccess, Json}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -99,7 +99,8 @@ class EtmpRegistrationRequestSpec extends SpecBase {
         previousEuCountry = arbitraryCountry.arbitrary.sample.value,
         previousSchemesDetails = Gen.listOfN(maxSchemes, PreviousSchemeDetails(
           previousScheme = arbitraryPreviousScheme.arbitrary.sample.value,
-          previousSchemeNumbers = arbitraryPreviousIossSchemeDetails.arbitrary.sample.value
+          previousSchemeNumbers = arbitraryPreviousIossSchemeDetails.arbitrary.sample.value,
+          nonCompliantDetails = Some(arbitraryNonCompliantDetails.arbitrary.sample.value)
         )).sample.value
       )
       val previousEuRegistrations: List[PreviousRegistrationDetails] = Gen.listOfN(numberOfRegistrations, previousRegistration).sample.value
@@ -155,6 +156,17 @@ class EtmpRegistrationRequestSpec extends SpecBase {
             iban = bankDetails.iban
           )
 
+        val getNonCompliantDetails: Option[NonCompliantDetails] = {
+          val maybeNonCompliantDetailsList = previousEuRegistrations.flatMap(_.previousSchemesDetails).flatMap(_.nonCompliantDetails)
+          maybeNonCompliantDetailsList match {
+            case Nil => None
+            case nonCompliantDetailsList =>
+              Some(nonCompliantDetailsList.maxBy(
+                nonCompliantDetails => nonCompliantDetails.nonCompliantReturns.getOrElse(0) + nonCompliantDetails.nonCompliantPayments.getOrElse(0)
+              ))
+          }
+        }
+
         val etmpPreviousEuRegistrationDetails: List[EtmpPreviousEuRegistrationDetails] = {
           for {
             previousEuRegistration <- previousEuRegistrations
@@ -195,8 +207,8 @@ class EtmpRegistrationRequestSpec extends SpecBase {
           contactName = genBusinessContactDetails.fullName,
           businessTelephoneNumber = genBusinessContactDetails.telephoneNumber,
           businessEmailId = genBusinessContactDetails.emailAddress,
-          nonCompliantReturns = None,
-          nonCompliantPayments = None
+          nonCompliantReturns = getNonCompliantDetails.flatMap(_.nonCompliantReturns.map(_.toString)),
+          nonCompliantPayments = getNonCompliantDetails.flatMap(_.nonCompliantPayments.map(_.toString)),
         )
 
         val etmpRegistrationRequest: EtmpRegistrationRequest = EtmpRegistrationRequest(

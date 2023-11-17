@@ -122,7 +122,8 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
         previousSchemeNumbers = PreviousSchemeNumbers(
           previousSchemeNumber = etmpPreviousEURegistrationDetails.registrationNumber,
           previousIntermediaryNumber = etmpPreviousEURegistrationDetails.intermediaryNumber
-        )
+        ),
+        nonCompliantDetails = None
       )
     }
 

@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package pages.previousRegistrations
+package queries.previousRegistration
 
-import controllers.previousRegistrations.routes
-import models.{Index, UserAnswers}
-import pages.{Page, Waypoints}
-import play.api.mvc.Call
+import models.Index
+import models.previousRegistrations.NonCompliantDetails
+import play.api.libs.json.JsPath
+import queries.{Gettable, Settable}
 
-case class PreviousOssNumberPage(countryIndex: Index, schemeIndex: Index) extends PreviousSchemeNumbersPage {
+case class NonCompliantQuery(countryIndex: Index, schemeIndex: Index) extends Gettable[NonCompliantDetails] with Settable[NonCompliantDetails] {
 
-  override def route(waypoints: Waypoints): Call =
-    routes.PreviousOssNumberController.onPageLoad(waypoints, countryIndex, schemeIndex)
+  override def path: JsPath = JsPath \ "previousRegistrations" \ countryIndex.position \ "previousSchemesDetails" \ schemeIndex.position \ toString
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    CheckPreviousSchemeAnswersPage(countryIndex)
-  }
+  override def toString: String = "nonCompliantDetails"
 }

@@ -95,7 +95,9 @@ trait EtmpPreviousEuRegistrations extends Logging {
   private def processPreviousSchemes(answers: UserAnswers, countryIndex: Index, schemeIndex: Index): PreviousSchemeDetails = {
     val previousScheme = getPreviousScheme(answers, countryIndex, schemeIndex)
     val previousSchemeNumber = getPreviousSchemeNumber(answers, countryIndex, schemeIndex)
-    PreviousSchemeDetails(previousScheme, previousSchemeNumber)
+    // TODO -> nonCompliantDetails to be implemented at a later date
+    val nonCompliantDetails = None
+    PreviousSchemeDetails(previousScheme, previousSchemeNumber, nonCompliantDetails)
   }
 
   private def getPreviousScheme(answers: UserAnswers, countryIndex: Index, schemeIndex: Index): PreviousScheme =
