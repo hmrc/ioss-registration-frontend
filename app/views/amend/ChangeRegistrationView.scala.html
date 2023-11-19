@@ -27,9 +27,16 @@
         govukWarningText: GovukWarningText
 )
 
-@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, iossNumber: String)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, iossNumber: String, isValid: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
+
+    @if(!isValid) {
+        @govukWarningText(WarningText(
+            iconFallbackText = Option(messages("site.warning")),
+            content = Text(messages("error.missing_answers"))
+        ))
+    }
 
     <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
 
@@ -53,8 +60,17 @@
 
     <p class="govuk-body">@messages("changeRegistration.info.p1")</p>
 
-    @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit()) {
-        @button("site.confirm", ChangeRegistrationPage.route(waypoints).url, waypoints)
+    @if(isValid) {
+        @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false)) {
+            @button("site.confirm", ChangeRegistrationPage.route(waypoints).url, waypoints)
+        }
+    } else {
+        <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+        <p class="govuk-body">@messages("error.missing_answers_prompt.general")</p>
+
+        @formHelper(action = controllers.amend.routes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = true)) {
+            @button("error.resolve_missing_answers", ChangeRegistrationPage.route(waypoints).url, waypoints)
+        }
     }
 
     <div id="processing-wheel" hidden>

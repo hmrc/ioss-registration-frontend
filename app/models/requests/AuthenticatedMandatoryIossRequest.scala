@@ -18,13 +18,13 @@ package models.requests
 
 import models.UserAnswers
 import models.amend.RegistrationWrapper
-import play.api.mvc.{Request, WrappedRequest}
+import play.api.mvc.WrappedRequest
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
 
 
 case class AuthenticatedMandatoryIossRequest[A](
-                                                 request: Request[A],
+                                                 request: AuthenticatedDataRequest[A],
                                                  credentials: Credentials,
                                                  vrn: Vrn,
                                                  iossNumber: String,

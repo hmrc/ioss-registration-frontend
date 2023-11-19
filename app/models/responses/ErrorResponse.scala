@@ -17,8 +17,7 @@
 package models.responses
 
 sealed trait ErrorResponse {
-
-  val body: String
+  def body: String
 }
 
 case object InvalidJson extends ErrorResponse {
