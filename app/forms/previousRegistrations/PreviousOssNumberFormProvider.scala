@@ -27,6 +27,7 @@ class PreviousOssNumberFormProvider @Inject() extends Mappings with EuVatNumberC
   def apply(country: Country, previousSchemes: Seq[PreviousScheme]): Form[String] =
     Form(
       "value" -> text("previousOssNumber.error.required", Seq(country.name))
+        .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
         .verifying(
           validateEuVatNumberOrEu(country.code, "previousOssNumber.error.invalid")
         )

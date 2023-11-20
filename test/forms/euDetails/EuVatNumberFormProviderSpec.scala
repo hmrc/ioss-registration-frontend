@@ -89,6 +89,36 @@ class EuVatNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("SE", "Sweden"), Seq("12345678901", "1234567890120", "1234567AA012"))
   )
 
+  val countriesAndLowercaseVatNumbers: Seq[(Country, Seq[String])] = Seq(
+    (Country("AT", "Austria"), Seq("atU23456789")),
+    (Country("BE", "Belgium"), Seq("be0123456789", "be1123456789")),
+    (Country("BG", "Bulgaria"), Seq("bg123456789", "bg1234567890")),
+    (Country("HR", "Croatia"), Seq("hr12345678901")),
+    (Country("CY", "Republic of Cyprus"), Seq("cy12345678L")),
+    (Country("CZ", "Czech Republic"), Seq("cz12345678", "cz123456789", "cz1234567890")),
+    (Country("DK", "Denmark"), Seq("dk12345678")),
+    (Country("EE", "Estonia"), Seq("ee123456789")),
+    (Country("FI", "Finland"), Seq("fi12345678")),
+    (Country("FR", "France"), Seq("frAA123456789", "fr11123456789", "frA1123456789", "fr1A123456789")),
+    (Country("DE", "Germany"), Seq("de123456789")),
+    (Country("EL", "Greece"), Seq("el123456789")),
+    (Country("HU", "Hungary"), Seq("hu12345678")),
+    (Country("IE", "Ireland"), Seq("ie1A12345L", "ie1112345L", "ie1234567WI", "ie1A23456A")),
+    (Country("IT", "Italy"), Seq("it12345678901")),
+    (Country("LV", "Latvia"), Seq("lv12345678901")),
+    (Country("LT", "Lithuania"), Seq("lt123456789", "lt123456789012")),
+    (Country("LU", "Luxembourg"), Seq("lu12345678")),
+    (Country("MT", "Malta"), Seq("mt12345678")),
+    (Country("NL", "Netherlands"), Seq("nl123456789012", "nla+*456789012", "nl++++++++++++", "nl************", "nlAAAAAAAAAAAA")),
+    (Country("PL", "Poland"), Seq("pl1234567890")),
+    (Country("PT", "Portugal"), Seq("pt123456789")),
+    (Country("RO", "Romania"), Seq("rO12", "rO123", "rO1234", "rO12345", "rO123456", "rO1234567", "rO12345678", "rO123456789", "rO1234567890")),
+    (Country("SK", "Slovakia"), Seq("sk1234567890")),
+    (Country("SI", "Slovenia"), Seq("si12345678")),
+    (Country("ES", "Spain"), Seq("esA12345678", "es12345678A", "esA1234567A")),
+    (Country("SE", "Sweden"), Seq("se123456789012"))
+  )
+
   ".value" - {
 
     val fieldName = "value"
@@ -122,6 +152,20 @@ class EuVatNumberFormProviderSpec extends StringFieldBehaviours {
               val result = form.bind(Map(fieldName -> vatNumber)).apply(fieldName)
               result.errors mustBe Seq(FormError(fieldName, invalidKey))
             }
+        }
+    }
+
+    countriesAndLowercaseVatNumbers.foreach {
+      case (country, vatNumbers) =>
+        vatNumbers.foreach { vatNumber =>
+          s"must bind valid lowercase EU VAT number ${vatNumber} for ${country.name}" - {
+            val form = formProvider(country)
+            behave like fieldThatBindsValidData(
+              form,
+              fieldName,
+              vatNumber
+            )
+          }
         }
     }
   }
