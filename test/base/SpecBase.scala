@@ -132,7 +132,7 @@ trait SpecBase
     origin = "IOSS",
     deskproServiceName = Some("one-stop-shop-registration-frontend"),
     accessibilityStatementUrl = "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",
-    pageTitle = Some("ioss-registration-frontend"),
+    pageTitle = Some("VAT Import One Stop Shop Scheme"),
     backUrl = Some("/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"),
     email = Some(verifyEmail)
   )
