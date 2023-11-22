@@ -21,16 +21,18 @@ import controllers.actions.{FakeIossRequiredAction, IossRequiredAction}
 import controllers.amend.{routes => amendRoutes}
 import models.amend.RegistrationWrapper
 import models.responses.InternalServerError
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import pages._
 import pages.amend.ChangeRegistrationPage
+import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{running, _}
+import queries.euDetails.EuDetailsQuery
 import services._
 import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -48,6 +50,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
   private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
   private val amendYourAnswersPage = ChangeRegistrationPage
   private val registrationService = mock[RegistrationService]
+  private val country = arbitraryCountry.arbitrary.sample.value
 
   "ChangeRegistration Controller" - {
 
@@ -154,6 +157,27 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
               status(result) mustBe SEE_OTHER
               redirectLocation(result).value mustEqual controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints).url
+            }
+          }
+
+          "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
+            val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+
+            val answers = completeUserAnswers
+              .set(TaxRegisteredInEuPage, true).success.value
+              .set(EuCountryPage(Index(0)), country).success.value
+              .remove(EuDetailsQuery(Index(0))).success.value
+
+            val application = applicationBuilder(userAnswers = Some(answers))
+              .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+              .build()
+
+            running(application) {
+              val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = true).url)
+              val result = route(application, request).value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustEqual controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(waypoints).url
             }
           }
         }

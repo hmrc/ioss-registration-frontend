@@ -17,15 +17,16 @@
 package controllers
 
 import base.SpecBase
-import models.CheckMode
 import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.requests.AuthenticatedDataRequest
 import models.responses.etmp.EtmpEnrolmentResponse
 import models.responses.{ConflictFound, InternalServerError => ServerError}
+import models.{CheckMode, Index}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.mvc.AnyContentAsEmpty
@@ -33,6 +34,7 @@ import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.etmp.EtmpEnrolmentResponseQuery
+import queries.euDetails.EuDetailsQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.{AuditService, RegistrationService, SaveForLaterService}
 import utils.FutureSyntax.FutureOps
@@ -47,6 +49,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
   private val mockRegistrationService: RegistrationService = mock[RegistrationService]
   private val mockAuditService: AuditService = mock[AuditService]
   private val mockSaveForLaterService: SaveForLaterService = mock[SaveForLaterService]
+  private val country = arbitraryCountry.arbitrary.sample.value
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationService)
@@ -176,6 +179,27 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           redirectLocation(result).value mustBe ErrorSubmittingRegistrationPage.route(waypoints).url
           verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
           verify(mockSaveForLaterService, times(1)).saveAnswers(any(), any())(any(), any(), any())
+        }
+      }
+
+      "when the user has not answered all necessary data" - {
+        "the user is redirected when the incomplete prompt is shown" - {
+          "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
+            val answers = completeUserAnswersWithVatInfo
+              .set(TaxRegisteredInEuPage, true).success.value
+              .set(EuCountryPage(Index(0)), country).success.value
+              .remove(EuDetailsQuery(Index(0))).success.value
+
+            val application = applicationBuilder(userAnswers = Some(answers)).build()
+
+            running(application) {
+              val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(waypoints, incompletePrompt = true).url)
+              val result = route(application, request).value
+
+              status(result) mustBe SEE_OTHER
+              redirectLocation(result).value mustBe controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(waypoints).url
+            }
+          }
         }
       }
     }
