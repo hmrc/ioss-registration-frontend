@@ -109,6 +109,23 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("CY", "Republic of Cyprus"), Seq(PreviousScheme.OSSU, PreviousScheme.OSSNU), Seq("CY12345678L", "EU234567891"))
   )
 
+  private val countriesAndLowerCaseOSSSchemes: Seq[(Country, Seq[String])] = Seq(
+    (Country("AT", "Austria"), Seq("eu123456789")),
+    (Country("BE", "Belgium"), Seq("be1234567891")),
+    (Country("BG", "Bulgaria"), Seq("bg1234567890")),
+    (Country("HR", "Croatia"), Seq("eu123567901")),
+    (Country("CY", "Republic of Cyprus"), Seq("cy12345678L", "eu234567891"))
+  )
+
+  private val countriesAndOSSSchemesWithSpaces: Seq[(Country, Seq[String])] = Seq(
+    (Country("AT", "Austria"), Seq(" eu 1234 56789")),
+    (Country("BE", "Belgium"), Seq(" be1234 567891  ")),
+    (Country("BG", "Bulgaria"), Seq("b g 123 45 6789 0")),
+    (Country("HR", "Croatia"), Seq("eu 123 5679 01 ")),
+    (Country("CY", "Republic of Cyprus"), Seq(" cy12345678L ", "eu 234567891"))
+  )
+
+
   ".value" - {
 
     val fieldName = "value"
@@ -175,6 +192,36 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
               result.errors mustBe Seq(FormError(fieldName, invalidOssSchemeKey, Seq(schemeType, country.name)))
             }
         }
+    }
+
+    countriesAndLowerCaseOSSSchemes.foreach {
+      case (country, vatNumbers) =>
+        vatNumbers.foreach { vatNumber =>
+          s"must bind vat number with lowercase letters $vatNumber for ${country.name}" - {
+            val form = formProvider(country, Seq.empty)
+            behave like fieldThatBindsValidData(
+              form,
+              fieldName,
+              vatNumber
+            )
+          }
+        }
+
+    }
+
+    countriesAndOSSSchemesWithSpaces.foreach {
+      case (country, vatNumbers) =>
+        vatNumbers.foreach { vatNumber =>
+          s"must bind vat number with spaces in $vatNumber for ${country.name}" - {
+            val form = formProvider(country, Seq.empty)
+            behave like fieldThatBindsValidData(
+              form,
+              fieldName,
+              vatNumber
+            )
+          }
+        }
+
     }
   }
 }

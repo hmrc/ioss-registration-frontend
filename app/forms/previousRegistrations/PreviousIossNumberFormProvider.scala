@@ -32,12 +32,15 @@ class PreviousIossNumberFormProvider @Inject() extends Mappings with IossRegistr
     Form(
       mapping(
         "previousSchemeNumber" -> text("previousIossNumber.error.schemeNumber.required")
+          .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
           .verifying(validateIossRegistrationNumber(country.code, "previousIossNumber.error.invalid")),
         if (hasIntermediary) {
           "previousIntermediaryNumber" -> mandatory(text("previousIossNumber.error.intermediaryNumber.required")
+            .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
             .verifying(validateIntermediaryIdentificationNumber(country.code, "previousIntermediaryNumber.error.invalid")))
         } else {
           "previousIntermediaryNumber" -> optional(text("previousIossNumber.error.intermediaryNumber.required")
+            .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
             .verifying(validateIntermediaryIdentificationNumber(country.code, "previousIntermediaryNumber.error.invalid")))
         }
       )(PreviousSchemeNumbers.apply)(PreviousSchemeNumbers.unapply)

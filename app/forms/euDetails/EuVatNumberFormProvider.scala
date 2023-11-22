@@ -27,7 +27,7 @@ class EuVatNumberFormProvider @Inject() extends Mappings with EuVatNumberConstra
   def apply(country: Country): Form[String] =
     Form(
       "value" -> text("euVatNumber.error.required", args = Seq(country.name))
+        .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
         .verifying(validateEuVatNumber(country.code, "euVatNumber.error.invalid"))
-        .transform[String](_.toUpperCase, value => value)
     )
 }
