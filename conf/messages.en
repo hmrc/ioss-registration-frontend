@@ -649,7 +649,7 @@ savedProgress.nextSteps = What happens next
 savedProgress.listStart = You can:
 savedProgress.continue.registration = continue to complete your registration
 savedProgress.sign.out = sign out and come back later
-savedProgress.sign.in = If you sign out, you must sign back into your <a href="{0}">Government Gateway</a> to continue.
+savedProgress.sign.in = If you sign out, you must sign back into your <a href="{0}" class="govuk-link">Government Gateway</a> to continue.
 
 continueRegistration.title = You have a registration in progress. Do you want to continue?
 continueRegistration.heading = You have a registration in progress. Do you want to continue?
