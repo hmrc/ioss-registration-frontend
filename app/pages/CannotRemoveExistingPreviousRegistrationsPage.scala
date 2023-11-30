@@ -16,14 +16,10 @@
 
 package pages
 
-import models.UserAnswers
 import play.api.mvc.Call
 
 object CannotRemoveExistingPreviousRegistrationsPage extends Page {
 
   override def route(waypoints: Waypoints): Call =
     controllers.previousRegistrations.routes.CannotRemoveExistingPreviousRegistrationsController.onPageLoad()
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    throw new NotImplementedError("nextPageNormalMode is not implemented")
 }
