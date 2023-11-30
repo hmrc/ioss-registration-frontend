@@ -398,7 +398,7 @@ euDetails.checkYourAnswersLabel = EU tax details added
 euDetails.change.hidden = EU tax registration details added
 euDetails.remove.hidden = tax details for {0}
 
-change.euDetails.hidden = VAT registration number for {0}
+change.euDetails.hidden = tax details for {0}
 
 deleteEuDetails.title = Are you sure you need to remove the tax details for {0}?
 deleteEuDetails.heading = Are you sure you need to remove the tax details for {0}?
