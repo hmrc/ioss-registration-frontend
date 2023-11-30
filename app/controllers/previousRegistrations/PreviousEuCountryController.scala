@@ -43,7 +43,8 @@ class PreviousEuCountryController @Inject()(
   def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
     implicit request =>
 
-      val form = formProvider(index, request.userAnswers.get(AllPreviousRegistrationsQuery). getOrElse(Seq.empty).map(_.previousEuCountry))
+      val form = formProvider(index, request.userAnswers.get(AllPreviousRegistrationsQuery)
+        .getOrElse(Seq.empty).map(_.previousEuCountry))
 
       val preparedForm = request.userAnswers.get(PreviousEuCountryPage(index)) match {
         case None => form
@@ -56,7 +57,8 @@ class PreviousEuCountryController @Inject()(
   def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
 
-      val form = formProvider(index, request.userAnswers.get(AllPreviousRegistrationsQuery). getOrElse(Seq.empty).map(_.previousEuCountry))
+      val form = formProvider(index, request.userAnswers.get(AllPreviousRegistrationsQuery)
+        .getOrElse(Seq.empty).map(_.previousEuCountry))
 
       form.bindFromRequest().fold(
         formWithErrors =>

@@ -33,7 +33,7 @@ class TradingNameFormProvider @Inject() extends Mappings {
           maxLength(100, "tradingName.error.length"),
           notADuplicate(thisIndex, existingAnswers, "tradingName.error.duplicate"),
           regexp(commonTextPattern, "tradingName.error.invalid"),
-          notContainStrings(tradingNameReservedWords, "tradingName.error.invalid")
+          notContainStrings(tradingNameReservedWords, "tradingName.error.usedReservedWord")
         )),
     )
 }

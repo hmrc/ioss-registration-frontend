@@ -20,30 +20,34 @@
 
 @this()
 
-@(itemList: Seq[ListItemWrapper], itemSize: ItemSize = addtoalist.Short, changePrefix :String, removePrefix :String)(implicit messages: Messages)
+@(itemList: Seq[ListItemWrapper], itemSize: ItemSize = addtoalist.Short, changePrefix: String, removePrefix: String)(implicit messages: Messages)
 
 <div class="govuk-form-group">
-    <dl class="hmrc-add-to-a-list hmrc-add-to-a-list--@itemSize.suffix">
-    @for(item <- itemList) {
-        <div class="hmrc-add-to-a-list__contents">
-            <dt class="hmrc-add-to-a-list__identifier hmrc-add-to-a-list__identifier--light">
-            @Html(item.listItem.name)
-            </dt>
-            <dd class="hmrc-add-to-a-list__change">
-                <a class="govuk-link" href="@item.listItem.changeUrl">
-                    <span>@messages("site.change")</span>
-                    <span class="govuk-visually-hidden">@messages(changePrefix, item.listItem.name)</span>
-                </a>
-            </dd>
-            @if(item.removeButtonEnabled) {
-                <dd class="hmrc-add-to-a-list__remove">
-                    <a class="govuk-link" href="@item.listItem.removeUrl">
-                        <span>@messages("site.remove")</span>
-                        <span class="govuk-visually-hidden">@messages(removePrefix, item.listItem.name)</span>
-                    </a>
-                </dd>
-            }
-        </div>
-    }
-    </dl>
+  <dl class="govuk-summary-list hmrc-list-with-actions hmrc-list-with-actions--@itemSize.suffix">
+  @for(item <- itemList) {
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key govuk-!-font-weight-regular hmrc-summary-list__key">
+      @Html(item.listItem.name)
+      </dt>
+      <dd class="govuk-summary-list__actions hmrc-summary-list__actions">
+        <ul class="govuk-summary-list__actions-list">
+          <li class="govuk-summary-list__actions-list-item">
+            <a class="govuk-link" href="@item.listItem.changeUrl">
+              <span>@messages("site.change")</span>
+              <span class="govuk-visually-hidden">@messages(changePrefix, item.listItem.name)</span>
+            </a>
+          </li>
+          @if(item.removeButtonEnabled) {
+            <li class="govuk-summary-list__actions-list-item">
+              <a class="govuk-link" href="@item.listItem.removeUrl">
+                <span>@messages("site.remove")</span>
+                <span class="govuk-visually-hidden">@messages(removePrefix, item.listItem.name)</span>
+              </a>
+            </li>
+          </ul>
+      </dd>
+      }
+    </div>
+  }
+  </dl>
 </div>
