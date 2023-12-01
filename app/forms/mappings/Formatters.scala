@@ -107,6 +107,7 @@ trait Formatters {
         baseFormatter
           .bind(key, data)
           .right
+          .map(_.toUpperCase)
           .flatMap {
             value =>
               Bic(value) match {
@@ -127,6 +128,7 @@ trait Formatters {
         baseFormatter
           .bind(key, data)
           .right
+          .map(_.toUpperCase)
           .flatMap {
             value =>
               Iban(value) match {
