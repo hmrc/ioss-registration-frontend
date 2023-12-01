@@ -471,8 +471,8 @@ previousScheme.remove.hidden = tax details for {0} {1} scheme
 
 previousOssNumber.title = Enter your registration number for {0}?
 previousOssNumber.heading = Enter your registration number for {0}?
-previousOssNumber.hint.default = This will start with {0} or EU, for example {0}{1}{2}
-previousOssNumber.hint.union = This will start with {0}, for example {0}{1}{2}
+previousOssNumber.hint.default = This will start with {0} or EU, for example {0}{1}
+previousOssNumber.hint.union = This will start with {0}, for example {0}{1}
 previousOssNumber.hint.nonunion = This will start with EU, for example EU123456789
 previousOssNumber.error.required = Enter your registration number for {0}
 previousOssNumber.error.invalid = Enter a registration number in the correct format
