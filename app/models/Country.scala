@@ -23,7 +23,7 @@ import viewmodels.govuk.select._
 
 case class Country(code: String, name: String)
 
-case class CountryWithValidationDetails(country: Country, vrnRegex: String, messageInput: String, exampleVrn: String, additionalMessage: Option[String] = None)
+case class CountryWithValidationDetails(country: Country, vrnRegex: String, messageInput: String, exampleVrn: String)
 
 object Country {
 
@@ -283,10 +283,10 @@ object CountryWithValidationDetails extends Logging {
     CountryWithValidationDetails(Country("HR", "Croatia"), croatiaVatNumberRegex, "the 11 numbers", "01234567899"),
     CountryWithValidationDetails(Country("CY", "Republic of Cyprus"), cyprusVatNumberRegex, "the 9 characters", "12345678X"),
     CountryWithValidationDetails(Country("CZ", "Czech Republic"), czechRepublicVatNumberRegex, "8, 9 or 10 numbers", "123456789"),
-    CountryWithValidationDetails(Country("DK", "Denmark"), denmarkVatNumberRegex, "the 8 numbers", "12345678", Some(". Do not include spaces.")),
+    CountryWithValidationDetails(Country("DK", "Denmark"), denmarkVatNumberRegex, "the 8 numbers", "12345678"),
     CountryWithValidationDetails(Country("EE", "Estonia"), estoniaVatNumberRegex, "the 9 numbers", "123456789"),
     CountryWithValidationDetails(Country("FI", "Finland"), finlandVatNumberRegex, "the 8 numbers", "12345678"),
-    CountryWithValidationDetails(Country("FR", "France"), franceVatNumberRegex, "the 11 characters", "XX123456789", Some(". Do not include spaces.")),
+    CountryWithValidationDetails(Country("FR", "France"), franceVatNumberRegex, "the 11 characters", "XX123456789"),
     CountryWithValidationDetails(Country("DE", "Germany"), germanyVatNumberRegex, "the 9 numbers", "123456789"),
     CountryWithValidationDetails(Country("EL", "Greece"), greeceVatNumberRegex, "the 9 numbers", "123456789"),
     CountryWithValidationDetails(Country("HU", "Hungary"), hungaryVatNumberRegex, "the 8 numbers", "12345678"),

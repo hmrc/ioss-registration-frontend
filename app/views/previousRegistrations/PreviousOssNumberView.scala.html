@@ -46,11 +46,11 @@
             .withHint(HintViewModel(
                 previousSchemeHintText match {
                     case PreviousSchemeHintText.OssUnion =>
-                        messages("previousOssNumber.hint.union",  countryWithValidationDetails.country.code, countryWithValidationDetails.exampleVrn, countryWithValidationDetails.additionalMessage.getOrElse(""))
+                        messages("previousOssNumber.hint.union",  countryWithValidationDetails.country.code, countryWithValidationDetails.exampleVrn)
                     case PreviousSchemeHintText.OssNonUnion =>
                         messages("previousOssNumber.hint.nonunion")
                     case PreviousSchemeHintText.Both =>
-                        messages("previousOssNumber.hint.default",  countryWithValidationDetails.country.code, countryWithValidationDetails.exampleVrn, countryWithValidationDetails.additionalMessage.getOrElse(""))
+                        messages("previousOssNumber.hint.default",  countryWithValidationDetails.country.code, countryWithValidationDetails.exampleVrn)
                 }
             ))
         )

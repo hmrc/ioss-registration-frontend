@@ -336,7 +336,7 @@ registrationType.change.hidden = your registration type
 
 euVatNumber.title = What is your VAT registration number for {0}?
 euVatNumber.heading = What is your VAT registration number for {0}?
-euVatNumber.hint = This will start with {0}, for example {0}{1}{2}
+euVatNumber.hint = This will start with {0}, for example {0}{1}
 euVatNumber.checkYourAnswersLabel = VAT number
 euVatNumber.error.required = Enter your VAT registration number for {0}
 euVatNumber.error.invalid = Enter a registration number in the correct format
