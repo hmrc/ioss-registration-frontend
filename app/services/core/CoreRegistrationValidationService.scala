@@ -99,7 +99,9 @@ class CoreRegistrationValidationService @Inject()(
       case Right(coreRegistrationResponse) =>
         auditService.audit(CoreRegistrationAuditModel.build(coreRegistrationRequest, coreRegistrationResponse))
         coreRegistrationResponse.matches.headOption
-      case _ => throw CoreRegistrationValidationException("Error while validating core registration")
+      case Left(errorResponse) =>
+        logger.error(s"failed getting registration response $errorResponse")
+        throw CoreRegistrationValidationException("Error while validating core registration")
     }
   }
 

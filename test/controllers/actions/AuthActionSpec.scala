@@ -19,6 +19,7 @@ package controllers.actions
 import base.SpecBase
 import com.google.inject.Inject
 import config.FrontendAppConfig
+import connectors.RegistrationConnector
 import controllers.auth.{routes => authRoutes}
 import controllers.routes
 import org.mockito.ArgumentMatchers.any
@@ -54,6 +55,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
   }
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
 
   override def beforeEach(): Unit = {
     reset(mockAuthConnector)
@@ -261,7 +263,11 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           val urlBuilder = application.injector.instanceOf[UrlBuilderService]
           val actionBuilder = application.injector.instanceOf[DefaultActionBuilder]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), appConfig, urlBuilder)
+          val authAction = new AuthenticatedIdentifierAction(
+            new FakeFailingAuthConnector(new MissingBearerToken),
+            appConfig,
+            urlBuilder
+          )
           val controller = new Harness(authAction, actionBuilder)
           val result = controller.onPageLoad()(FakeRequest("", "/endpoint"))
 
@@ -288,7 +294,8 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           val result = controller.onPageLoad()(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual appConfig.loginUrl + "?continue=" + URLEncoder.encode(urlBuilder.loginContinueUrl(request).get(OnlyRelative).url, "UTF-8")        }
+          redirectLocation(result).value mustEqual appConfig.loginUrl + "?continue=" + URLEncoder.encode(urlBuilder.loginContinueUrl(request).get(OnlyRelative).url, "UTF-8")
+        }
       }
     }
 

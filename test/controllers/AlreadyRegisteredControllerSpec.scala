@@ -37,7 +37,6 @@ import scala.concurrent.Future
 class AlreadyRegisteredControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
   private val mockRegistrationConnector = mock[RegistrationConnector]
-  private val registrationWrapper:RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
 
   override def beforeEach(): Unit = {
     Mockito.reset(mockRegistrationConnector)

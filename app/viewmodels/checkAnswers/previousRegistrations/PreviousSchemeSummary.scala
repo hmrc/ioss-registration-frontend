@@ -31,13 +31,13 @@ object PreviousSchemeSummary  {
   def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, country: Country, existingPreviousSchemes: Seq[PreviousScheme], waypoints: Waypoints)
          (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
-      answer =>
+      previousAnsweredScheme: PreviousScheme =>
 
-        val isExistingScheme = existingPreviousSchemes.contains(answer)
+        val isExistingScheme = existingPreviousSchemes.contains(previousAnsweredScheme)
 
         val value = ValueViewModel(
           HtmlContent(
-            HtmlFormat.escape(messages(s"previousScheme.$answer"))
+            HtmlFormat.escape(messages(s"previousScheme.$previousAnsweredScheme"))
           )
         )
 
@@ -48,7 +48,7 @@ object PreviousSchemeSummary  {
             Seq(
               ActionItemViewModel("site.remove", controllers.previousRegistrations.routes.DeletePreviousSchemeController.onPageLoad(
                 waypoints, countryIndex, schemeIndex).url)
-                .withVisuallyHiddenText(messages("previousScheme.remove.hidden", country.name, HtmlFormat.escape(messages(s"previousScheme.$answer"))))
+                .withVisuallyHiddenText(messages("site.remove.hidden", country.name, HtmlFormat.escape(messages(s"previousScheme.$previousAnsweredScheme"))))
             )
           } else {
             Seq.empty

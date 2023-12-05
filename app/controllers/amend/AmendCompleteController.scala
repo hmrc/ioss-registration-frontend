@@ -31,36 +31,38 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class AmendCompleteController @Inject()(
-                                               override val messagesApi: MessagesApi,
-                                               cc: AuthenticatedControllerComponents,
-                                               view: AmendCompleteView,
-                                               frontendAppConfig: FrontendAppConfig,
-                                               registrationConnector: RegistrationConnector,
-                                               clock: Clock
-)(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                         override val messagesApi: MessagesApi,
+                                         cc: AuthenticatedControllerComponents,
+                                         view: AmendCompleteView,
+                                         frontendAppConfig: FrontendAppConfig,
+                                         registrationConnector: RegistrationConnector,
+                                         clock: Clock
+                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(): Action[AnyContent] = (cc.actionBuilder andThen cc.identify andThen cc.getData andThen cc.requireData()).async {
+  def onPageLoad(): Action[AnyContent] = (cc.actionBuilder andThen cc.identify andThen cc.getData andThen cc.requireData(isInAmendMode = true)).async {
     implicit request => {
 
       for {
         externalEntryUrl <- registrationConnector.getSavedExternalEntry()
       } yield {
-          {for {
+        {
+          for {
             organisationName <- getOrganisationName(request.userAnswers)
           } yield {
             val savedUrl = externalEntryUrl.fold(_ => None, _.url)
-              Ok(
-                view(
-                  request.vrn,
-                  frontendAppConfig.feedbackUrl,
-                  savedUrl,
-                  frontendAppConfig.iossYourAccountUrl,
-                  organisationName
-                )
+            Ok(
+              view(
+                request.vrn,
+                frontendAppConfig.feedbackUrl,
+                savedUrl,
+                frontendAppConfig.iossYourAccountUrl,
+                organisationName
               )
-          }}.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            )
+          }
+        }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
   }

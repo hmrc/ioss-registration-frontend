@@ -18,6 +18,7 @@ package base
 
 import controllers.actions.{FakeCheckEmailVerificationFilter, _}
 import generators.Generators
+import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
 import models.{BankDetails, Bic, BusinessContactDetails, CheckMode, Iban, Index, UserAnswers, Website}
@@ -38,12 +39,12 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.FakeRequest
+import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.auth.core.{Enrolment, Enrolments}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
 
 import java.time.{Clock, Instant, LocalDate, ZoneId}
-import scala.collection.immutable.Seq
 
 trait SpecBase
   extends AnyFreeSpec
@@ -91,6 +92,7 @@ trait SpecBase
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, lastUpdated = arbitraryInstant)
   def emptyUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.copy(vatInfo = Some(vatCustomerInfo))
   def basicUserAnswersWithVatInfo: UserAnswers = emptyUserAnswers.set(RegisteredForIossInEuPage, false).success.value.copy(vatInfo = Some(vatCustomerInfo))
+
   def completeUserAnswersWithVatInfo: UserAnswers =
     basicUserAnswersWithVatInfo
       .set(HasTradingNamePage, false).success.value
@@ -142,8 +144,9 @@ trait SpecBase
   )
 
   val yourAccountUrl = "http://localhost:10193/pay-vat-on-goods-sold-to-eu/import-one-stop-shop-returns-payments"
+  val registrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
 
- protected def createCheckModeWayPoint(checkAnswersPage: CheckAnswersPage): NonEmptyWaypoints =
+  protected def createCheckModeWayPoint(checkAnswersPage: CheckAnswersPage): NonEmptyWaypoints =
     EmptyWaypoints.setNextWaypoint(Waypoint(checkAnswersPage, CheckMode, checkAnswersPage.urlFragment))
 
 }

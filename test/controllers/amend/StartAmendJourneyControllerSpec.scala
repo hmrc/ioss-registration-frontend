@@ -41,8 +41,6 @@ class StartAmendJourneyControllerSpec extends SpecBase with BeforeAndAfterEach {
   private val mockRegistrationService: RegistrationService = mock[RegistrationService]
   private val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
 
-  private val registrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
-
   override def beforeEach(): Unit = {
     Mockito.reset(mockRegistrationConnector)
     Mockito.reset(mockRegistrationService)

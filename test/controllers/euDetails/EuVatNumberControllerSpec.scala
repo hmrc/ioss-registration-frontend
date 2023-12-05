@@ -17,6 +17,7 @@
 package controllers.euDetails
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import forms.euDetails.EuVatNumberFormProvider
 import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
 import models.{CheckMode, Country, CountryWithValidationDetails, Index, UserAnswers}
@@ -426,18 +427,21 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
   "inAmend" - {
 
     "must not redirect to ExcludedVRNController page when the vat number is excluded for match FixedEstablishmentQuarantinedNETP when in Amend" in {
-
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
-
         val expectedResponse = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP)
 
         when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
+
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
           .withFormUrlEncodedBody(("value", euVatNumber))
@@ -446,14 +450,17 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
-    "must not redirect to ExcludedVRNController page when the vat number is excluded for match TraderIdQuarantinedNETP " in {
-
+    "must not redirect to ExcludedVRNController page when the vat number is excluded for match TraderIdQuarantinedNETP" in {
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
@@ -463,6 +470,9 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
         when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
 
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
+
         val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
           .withFormUrlEncodedBody(("value", euVatNumber))
 
@@ -470,23 +480,28 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
-    "must not redirect to ExcludedVRNController page when the vat number is excluded for match OtherMSNETPQuarantinedNETP " in {
-
+    "must not redirect to ExcludedVRNController page when the vat number is excluded for match OtherMSNETPQuarantinedNETP" in {
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
-
         val expectedResponse = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP)
 
         when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
 
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
+
         val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
           .withFormUrlEncodedBody(("value", euVatNumber))
 
@@ -494,6 +509,8 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
   }

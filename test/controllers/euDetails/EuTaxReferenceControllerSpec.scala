@@ -17,6 +17,7 @@
 package controllers.euDetails
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import forms.euDetails.EuTaxReferenceFormProvider
 import models.{CheckMode, Country, Index, UserAnswers}
 import models.core.{Match, MatchType}
@@ -39,12 +40,12 @@ import views.html.euDetails.EuTaxReferenceView
 import scala.concurrent.Future
 
 class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
-  
+
   private val waypoints: Waypoints = EmptyWaypoints
   private val countryIndex: Index = Index(0)
   private val country: Country = arbitraryCountry.arbitrary.sample.value
   private val euTaxReference = arbitraryEuTaxReference.sample.value
-  
+
   val formProvider = new EuTaxReferenceFormProvider()
   val form: Form[String] = formProvider(country)
 
@@ -431,12 +432,14 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
   "inAmend" - {
 
     "must not redirect to ExcludedVRNController page when the vat number is excluded for match FixedEstablishmentQuarantinedNETP" in {
+      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val taxReferenceNumber: String = "333333333"
 
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
@@ -446,6 +449,9 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
 
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
+
         val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
           .withFormUrlEncodedBody(("value", taxReferenceNumber))
 
@@ -453,16 +459,19 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must not redirect to ExcludedVRNController page when the vat number is excluded for match TraderIdQuarantinedNETP" in {
-
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val taxReferenceNumber: String = "333333333"
 
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
@@ -472,6 +481,9 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
 
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
+
         val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
           .withFormUrlEncodedBody(("value", taxReferenceNumber))
 
@@ -479,16 +491,19 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must not redirect to ExcludedVRNController page when the vat number is excluded for match OtherMSNETPQuarantinedNETP" in {
-
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val taxReferenceNumber: String = "333333333"
 
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
@@ -498,6 +513,9 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
 
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
+
         val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
           .withFormUrlEncodedBody(("value", taxReferenceNumber))
 
@@ -505,16 +523,19 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must not redirect to FixedEstablishmentVRNAlreadyRegisteredController page when the vat number is excluded for match FixedEstablishmentActiveNETP" in {
-
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val taxReferenceNumber: String = "333333333"
 
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
@@ -524,6 +545,9 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
 
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
+
         val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
           .withFormUrlEncodedBody(("value", taxReferenceNumber))
 
@@ -531,16 +555,19 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must not redirect to FixedEstablishmentVRNAlreadyRegisteredController page when the vat number is excluded for match TraderIdActiveNETP" in {
-
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val taxReferenceNumber: String = "333333333"
 
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
@@ -550,6 +577,9 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
 
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
+
         val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
           .withFormUrlEncodedBody(("value", taxReferenceNumber))
 
@@ -557,16 +587,19 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must not redirect to FixedEstablishmentVRNAlreadyRegisteredController page when the vat number is excluded for match OtherMSNETPActiveNETP" in {
-
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val taxReferenceNumber: String = "333333333"
 
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
+          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
@@ -576,6 +609,9 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         when(mockCoreRegistrationValidationService.searchEuTaxId(eqTo(taxReferenceNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
 
+        when(mockRegistrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWrapper)))
+
         val request = FakeRequest(POST, amendEuTaxReferenceSubmitRoute)
           .withFormUrlEncodedBody(("value", taxReferenceNumber))
 
@@ -583,6 +619,8 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
+
+        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 

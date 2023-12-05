@@ -30,7 +30,11 @@
         govukWarningText: GovukWarningText
 )
 
-@(form: Form[_], waypoints: Waypoints, list: Seq[ListItemWrapper], canAddCountries: Boolean, incompleteCountries: Seq[PreviousRegistrationDetailsWithOptionalVatNumber] = List.empty)(implicit request: Request[_], messages: Messages)
+@(form: Form[_],
+    waypoints: Waypoints,
+    list: Seq[ListItemWrapper],
+    canAddCountries: Boolean,
+    incompleteCountries: Seq[PreviousRegistrationDetailsWithOptionalVatNumber] = List.empty)(implicit request: Request[_], messages: Messages)
 @defining(if(list.size == 1) ".singular" else "") { messageSuffix =>
 
     @layout(pageTitle = title(form, messages("addPreviousRegistration.title" + messageSuffix, list.size))) {

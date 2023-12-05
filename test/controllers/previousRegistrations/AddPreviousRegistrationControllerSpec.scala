@@ -17,6 +17,7 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import controllers.previousRegistrations.{routes => prevRoutes}
 import controllers.routes
 import forms.previousRegistrations.AddPreviousRegistrationFormProvider
@@ -29,8 +30,8 @@ import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
-import pages.{CheckAnswersPage, CheckYourAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
 import pages.previousRegistrations._
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -137,47 +138,74 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar w
       }
     }
 
-    "must save the answer and redirect to the next page when valid data is submitted when not in check mode with the waypoints amended" in {
+    "must save the answer and redirect to the next page when valid data is submitted when in check mode" in {
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(baseAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
           .build()
 
-      def createWaypoints(checkAnswersPage: CheckAnswersPage): NonEmptyWaypoints = {
-        EmptyWaypoints.setNextWaypoint(Waypoint(checkAnswersPage, CheckMode, checkAnswersPage.urlFragment))
-      }
-
-      val checkModeOptions = Table(
-        ("description", "waypoints"),
-        ("change registration", createWaypoints(ChangeRegistrationPage)),
-        ("check your answers", createWaypoints(CheckYourAnswersPage))
-      )
+      val checkModeWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
 
       val expectedAnswers = baseAnswers.set(AddPreviousRegistrationPage(), true).success.value
 
+
       running(application) {
+        val request =
+          FakeRequest(POST, addPreviousRegistrationRoutePost(prompt = false, waypoints = checkModeWaypoints))
+            .withFormUrlEncodedBody(("value", "true"))
 
-        forAll(checkModeOptions) { case (_, checkModeWaypoints) =>
-          Mockito.reset(mockSessionRepository)
-          when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        val result = route(application, request).value
 
-          val request =
-            FakeRequest(POST, addPreviousRegistrationRoutePost(prompt = false, waypoints = checkModeWaypoints))
-              .withFormUrlEncodedBody(("value", "true"))
+        status(result) mustEqual SEE_OTHER
 
-          val result = route(application, request).value
+        val expectedWaypoints = checkModeWaypoints
+          .setNextWaypoint(Waypoint(AddPreviousRegistrationPage(), CheckMode, AddPreviousRegistrationPage.checkModeUrlFragment))
 
-          status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual AddPreviousRegistrationPage().navigate(expectedWaypoints, baseAnswers, expectedAnswers).url
 
-          val expectedWaypoints = checkModeWaypoints
-            .setNextWaypoint(Waypoint(AddPreviousRegistrationPage(), CheckMode, AddPreviousRegistrationPage.checkModeUrlFragment))
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
 
-          redirectLocation(result).value mustEqual AddPreviousRegistrationPage().navigate(expectedWaypoints, baseAnswers, expectedAnswers).url
+      }
+    }
 
-          verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-        }
+
+    "must save the answer and redirect to the next page when valid data is submitted when in amend mode" in {
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val registrationConnector: RegistrationConnector = mock[RegistrationConnector]
+
+      val application =
+        applicationBuilder(userAnswers = Some(baseAnswers))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .build()
+
+      when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
+      val amendModeWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
+      val expectedAnswers = baseAnswers.set(AddPreviousRegistrationPage(), true).success.value
+
+      running(application) {
+        Mockito.reset(mockSessionRepository)
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        val request =
+          FakeRequest(POST, addPreviousRegistrationRoutePost(prompt = false, waypoints = amendModeWaypoints))
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+
+        val expectedWaypoints = amendModeWaypoints
+          .setNextWaypoint(Waypoint(AddPreviousRegistrationPage(), CheckMode, AddPreviousRegistrationPage.checkModeUrlFragment))
+
+        redirectLocation(result).value mustEqual AddPreviousRegistrationPage().navigate(expectedWaypoints, baseAnswers, expectedAnswers).url
+
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+        verify(registrationConnector, times(1)).getRegistration()(any())
       }
     }
 

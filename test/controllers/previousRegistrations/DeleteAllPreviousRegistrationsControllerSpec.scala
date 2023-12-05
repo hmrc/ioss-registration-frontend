@@ -17,6 +17,7 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
+import connectors.RegistrationConnector
 import forms.previousRegistrations.DeleteAllPreviousRegistrationsFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.{Country, Index}
@@ -76,15 +77,21 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
       }
     }
 
-
     "must fail for a GET when in Amend mode" in {
+      val mockRegistrationConnector = mock[RegistrationConnector]
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .build()
 
-      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
+      when(mockRegistrationConnector.getRegistration()(any()))
+        .thenReturn(Future.successful(Right(registrationWrapper)))
 
       running(application) {
         val request = FakeRequest(GET, deleteAllPreviousRegistrationsRoute(createCheckModeWayPoint(ChangeRegistrationPage)))
         route(application, request).value.failed.futureValue mustBe an[InvalidAmendModeOperationException]
       }
+
+      verify(mockRegistrationConnector).getRegistration()(any())
     }
 
     "must delete all previous registration answers and redirect to the next page when the user answers Yes and not in Amend mode" in {
@@ -122,17 +129,21 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
 
     "must not delete all previous registration answers and redirect to the next page when the user answers No when not in Amend mode" in {
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-
+      val mockRegistrationConnector = mock[RegistrationConnector]
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
         forAll(nonAmendModeWayPoints) { case (_, nonAmendModeWayPoints) =>
+          Mockito.reset(mockSessionRepository, mockRegistrationConnector)
 
-          Mockito.reset(mockSessionRepository)
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+          when(mockRegistrationConnector.getRegistration()(any()))
+            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request =
             FakeRequest(POST, deleteAllPreviousRegistrationsRoute(nonAmendModeWayPoints))
@@ -146,6 +157,7 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual DeleteAllPreviousRegistrationsPage.navigate(nonAmendModeWayPoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+          verify(mockRegistrationConnector, times(0)).getRegistration()(any())
         }
       }
     }
@@ -158,21 +170,25 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
       )
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
         forAll(dpDeleteOptions) { case (doDelete) =>
-
-          Mockito.reset(mockSessionRepository)
+          Mockito.reset(mockSessionRepository, mockRegistrationConnector)
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+          when(mockRegistrationConnector.getRegistration()(any()))
+            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request =
             FakeRequest(POST, deleteAllPreviousRegistrationsRoute(createCheckModeWayPoint(ChangeRegistrationPage)))
-              .withFormUrlEncodedBody(("value",doDelete))
+              .withFormUrlEncodedBody(("value", doDelete))
 
           val result = route(application, request).value
 

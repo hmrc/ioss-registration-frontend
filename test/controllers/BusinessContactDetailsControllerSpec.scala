@@ -67,7 +67,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
     redirectUri = controllers.amend.routes.ChangeRegistrationController.onPageLoad().url
   )
 
-
   override def beforeEach(): Unit = {
     Mockito.reset(mockEmailVerificationService)
     Mockito.reset(mockRegistrationConnector)
@@ -452,8 +451,11 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
     "must save the answer and redirect to the next page if email is already verified and valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val mockRegistrationConnector = mock[RegistrationConnector]
 
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockRegistrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
       when(mockEmailVerificationService.isEmailVerified(
         eqTo(emailVerificationRequest.email.get.address),
         eqTo(emailVerificationRequest.credId))(any())) thenReturn Future.successful(Verified)
@@ -498,11 +500,14 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
     "must save the answer and redirect to the Business Contact Details page if email is not verified and valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+      val mockRegistrationConnector = mock[RegistrationConnector]
 
-      val newEmailAdress = "email@example.co.uk"
+      when(mockRegistrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
 
-      val amendEmailVerifictaionRequest = emailVerificationRequest.copy(
-        email = emailVerificationRequest.email.map(_.copy(address = newEmailAdress)),
+      val newEmailAddress = "email@example.co.uk"
+
+      val amendEmailVerificationRequest = emailVerificationRequest.copy(
+        email = emailVerificationRequest.email.map(_.copy(address = newEmailAddress)),
         continueUrl = controllers.amend.routes.ChangeRegistrationController.onPageLoad().url
       )
 
@@ -531,18 +536,18 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
       running(application) {
         val request =
           FakeRequest(POST, amendBusinessContactDetailsRoute)
-            .withFormUrlEncodedBody(("fullName", "name"), ("telephoneNumber", "0111 2223334"), ("emailAddress", newEmailAdress))
+            .withFormUrlEncodedBody(("fullName", "name"), ("telephoneNumber", "0111 2223334"), ("emailAddress", newEmailAddress))
 
         val config = application.injector.instanceOf[FrontendAppConfig]
         val result = route(application, request).value
-        val expectedAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails.copy(emailAddress = newEmailAdress)).success.value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails.copy(emailAddress = newEmailAddress)).success.value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual config.emailVerificationUrl + amendEmailVerificationResponse.redirectUri
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
 
         verify(mockEmailVerificationService, times(1))
-          .isEmailVerified(eqTo(newEmailAdress), eqTo(amendEmailVerifictaionRequest.credId))(any())
+          .isEmailVerified(eqTo(newEmailAddress), eqTo(amendEmailVerificationRequest.credId))(any())
 
         verify(mockEmailVerificationService, times(0))
           .createEmailVerificationRequest(

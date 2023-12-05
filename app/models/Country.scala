@@ -29,6 +29,15 @@ object Country {
 
   implicit val format: OFormat[Country] = Json.format[Country]
 
+  def fromCountryCode(countryCode: String): Option[Country] = {
+    euCountries.find(_.code == countryCode)
+  }
+
+  def fromCountryCodeUnsafe(countryCode: String): Country = {
+    fromCountryCode(countryCode)
+      .getOrElse(throw new RuntimeException(s"countryCode $countryCode could not be mapped to a country"))
+  }
+
   val euCountries: Seq[Country] = Seq(
     Country("AT", "Austria"),
     Country("BE", "Belgium"),

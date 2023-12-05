@@ -125,34 +125,16 @@ class RegistrationService @Inject()(
                                                     etmpPreviousEuRegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails]
                                                   ): Seq[PreviousRegistrationDetails] =
     for {
-      issuedBy <- etmpPreviousEuRegistrationDetails.map(_.issuedBy).distinct
+      issuedByCountryCode <- etmpPreviousEuRegistrationDetails.map(_.issuedBy).distinct
     } yield {
-      val country = euCountries.filter(_.code == issuedBy).head
-      val schemeDetailsForCountry = etmpPreviousEuRegistrationDetails.filter(_.issuedBy == issuedBy)
+      val country = euCountries.find(_.code == issuedByCountryCode)
+        .getOrElse(throw new RuntimeException(s"Country code $issuedByCountryCode WAS not resolvable"))
+
+      val schemeDetailsForCountry = etmpPreviousEuRegistrationDetails.filter(_.issuedBy == issuedByCountryCode)
       PreviousRegistrationDetails(
         previousEuCountry = country,
-        previousSchemesDetails = schemeDetailsForCountry.map(convertPreviousSchemeDetails)
+        previousSchemesDetails = schemeDetailsForCountry.map(PreviousSchemeDetails.fromEtmpPreviousEuRegistrationDetails)
       )
-    }
-
-  private def convertPreviousSchemeDetails(etmpPreviousEURegistrationDetails: EtmpPreviousEuRegistrationDetails): PreviousSchemeDetails =
-    PreviousSchemeDetails(
-      previousScheme = convertedSchemeType(etmpPreviousEURegistrationDetails.schemeType),
-      previousSchemeNumbers = PreviousSchemeNumbers(
-        previousSchemeNumber = etmpPreviousEURegistrationDetails.registrationNumber,
-        previousIntermediaryNumber = etmpPreviousEURegistrationDetails.intermediaryNumber,
-      ),
-      // TODO -> nonCompliantDetails to be implemented at a later date
-      nonCompliantDetails = None
-    )
-
-  private def convertedSchemeType(schemeType: SchemeType): PreviousScheme =
-    schemeType match {
-      case SchemeType.OSSUnion => PreviousScheme.OSSU
-      case SchemeType.OSSNonUnion => PreviousScheme.OSSNU
-      case SchemeType.IOSSWithIntermediary => PreviousScheme.IOSSWI
-      case SchemeType.IOSSWithoutIntermediary => PreviousScheme.IOSSWOI
-      case _ => throw new IllegalStateException("Not a recognised scheme type")
     }
 
   private def convertToEuDetails(etmpEuRegistrationDetails: Seq[EtmpEuRegistrationDetails]): Seq[EuDetails] =
@@ -199,7 +181,7 @@ class RegistrationService @Inject()(
     }
 
   private def getCountry(countryCode: String): Country =
-    Country.euCountries.find(_.code == countryCode) match {
+    Country.fromCountryCode(countryCode) match {
       case Some(country) => country
       case _ =>
         val exception = new IllegalStateException(s"Unable to find country $countryCode")

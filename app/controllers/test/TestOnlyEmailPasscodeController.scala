@@ -33,7 +33,7 @@ class TestOnlyEmailPasscodeController @Inject()(
                                                  emailVerificationService: EmailVerificationService
                                                )(implicit ec: ExecutionContext) extends FrontendController(cc) with I18nSupport {
 
-  def testOnlyGetPasscodes(): Action[AnyContent] = (cc.actionBuilder andThen cc.identify).async {
+  def testOnlyGetPasscodes(): Action[AnyContent] = (cc.actionBuilder andThen cc.identify).async{
     implicit request =>
       testOnlyEmailPasscodeConnector.getTestOnlyPasscode().flatMap {
         case Right(response) =>

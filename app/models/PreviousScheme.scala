@@ -16,6 +16,7 @@
 
 package models
 
+import models.etmp.SchemeType
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
@@ -23,6 +24,24 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 sealed trait PreviousScheme
 
 object PreviousScheme extends Enumerable.Implicits {
+
+  def fromEmtpSchemaType(etmpSchemeType: SchemeType): PreviousScheme = {
+    etmpSchemeType match {
+      case SchemeType.OSSUnion => OSSU
+      case SchemeType.OSSNonUnion => OSSNU
+      case SchemeType.IOSSWithoutIntermediary => IOSSWOI
+      case SchemeType.IOSSWithIntermediary => IOSSWI
+    }
+  }
+
+  def toEmtpSchemaType(previousScheme: PreviousScheme): SchemeType = {
+    previousScheme match {
+      case OSSU => SchemeType.OSSUnion
+      case OSSNU =>  SchemeType.OSSNonUnion
+      case IOSSWOI => SchemeType.IOSSWithoutIntermediary
+      case IOSSWI => SchemeType.IOSSWithIntermediary
+    }
+  }
 
   case object OSSU extends WithName("ossu") with PreviousScheme
 

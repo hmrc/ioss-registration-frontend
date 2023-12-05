@@ -63,6 +63,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           .build()
 
         when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
 
         running(application) {
           val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
