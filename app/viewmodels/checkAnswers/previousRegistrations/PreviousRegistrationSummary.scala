@@ -16,21 +16,20 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Country, Index, UserAnswers}
+import models.{Index, UserAnswers}
 import models.domain.PreviousRegistration
-import pages.previousRegistrations._
 import pages.{AddItemPage, CheckAnswersPage, Waypoints}
+import pages.previousRegistrations._
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import queries.previousRegistration._
-import viewmodels.ListItemWrapper
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
 import utils.CheckExistingRegistrations
-import utils.CheckExistingRegistrations.existingPreviousRegistration
+import viewmodels.ListItemWrapper
+import viewmodels.govuk.summarylist._
+import viewmodels.implicits._
 
 object PreviousRegistrationSummary {
 

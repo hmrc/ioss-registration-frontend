@@ -26,14 +26,13 @@ import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
-import pages.amend.ChangeRegistrationPage
 import pages.{CheckYourAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoints}
+import pages.amend.ChangeRegistrationPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
-import services.core.CoreRegistrationValidationService
 import views.html.previousRegistrations.PreviouslyRegisteredView
 
 import scala.concurrent.Future

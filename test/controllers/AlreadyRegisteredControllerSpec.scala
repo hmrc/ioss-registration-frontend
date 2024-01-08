@@ -19,7 +19,6 @@ package controllers
 import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
-import models.amend.RegistrationWrapper
 import models.external.ExternalEntryUrl
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
@@ -29,7 +28,6 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import testutils.RegistrationData.etmpDisplayRegistration
 import views.html.AlreadyRegisteredView
 
 import scala.concurrent.Future

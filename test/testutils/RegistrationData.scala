@@ -91,7 +91,8 @@ object RegistrationData extends SpecBase {
       tradingNames = true,
       fixedEstablishments = true,
       contactDetails = true,
-      bankDetails = true
+      bankDetails = true,
+      reRegistration = false
     ),
     customerIdentification = etmpRegistrationRequest.customerIdentification,
     tradingNames = etmpRegistrationRequest.tradingNames,

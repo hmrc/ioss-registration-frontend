@@ -18,20 +18,18 @@ package controllers.amend
 
 import base.SpecBase
 import connectors.RegistrationConnector
-import models.amend.RegistrationWrapper
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.MockitoSugar.when
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.amend.ChangeRegistrationPage
 import pages.{EmptyWaypoints, Waypoints}
+import pages.amend.ChangeRegistrationPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
 import services.RegistrationService
-import testutils.RegistrationData.etmpDisplayRegistration
 import utils.FutureSyntax.FutureOps
 
 class StartAmendJourneyControllerSpec extends SpecBase with BeforeAndAfterEach {
