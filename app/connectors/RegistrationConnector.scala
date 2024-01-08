@@ -21,7 +21,6 @@ import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, External
 import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, AmendRegistrationResultResponseReads, DisplayRegistrationResponse, DisplayRegistrationResponseReads, RegistrationResponseReads, RegistrationResultResponse}
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import logging.Logging
-import models.amend.RegistrationWrapper
 import models.etmp.EtmpRegistrationRequest
 import models.etmp.amend.EtmpAmendRegistrationRequest
 import play.api.Configuration

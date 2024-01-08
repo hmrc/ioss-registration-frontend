@@ -53,7 +53,8 @@ object EtmpAmendRegistrationRequest {
           registration.schemeDetails.euRegistrationDetails != etmpRegistrationRequest.schemeDetails.euRegistrationDetails,
         contactDetails =
           contactDetailsDiff(registration.schemeDetails, etmpRegistrationRequest.schemeDetails),
-        bankDetails = registration.bankDetails != etmpRegistrationRequest.bankDetails
+        bankDetails = registration.bankDetails != etmpRegistrationRequest.bankDetails,
+        reRegistration = false
       ),
       customerIdentification = etmpRegistrationRequest.customerIdentification,
       tradingNames = etmpRegistrationRequest.tradingNames,

@@ -210,7 +210,8 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
             tradingNames = true,
             fixedEstablishments = true,
             contactDetails = true,
-            bankDetails = true
+            bankDetails = true,
+            reRegistration = false
           ),
           customerIdentification = EtmpCustomerIdentification(vrn),
           tradingNames = convertToEtmpTradingNames,
