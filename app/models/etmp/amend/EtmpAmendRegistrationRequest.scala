@@ -64,7 +64,7 @@ object EtmpAmendRegistrationRequest {
   }
 
   private def contactDetailsDiff(
-                                  registrationSchemeDetails: EtmpSchemeDetails,
+                                  registrationSchemeDetails: EtmpDisplaySchemeDetails,
                                   amendSchemeDetails: EtmpSchemeDetails
                                 ): Boolean = {
     registrationSchemeDetails.contactName != amendSchemeDetails.contactName ||

@@ -59,6 +59,19 @@ object RegistrationData extends SpecBase {
     nonCompliantPayments = Some(arbitraryNonCompliantDetails.arbitrary.sample.value.nonCompliantPayments.toString)
   )
 
+  val etmpDisplaySchemeDetails: EtmpDisplaySchemeDetails = EtmpDisplaySchemeDetails(
+    commencementDate = etmpSchemeDetails.commencementDate,
+    euRegistrationDetails = etmpSchemeDetails.euRegistrationDetails,
+    previousEURegistrationDetails = etmpSchemeDetails.previousEURegistrationDetails,
+    websites = etmpSchemeDetails.websites,
+    contactName = etmpSchemeDetails.contactName,
+    businessTelephoneNumber = etmpSchemeDetails.businessTelephoneNumber,
+    businessEmailId = etmpSchemeDetails.businessEmailId,
+    unusableStatus = false,
+    nonCompliantReturns = etmpSchemeDetails.nonCompliantReturns,
+    nonCompliantPayments = etmpSchemeDetails.nonCompliantPayments
+  )
+
   val genBankDetails: EtmpBankDetails = EtmpBankDetails(
     accountName = arbitrary[String].sample.value,
     bic = Some(arbitrary[Bic].sample.value),
@@ -79,7 +92,7 @@ object RegistrationData extends SpecBase {
 
   val etmpDisplayRegistration: EtmpDisplayRegistration = EtmpDisplayRegistration(
     tradingNames = Gen.listOfN(maxTradingNames, arbitraryEtmpTradingName.arbitrary).sample.value,
-    schemeDetails = etmpSchemeDetails,
+    schemeDetails = etmpDisplaySchemeDetails,
     bankDetails = genBankDetails,
     exclusions = Gen.listOfN(3, arbitrary[EtmpExclusion]).sample.value,
     adminUse = etmpAdminUse

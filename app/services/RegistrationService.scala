@@ -194,7 +194,7 @@ class RegistrationService @Inject()(
       etmpWebsite <- etmpWebsites.toList
     } yield Website(site = etmpWebsite.websiteAddress)
 
-  private def getBusinessContactDetails(schemeDetails: EtmpSchemeDetails): BusinessContactDetails =
+  private def getBusinessContactDetails(schemeDetails: EtmpDisplaySchemeDetails): BusinessContactDetails =
     BusinessContactDetails(
       fullName = schemeDetails.contactName,
       telephoneNumber = schemeDetails.businessTelephoneNumber,

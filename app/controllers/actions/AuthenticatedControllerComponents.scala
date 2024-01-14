@@ -47,6 +47,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def retrieveSavedAnswers: SavedAnswersRetrievalActionProvider
 
+  def checkBouncedEmail: CheckBouncedEmailFilterProvider
 
   def requireIoss: IossRequiredAction
 
@@ -71,7 +72,8 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def authAndRequireIoss(): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
     authAndGetDataAndCheckVerifyEmail(inAmend = true) andThen
-      requireIoss()
+      requireIoss() andThen
+      checkBouncedEmail()
   }
 }
 
@@ -92,5 +94,6 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                checkEmailVerificationStatus: CheckEmailVerificationFilterProvider,
                                                                retrieveSavedAnswers: SavedAnswersRetrievalActionProvider,
                                                                checkRegistration: CheckRegistrationFilterProvider,
-                                                               requireIoss: IossRequiredAction
+                                                               requireIoss: IossRequiredAction,
+                                                               checkBouncedEmail: CheckBouncedEmailFilterProvider
                                                              ) extends AuthenticatedControllerComponents

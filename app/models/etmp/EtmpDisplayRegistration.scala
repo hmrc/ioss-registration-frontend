@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class EtmpDisplayRegistration(
                                     tradingNames: Seq[EtmpTradingName],
-                                    schemeDetails: EtmpSchemeDetails,
+                                    schemeDetails: EtmpDisplaySchemeDetails,
                                     bankDetails: EtmpBankDetails,
                                     exclusions: Seq[EtmpExclusion],
                                     adminUse: EtmpAdminUse
