@@ -36,11 +36,8 @@ case object DeleteAllTradingNamesPage extends QuestionPage[Boolean] {
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     answers.get(this) match {
       case Some(_) =>
-        if(waypoints.inAmend){
-          ChangeRegistrationPage
-        }else{
-          CheckYourAnswersPage
-        }
+        waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(CheckYourAnswersPage)
+
       case _ => JourneyRecoveryPage
     }
 }

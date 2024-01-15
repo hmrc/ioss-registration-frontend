@@ -57,7 +57,11 @@ trait Page {
   protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     nextPageNormalMode(waypoints, answers, answers) match {
       case questionPage: Page with Gettable[_] =>
-        if (answers.isDefined(questionPage)) waypoints.next.page else questionPage
+        if (answers.isDefined(questionPage)) {
+          waypoints.next.page
+        } else {
+          questionPage
+        }
 
       case otherPage =>
         otherPage

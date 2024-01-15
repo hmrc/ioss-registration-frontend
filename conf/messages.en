@@ -699,3 +699,40 @@ noRegistrationInProgress.sessionExpired = Your previous session may have expired
 alreadyRegistered.title = This account is already registered for the Import One Stop Shop scheme
 alreadyRegistered.heading = This account is already registered for the Import One Stop Shop scheme
 alreadyRegistered.continue = Continue to your account
+
+
+rejoinRegistration.title = Check your details are still correct
+rejoinRegistration.heading = Check your details are still correct
+rejoinRegistration.preSubmitNote.line1 = By re-registering for this scheme, you confirm that the information you are providing is correct and complete.
+rejoinRegistration.preSubmitNote.line2 = After registering, do not use the Back button or refresh the page.
+
+rejoinComplete.title = You are registered for the Import One Stop Shop scheme
+rejoinComplete.heading = You are registered for the Import One Stop Shop scheme
+rejoinComplete.newIossReference = Your new IOSS number is<br/><strong>{0}</strong></div>
+rejoinComplete.organisationName = We’ve received your registration for <strong>{0}</strong>.
+rejoinComplete.para1 = You can now use this service to fill out monthly returns for goods sold to consumers in the EU and Northern Ireland.
+rejoinComplete.para2 = You can also pay any Import One Stop Shop VAT that you owe.
+rejoinComplete.nextReturnDates = You can begin your {0} return on {1}. Include any sales from {2} onwards.
+rejoinComplete.happensNext = What happens next
+rejoinComplete.manageReturnsLink = <a href="{0}">Manage your Import One Stop Shop returns in your account.</a>
+rejoinComplete.contactYou = We’ll email you if we need to check any information.
+rejoinComplete.completeIossReturnLink = Read more information about <a href="https://www.gov.uk/guidance/completing-a-one-stop-shop-vat-return">how to complete an IOSS return.</a>
+
+
+rejoinComplete.info = You changed the following details:
+rejoinComplete.link.BTA = Manage your Import One Stop Shop returns in your account.
+rejoinComplete.link.yourAccount = Manage your Import One Stop Shop returns in your account.
+rejoinComplete.contact.text = We will contact you if we need to check any information.
+rejoinComplete.feedback.link.text = What did you think of this service?
+rejoinComplete.feedback.30seconds = (takes 30 seconds)
+
+errorSubmittingRejoin.title = We have a problem with our service right now
+errorSubmittingRejoin.heading = We cannot update your registration
+errorSubmittingRejoin.tryAgainLater = You can <a class="govuk-link" href="{0}">try again later</a>.
+errorSubmittingRejoin.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
+errorSubmittingRejoin.yourAccount = Back to your account
+
+cannotRejoin.title = You cannot use this service
+cannotRejoin.heading = You cannot use this service
+
+

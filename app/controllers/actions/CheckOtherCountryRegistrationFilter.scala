@@ -51,7 +51,6 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
     }
 
     service.searchUkVrn(request.vrn)(hc, request).map {
-
       case Some(activeMatch)
         if isActiveNotInAmend(activeMatch) =>
         Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(activeMatch.memberState)))

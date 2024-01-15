@@ -254,3 +254,11 @@ GET         /error-submitting-amendment                                      con
 GET         /successful-amend                                                controllers.amend.AmendCompleteController.onPageLoad()
 
 GET        /cannot-use-not-registered                                        controllers.NotRegisteredController.onPageLoad()
+
+GET         /start-rejoin-journey                                             controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /rejoin-registration                                             controllers.rejoin.RejoinRegistrationController.onPageLoad()
+POST        /rejoin-registration                                             controllers.rejoin.RejoinRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
+
+GET         /successful-rejoin                                               controllers.rejoin.RejoinCompleteController.onPageLoad()
+GET         /error-submitting-rejoin                                         controllers.rejoin.ErrorSubmittingRejoinController.onPageLoad()
+GET         /cannot-rejoin                                                   controllers.rejoin.CannotRejoinController.onPageLoad()

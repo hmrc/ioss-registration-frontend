@@ -63,7 +63,7 @@ class AddEuDetailsController @Inject()(
             onFailure = (incomplete: Seq[EuOptionalDetails]) => {
               Future.successful(Ok(view(form, waypoints, euDetailsSummary, canAddEuDetails, incomplete)))
             }) {
-              Future.successful(Ok(view(form, waypoints, euDetailsSummary, canAddEuDetails)))
+            Future.successful(Ok(view(form, waypoints, euDetailsSummary, canAddEuDetails)))
           }
       }
   }

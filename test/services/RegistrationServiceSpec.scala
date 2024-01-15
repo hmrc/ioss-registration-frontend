@@ -22,6 +22,7 @@ import models.Country.euCountries
 import models.amend.RegistrationWrapper
 import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
 import models.etmp._
+import models.etmp.amend.AmendRegistrationResponse
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.responses.etmp.EtmpEnrolmentResponse
@@ -42,10 +43,12 @@ import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
-import testutils.RegistrationData.etmpDisplayRegistration
+import testutils.RegistrationData.{amendRegistrationResponse, etmpDisplayRegistration}
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
+
+import java.time.LocalDateTime
 
 class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAndAfterEach {
 
@@ -54,6 +57,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val registrationService = new RegistrationService(stubClockAtArbitraryDate, mockRegistrationConnector)
   private val etmpRegistration = etmpDisplayRegistration
+
 
   override def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
@@ -82,16 +86,19 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
   ".amendRegistration" - {
 
     "must create a registration request from user answers provided and return a successful response" in {
-
-
-      when(mockRegistrationConnector.amendRegistration(any())(any())) thenReturn Right(()).toFuture
+      when(mockRegistrationConnector.amendRegistration(any())(any())) thenReturn Right(amendRegistrationResponse).toFuture
 
       val app = applicationBuilder(Some(completeUserAnswersWithVatInfo), Some(stubClockAtArbitraryDate))
         .build()
 
       running(app) {
-
-        registrationService.amendRegistration(completeUserAnswersWithVatInfo, etmpDisplayRegistration, vrn, iossNumber).futureValue mustBe Right(())
+        registrationService.amendRegistration(
+          answers = completeUserAnswersWithVatInfo,
+          registration = etmpDisplayRegistration,
+          vrn = vrn,
+          iossNumber = iossNumber,
+          rejoin = false
+        ).futureValue mustBe Right(amendRegistrationResponse)
         verify(mockRegistrationConnector, times(1)).amendRegistration(any())(any())
       }
     }

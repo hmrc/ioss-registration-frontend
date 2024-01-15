@@ -18,13 +18,44 @@ package models.etmp
 
 import play.api.libs.json.{Json, OFormat}
 
+import java.time.LocalDate
+
 case class EtmpDisplayRegistration(
                                     tradingNames: Seq[EtmpTradingName],
                                     schemeDetails: EtmpDisplaySchemeDetails,
                                     bankDetails: EtmpBankDetails,
                                     exclusions: Seq[EtmpExclusion],
                                     adminUse: EtmpAdminUse
-                                  )
+                                  ) {
+
+
+  def canRejoinRegistration(currentDate: LocalDate): Boolean = {
+    exclusions.lastOption match {
+      case Some(etmpExclusion) if etmpExclusion.exclusionReason == EtmpExclusionReason.Reversal => false
+      case Some(etmpExclusion) if isQuarantinedAndAfterTwoYears(currentDate, etmpExclusion) => true
+      case Some(etmpExclusion) if notQuarantinedAndAfterEffectiveDate(currentDate, etmpExclusion) => true
+      case _ => false
+    }
+  }
+
+  private def isQuarantinedAndAfterTwoYears(currentDate: LocalDate, etmpExclusion: EtmpExclusion): Boolean = {
+    if(etmpExclusion.quarantine) {
+      val minimumDate = currentDate.minusYears(2)
+      etmpExclusion.effectiveDate.isBefore(minimumDate)
+    } else {
+      false
+    }
+  }
+
+  private def notQuarantinedAndAfterEffectiveDate(currentDate: LocalDate, etmpExclusion: EtmpExclusion): Boolean = {
+    if(!etmpExclusion.quarantine) {
+      etmpExclusion.effectiveDate.isBefore(currentDate) || etmpExclusion.effectiveDate.isEqual(currentDate)
+    } else {
+      false
+    }
+  }
+
+}
 
 object EtmpDisplayRegistration {
 

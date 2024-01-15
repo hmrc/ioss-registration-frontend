@@ -21,9 +21,14 @@ import connectors.RegistrationConnector
 import controllers.actions.{FakeIossRequiredAction, IossRequiredAction}
 import controllers.amend.{routes => amendRoutes}
 import models.amend.RegistrationWrapper
+import models.etmp.EtmpExclusion
+import models.etmp.EtmpExclusionReason.NoLongerSupplies
+import models.etmp.amend.AmendRegistrationResponse
 import models.responses.InternalServerError
 import models.{CheckMode, Index, UserAnswers}
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import pages._
@@ -46,6 +51,7 @@ import viewmodels.govuk.SummaryListFluency
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
+import java.time.{Clock, LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
 class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with SummaryListFluency {
@@ -55,6 +61,33 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
   private val registrationService = mock[RegistrationService]
   private val country = arbitraryCountry.arbitrary.sample.value
 
+  private val amendRegistrationResponse: AmendRegistrationResponse =
+    AmendRegistrationResponse(
+      processingDateTime = LocalDateTime.now(),
+      formBundleNumber = "12345",
+      vrn = "123456789",
+      iossReference = "IM900100000001",
+      businessPartner = "businessPartner"
+    )
+
+  private val rejoinableRegistration = {
+    val registration = registrationWrapper.registration
+
+    registrationWrapper.copy(
+      registration = registration.copy(
+        exclusions = List(
+          EtmpExclusion(
+            exclusionReason = NoLongerSupplies,
+            effectiveDate = LocalDate.now(),
+            decisionDate = LocalDate.now(),
+            quarantine = false
+          )
+        )
+      )
+    )
+  }
+
+
   "ChangeRegistration Controller" - {
 
     ".onPageLoad" - {
@@ -62,10 +95,10 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         val registrationConnector = mock[RegistrationConnector]
 
-        when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+        when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(rejoinableRegistration)))
 
-        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
-          .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapper)))
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock =Some(Clock.systemUTC()))
+          .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), rejoinableRegistration)))
           .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
           .build()
 
@@ -101,7 +134,12 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .build()
 
-          when(registrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn Right(()).toFuture
+          when(registrationService.amendRegistration(
+            answers = any(),
+            registration = any(),
+            vrn = any(),
+            iossNumber = any(),
+            rejoin = ArgumentMatchers.eq(false))(any())) thenReturn Right(amendRegistrationResponse).toFuture
 
           running(application) {
             val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
@@ -125,7 +163,13 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
               .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
               .build()
 
-            when(registrationService.amendRegistration(any(), any(), any(), any())(any())) thenReturn Left(InternalServerError).toFuture
+            when(registrationService.amendRegistration(
+              answers = any(),
+              registration = any(),
+              vrn = any(),
+              iossNumber = any(),
+              rejoin = ArgumentMatchers.eq(false)
+            )(any())) thenReturn Left(InternalServerError).toFuture
 
             running(application) {
               val request = FakeRequest(POST, amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
@@ -182,7 +226,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
           "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
             val registrationConnector = mock[RegistrationConnector]
-            val registrationWrapper   = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+            val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
             when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
 
             val answers = completeUserAnswers

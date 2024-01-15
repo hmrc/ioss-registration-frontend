@@ -1,0 +1,97 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import pages.rejoin.RejoinRegistrationPage
+@import views.html.components.ButtonGroupProcessing
+@import pages.EmptyWaypoints
+
+@this(
+        formHelper: FormWithCSRF,
+        layout: templates.Layout,
+        govukSummaryList: GovukSummaryList,
+        button: ButtonGroupProcessing,
+        govukErrorSummary: GovukErrorSummary,
+        govukWarningText: GovukWarningText
+)
+
+@(waypoints: Waypoints,
+        vatRegistrationDetailsList: SummaryList,
+        list: SummaryList,
+        iossNumber: String,
+        isValid: Boolean
+)(implicit request: Request[_], messages: Messages)
+
+    @layout(pageTitle = titleNoForm(messages("rejoinRegistration.title")), showBackLink = false) {
+
+        @if(!isValid) {
+            @govukWarningText(WarningText(
+                iconFallbackText = Option(messages("site.warning")),
+                content = Text(messages("error.missing_answers"))
+            ))
+        }
+
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("rejoinRegistration.heading")</h1>
+
+        <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
+
+        @govukSummaryList(
+            SummaryListViewModel(
+                vatRegistrationDetailsList.rows
+            ).withCssClass("govuk-summary-list govuk-!-margin-bottom-3")
+        )
+
+        <p class="govuk-body govuk-!-margin-bottom-9">
+        @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA"))
+        </p>
+
+        <h2 class="govuk-heading-m">@messages("changeRegistration.details.heading")</h2>
+
+        @govukSummaryList(list)
+
+
+        <br/>
+        <br/>
+        <p class="govuk-body">
+        @Html(messages("rejoinRegistration.preSubmitNote.line1"))
+        </p>
+
+        <p class="govuk-body govuk-!-margin-bottom-4">
+        @Html(messages("rejoinRegistration.preSubmitNote.line2"))
+        </p>
+
+        @if(isValid) {
+            @formHelper(action = controllers.rejoin.routes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = false)) {
+                @button("site.confirm", RejoinRegistrationPage.route(waypoints).url, EmptyWaypoints)
+            }
+        } else {
+            <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+            <p class="govuk-body">@messages("error.missing_answers_prompt.general")</p>
+
+            @formHelper(action = controllers.rejoin.routes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = true)) {
+                @button("error.resolve_missing_answers", RejoinRegistrationPage.route(waypoints).url, EmptyWaypoints)
+            }
+        }
+
+
+        <div id="processing-wheel" hidden>
+            <div id="processing" aria-live="polite" class="govuk-!-margin-bottom-9">
+                <h2 class="govuk-heading-m">
+                @messages("site.processing")
+                </h2>
+                <div class="processing-wheel-loader"></div>
+            </div>
+        </div>
+    }
