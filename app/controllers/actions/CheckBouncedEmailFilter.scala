@@ -35,7 +35,8 @@ class CheckBouncedEmailFilterImpl()(implicit val executionContext: ExecutionCont
       case Some(contactDetails) =>
         contactDetails.emailAddress ==
           request.registrationWrapper.registration.schemeDetails.businessEmailId
-      case _ => true
+      case _ =>
+      false
     }
 
     if (request.registrationWrapper.registration.schemeDetails.unusableStatus && emailMatched) {

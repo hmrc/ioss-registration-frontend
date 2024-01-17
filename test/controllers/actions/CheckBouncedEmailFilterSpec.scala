@@ -17,11 +17,11 @@
 package controllers.actions
 
 import base.SpecBase
-import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import models.{BusinessContactDetails, CheckMode}
+import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.amend.ChangeRegistrationPage
 import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}
+import pages.amend.ChangeRegistrationPage
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
@@ -56,15 +56,19 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
           val app = applicationBuilder(None)
             .build()
 
+          val testEmail = "test@test.com"
+
+          val userAnswers = completeUserAnswers.set(BusinessContactDetailsPage, BusinessContactDetails("test name", "123456", testEmail)).success.value
+
           val regWrapperWithUnusableEmail = registrationWrapper.copy(registration =
             registrationWrapper.registration.copy(schemeDetails =
-              registrationWrapper.registration.schemeDetails.copy(unusableStatus = true)))
+              registrationWrapper.registration.schemeDetails.copy(unusableStatus = true, businessEmailId = testEmail)))
 
           val changeRegWaypoint = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
           running(app) {
 
-            val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, completeUserAnswers)
+            val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
             val controller = new Harness
 
             val result = controller.callFilter(request).futureValue
@@ -86,7 +90,7 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
             registrationWrapper.registration.copy(schemeDetails =
               registrationWrapper.registration.schemeDetails.copy(unusableStatus = true)))
 
-          val updatedUserAnswers = completeUserAnswers.set(BusinessContactDetailsPage, BusinessContactDetails(
+          val updatedUserAnswers = completeUserAnswersWithVatInfo.set(BusinessContactDetailsPage, BusinessContactDetails(
             fullName = registrationWrapper.registration.schemeDetails.contactName,
             telephoneNumber = registrationWrapper.registration.schemeDetails.businessTelephoneNumber,
             emailAddress = s"1${registrationWrapper.registration.schemeDetails.businessEmailId}",
@@ -113,7 +117,7 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
           .build()
 
         running(app) {
-          val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, registrationWrapper, completeUserAnswers)
+          val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, registrationWrapper, completeUserAnswersWithVatInfo)
           val controller = new Harness
 
           val result = controller.callFilter(request).futureValue
