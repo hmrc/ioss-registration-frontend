@@ -31,13 +31,8 @@ class CheckBouncedEmailFilterImpl()(implicit val executionContext: ExecutionCont
 
   override protected def filter[A](request: AuthenticatedMandatoryIossRequest[A]): Future[Option[Result]] = {
 
-    val emailMatched = request.userAnswers.get(BusinessContactDetailsPage) match {
-      case Some(contactDetails) =>
-        contactDetails.emailAddress ==
-          request.registrationWrapper.registration.schemeDetails.businessEmailId
-      case _ =>
-      false
-    }
+    val emailMatched = request.userAnswers.get(BusinessContactDetailsPage)
+      .exists(_.emailAddress == request.registrationWrapper.registration.schemeDetails.businessEmailId)
 
     if (request.registrationWrapper.registration.schemeDetails.unusableStatus && emailMatched) {
       val changeRegWaypoint = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
