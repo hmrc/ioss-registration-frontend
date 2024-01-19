@@ -71,9 +71,9 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
 
   private val austrianContainingRegistrationWrapper = registrationWrapper.copy(registration =
     RegistrationData.etmpDisplayRegistration.copy(schemeDetails =
-      RegistrationData.etmpSchemeDetails.copy(
+      RegistrationData.etmpDisplaySchemeDetails.copy(
         previousEURegistrationDetails =
-          RegistrationData.etmpSchemeDetails.previousEURegistrationDetails.map(details => details.copy(issuedBy = "AT"))
+          RegistrationData.etmpDisplaySchemeDetails.previousEURegistrationDetails.map(details => details.copy(issuedBy = "AT"))
       )
     )
   )

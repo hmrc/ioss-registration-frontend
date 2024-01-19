@@ -30,7 +30,7 @@ class RegistrationWrapperSpec extends SpecBase {
   private val vatInfo: VatCustomerInfo = vatCustomerInfo.copy(desAddress = desAddress)
 
   private val tradingNames: Seq[EtmpTradingName] = etmpDisplayRegistration.tradingNames
-  private val schemeDetails: EtmpSchemeDetails = etmpDisplayRegistration.schemeDetails
+  private val schemeDetails: EtmpDisplaySchemeDetails = etmpDisplayRegistration.schemeDetails
   private val bankDetails: EtmpBankDetails = etmpDisplayRegistration.bankDetails
   private val exclusions: Seq[EtmpExclusion] = etmpDisplayRegistration.exclusions
   private val adminUse: EtmpAdminUse = etmpDisplayRegistration.adminUse
