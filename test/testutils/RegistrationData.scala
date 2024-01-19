@@ -40,6 +40,18 @@ object RegistrationData extends SpecBase {
     postcode = Some(arbitrary[String].sample.value)
   )
 
+  val etmpDisplayEuRegistrationDetails: EtmpDisplayEuRegistrationDetails = EtmpDisplayEuRegistrationDetails(
+    issuedBy = arbitrary[Country].sample.value.code,
+    vatNumber = Some(Gen.alphaNumStr.sample.value),
+    taxIdentificationNumber = None,
+    fixedEstablishmentTradingName = arbitraryEtmpTradingName.arbitrary.sample.value.tradingName,
+    fixedEstablishmentAddressLine1 = arbitrary[String].sample.value,
+    fixedEstablishmentAddressLine2 = Some(arbitrary[String].sample.value),
+    townOrCity = arbitrary[String].sample.value,
+    regionOrState = Some(arbitrary[String].sample.value),
+    postcode = Some(arbitrary[String].sample.value)
+  )
+
   val etmpEuPreviousRegistrationDetails: EtmpPreviousEuRegistrationDetails = EtmpPreviousEuRegistrationDetails(
     issuedBy = arbitrary[Country].sample.value.code,
     registrationNumber = arbitrary[String].sample.value,
@@ -61,7 +73,7 @@ object RegistrationData extends SpecBase {
 
   val etmpDisplaySchemeDetails: EtmpDisplaySchemeDetails = EtmpDisplaySchemeDetails(
     commencementDate = etmpSchemeDetails.commencementDate,
-    euRegistrationDetails = etmpSchemeDetails.euRegistrationDetails,
+    euRegistrationDetails = Seq(etmpDisplayEuRegistrationDetails),
     previousEURegistrationDetails = etmpSchemeDetails.previousEURegistrationDetails,
     websites = etmpSchemeDetails.websites,
     contactName = etmpSchemeDetails.contactName,

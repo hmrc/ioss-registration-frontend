@@ -137,47 +137,35 @@ class RegistrationService @Inject()(
       )
     }
 
-  private def convertToEuDetails(etmpEuRegistrationDetails: Seq[EtmpEuRegistrationDetails]): Seq[EuDetails] =
+  private def convertToEuDetails(etmpEuRegistrationDetails: Seq[EtmpDisplayEuRegistrationDetails]): Seq[EuDetails] =
     for {
       etmpPreviousEuCountryRegistrationDetails <- etmpEuRegistrationDetails
     } yield {
       EuDetails(
-        euCountry = getCountry(etmpPreviousEuCountryRegistrationDetails.countryOfRegistration),
+        euCountry = getCountry(etmpPreviousEuCountryRegistrationDetails.issuedBy),
         sellsGoodsToEuConsumerMethod = Some(EuConsumerSalesMethod.FixedEstablishment),
-        registrationType = determineRegistrationType(etmpPreviousEuCountryRegistrationDetails.traderId),
-        euVatNumber = getVatNumber(etmpPreviousEuCountryRegistrationDetails.traderId),
-        euTaxReference = getTaxId(etmpPreviousEuCountryRegistrationDetails.traderId),
-        fixedEstablishmentTradingName = Some(etmpPreviousEuCountryRegistrationDetails.tradingName),
+        registrationType = determineRegistrationType(
+          etmpPreviousEuCountryRegistrationDetails.vatNumber,
+          etmpPreviousEuCountryRegistrationDetails.taxIdentificationNumber
+        ),
+        euVatNumber = etmpPreviousEuCountryRegistrationDetails.vatNumber,
+        euTaxReference = etmpPreviousEuCountryRegistrationDetails.taxIdentificationNumber,
+        fixedEstablishmentTradingName = Some(etmpPreviousEuCountryRegistrationDetails.fixedEstablishmentTradingName),
         fixedEstablishmentAddress = Some(InternationalAddress(
           line1 = etmpPreviousEuCountryRegistrationDetails.fixedEstablishmentAddressLine1,
           line2 = etmpPreviousEuCountryRegistrationDetails.fixedEstablishmentAddressLine2,
           townOrCity = etmpPreviousEuCountryRegistrationDetails.townOrCity,
           stateOrRegion = etmpPreviousEuCountryRegistrationDetails.regionOrState,
           postCode = etmpPreviousEuCountryRegistrationDetails.postcode,
-          country = getCountry(etmpPreviousEuCountryRegistrationDetails.countryOfRegistration
-          ))
-        )
+          country = getCountry(etmpPreviousEuCountryRegistrationDetails.issuedBy)
+        ))
       )
     }
 
-  private def getVatNumber(traderId: TraderId): Option[String] =
-    traderId match {
-      case vatNumberTraderId: VatNumberTraderId =>
-        Some(vatNumberTraderId.vatNumber)
-      case _ => None
-    }
-
-  private def getTaxId(traderId: TraderId): Option[String] =
-    traderId match {
-      case taxRefTraderID: TaxRefTraderID =>
-        Some(taxRefTraderID.taxReferenceNumber)
-      case _ => None
-    }
-
-  private def determineRegistrationType(traderId: TraderId): Option[RegistrationType] =
-    traderId match {
-      case _: VatNumberTraderId => Some(RegistrationType.VatNumber)
-      case _: TaxRefTraderID => Some(RegistrationType.TaxId)
+  def determineRegistrationType(vatNumber: Option[String], taxIdentificationNumber: Option[String]): Option[RegistrationType] =
+    (vatNumber, taxIdentificationNumber) match {
+      case (Some(_), _) => Some(RegistrationType.VatNumber)
+      case _ => Some(RegistrationType.TaxId)
     }
 
   private def getCountry(countryCode: String): Country =
