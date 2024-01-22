@@ -30,7 +30,7 @@ class RegistrationWrapperSpec extends SpecBase {
   private val vatInfo: VatCustomerInfo = vatCustomerInfo.copy(desAddress = desAddress)
 
   private val tradingNames: Seq[EtmpTradingName] = etmpDisplayRegistration.tradingNames
-  private val schemeDetails: EtmpDisplaySchemeDetails = etmpDisplayRegistration.schemeDetails
+  private val displaySchemeDetails: EtmpDisplaySchemeDetails = etmpDisplayRegistration.schemeDetails
   private val bankDetails: EtmpBankDetails = etmpDisplayRegistration.bankDetails
   private val exclusions: Seq[EtmpExclusion] = etmpDisplayRegistration.exclusions
   private val adminUse: EtmpAdminUse = etmpDisplayRegistration.adminUse
@@ -52,7 +52,7 @@ class RegistrationWrapperSpec extends SpecBase {
         ),
         "registration" -> Json.obj(
           "tradingNames" -> tradingNames,
-          "schemeDetails" -> schemeDetails,
+          "schemeDetails" -> displaySchemeDetails,
           "bankDetails" -> bankDetails,
           "exclusions" -> exclusions,
           "adminUse" -> adminUse

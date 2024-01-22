@@ -138,43 +138,29 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
 
     val previousRegistrations = convertToPreviousRegistrationDetails(etmpRegistration.schemeDetails.previousEURegistrationDetails)
 
-    def getVatNumber(traderId: TraderId): Option[String] =
-      traderId match {
-        case vatNumberTraderId: VatNumberTraderId =>
-          Some(vatNumberTraderId.vatNumber)
-        case _ => None
-      }
-
-    def getTaxId(traderId: TraderId): Option[String] =
-      traderId match {
-        case taxRefTraderID: TaxRefTraderID =>
-          Some(taxRefTraderID.taxReferenceNumber)
-        case _ => None
-      }
-
-    def determineRegistrationType(traderId: TraderId): Option[RegistrationType] =
-      traderId match {
-        case _: VatNumberTraderId => Some(RegistrationType.VatNumber)
-        case _: TaxRefTraderID => Some(RegistrationType.TaxId)
+    def determineRegistrationType(vatNumber: Option[String], taxIdentificationNumber: Option[String]): Option[RegistrationType] =
+      (vatNumber, taxIdentificationNumber) match {
+        case (Some(_), _) => Some(RegistrationType.VatNumber)
+        case _ => Some(RegistrationType.TaxId)
       }
 
     val euDetails: Seq[EuDetails] = for {
       euCountryDetails <- etmpRegistration.schemeDetails.euRegistrationDetails
     } yield {
       EuDetails(
-        euCountry = euCountries.filter(_.code == euCountryDetails.countryOfRegistration).head,
+        euCountry = euCountries.filter(_.code == euCountryDetails.issuedBy).head,
         sellsGoodsToEuConsumerMethod = Some(EuConsumerSalesMethod.FixedEstablishment),
-        registrationType = determineRegistrationType(euCountryDetails.traderId),
-        euVatNumber = getVatNumber(euCountryDetails.traderId),
-        euTaxReference = getTaxId(euCountryDetails.traderId),
-        fixedEstablishmentTradingName = Some(euCountryDetails.tradingName),
+        registrationType = determineRegistrationType(euCountryDetails.vatNumber, euCountryDetails.taxIdentificationNumber),
+        euVatNumber = euCountryDetails.vatNumber,
+        euTaxReference = euCountryDetails.taxIdentificationNumber,
+        fixedEstablishmentTradingName = Some(euCountryDetails.fixedEstablishmentTradingName),
         fixedEstablishmentAddress = Some(InternationalAddress(
           line1 = euCountryDetails.fixedEstablishmentAddressLine1,
           line2 = euCountryDetails.fixedEstablishmentAddressLine2,
           townOrCity = euCountryDetails.townOrCity,
           stateOrRegion = euCountryDetails.regionOrState,
           postCode = euCountryDetails.postcode,
-          country = euCountries.filter(_.code == euCountryDetails.countryOfRegistration).head
+          country = euCountries.filter(_.code == euCountryDetails.issuedBy).head
         ))
       )
     }
