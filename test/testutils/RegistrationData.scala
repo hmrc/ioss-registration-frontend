@@ -21,7 +21,7 @@ import config.Constants.maxTradingNames
 import formats.Format.eisDateFormatter
 import models.etmp._
 import models.{Bic, Country, Iban}
-import models.etmp.amend.{EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
+import models.etmp.amend.{EtmpAmendCustomerIdentification, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 
@@ -119,7 +119,7 @@ object RegistrationData extends SpecBase {
       bankDetails = true,
       reRegistration = false
     ),
-    customerIdentification = etmpRegistrationRequest.customerIdentification,
+    customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
     tradingNames = etmpRegistrationRequest.tradingNames,
     schemeDetails = etmpRegistrationRequest.schemeDetails,
     bankDetails = etmpRegistrationRequest.bankDetails

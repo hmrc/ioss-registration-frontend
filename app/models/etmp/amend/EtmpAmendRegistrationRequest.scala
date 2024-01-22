@@ -27,7 +27,7 @@ import java.time.LocalDate
 case class EtmpAmendRegistrationRequest(
                                          administration: EtmpAdministration,
                                          changeLog: EtmpAmendRegistrationChangeLog,
-                                         customerIdentification: EtmpCustomerIdentification,
+                                         customerIdentification: EtmpAmendCustomerIdentification,
                                          tradingNames: Seq[EtmpTradingName],
                                          schemeDetails: EtmpSchemeDetails,
                                          bankDetails: EtmpBankDetails,
@@ -41,6 +41,7 @@ object EtmpAmendRegistrationRequest {
                                          answers: UserAnswers,
                                          registration: EtmpDisplayRegistration,
                                          vrn: Vrn,
+                                         iossNumber: String,
                                          commencementDate: LocalDate): EtmpAmendRegistrationRequest = {
     val etmpRegistrationRequest = buildEtmpRegistrationRequest(answers, vrn, commencementDate)
 
@@ -56,7 +57,7 @@ object EtmpAmendRegistrationRequest {
         bankDetails = registration.bankDetails != etmpRegistrationRequest.bankDetails,
         reRegistration = false
       ),
-      customerIdentification = etmpRegistrationRequest.customerIdentification,
+      customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
       tradingNames = etmpRegistrationRequest.tradingNames,
       schemeDetails = etmpRegistrationRequest.schemeDetails,
       bankDetails = etmpRegistrationRequest.bankDetails

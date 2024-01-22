@@ -85,7 +85,7 @@ class ChangeRegistrationController @Inject()(
         }
 
         case None =>
-          registrationService.amendRegistration(request.userAnswers, request.registrationWrapper.registration, request.vrn).map {
+          registrationService.amendRegistration(request.userAnswers, request.registrationWrapper.registration, request.vrn, request.iossNumber).map {
             case Right(_) =>
               Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
             case Left(e) =>
