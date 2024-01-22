@@ -19,33 +19,33 @@ package models.etmp.amend
 import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
 import formats.Format.eisDateFormatter
+import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
 import models.etmp._
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
-import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{Json, JsSuccess}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
-import testutils.RegistrationData.{etmpDisplayRegistration, etmpRegistrationRequest}
+import testutils.RegistrationData.{etmpAmendRegistrationRequest, etmpDisplayRegistration}
 
 import java.time.LocalDate
 
 class EtmpAmendRegistrationRequestSpec extends SpecBase {
 
-  private val administration = etmpRegistrationRequest.administration
-  private val customerIdentification = etmpRegistrationRequest.customerIdentification
-  private val tradingNames = etmpRegistrationRequest.tradingNames
-  private val schemeDetails = etmpRegistrationRequest.schemeDetails
-  private val bankDetails = etmpRegistrationRequest.bankDetails
+  private val administration = etmpAmendRegistrationRequest.administration
+  private val customerIdentification = etmpAmendRegistrationRequest.customerIdentification
+  private val tradingNames = etmpAmendRegistrationRequest.tradingNames
+  private val schemeDetails = etmpAmendRegistrationRequest.schemeDetails
+  private val bankDetails = etmpAmendRegistrationRequest.bankDetails
   private val changeLog = arbitrary[EtmpAmendRegistrationChangeLog].sample.value
 
   private val numberOfRegistrations: Int = 8
@@ -213,7 +213,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
             bankDetails = true,
             reRegistration = false
           ),
-          customerIdentification = EtmpCustomerIdentification(vrn),
+          customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
           tradingNames = convertToEtmpTradingNames,
           schemeDetails = etmpSchemeDetails,
           bankDetails = convertToEtmpBankDetails
@@ -222,6 +222,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
         EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest(userAnswers,
           etmpDisplayRegistration,
           vrn,
+          iossNumber,
           LocalDate.now(stubClockAtArbitraryDate)
         ) mustBe etmpAmendRegistrationRequest
       }

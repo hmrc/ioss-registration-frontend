@@ -59,12 +59,14 @@ class RegistrationService @Inject()(
   def amendRegistration(
                          answers: UserAnswers,
                          registration: EtmpDisplayRegistration,
-                         vrn: Vrn
+                         vrn: Vrn,
+                         iossNumber: String
                        )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
     registrationConnector.amendRegistration(buildEtmpAmendRegistrationRequest(
       answers,
       registration,
       vrn,
+      iossNumber,
       LocalDate.parse(registration.schemeDetails.commencementDate)
     ))
   }
