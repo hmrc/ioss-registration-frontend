@@ -117,10 +117,16 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
     }
 
     def convertPreviousSchemeDetails(etmpPreviousEURegistrationDetails: EtmpPreviousEuRegistrationDetails): PreviousSchemeDetails = {
+      val schemeType = convertedSchemeType(etmpPreviousEURegistrationDetails.schemeType)
       PreviousSchemeDetails(
-        previousScheme = convertedSchemeType(etmpPreviousEURegistrationDetails.schemeType),
+        previousScheme = schemeType,
         previousSchemeNumbers = PreviousSchemeNumbers(
-          previousSchemeNumber = etmpPreviousEURegistrationDetails.registrationNumber,
+          previousSchemeNumber =
+            if(schemeType == PreviousScheme.OSSU) {
+              s"${etmpPreviousEURegistrationDetails.issuedBy}${etmpPreviousEURegistrationDetails.registrationNumber}"
+            } else {
+              etmpPreviousEURegistrationDetails.registrationNumber
+            },
           previousIntermediaryNumber = etmpPreviousEURegistrationDetails.intermediaryNumber
         ),
         nonCompliantDetails = None
@@ -151,7 +157,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
         euCountry = euCountries.filter(_.code == euCountryDetails.issuedBy).head,
         sellsGoodsToEuConsumerMethod = Some(EuConsumerSalesMethod.FixedEstablishment),
         registrationType = determineRegistrationType(euCountryDetails.vatNumber, euCountryDetails.taxIdentificationNumber),
-        euVatNumber = euCountryDetails.vatNumber,
+        euVatNumber = euCountryDetails.vatNumber.map(vatNumber => s"${euCountryDetails.issuedBy}$vatNumber"),
         euTaxReference = euCountryDetails.taxIdentificationNumber,
         fixedEstablishmentTradingName = Some(euCountryDetails.fixedEstablishmentTradingName),
         fixedEstablishmentAddress = Some(InternationalAddress(

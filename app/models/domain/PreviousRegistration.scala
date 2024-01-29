@@ -64,12 +64,25 @@ case class PreviousSchemeDetails(
 
 object PreviousSchemeDetails {
 
+  private def convertEuVatNumber(countryCode: String, maybeVatNumber: Option[String]): Option[String] = {
+    maybeVatNumber.map { vatNumber =>
+      s"$countryCode$vatNumber"
+    }
+  }
+
   def fromEtmpPreviousEuRegistrationDetails(etmpPreviousEuRegistrationDetails: EtmpPreviousEuRegistrationDetails): PreviousSchemeDetails = {
+    val previousSchemeType = PreviousScheme.fromEmtpSchemeType(etmpPreviousEuRegistrationDetails.schemeType)
     PreviousSchemeDetails(
-      previousScheme = PreviousScheme.fromEmtpSchemaType(etmpPreviousEuRegistrationDetails.schemeType),
+      previousScheme = previousSchemeType,
       previousSchemeNumbers = PreviousSchemeNumbers(
-        previousSchemeNumber = etmpPreviousEuRegistrationDetails.registrationNumber,
-        previousIntermediaryNumber = etmpPreviousEuRegistrationDetails.intermediaryNumber,
+        previousSchemeNumber =
+        if(previousSchemeType == PreviousScheme.OSSU) {
+          convertEuVatNumber(etmpPreviousEuRegistrationDetails.issuedBy, Some(etmpPreviousEuRegistrationDetails.registrationNumber))
+            .getOrElse(etmpPreviousEuRegistrationDetails.registrationNumber)
+        } else {
+          etmpPreviousEuRegistrationDetails.registrationNumber
+        },
+        previousIntermediaryNumber = etmpPreviousEuRegistrationDetails.intermediaryNumber
       ),
       None
     )

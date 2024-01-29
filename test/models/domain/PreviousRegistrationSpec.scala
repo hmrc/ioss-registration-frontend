@@ -34,7 +34,7 @@ class PreviousRegistrationSpec extends AnyFreeSpec with Matchers {
   private val remappedGermanResults = PreviousRegistration(germanCountry, List(
     PreviousSchemeDetails(OSSNU, PreviousSchemeNumbers("DE-reg-1", None), None),
     PreviousSchemeDetails(IOSSWI, PreviousSchemeNumbers("DE-reg-3", None), None),
-    PreviousSchemeDetails(OSSU, PreviousSchemeNumbers("DE-reg-4", None), None)
+    PreviousSchemeDetails(OSSU, PreviousSchemeNumbers("DEDE-reg-4", None), None)
   ))
 
   "fromEtmpPreviousEuRegistrationDetailsByCountry group results by expected country" in {
@@ -56,7 +56,7 @@ class PreviousRegistrationSpec extends AnyFreeSpec with Matchers {
       List(
         PreviousRegistration(
           Country.fromCountryCodeUnsafe("CY"),
-          List(PreviousSchemeDetails(OSSU, PreviousSchemeNumbers("CY-reg-0", None), None))),
+          List(PreviousSchemeDetails(OSSU, PreviousSchemeNumbers("CYCY-reg-0", None), None))),
         PreviousRegistration(
           Country.fromCountryCodeUnsafe("IT"),
           List(PreviousSchemeDetails(IOSSWOI, PreviousSchemeNumbers("IT-reg-2", None), None))),
