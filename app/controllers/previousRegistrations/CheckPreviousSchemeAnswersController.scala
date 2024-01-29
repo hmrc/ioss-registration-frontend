@@ -78,7 +78,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
     if (waypoints.inAmend) {
       request.previousEURegistrationDetails.collect {
         case previousEURegistrationDetails if previousEURegistrationDetails.issuedBy == country.code =>
-          PreviousScheme.fromEmtpSchemaType(previousEURegistrationDetails.schemeType)
+          PreviousScheme.fromEmtpSchemeType(previousEURegistrationDetails.schemeType)
       }
     } else {
       Seq.empty

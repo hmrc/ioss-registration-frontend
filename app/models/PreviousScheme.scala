@@ -25,7 +25,7 @@ sealed trait PreviousScheme
 
 object PreviousScheme extends Enumerable.Implicits {
 
-  def fromEmtpSchemaType(etmpSchemeType: SchemeType): PreviousScheme = {
+  def fromEmtpSchemeType(etmpSchemeType: SchemeType): PreviousScheme = {
     etmpSchemeType match {
       case SchemeType.OSSUnion => OSSU
       case SchemeType.OSSNonUnion => OSSNU
