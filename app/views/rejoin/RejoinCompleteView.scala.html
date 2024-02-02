@@ -36,6 +36,7 @@
 )(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("rejoinComplete.title")), showBackLink = false) {
+
     <div class="grid-row column-two-thirds" id="application_complete_id">
         <div class="govuk-panel govuk-panel--confirmation">
             <h1 class="govuk-panel__title">@messages("rejoinComplete.heading")</h1>
@@ -61,8 +62,6 @@
                 returnStartDate.format(Format.dateFormatter),
                 includedSalesDate.format(Format.dateFormatter)
             )
-
-@*            You can begin your April 2023 return on 1 May 2023. Include any sales from 1 April 2023 onwards.*@
         </p>
 
         <h2 class="govuk-heading-m">@messages("rejoinComplete.happensNext")</h2>
@@ -83,5 +82,7 @@
             <a href="#" class="govuk-link">What did you think of this service?</a> (takes 30 seconds)
         </p>
     </div>
+
+    <br />
 
 }
