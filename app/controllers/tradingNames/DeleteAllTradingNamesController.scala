@@ -59,7 +59,14 @@ class DeleteAllTradingNamesController @Inject()(
 
         value =>
 
-          determineRemoveAllItemsAndRedirect(waypoints, value, cc, AllTradingNames, HasTradingNamePage, DeleteAllTradingNamesPage)
+          determineRemoveAllItemsAndRedirect(
+            waypoints = waypoints,
+            doRemoveItems = value,
+            cc = cc,
+            query = AllTradingNames,
+            hasItems = HasTradingNamePage,
+            deleteAllItemsPage = DeleteAllTradingNamesPage
+          )
       )
   }
 }

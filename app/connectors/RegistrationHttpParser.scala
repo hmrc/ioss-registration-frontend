@@ -18,6 +18,7 @@ package connectors
 
 import logging.Logging
 import models.amend.RegistrationWrapper
+import models.etmp.amend.AmendRegistrationResponse
 import models.responses._
 import models.responses.etmp.EtmpEnrolmentResponse
 import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, OK}
@@ -29,7 +30,7 @@ object RegistrationHttpParser extends Logging {
 
   type RegistrationResultResponse = Either[ErrorResponse, EtmpEnrolmentResponse]
   type DisplayRegistrationResponse = Either[ErrorResponse, RegistrationWrapper]
-  type AmendRegistrationResultResponse = Either[ErrorResponse, Any]
+  type AmendRegistrationResultResponse = Either[ErrorResponse, AmendRegistrationResponse]
 
   implicit object RegistrationResponseReads extends HttpReads[RegistrationResultResponse] {
 
@@ -74,7 +75,14 @@ object RegistrationHttpParser extends Logging {
   implicit object AmendRegistrationResultResponseReads extends HttpReads[AmendRegistrationResultResponse] {
     override def read(method: String, url: String, response: HttpResponse): AmendRegistrationResultResponse = {
       response.status match {
-        case OK => Right(())
+        case OK => response.json.validate[AmendRegistrationResponse]
+          .asEither
+          .left
+          .map { errors =>
+            logger.error(s"Failed trying to parse display registration response JSON with body ${response.body}" +
+              s"and status ${response.status} with errors: $errors")
+            InvalidJson
+          }
         case status => Left(UnexpectedResponseStatus(response.status, s"Unexpected amend response, status $status returned"))
       }
     }

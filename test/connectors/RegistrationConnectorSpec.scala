@@ -28,7 +28,7 @@ import play.api.Application
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
-import testutils.RegistrationData.{etmpAmendRegistrationRequest, etmpDisplayRegistration, etmpRegistrationRequest}
+import testutils.RegistrationData.{amendRegistrationResponse, etmpAmendRegistrationRequest, etmpDisplayRegistration, etmpRegistrationRequest}
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -306,11 +306,12 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
       running(application) {
         val connector = application.injector.instanceOf[RegistrationConnector]
 
-        server.stubFor(post(urlEqualTo(url)).willReturn(ok()))
+        val response = Json.toJson(amendRegistrationResponse).toString()
+        server.stubFor(post(urlEqualTo(url)).willReturn(ok(response)))
 
         val result = connector.amendRegistration(etmpAmendRegistrationRequest).futureValue
 
-        result mustBe Right(())
+        result mustBe Right(amendRegistrationResponse)
       }
     }
 

@@ -42,7 +42,8 @@ object EtmpAmendRegistrationRequest {
                                          registration: EtmpDisplayRegistration,
                                          vrn: Vrn,
                                          iossNumber: String,
-                                         commencementDate: LocalDate): EtmpAmendRegistrationRequest = {
+                                         commencementDate: LocalDate,
+                                         rejoin : Boolean): EtmpAmendRegistrationRequest = {
     val etmpRegistrationRequest = buildEtmpRegistrationRequest(answers, vrn, commencementDate)
 
     EtmpAmendRegistrationRequest(
@@ -55,7 +56,7 @@ object EtmpAmendRegistrationRequest {
         contactDetails =
           contactDetailsDiff(registration.schemeDetails, etmpRegistrationRequest.schemeDetails),
         bankDetails = registration.bankDetails != etmpRegistrationRequest.bankDetails,
-        reRegistration = false
+        reRegistration = rejoin
       ),
       customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
       tradingNames = etmpRegistrationRequest.tradingNames,

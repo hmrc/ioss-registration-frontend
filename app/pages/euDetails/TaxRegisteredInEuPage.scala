@@ -46,8 +46,7 @@ case object TaxRegisteredInEuPage extends QuestionPage[Boolean] {
       case (Some(true), Some(euDetails)) if euDetails.nonEmpty => AddEuDetailsPage()
       case (Some(true), _) => EuCountryPage(Index(0))
       case (Some(false), Some(euDetails)) if euDetails.nonEmpty => DeleteAllEuDetailsPage
-      case (Some(false), _) if waypoints.inAmend => ChangeRegistrationPage
-      case (Some(false), _) => CheckYourAnswersPage
+      case (Some(false), _) => waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(JourneyRecoveryPage)
       case _ => JourneyRecoveryPage
     }
 }

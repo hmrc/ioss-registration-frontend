@@ -41,7 +41,7 @@ case object DeleteAllEuDetailsPage extends QuestionPage[Boolean] {
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     answers.get(this) match {
-      case Some(_) if waypoints.inAmend => ChangeRegistrationPage
+      case Some(_) if waypoints.inAmend => waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(ChangeRegistrationPage)
       case Some(_) => CheckYourAnswersPage
       case _ => JourneyRecoveryPage
     }

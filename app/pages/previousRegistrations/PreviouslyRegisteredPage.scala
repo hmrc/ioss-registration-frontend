@@ -45,8 +45,7 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
       case (Some(true), Some(size)) if size > 0   => AddPreviousRegistrationPage()
       case (Some(true), _)                        => PreviousEuCountryPage(Index(0))
       case (Some(false), Some(size)) if size > 0  => DeleteAllPreviousRegistrationsPage
-      case (Some(false), _) if waypoints.inAmend  => ChangeRegistrationPage
-      case (Some(false), _)                       => CheckYourAnswersPage
-      case _                                      => JourneyRecoveryPage
+      case (Some(false), _)  => waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(CheckYourAnswersPage)
+      case _ => JourneyRecoveryPage
     }
 }

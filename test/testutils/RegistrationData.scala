@@ -21,6 +21,7 @@ import config.Constants.maxTradingNames
 import formats.Format.eisDateFormatter
 import models.etmp._
 import models.{Bic, Country, Iban}
+import models.etmp.amend.{AmendRegistrationResponse, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
 import models.etmp.amend.{EtmpAmendCustomerIdentification, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
@@ -124,5 +125,15 @@ object RegistrationData extends SpecBase {
     schemeDetails = etmpRegistrationRequest.schemeDetails,
     bankDetails = etmpRegistrationRequest.bankDetails
   )
+
+  val amendRegistrationResponse: AmendRegistrationResponse =
+    AmendRegistrationResponse(
+      processingDateTime = LocalDateTime.now(),
+      formBundleNumber = "12345",
+      vrn = "123456789",
+      iossReference = "IM900100000001",
+      businessPartner = "businessPartner"
+    )
+
 }
 

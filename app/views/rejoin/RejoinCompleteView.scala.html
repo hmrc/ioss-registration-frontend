@@ -1,0 +1,85 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.domain.Vrn
+@import java.time.LocalDate
+@import formats.Format
+
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton
+)
+
+@(
+        vrn: Vrn,
+        feedbackLink: String,
+        externalUrl: Option[String] = None,
+        yourAccountUrl: String,
+        organisationName: String,
+        newIossReference: String,
+        commencementDate : LocalDate,
+        returnStartDate : LocalDate,
+        includedSalesDate : LocalDate
+)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("rejoinComplete.title")), showBackLink = false) {
+
+    <div class="grid-row column-two-thirds" id="application_complete_id">
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title">@messages("rejoinComplete.heading")</h1>
+            <div class="govuk-panel__body"> @Html(messages("rejoinComplete.newIossReference", newIossReference))</div>
+        </div>
+
+        <p class="govuk-body">
+            @Html(messages("rejoinComplete.organisationName", organisationName))
+        </p>
+
+        <p class="govuk-body">
+            @messages("rejoinComplete.para1")
+        </p>
+
+        <p class="govuk-body">
+             @messages("rejoinComplete.para2")
+        </p>
+
+        <p class="govuk-body">
+            @messages(
+                "rejoinComplete.nextReturnDates",
+                commencementDate.format(Format.dateMonthYearFormatter),
+                returnStartDate.format(Format.dateFormatter),
+                includedSalesDate.format(Format.dateFormatter)
+            )
+        </p>
+
+        <h2 class="govuk-heading-m">@messages("rejoinComplete.happensNext")</h2>
+
+        <p class="govuk-body">
+            @Html(messages("rejoinComplete.manageReturnsLink", yourAccountUrl))
+        </p>
+
+        <p class="govuk-body">
+            @messages("rejoinComplete.contactYou")
+        </p>
+
+        <p class="govuk-body">
+            @Html(messages("rejoinComplete.completeIossReturnLink"))
+        </p>
+
+        <p class="govuk-body">
+            <a href="#" class="govuk-link">What did you think of this service?</a> (takes 30 seconds)
+        </p>
+    </div>
+}

@@ -23,7 +23,7 @@ import logging.Logging
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
 import models.{BusinessContactDetails, CheckMode}
-import pages.{BusinessContactDetailsPage, Waypoints}
+import pages.{BankDetailsPage, BusinessContactDetailsPage, Waypoints}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.{EmailVerificationService, SaveForLaterService}
@@ -78,13 +78,7 @@ class BusinessContactDetailsController @Inject()(
               false
           }
 
-          val continueUrl = if (waypoints.inAmend) {
-            controllers.amend.routes.ChangeRegistrationController.onPageLoad().url
-          } else if (waypoints.currentMode == CheckMode) {
-            routes.CheckYourAnswersController.onPageLoad().url
-          } else {
-            routes.BankDetailsController.onPageLoad(waypoints).url
-          }
+          val continueUrl = waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url
 
           if (config.emailVerificationEnabled && !isMatchingEmailAddress) {
             verifyEmailAndRedirect(waypoints, messages, continueUrl, value)

@@ -223,7 +223,8 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
           etmpDisplayRegistration,
           vrn,
           iossNumber,
-          LocalDate.now(stubClockAtArbitraryDate)
+          LocalDate.now(stubClockAtArbitraryDate),
+          rejoin = false
         ) mustBe etmpAmendRegistrationRequest
       }
     }

@@ -45,9 +45,7 @@ case object HasTradingNamePage extends QuestionPage[Boolean] {
       case (Some(true), Some(tradingNames)) if tradingNames.nonEmpty => AddTradingNamePage()
       case (Some(true), _) => TradingNamePage(Index(0))
       case (Some(false), Some(tradingNames)) if tradingNames.nonEmpty => DeleteAllTradingNamesPage
-      case (Some(false), _) if waypoints.inAmend => ChangeRegistrationPage
-      case (Some(false), _) if waypoints.inCheck => CheckYourAnswersPage
-      case (Some(false), _) => PreviouslyRegisteredPage
+      case (Some(false), _)  => waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(PreviouslyRegisteredPage)
       case _ => JourneyRecoveryPage
     }
   }

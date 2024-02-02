@@ -74,7 +74,7 @@ class AddPreviousRegistrationController @Inject()(
             }
 
           withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
-            data = getAllIncompleteDeregisteredDetails _, onFailure = failureCall) {
+            data = () => getAllIncompleteDeregisteredDetails(), onFailure = failureCall) {
             Future.successful(Ok(view(form, waypoints, previousRegistrationRows, canAddCountries)))
           }
       }

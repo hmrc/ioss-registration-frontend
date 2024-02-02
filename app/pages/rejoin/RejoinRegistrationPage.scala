@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-package pages
+package pages.rejoin
 
-import models.{BankDetails, UserAnswers}
-import pages.amend.ChangeRegistrationPage
-import play.api.libs.json.JsPath
+import controllers.rejoin.{routes => rejoinRoutes}
+import models.UserAnswers
+import pages.{CheckAnswersPage, Page, Waypoints}
 import play.api.mvc.Call
-import utils.AmendWaypoints.AmendWaypointsOps
 
-case object BankDetailsPage extends QuestionPage[BankDetails] {
+object RejoinRegistrationPage extends CheckAnswersPage {
 
-  override def path: JsPath = JsPath \ toString
+  override def isTheSamePage(other: Page): Boolean = other match {
+    case RejoinRegistrationPage => true
+    case _ => false
+  }
 
-  override def toString: String = "bankDetails"
+  override val urlFragment: String = "rejoin-registration"
 
   override def route(waypoints: Waypoints): Call =
-    controllers.routes.BankDetailsController.onPageLoad(waypoints)
+    rejoinRoutes.RejoinRegistrationController.onPageLoad()
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    CheckYourAnswersPage
-
-  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
-    answers.get(this) match {
-      case Some(_)  => waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(CheckYourAnswersPage)
-      case _ => JourneyRecoveryPage
-    }
+    RejoinCompletePage
 }

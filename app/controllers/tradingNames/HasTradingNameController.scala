@@ -58,6 +58,29 @@ class HasTradingNameController @Inject()(
       }
   }
 
+  private def getCompanyName(waypoints: Waypoints)(block: String => Future[Result])
+                            (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
+    request.userAnswers.vatInfo match {
+      case Some(vatInfo) =>
+        (vatInfo.organisationName, vatInfo.individualName) match {
+          case (Some(organisationName), _) =>
+            block(organisationName)
+
+          case (_, Some(individualName)) =>
+            block(individualName)
+
+          case _ =>
+            val exception = new IllegalStateException("Both organisationName and individualName are both missing")
+            logger.error(exception.getMessage, exception)
+            Future.failed(exception)
+        }
+
+      case None =>
+        logger.error("No vat info", new RuntimeException("No vat info"))
+        Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
+    }
+  }
+
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
     implicit request =>
       getCompanyName(waypoints) {
@@ -76,27 +99,6 @@ class HasTradingNameController @Inject()(
       }
   }
 
-  private def getCompanyName(waypoints: Waypoints)(block: String => Future[Result])
-                            (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
 
-    request.userAnswers.vatInfo match {
-      case Some(vatInfo) =>
-        (vatInfo.organisationName, vatInfo.individualName) match {
-          case (Some(organisationName), _) =>
-            block(organisationName)
-
-          case (_, Some(individualName)) =>
-            block(individualName)
-
-          case _ =>
-            val exception = new IllegalStateException("Both organisationName and individualName are both missing")
-            logger.error(exception.getMessage, exception)
-            Future.failed(exception)
-        }
-
-      case None =>
-        Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
-    }
-  }
 }
 

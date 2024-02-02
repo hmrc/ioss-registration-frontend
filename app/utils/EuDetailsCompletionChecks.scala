@@ -54,10 +54,10 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
     val isPartOfVatGroup = request.userAnswers.vatInfo.exists(_.partOfVatGroup)
     request.userAnswers
       .get(AllEuOptionalDetailsQuery).map(
-      _.filter { details =>
-        sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) || checkVatNumber(details)
-      }
-    ).getOrElse(List.empty)
+        _.filter { details =>
+          sellsGoodsToEuConsumersMethod(isPartOfVatGroup, details) || checkVatNumber(details)
+        }
+      ).getOrElse(List.empty)
   }
 
   private def checkVatNumber(details: EuOptionalDetails): Boolean = {

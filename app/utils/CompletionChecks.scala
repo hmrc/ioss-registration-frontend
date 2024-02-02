@@ -60,9 +60,9 @@ trait CompletionChecks {
   def getAllIncompleteDeregisteredDetails()(implicit request: AuthenticatedDataRequest[AnyContent]): Seq[PreviousRegistrationDetailsWithOptionalVatNumber] = {
     request.userAnswers
       .get(AllPreviousRegistrationsWithOptionalVatNumberQuery).map(
-      _.filter(scheme =>
-        scheme.previousSchemesDetails.isEmpty || scheme.previousSchemesDetails.getOrElse(List.empty).exists(_.previousSchemeNumbers.isEmpty))
-    ).getOrElse(List.empty)
+        _.filter(scheme =>
+          scheme.previousSchemesDetails.isEmpty || scheme.previousSchemesDetails.getOrElse(List.empty).exists(_.previousSchemeNumbers.isEmpty))
+      ).getOrElse(List.empty)
   }
 
   def firstIndexedIncompleteDeregisteredCountry(incompleteCountries: Seq[Country])
@@ -149,20 +149,20 @@ trait CompletionChecks {
     }
 
   private def incompleteTradingNameRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isTradingNamesValid()) {
-    Some(Redirect(controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints)))
-  } else {
-    None
-  }
+      Some(Redirect(controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints)))
+    } else {
+      None
+    }
 
   private def incompleteWebsiteUrlsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!hasWebsiteValid()) {
-    Some(Redirect(controllers.website.routes.WebsiteController.onPageLoad(waypoints, Index(0))))
-  } else {
-    None
-  }
+      Some(Redirect(controllers.website.routes.WebsiteController.onPageLoad(waypoints, Index(0))))
+    } else {
+      None
+    }
 
   private def emptyDeregisteredRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isDeregisteredPopulated()) {
-    Some(Redirect(controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints)))
-  } else {
-    None
-  }
+      Some(Redirect(controllers.previousRegistrations.routes.PreviouslyRegisteredController.onPageLoad(waypoints)))
+    } else {
+      None
+    }
 }

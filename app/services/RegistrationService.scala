@@ -17,7 +17,7 @@
 package services
 
 import connectors.RegistrationConnector
-import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, RegistrationResultResponse}
+import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, DisplayRegistrationResponse, RegistrationResultResponse}
 import logging.Logging
 import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, TradingName, UserAnswers, Website}
 import models.Country.euCountries
@@ -60,15 +60,18 @@ class RegistrationService @Inject()(
                          answers: UserAnswers,
                          registration: EtmpDisplayRegistration,
                          vrn: Vrn,
-                         iossNumber: String
+                         iossNumber: String,
+                         rejoin: Boolean
                        )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
-    registrationConnector.amendRegistration(buildEtmpAmendRegistrationRequest(
-      answers,
-      registration,
-      vrn,
-      iossNumber,
-      LocalDate.parse(registration.schemeDetails.commencementDate)
-    ))
+    registrationConnector.amendRegistration(
+      buildEtmpAmendRegistrationRequest(
+        answers = answers,
+        registration = registration,
+        vrn = vrn,
+        iossNumber = iossNumber,
+        commencementDate = LocalDate.parse(registration.schemeDetails.commencementDate),
+        rejoin = rejoin
+      ))
   }
 
   def toUserAnswers(userId: String, registrationWrapper: RegistrationWrapper): Future[UserAnswers] = {
@@ -203,5 +206,6 @@ class RegistrationService @Inject()(
       bic = etmpBankDetails.bic,
       iban = etmpBankDetails.iban
     )
+
 }
 
