@@ -16,6 +16,7 @@
 
 package models.etmp
 
+import date.LocalDateOps
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
@@ -49,7 +50,7 @@ case class EtmpDisplayRegistration(
 
   private def notQuarantinedAndAfterEffectiveDate(currentDate: LocalDate, etmpExclusion: EtmpExclusion): Boolean = {
     if(!etmpExclusion.quarantine) {
-      etmpExclusion.effectiveDate.isBefore(currentDate) || etmpExclusion.effectiveDate.isEqual(currentDate)
+      etmpExclusion.effectiveDate <= currentDate
     } else {
       false
     }
