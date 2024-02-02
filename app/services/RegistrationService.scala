@@ -56,12 +56,6 @@ class RegistrationService @Inject()(
     registrationConnector.createRegistration(buildEtmpRegistrationRequest(answers, vrn, commencementDate))
   }
 
-
-  def getRegistration()(implicit hc: HeaderCarrier): Future[DisplayRegistrationResponse] = {
-    registrationConnector.getRegistration()
-  }
-
-
   def amendRegistration(
                          answers: UserAnswers,
                          registration: EtmpDisplayRegistration,
