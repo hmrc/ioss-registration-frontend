@@ -708,7 +708,7 @@ rejoinRegistration.preSubmitNote.line2 = After registering, do not use the Back 
 
 rejoinComplete.title = You are registered for the Import One Stop Shop scheme
 rejoinComplete.heading = You are registered for the Import One Stop Shop scheme
-rejoinComplete.newIossReference = Your new IOSS number is<br/><strong>{0}</strong></div>
+rejoinComplete.newIossReference = Your new IOSS number is<br/><strong>{0}</strong>
 rejoinComplete.organisationName = We’ve received your registration for <strong>{0}</strong>.
 rejoinComplete.para1 = You can now use this service to fill out monthly returns for goods sold to consumers in the EU and Northern Ireland.
 rejoinComplete.para2 = You can also pay any Import One Stop Shop VAT that you owe.
