@@ -714,9 +714,9 @@ rejoinComplete.para1 = You can now use this service to fill out monthly returns 
 rejoinComplete.para2 = You can also pay any Import One Stop Shop VAT that you owe.
 rejoinComplete.nextReturnDates = You can begin your {0} return on {1}. Include any sales from {2} onwards.
 rejoinComplete.happensNext = What happens next
-rejoinComplete.manageReturnsLink = <a href="{0}">Manage your Import One Stop Shop returns in your account.</a>
+rejoinComplete.manageReturnsLink = <a href="{0}" class="govuk-link">Manage your Import One Stop Shop returns in your account.</a>
 rejoinComplete.contactYou = We’ll email you if we need to check any information.
-rejoinComplete.completeIossReturnLink = Read more information about <a href="https://www.gov.uk/guidance/completing-a-one-stop-shop-vat-return">how to complete an IOSS return.</a>
+rejoinComplete.completeIossReturnLink = Read more information about <a href="https://www.gov.uk/guidance/completing-a-one-stop-shop-vat-return" class="govuk-link">how to complete an IOSS return.</a>
 
 
 rejoinComplete.info = You changed the following details:
