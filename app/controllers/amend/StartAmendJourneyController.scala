@@ -17,7 +17,7 @@
 package controllers.amend
 
 import connectors.RegistrationConnector
-import controllers.actions.AuthenticatedControllerComponents
+import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
 import logging.Logging
 import pages.Waypoints
 import pages.amend.ChangeRegistrationPage
@@ -39,7 +39,7 @@ class StartAmendJourneyController @Inject()(
                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging {
   protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(inAmend = true).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
     implicit request =>
       (for {
         registrationWrapperResponse <- registrationConnector.getRegistration()

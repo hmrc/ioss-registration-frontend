@@ -16,9 +16,9 @@
 
 package controllers.euDetails
 
-import controllers.actions._
 import controllers.GetCountry
-import models.Index
+import controllers.actions._
+import models.Country
 import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -27,21 +27,22 @@ import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.euDetails.FixedEstablishmentVRNAlreadyRegisteredView
 
 import javax.inject.Inject
-import scala.concurrent.Future
 
 class FixedEstablishmentVRNAlreadyRegisteredController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       cc: AuthenticatedControllerComponents,
-                                       view: FixedEstablishmentVRNAlreadyRegisteredView
-                                     ) extends FrontendBaseController with I18nSupport with GetCountry {
+                                                                  override val messagesApi: MessagesApi,
+                                                                  cc: AuthenticatedControllerComponents,
+                                                                  view: FixedEstablishmentVRNAlreadyRegisteredView
+                                                                ) extends FrontendBaseController with I18nSupport with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
-      getCountry(waypoints, countryIndex){ country =>
-        Future.successful(Ok(view(country.name)))
-      }
+  def onPageLoad(waypoints: Waypoints, countryCode: String): Action[AnyContent] = {
+    cc.authAndGetData(waypoints.registrationModificationMode) {
+      implicit request =>
+        Country.fromCountryCode(countryCode).map { country =>
+          Ok(view(country.name))
+        }.getOrElse(throw new RuntimeException(s"countryCode $countryCode not found"))
+    }
   }
 
 }

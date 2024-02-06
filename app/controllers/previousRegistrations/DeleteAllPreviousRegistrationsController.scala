@@ -49,7 +49,7 @@ class DeleteAllPreviousRegistrationsController @Inject()(
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode) {
     implicit request =>
       protectAgainstAmendMode(waypoints) {
         Ok(view(form, waypoints))
@@ -65,7 +65,7 @@ class DeleteAllPreviousRegistrationsController @Inject()(
   }
 
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
       protectAgainstAmendMode(waypoints) {
         form.bindFromRequest().fold(

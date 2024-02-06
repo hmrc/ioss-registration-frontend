@@ -40,13 +40,13 @@ class CancelAmendRegistrationController @Inject()(
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(inAmend = true) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration) {
     implicit request =>
 
       Ok(view(form, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(inAmend = true).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>

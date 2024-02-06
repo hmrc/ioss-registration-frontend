@@ -23,6 +23,7 @@ import models.PreviousScheme
 import models.audit.CoreRegistrationAuditModel
 import models.core.{CoreRegistrationRequest, Match, SourceType}
 import models.requests.AuthenticatedDataRequest
+import play.api.mvc.Request
 import services.AuditService
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier
@@ -82,11 +83,11 @@ class CoreRegistrationValidationService @Inject()(
       }
 
       val coreRegistrationRequest = CoreRegistrationRequest(
-        sourceType.toString,
-        Some(convertScheme(previousScheme)),
-        convertedSearchNumber,
-        intermediaryNumber,
-        countryCode
+        source = sourceType.toString,
+        scheme = Some(convertScheme(previousScheme)),
+        searchId = convertedSearchNumber,
+        searchIntermediary = intermediaryNumber,
+        searchIdIssuedBy = countryCode
       )
 
       getValidateCoreRegistrationResponse(coreRegistrationRequest)

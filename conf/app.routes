@@ -205,7 +205,7 @@ POST        /remove-all-tax-details                                          con
 
 GET         /excluded-vrn                                                    controllers.euDetails.ExcludedVRNController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /fixed-establishment-vrn-already-registered/:countryIndex        controllers.euDetails.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index)
+GET         /fixed-establishment-vrn-already-registered                      controllers.euDetails.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String)
 
 # Business contact details section
 GET         /business-contact-details                                        controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)

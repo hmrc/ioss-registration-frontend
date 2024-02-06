@@ -42,7 +42,7 @@ class DeleteWebsiteController @Inject()(
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
       getWebsite(waypoints, index) {
         website =>
@@ -51,7 +51,7 @@ class DeleteWebsiteController @Inject()(
 
   }
 
-  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
       getWebsite(waypoints, index) {
         website =>

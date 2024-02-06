@@ -54,7 +54,7 @@ class AddPreviousRegistrationController @Inject()(
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request: AuthenticatedDataRequest[AnyContent] =>
 
       val previousRegistrations: Seq[PreviousRegistration] = getPreviousRegistrationsWhenInAmend(waypoints, request)
@@ -98,7 +98,7 @@ class AddPreviousRegistrationController @Inject()(
     }
   }
 
-  def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
       withCompleteDataAsync[PreviousRegistrationDetailsWithOptionalVatNumber](
         data = getAllIncompleteDeregisteredDetails _,

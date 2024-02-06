@@ -44,7 +44,7 @@ class DeletePreviousRegistrationController @Inject()(
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request: AuthenticatedDataRequest[AnyContent] =>
       getPreviousRegistration(waypoints, index) {
         details =>
@@ -65,7 +65,7 @@ class DeletePreviousRegistrationController @Inject()(
     }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
 
 
-  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
       getPreviousRegistration(waypoints, index) {
         details =>

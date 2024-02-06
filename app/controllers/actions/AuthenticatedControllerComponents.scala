@@ -25,6 +25,16 @@ import repositories.AuthenticatedUserAnswersRepository
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
+sealed trait RegistrationModificationMode
+
+case object NotModifyingExistingRegistration extends RegistrationModificationMode
+
+sealed trait ModifyingExistingRegistrationMode extends RegistrationModificationMode
+
+case object AmendingActiveRegistration extends ModifyingExistingRegistrationMode
+
+case object RejoiningRegistration extends ModifyingExistingRegistrationMode
+
 trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def actionBuilder: DefaultActionBuilder
@@ -51,13 +61,14 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def requireIoss: IossRequiredAction
 
-  def authAndGetData(inAmend: Boolean = false): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+  def authAndGetData(registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+    val modifyingExistingRegistration = registrationModificationMode != NotModifyingExistingRegistration
     actionBuilder andThen
       identify andThen
-      checkRegistration(inAmend) andThen
+      checkRegistration(modifyingExistingRegistration) andThen
       getData andThen
-      requireData(inAmend) andThen
-      checkOtherCountryRegistration(inAmend)
+      requireData(modifyingExistingRegistration) andThen
+      checkOtherCountryRegistration(registrationModificationMode)
   }
 
   def authAndGetOptionalData(): ActionBuilder[AuthenticatedOptionalDataRequest, AnyContent] = {
@@ -66,16 +77,19 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       getData
   }
 
-  def authAndGetDataAndCheckVerifyEmail(inAmend: Boolean): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
-    authAndGetData(inAmend) andThen
-      checkEmailVerificationStatus(inAmend)
+  def authAndGetDataAndCheckVerifyEmail(
+                                         registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration
+                                       ): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
+    authAndGetData(registrationModificationMode) andThen
+      checkEmailVerificationStatus(registrationModificationMode != NotModifyingExistingRegistration)
 
-  def authAndRequireIoss(): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
-    authAndGetDataAndCheckVerifyEmail(inAmend = true) andThen
+  def authAndRequireIoss(modifyingExistingRegistrationMode: ModifyingExistingRegistrationMode): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
+    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode) andThen
       requireIoss() andThen
       checkBouncedEmail()
   }
 }
+
 
 case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                messagesActionBuilder: MessagesActionBuilder,

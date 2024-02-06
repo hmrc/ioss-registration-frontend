@@ -43,7 +43,7 @@ class CannotRegisterFixedEstablishmentOperationOnlyController @Inject()(
       Ok(view(waypoints, countryIndex))
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
 
       for {

@@ -152,7 +152,9 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
       running(application) {
         forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-          Mockito.reset(mockSessionRepository, mockCoreRegistrationValidationService, mockRegistrationConnector)
+          Mockito.reset(mockSessionRepository)
+          Mockito.reset(mockCoreRegistrationValidationService)
+          Mockito.reset(mockRegistrationConnector)
 
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
           when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
@@ -188,7 +190,9 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
       running(application) {
         forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-          Mockito.reset(mockSessionRepository, mockCoreRegistrationValidationService, mockRegistrationConnector)
+          Mockito.reset(mockSessionRepository)
+          Mockito.reset(mockCoreRegistrationValidationService)
+          Mockito.reset(mockRegistrationConnector)
 
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
           when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
@@ -237,7 +241,8 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
         running(application) {
           forAll(allNonAmendModeWaypoints) { (_, nonAmendModeWaypoints, _) =>
-            Mockito.reset(mockSessionRepository, mockCoreRegistrationValidationService)
+            Mockito.reset(mockSessionRepository)
+            Mockito.reset(mockCoreRegistrationValidationService)
 
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
             when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(Some(genericMatch))
@@ -251,7 +256,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).value mustEqual
               controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
-                nonAmendModeWaypoints,
+                EmptyWaypoints,
                 countryCode
               ).url
             verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
@@ -305,7 +310,9 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
         running(application) {
           forAll(allNonAmendModeWaypoints) { (_, nonAmendModeWaypoints, _) =>
-            Mockito.reset(mockSessionRepository, mockCoreRegistrationValidationService)
+            Mockito.reset(mockSessionRepository)
+            Mockito.reset(mockCoreRegistrationValidationService)
+
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
             when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
               Future.successful(Some(genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)))
@@ -319,7 +326,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).value mustEqual
               controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(
-                nonAmendModeWaypoints
+                EmptyWaypoints
               ).url
             verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
           }
@@ -384,7 +391,9 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
         running(application) {
           forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-            Mockito.reset(mockSessionRepository, mockCoreRegistrationValidationService, mockRegistrationConnector)
+            Mockito.reset(mockSessionRepository)
+            Mockito.reset(mockCoreRegistrationValidationService)
+            Mockito.reset(mockRegistrationConnector)
 
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
             when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn

@@ -38,7 +38,7 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
 
   override protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(waypoints.inAmend) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode) {
     implicit request =>
 
       val preparedForm = request.userAnswers.get(BankDetailsPage) match {
@@ -49,7 +49,7 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
       Ok(view(preparedForm, waypoints))
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
 
       form.bindFromRequest().fold(

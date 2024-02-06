@@ -162,7 +162,7 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, countryIndex).url
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, country.code).url
       }
     }
 
@@ -188,7 +188,7 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, countryIndex).url
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, country.code).url
       }
     }
 
@@ -214,7 +214,7 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, countryIndex).url
+        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, country.code).url
       }
     }
 

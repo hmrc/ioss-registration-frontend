@@ -17,7 +17,7 @@
 package controllers.euDetails
 
 import controllers.GetCountry
-import controllers.actions.AuthenticatedControllerComponents
+import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
 import forms.euDetails.EuTaxReferenceFormProvider
 import models.Index
 import pages.Waypoints
@@ -44,13 +44,11 @@ class EuTaxReferenceController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
 
       getCountry(waypoints, countryIndex) {
-
         country =>
-
           val form: Form[String] = formProvider(country)
           val preparedForm = request.userAnswers.get(EuTaxReferencePage(countryIndex)) match {
             case None => form
@@ -61,34 +59,36 @@ class EuTaxReferenceController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
+
+      val isNotAmendingRegistration = waypoints.registrationModificationMode != AmendingActiveRegistration
 
       getCountry(waypoints, countryIndex) {
 
         country =>
 
-        val form: Form[String] = formProvider(country)
-        form.bindFromRequest().fold(
-          formWithErrors =>
-            BadRequest(view(formWithErrors, waypoints, countryIndex, country)).toFuture,
+          val form: Form[String] = formProvider(country)
+          form.bindFromRequest().fold(
+            formWithErrors =>
+              BadRequest(view(formWithErrors, waypoints, countryIndex, country)).toFuture,
 
-          value =>
+            (euTaxReference: String) =>
 
-            coreRegistrationValidationService.searchEuTaxId(value, country.code).flatMap {
+              coreRegistrationValidationService.searchEuTaxId(euTaxReference, country.code).flatMap {
 
-              case Some(activeMatch) if activeMatch.matchType.isActiveTrader && !waypoints.inAmend =>
-                Future.successful(Redirect(controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints, countryIndex)))
+                case Some(activeMatch) if activeMatch.matchType.isActiveTrader && isNotAmendingRegistration =>
+                  Future.successful(Redirect(controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints, country.code)))
 
-              case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && !waypoints.inAmend =>
-                Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
+                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && isNotAmendingRegistration =>
+                  Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
 
-              case _ => for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(EuTaxReferencePage(countryIndex), value))
-                _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(EuTaxReferencePage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
-            }
-        )
+                case _ => for {
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(EuTaxReferencePage(countryIndex), euTaxReference))
+                  _ <- cc.sessionRepository.set(updatedAnswers)
+                } yield Redirect(EuTaxReferencePage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+              }
+          )
       }
   }
 }

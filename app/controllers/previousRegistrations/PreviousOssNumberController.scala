@@ -47,69 +47,71 @@ class PreviousOssNumberController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
-      getPreviousCountry(waypoints, countryIndex) {
-        country =>
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode).async {
+      implicit request =>
+        getPreviousCountry(waypoints, countryIndex) {
+          country =>
 
-          val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex)
+            val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex)
 
-          val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
-            case Some(previousSchemeDetails) =>
+            val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
+              case Some(previousSchemeDetails) =>
 
-              val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
-              formProvider(country, previousSchemes)
+                val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
+                formProvider(country, previousSchemes)
 
-            case None =>
-              formProvider(country, Seq.empty)
-          }
-
-          val preparedForm = request.userAnswers.get(PreviousOssNumberPage(countryIndex, schemeIndex)) match {
-            case None => form
-            case Some(value) => form.fill(value.previousSchemeNumber)
-          }
-          CountryWithValidationDetails.euCountriesWithVRNValidationRules.filter(_.country.code == country.code).head match {
-            case countryWithValidationDetails =>
-              Future.successful(Ok(view(preparedForm, waypoints, countryIndex, schemeIndex, countryWithValidationDetails, previousSchemeHintText)))
-          }
-      }
-  }
-
-  def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
-      getPreviousCountry(waypoints, countryIndex) {
-        country =>
-
-          val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex)
-
-          val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
-            case Some(previousSchemeDetails) =>
-              val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
-              formProvider(country, previousSchemes)
-
-            case None =>
-              formProvider(country, Seq.empty)
-          }
-
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              CountryWithValidationDetails.euCountriesWithVRNValidationRules.filter(_.country.code == country.code).head match {
-                case countryWithValidationDetails =>
-                  Future.successful(BadRequest(view(
-                    formWithErrors, waypoints, countryIndex, schemeIndex, countryWithValidationDetails, previousSchemeHintText)))
-              },
-
-            value => {
-              val previousScheme = if (value.startsWith("EU")) {
-                PreviousScheme.OSSNU
-              } else {
-                PreviousScheme.OSSU
-              }
-              searchSchemeThenSaveAndRedirect(waypoints, countryIndex, schemeIndex, country, value, previousScheme)
+              case None =>
+                formProvider(country, Seq.empty)
             }
-          )
-      }
-  }
+
+            val preparedForm = request.userAnswers.get(PreviousOssNumberPage(countryIndex, schemeIndex)) match {
+              case None => form
+              case Some(value) => form.fill(value.previousSchemeNumber)
+            }
+            CountryWithValidationDetails.euCountriesWithVRNValidationRules.filter(_.country.code == country.code).head match {
+              case countryWithValidationDetails =>
+                Future.successful(Ok(view(preparedForm, waypoints, countryIndex, schemeIndex, countryWithValidationDetails, previousSchemeHintText)))
+            }
+        }
+    }
+
+  def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode).async {
+      implicit request =>
+        getPreviousCountry(waypoints, countryIndex) {
+          country =>
+
+            val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex)
+
+            val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
+              case Some(previousSchemeDetails) =>
+                val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
+                formProvider(country, previousSchemes)
+
+              case None =>
+                formProvider(country, Seq.empty)
+            }
+
+            form.bindFromRequest().fold(
+              formWithErrors =>
+                CountryWithValidationDetails.euCountriesWithVRNValidationRules.filter(_.country.code == country.code).head match {
+                  case countryWithValidationDetails =>
+                    Future.successful(BadRequest(view(
+                      formWithErrors, waypoints, countryIndex, schemeIndex, countryWithValidationDetails, previousSchemeHintText)))
+                },
+
+              value => {
+                val previousScheme = if (value.startsWith("EU")) {
+                  PreviousScheme.OSSNU
+                } else {
+                  PreviousScheme.OSSU
+                }
+                searchSchemeThenSaveAndRedirect(waypoints, countryIndex, schemeIndex, country, value, previousScheme)
+              }
+            )
+        }
+    }
 
   private def searchSchemeThenSaveAndRedirect(
                                                waypoints: Waypoints,
@@ -119,6 +121,9 @@ class PreviousOssNumberController @Inject()(
                                                value: String,
                                                previousScheme: WithName with PreviousScheme
                                              )(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] = {
+
+    val isNotAmendingActiveRegistration = waypoints.registrationModificationMode != AmendingActiveRegistration
+
     if (previousScheme == PreviousScheme.OSSU) {
       coreRegistrationValidationService.searchScheme(
         searchNumber = value,
@@ -126,7 +131,7 @@ class PreviousOssNumberController @Inject()(
         intermediaryNumber = None,
         countryCode = country.code
       ).flatMap {
-        case Some(activeMatch) if !waypoints.inAmend && activeMatch.matchType.isQuarantinedTrader =>
+        case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.matchType.isQuarantinedTrader =>
           Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
 
         case _ =>
