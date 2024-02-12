@@ -3,9 +3,6 @@
 
 This is the repository for Import One Stop Shop Registration Frontend
 
-
-
-
 Backend: https://github.com/hmrc/ioss-registration
 
 Stub: https://github.com/hmrc/ioss-registration-stub
@@ -32,25 +29,6 @@ and
 ```
 sbt run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes
 ```
-
-### Running correct version of mongo
-We have introduced a transaction to the call to be able to ensure that both the vatreturn and correction get submitted to mongo.
-Your local mongo is unlikely to be running a latest enough version and probably not in a replica set.
-To do this, you'll need to stop your current mongo instance (docker ps to get the name of your mongo docker then docker stop <name> to stop)
-Run at least 4.4 with a replica set:
-```  
-docker run --restart unless-stopped -d -p 27017-27019:27017-27019 --name mongo4 mongo:4.4 --replSet rs0
-```
-Connect to said replica set:
-```
-docker exec -it mongo4 mongo
-```
-When that console is there:
-```
-rs.initiate()
-```
-You then should be running 4.4 with a replica set. You may have to re-run the rs.initiate() after you've restarted
-
 
 ### Using the application
 To log in using the Authority Wizard provide "continue url", "affinity group" and "enrolments" as follows:
