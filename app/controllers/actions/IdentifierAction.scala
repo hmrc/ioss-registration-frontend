@@ -150,12 +150,14 @@ class AuthenticatedIdentifierAction @Inject()(
           enrolment.identifiers.find(_.key == "VATRegNo").map(e => Vrn(e.value))
       }
 
-  private def findIossNumberFromEnrolments(enrolments: Enrolments)(implicit hc: HeaderCarrier): Future[Option[String]] =
-    enrolments.enrolments.find(_.key == config.iossEnrolment).flatMap(_.identifiers.find(_.key == "IOSSNumber").map(_.value)) match {
-      case Some(_) =>
+  private def findIossNumberFromEnrolments(enrolments: Enrolments)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    enrolments.enrolments.filter(_.key == config.iossEnrolment).toSeq.flatMap(_.identifiers.filter(_.key == "IOSSNumber").map(_.value)) match {
+      case firstEnrolment :: Nil => Some(firstEnrolment).toFuture
+      case enrolments if enrolments.nonEmpty =>
         accountService.getLatestAccount()
-      case a => a.toFuture
+      case _ => None.toFuture
     }
+  }
 
   private def upliftCredentialStrength[A](request: Request[A]): IdentifierActionResult[A] =
     Left(Redirect(
