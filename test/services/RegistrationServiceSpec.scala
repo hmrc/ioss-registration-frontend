@@ -18,26 +18,25 @@ package services
 
 import base.SpecBase
 import connectors.RegistrationConnector
+import models.{BankDetails, BusinessContactDetails, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
 import models.Country.euCountries
 import models.amend.RegistrationWrapper
 import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
 import models.etmp._
-import models.etmp.amend.AmendRegistrationResponse
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.responses.etmp.EtmpEnrolmentResponse
-import models.{BankDetails, BusinessContactDetails, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.reset
 import org.mockito.MockitoSugar.{times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import play.api.test.Helpers.running
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
@@ -47,8 +46,6 @@ import testutils.RegistrationData.{amendRegistrationResponse, etmpDisplayRegistr
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
-
-import java.time.LocalDateTime
 
 class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAndAfterEach {
 

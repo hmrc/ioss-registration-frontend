@@ -20,6 +20,7 @@ import connectors.SavedUserAnswers
 import models._
 import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
+import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
 import models.etmp._
 import models.etmp.amend.EtmpAmendRegistrationChangeLog
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
@@ -31,7 +32,8 @@ import org.scalatest.EitherValues
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.domain.Vrn
 
-import java.time.{Instant, LocalDate, ZoneOffset}
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
+import java.time.temporal.ChronoUnit
 
 trait ModelGenerators extends EitherValues {
 
@@ -397,4 +399,41 @@ trait ModelGenerators extends EitherValues {
         )
       }
     }
+
+  implicit val arbitraryEACDIdentifiers: Arbitrary[EACDIdentifiers] = {
+    Arbitrary {
+      for {
+        key <- Gen.alphaStr
+        value <- Gen.alphaStr
+      } yield EACDIdentifiers(
+        key = key,
+        value = value
+      )
+    }
+  }
+
+  implicit val arbitraryEACDEnrolment: Arbitrary[EACDEnrolment] = {
+    Arbitrary {
+      for {
+        service <- Gen.alphaStr
+        state <- Gen.alphaStr
+        identifiers <- Gen.listOfN(2, arbitraryEACDIdentifiers.arbitrary)
+      } yield EACDEnrolment(
+        service = service,
+        state = state,
+        activationDate = Some(LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
+        identifiers = identifiers
+      )
+    }
+  }
+
+  implicit val arbitraryEACDEnrolments: Arbitrary[EACDEnrolments] = {
+    Arbitrary {
+      for {
+        enrolments <- Gen.listOfN(2, arbitraryEACDEnrolment.arbitrary)
+      } yield EACDEnrolments(
+        enrolments = enrolments
+      )
+    }
+  }
 }

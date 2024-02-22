@@ -20,9 +20,11 @@ import base.SpecBase
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
+import models.enrolments.EACDEnrolments
 import models.external.ExternalEntryUrl
 import models.responses._
 import models.responses.etmp.EtmpEnrolmentResponse
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import play.api.Application
 import play.api.http.Status._
@@ -327,5 +329,28 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
         result mustBe Left(UnexpectedResponseStatus(123, "Unexpected amend response, status 123 returned"))
       }
     }
+  }
+
+  ".getAccounts" - {
+    val url = s"/ioss-registration/accounts"
+
+    "must return a registration when the server provides one" in {
+
+      val app = application
+
+      running(app) {
+        val connector = app.injector.instanceOf[RegistrationConnector]
+        val eACDEnrolments = arbitrary[EACDEnrolments].sample.value
+
+        val responseBody = Json.toJson(eACDEnrolments).toString
+
+        server.stubFor(get(urlEqualTo(url)).willReturn(ok().withBody(responseBody)))
+
+        val result = connector.getAccounts().futureValue
+
+        result mustEqual eACDEnrolments
+      }
+    }
+
   }
 }

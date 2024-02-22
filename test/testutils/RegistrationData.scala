@@ -19,10 +19,9 @@ package testutils
 import base.SpecBase
 import config.Constants.maxTradingNames
 import formats.Format.eisDateFormatter
-import models.etmp._
 import models.{Bic, Country, Iban}
-import models.etmp.amend.{AmendRegistrationResponse, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
-import models.etmp.amend.{EtmpAmendCustomerIdentification, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
+import models.etmp._
+import models.etmp.amend.{AmendRegistrationResponse, EtmpAmendCustomerIdentification, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 

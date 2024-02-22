@@ -24,7 +24,7 @@ import logging.Logging
 import models.requests.{AuthenticatedIdentifierRequest, SessionRequest}
 import play.api.mvc.Results._
 import play.api.mvc._
-import services.UrlBuilderService
+import services.{AccountService, UrlBuilderService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
@@ -41,7 +41,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuthenticatedIdentifierAction @Inject()(
                                                override val authConnector: AuthConnector,
                                                config: FrontendAppConfig,
-                                               urlBuilderService: UrlBuilderService
+                                               urlBuilderService: UrlBuilderService,
+                                               accountService: AccountService
                                              )
                                              (implicit val executionContext: ExecutionContext)
   extends ActionRefiner[Request, AuthenticatedIdentifierRequest]
@@ -70,7 +71,10 @@ class AuthenticatedIdentifierAction @Inject()(
 
       case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == User =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
-          case (Some(vrn), iossNumber) => Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, iossNumber)).toFuture
+          case (Some(vrn), futureMaybeIossNumber) =>
+            futureMaybeIossNumber.map { maybeIossNumber =>
+              Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber))
+            }
           case _ => throw InsufficientEnrolments()
         }
 
@@ -79,9 +83,11 @@ class AuthenticatedIdentifierAction @Inject()(
 
       case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
-          case (Some(vrn), iossNumber) =>
+          case (Some(vrn), futureMaybeIossNumber) =>
             if (confidence >= ConfidenceLevel.L200) {
-              Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, iossNumber)).toFuture
+              futureMaybeIossNumber.map { maybeIossNumber =>
+                Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber))
+              }
             } else {
               throw InsufficientConfidenceLevel()
             }
@@ -144,8 +150,12 @@ class AuthenticatedIdentifierAction @Inject()(
           enrolment.identifiers.find(_.key == "VATRegNo").map(e => Vrn(e.value))
       }
 
-  private def findIossNumberFromEnrolments(enrolments: Enrolments): Option[String] =
-    enrolments.enrolments.find(_.key == config.iossEnrolment).flatMap(_.identifiers.find(_.key == "IOSSNumber").map(_.value))
+  private def findIossNumberFromEnrolments(enrolments: Enrolments)(implicit hc: HeaderCarrier): Future[Option[String]] =
+    enrolments.enrolments.find(_.key == config.iossEnrolment).flatMap(_.identifiers.find(_.key == "IOSSNumber").map(_.value)) match {
+      case Some(_) =>
+        accountService.getLatestAccount()
+      case a => a.toFuture
+    }
 
   private def upliftCredentialStrength[A](request: Request[A]): IdentifierActionResult[A] =
     Left(Redirect(
