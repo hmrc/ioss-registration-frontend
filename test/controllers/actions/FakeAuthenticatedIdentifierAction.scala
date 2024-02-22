@@ -20,9 +20,9 @@ import config.FrontendAppConfig
 import models.requests.AuthenticatedIdentifierRequest
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.{Request, Result}
-import services.UrlBuilderService
-import uk.gov.hmrc.auth.core.retrieve.Credentials
+import services.{AccountService, UrlBuilderService}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolments}
+import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
 import utils.FutureSyntax.FutureOps
 
@@ -31,7 +31,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class FakeAuthenticatedIdentifierAction extends AuthenticatedIdentifierAction(
   mock[AuthConnector],
   mock[FrontendAppConfig],
-  mock[UrlBuilderService]
+  mock[UrlBuilderService],
+  mock[AccountService]
 )(ExecutionContext.Implicits.global) {
 
   override def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedIdentifierRequest[A]]] =

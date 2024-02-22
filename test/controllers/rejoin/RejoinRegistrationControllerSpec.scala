@@ -20,18 +20,17 @@ import base.SpecBase
 import connectors.RegistrationConnector
 import controllers.actions.{FakeIossRequiredAction, IossRequiredAction}
 import controllers.rejoin.{routes => rejoinRoutes}
+import models.{CheckMode, Index, UserAnswers}
 import models.amend.RegistrationWrapper
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
 import models.responses.InternalServerError
-import models.{CheckMode, Index, UserAnswers}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import pages._
-import pages.amend.ChangeRegistrationPage
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
 import play.api.i18n.Messages
@@ -43,12 +42,12 @@ import services._
 import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
-import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
-import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
-import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
-import viewmodels.govuk.SummaryListFluency
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
+import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviouslyRegisteredSummary, PreviousRegistrationSummary}
+import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.govuk.SummaryListFluency
 import views.html.rejoin.RejoinRegistrationView
 
 import java.time.{Clock, LocalDate, LocalDateTime}
