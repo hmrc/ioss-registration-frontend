@@ -252,7 +252,7 @@ expiredVrnDate.link = <a href="https://www.gov.uk/register-for-vat/how-register-
 
 cannotRegisterNoNiProtocol.title = You cannot register for this service
 cannotRegisterNoNiProtocol.heading = You cannot register for this service
-cannotRegisterNoNiProtocol.p1 = You need a VAT number starting with 'XI' to use this service.
+cannotRegisterNoNiProtocol.p1 = You need a VAT number starting with ''XI'' to use this service.
 cannotRegisterNoNiProtocol.link = <a href="https://www.gov.uk/register-for-vat/selling-or-moving-goods-between-northern-ireland-and-the-eu" class="govuk-link">Find out more and register</a>
 
 cannotRegisterNotNorwegianBasedBusiness.title = You cannot register for this service
