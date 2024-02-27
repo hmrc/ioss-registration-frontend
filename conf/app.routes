@@ -236,9 +236,9 @@ GET         /error-submitting-registration                                   con
 GET         /continue-registration                                           controllers.ContinueRegistrationController.onPageLoad()
 POST        /continue-registration                                           controllers.ContinueRegistrationController.onSubmit()
 
-GET        /no-saved-registration                                            controllers.NoRegistrationInProgressController.onPageLoad()
+GET         /no-saved-registration                                           controllers.NoRegistrationInProgressController.onPageLoad()
 
-GET        /already-registered                                               controllers.AlreadyRegisteredController.onPageLoad()
+GET         /already-registered                                              controllers.AlreadyRegisteredController.onPageLoad()
 
 # Amend registration
 GET         /start-amend-journey                                             controllers.amend.StartAmendJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
@@ -253,9 +253,9 @@ GET         /error-submitting-amendment                                      con
 
 GET         /successful-amend                                                controllers.amend.AmendCompleteController.onPageLoad()
 
-GET        /cannot-use-not-registered                                        controllers.NotRegisteredController.onPageLoad()
+GET         /cannot-use-not-registered                                       controllers.NotRegisteredController.onPageLoad()
 
-GET         /start-rejoin-journey                                             controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /start-rejoin-journey                                            controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 GET         /rejoin-registration                                             controllers.rejoin.RejoinRegistrationController.onPageLoad()
 POST        /rejoin-registration                                             controllers.rejoin.RejoinRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 

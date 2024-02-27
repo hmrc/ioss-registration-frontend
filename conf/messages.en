@@ -250,9 +250,9 @@ expiredVrnDate.title = The VAT number for this account is no longer valid
 expiredVrnDate.heading = The VAT number for this account is no longer valid
 expiredVrnDate.link = <a href="https://www.gov.uk/register-for-vat/how-register-for-vat" class="govuk-link">Apply for a new VAT number to use this service</a>
 
-cannotRegisterNoNiProtocol.title = Register to trade under the Northern Ireland Protocol
-cannotRegisterNoNiProtocol.heading = Register to trade under the Northern Ireland Protocol
-cannotRegisterNoNiProtocol.p1 = You need a VAT number starting with 'XI' to use this service.
+cannotRegisterNoNiProtocol.title = You cannot register for this service
+cannotRegisterNoNiProtocol.heading = You cannot register for this service
+cannotRegisterNoNiProtocol.p1 = You need a VAT number starting with ''XI'' to use this service.
 cannotRegisterNoNiProtocol.link = <a href="https://www.gov.uk/register-for-vat/selling-or-moving-goods-between-northern-ireland-and-the-eu" class="govuk-link">Find out more and register</a>
 
 cannotRegisterNotNorwegianBasedBusiness.title = You cannot register for this service
@@ -304,7 +304,7 @@ deleteAllTradingNames.change.hidden = Remove all your alternative trading names 
 
 taxRegisteredInEu.title = Is your business registered for VAT in EU countries?
 taxRegisteredInEu.heading = Is your business registered for VAT in EU countries?
-taxRegisteredInEu.checkYourAnswersLabel = Registered for tax in other EU countries
+taxRegisteredInEu.checkYourAnswersLabel = Registered for tax in EU countries
 taxRegisteredInEu.mini.checkYourAnswersLabel = VAT Registered
 taxRegisteredInEu.error.required = Select yes if your business registered for VAT in EU countries
 taxRegisteredInEu.change.hidden = if registered for VAT in EU countries
