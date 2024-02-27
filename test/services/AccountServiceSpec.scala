@@ -35,7 +35,6 @@ class AccountServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
   private implicit val emptyHc: HeaderCarrier = HeaderCarrier()
 
   private val mockRegistrationConnector = mock[RegistrationConnector]
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   override protected def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
@@ -44,7 +43,7 @@ class AccountServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
   "getAccounts" - {
 
     "return the most recent iossNumber" in {
-      val enrolmentKey = "HMRC-IOSS-ORG"
+      val enrolmentKey = "IOSSNumber"
 
       val enrolments = EACDEnrolments(Seq(
         EACDEnrolment(
@@ -62,8 +61,7 @@ class AccountServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
       ))
 
       when(mockRegistrationConnector.getAccounts()(any())) thenReturn enrolments.toFuture
-      when(mockFrontendAppConfig.iossEnrolment) thenReturn enrolmentKey
-      val service = new AccountService(mockFrontendAppConfig, mockRegistrationConnector)
+      val service = new AccountService(mockRegistrationConnector)
 
       val result = service.getLatestAccount().futureValue
 

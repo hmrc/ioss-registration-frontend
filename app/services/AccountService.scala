@@ -24,7 +24,6 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AccountService @Inject()(
-                                frontendAppConfig: FrontendAppConfig,
                                 registrationConnector: RegistrationConnector
                               )(implicit ec: ExecutionContext) {
 
@@ -34,7 +33,7 @@ class AccountService @Inject()(
         .filter(_.activationDate.isDefined)
         .maxBy(_.activationDate.get)
         .identifiers
-        .find(_.key == frontendAppConfig.iossEnrolment)
+        .find(_.key == "IOSSNumber")
         .map(_.value)
     }
   }
