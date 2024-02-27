@@ -31,7 +31,7 @@
             <h1 class="govuk-heading-l">@messages("cannotRegisterFixedEstablishmentOperationOnly.heading")</h1>
 
             @govukButton(
-                ButtonViewModel(messages("site.continue"))
+                ButtonViewModel(messages("site.continue")).withAttribute("id", "continue")
             )
         }
     }
