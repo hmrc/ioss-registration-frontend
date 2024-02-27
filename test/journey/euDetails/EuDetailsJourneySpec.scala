@@ -33,6 +33,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
   private val maxCountries: Int = Country.euCountries.size
   private val countryIndex1: Index = Index(0)
   private val countryIndex2: Index = Index(1)
+  private val countryIndex3: Index = Index(2)
 
   private val euVatNumber: String = arbitraryEuVatNumber.sample.value
   private val countryCode: String = euVatNumber.substring(0, 2)
@@ -102,15 +103,54 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
 
   "users with one or more EU registration" - {
 
-    "the user can't register a country as they don't have a fixed establishment in that country" in {
+    "the user can't register a country as they don't have a fixed establishment in that country" - {
 
-      startingFrom(TaxRegisteredInEuPage)
-        .run(
-          submitAnswer(TaxRegisteredInEuPage, true),
-          submitAnswer(EuCountryPage(countryIndex1), country),
-          submitAnswer(HasFixedEstablishmentPage(countryIndex1), false),
-          pageMustBe(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex1))
+      "when the user has only entered one country" in {
+
+        startingFrom(TaxRegisteredInEuPage)
+          .run(
+            submitAnswer(TaxRegisteredInEuPage, true),
+            submitAnswer(EuCountryPage(countryIndex1), country),
+            submitAnswer(HasFixedEstablishmentPage(countryIndex1), false),
+            pageMustBe(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex1)),
+            removeAddToListItem(EuDetailsQuery(countryIndex1)),
+            pageMustBe(TaxRegisteredInEuPage),
+            answersMustNotContain(EuCountryPage(countryIndex1))
+          )
+      }
+
+      "when the user has entered multiple countries" in {
+
+        val initialise = journeyOf(
+          setUserAnswerTo(TaxRegisteredInEuPage, true),
+          setUserAnswerTo(EuCountryPage(countryIndex1), country),
+          setUserAnswerTo(HasFixedEstablishmentPage(countryIndex1), true),
+          setUserAnswerTo(RegistrationTypePage(countryIndex1), RegistrationType.VatNumber),
+          setUserAnswerTo(EuVatNumberPage(countryIndex1), euVatNumber),
+          setUserAnswerTo(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
+          setUserAnswerTo(FixedEstablishmentAddressPage(countryIndex1), arbitraryInternationalAddress.arbitrary.sample.value),
+          setUserAnswerTo(AddEuDetailsPage(Some(countryIndex1)), true),
+          setUserAnswerTo(EuCountryPage(countryIndex2), arbitraryCountry.arbitrary.sample.value),
+          setUserAnswerTo(HasFixedEstablishmentPage(countryIndex2), true),
+          setUserAnswerTo(RegistrationTypePage(countryIndex2), RegistrationType.TaxId),
+          setUserAnswerTo(EuTaxReferencePage(countryIndex2), euTaxReference),
+          setUserAnswerTo(FixedEstablishmentTradingNamePage(countryIndex2), tradingName),
+          setUserAnswerTo(FixedEstablishmentAddressPage(countryIndex2), arbitraryInternationalAddress.arbitrary.sample.value),
+          setUserAnswerTo(AddEuDetailsPage(Some(countryIndex2)), true)
         )
+
+        startingFrom(EuCountryPage(countryIndex3))
+          .run(
+            initialise,
+            submitAnswer(EuCountryPage(countryIndex3), arbitraryCountry.arbitrary.sample.value),
+            submitAnswer(HasFixedEstablishmentPage(countryIndex3), false),
+            pageMustBe(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex3)),
+            removeAddToListItem(EuDetailsQuery(countryIndex3)),
+            answersMustNotContain(EuDetailsQuery(countryIndex3)),
+            answersMustContain(EuDetailsQuery(countryIndex1)),
+            answersMustContain(EuDetailsQuery(countryIndex2))
+          )
+      }
     }
 
     "the user registers a country with a VAT number" in {
