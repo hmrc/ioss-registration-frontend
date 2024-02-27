@@ -18,7 +18,7 @@ package controllers.euDetails
 
 import base.SpecBase
 import forms.euDetails.DeleteEuDetailsFormProvider
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.euDetails.RegistrationType
 import models.{Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
@@ -46,7 +46,7 @@ class DeleteEuDetailsControllerSpec extends SpecBase with MockitoSugar {
   private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
-    .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(HasFixedEstablishmentPage(countryIndex), true).success.value
     .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
     .set(EuTaxReferencePage(countryIndex), arbitraryEuTaxReference.sample.value).success.value
     .set(FixedEstablishmentTradingNamePage(countryIndex), "Trading name").success.value

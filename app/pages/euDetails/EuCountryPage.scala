@@ -32,5 +32,5 @@ case class EuCountryPage(countryIndex: Index) extends QuestionPage[Country] {
     routes.EuCountryController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    SellsGoodsToEuConsumerMethodPage(countryIndex)
+    HasFixedEstablishmentPage(countryIndex)
 }

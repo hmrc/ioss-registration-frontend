@@ -20,7 +20,6 @@ import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import forms.euDetails.EuTaxReferenceFormProvider
 import models.Index
-import models.core.Match
 import pages.Waypoints
 import pages.euDetails.EuTaxReferencePage
 import play.api.data.Form

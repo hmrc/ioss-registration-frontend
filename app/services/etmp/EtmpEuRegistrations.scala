@@ -18,7 +18,7 @@ package services.etmp
 
 import logging.Logging
 import models.etmp.{EtmpEuRegistrationDetails, TaxRefTraderID, TraderId, VatNumberTraderId}
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.euDetails.RegistrationType
 import models.{Country, CountryWithValidationDetails, Index, InternationalAddress, UserAnswers}
 import pages.euDetails._
 import queries.euDetails.AllEuDetailsRawQuery
@@ -51,8 +51,8 @@ trait EtmpEuRegistrations extends Logging {
   private def processEuDetails(answers: UserAnswers, index: Index): EtmpEuRegistrationDetails = {
     answers.get(EuCountryPage(index)) match {
       case Some(country) =>
-        answers.get(SellsGoodsToEuConsumerMethodPage(index)) match {
-          case Some(EuConsumerSalesMethod.FixedEstablishment) =>
+        answers.get(HasFixedEstablishmentPage(index)) match {
+          case Some(true) =>
             val traderId = getTraderId(answers, index, country)
             val fixedEstablishmentTradingName = getFixedEstablishmentTradingName(answers, index)
             val fixedEstablishmentAddress = getFixedEstablishmentAddress(answers, index)

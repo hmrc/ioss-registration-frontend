@@ -17,13 +17,12 @@
 package controllers.euDetails
 
 import base.SpecBase
-import forms.euDetails.SellsGoodsToEuConsumerMethodFormProvider
-import models.euDetails.EuConsumerSalesMethod
+import forms.euDetails.HasFixedEstablishmentFormProvider
 import models.{Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.euDetails.{EuCountryPage, SellsGoodsToEuConsumerMethodPage, TaxRegisteredInEuPage}
+import pages.euDetails.{EuCountryPage, HasFixedEstablishmentPage, TaxRegisteredInEuPage}
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
@@ -31,35 +30,35 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
-import views.html.euDetails.SellsGoodsToEuConsumerMethodView
+import views.html.euDetails.HasFixedEstablishmentView
 
-class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSugar {
+class HasFixedEstablishmentControllerSpec extends SpecBase with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
   private val countryIndex: Index = Index(0)
   private val country: Country = arbitraryCountry.arbitrary.sample.value
 
-  val formProvider = new SellsGoodsToEuConsumerMethodFormProvider()
-  val form: Form[EuConsumerSalesMethod] = formProvider(country)
+  val formProvider = new HasFixedEstablishmentFormProvider()
+  val form: Form[Boolean] = formProvider(country)
 
   private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
 
-  lazy val sellsGoodsToEuConsumerMethodRoute: String = routes.SellsGoodsToEuConsumerMethodController.onPageLoad(waypoints, countryIndex).url
+  lazy val hasFixedEstablishmentRoute: String = routes.HasFixedEstablishmentController.onPageLoad(waypoints, countryIndex).url
 
-  "SellsGoodsToEuConsumerMethod Controller" - {
+  "HasFixedEstablishment Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(answers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, sellsGoodsToEuConsumerMethodRoute)
+        val request = FakeRequest(GET, hasFixedEstablishmentRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[SellsGoodsToEuConsumerMethodView]
+        val view = application.injector.instanceOf[HasFixedEstablishmentView]
 
         status(result) mustBe OK
         contentAsString(result) mustBe view(form, waypoints, countryIndex, country)(request, messages(application)).toString
@@ -68,20 +67,20 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = answers.set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+      val userAnswers = answers.set(HasFixedEstablishmentPage(countryIndex), true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, sellsGoodsToEuConsumerMethodRoute)
+        val request = FakeRequest(GET, hasFixedEstablishmentRoute)
 
-        val view = application.injector.instanceOf[SellsGoodsToEuConsumerMethodView]
+        val view = application.injector.instanceOf[HasFixedEstablishmentView]
 
         val result = route(application, request).value
 
         status(result) mustBe OK
         contentAsString(result) mustBe view(
-          form.fill(EuConsumerSalesMethod.FixedEstablishment), waypoints, countryIndex, country
+          form.fill(true), waypoints, countryIndex, country
         )(request, messages(application)).toString
       }
     }
@@ -101,15 +100,15 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request =
-          FakeRequest(POST, sellsGoodsToEuConsumerMethodRoute)
-            .withFormUrlEncodedBody(("value", EuConsumerSalesMethod.values.head.toString))
+          FakeRequest(POST, hasFixedEstablishmentRoute)
+            .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
         val expectedAnswers = answers
-          .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+          .set(HasFixedEstablishmentPage(countryIndex), true).success.value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe SellsGoodsToEuConsumerMethodPage(countryIndex)
+        redirectLocation(result).value mustBe HasFixedEstablishmentPage(countryIndex)
           .navigate(waypoints, answers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
@@ -121,12 +120,12 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request =
-          FakeRequest(POST, sellsGoodsToEuConsumerMethodRoute)
+          FakeRequest(POST, hasFixedEstablishmentRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[SellsGoodsToEuConsumerMethodView]
+        val view = application.injector.instanceOf[HasFixedEstablishmentView]
 
         val result = route(application, request).value
 
@@ -140,7 +139,7 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, sellsGoodsToEuConsumerMethodRoute)
+        val request = FakeRequest(GET, hasFixedEstablishmentRoute)
 
         val result = route(application, request).value
 
@@ -155,7 +154,7 @@ class SellsGoodsToEuConsumerMethodControllerSpec extends SpecBase with MockitoSu
 
       running(application) {
         val request =
-          FakeRequest(POST, sellsGoodsToEuConsumerMethodRoute)
+          FakeRequest(POST, hasFixedEstablishmentRoute)
             .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value

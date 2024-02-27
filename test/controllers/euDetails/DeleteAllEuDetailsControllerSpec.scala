@@ -18,7 +18,7 @@ package controllers.euDetails
 
 import base.SpecBase
 import forms.euDetails.DeleteAllEuDetailsFormProvider
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.euDetails.RegistrationType
 import models.{Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
@@ -46,13 +46,13 @@ class DeleteAllEuDetailsControllerSpec extends SpecBase with MockitoSugar {
   private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex1), arbitraryCountry.arbitrary.sample.value).success.value
-    .set(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(HasFixedEstablishmentPage(countryIndex1), true).success.value
     .set(RegistrationTypePage(countryIndex1), RegistrationType.TaxId).success.value
     .set(EuTaxReferencePage(countryIndex1), arbitraryEuTaxReference.sample.value).success.value
     .set(FixedEstablishmentTradingNamePage(countryIndex1), "Trading name one").success.value
     .set(FixedEstablishmentAddressPage(countryIndex1), arbitraryInternationalAddress.arbitrary.sample.value).success.value
     .set(EuCountryPage(countryIndex2), arbitraryCountry.arbitrary.sample.value).success.value
-    .set(SellsGoodsToEuConsumerMethodPage(countryIndex2), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(HasFixedEstablishmentPage(countryIndex2), true).success.value
     .set(RegistrationTypePage(countryIndex2), RegistrationType.TaxId).success.value
     .set(EuTaxReferencePage(countryIndex2), arbitraryEuTaxReference.sample.value).success.value
     .set(FixedEstablishmentTradingNamePage(countryIndex2), "Trading name two").success.value

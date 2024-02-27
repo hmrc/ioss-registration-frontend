@@ -23,7 +23,7 @@ import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumber
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
 import models.etmp._
 import models.etmp.amend.EtmpAmendRegistrationChangeLog
-import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
+import models.euDetails.{EuDetails, RegistrationType}
 import models.previousRegistrations.NonCompliantDetails
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN, option}
@@ -32,8 +32,8 @@ import org.scalatest.EitherValues
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.domain.Vrn
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 import java.time.temporal.ChronoUnit
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
 trait ModelGenerators extends EitherValues {
 
@@ -139,11 +139,6 @@ trait ModelGenerators extends EitherValues {
       Gen.oneOf(Country.euCountries)
     }
 
-  implicit lazy val arbitraryEuConsumerSalesMethod: Arbitrary[EuConsumerSalesMethod] =
-    Arbitrary {
-      Gen.oneOf(EuConsumerSalesMethod.values)
-    }
-
   implicit lazy val arbitraryRegistrationType: Arbitrary[RegistrationType] =
     Arbitrary {
       Gen.oneOf(RegistrationType.values)
@@ -163,7 +158,7 @@ trait ModelGenerators extends EitherValues {
     Arbitrary {
       for {
         country <- arbitraryCountry.arbitrary
-        sellsGoodsToEUConsumerMethod <- Gen.option(arbitraryEuConsumerSalesMethod.arbitrary)
+        sellsGoodsToEUConsumerMethod <- Gen.option(arbitrary[Boolean])
         registrationType <- Gen.option(arbitraryRegistrationType.arbitrary)
         euVatNumber <- Gen.option(arbitraryEuVatNumber)
         euTaxReference <- Gen.option(arbitraryEuTaxReference)

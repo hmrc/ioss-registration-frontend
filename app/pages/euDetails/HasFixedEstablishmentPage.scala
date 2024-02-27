@@ -17,24 +17,23 @@
 package pages.euDetails
 
 import controllers.euDetails.routes
-import models.euDetails.EuConsumerSalesMethod
 import models.{Index, UserAnswers}
 import pages.{Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 
-case class SellsGoodsToEuConsumerMethodPage(countryIndex: Index) extends QuestionPage[EuConsumerSalesMethod] {
+case class HasFixedEstablishmentPage(countryIndex: Index) extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ "euDetails" \ countryIndex.position \ toString
 
-  override def toString: String = "sellsGoodsToEuConsumerMethod"
+  override def toString: String = "hasFixedEstablishment"
 
   override def route(waypoints: Waypoints): Call =
-    routes.SellsGoodsToEuConsumerMethodController.onPageLoad(waypoints, countryIndex)
+    routes.HasFixedEstablishmentController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
-      case EuConsumerSalesMethod.FixedEstablishment => RegistrationTypePage(countryIndex)
-      case EuConsumerSalesMethod.DispatchWarehouse => CannotRegisterFixedEstablishmentOperationOnlyPage
+      case true => RegistrationTypePage(countryIndex)
+      case false => CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex)
     }.orRecover
 }

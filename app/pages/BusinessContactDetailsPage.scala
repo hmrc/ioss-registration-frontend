@@ -18,7 +18,6 @@ package pages
 
 import controllers.routes
 import models.{BusinessContactDetails, UserAnswers}
-import pages.amend.ChangeRegistrationPage
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import utils.AmendWaypoints.AmendWaypointsOps

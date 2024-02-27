@@ -18,7 +18,7 @@ package controllers.euDetails
 
 import base.SpecBase
 import forms.euDetails.FixedEstablishmentTradingNameFormProvider
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.euDetails.RegistrationType
 import models.{Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
@@ -45,7 +45,7 @@ class FixedEstablishmentTradingNameControllerSpec extends SpecBase with MockitoS
   private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
-    .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(HasFixedEstablishmentPage(countryIndex), true).success.value
     .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
     .set(EuTaxReferencePage(countryIndex), arbitraryEuTaxReference.sample.value).success.value
 

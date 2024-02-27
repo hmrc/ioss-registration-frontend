@@ -56,7 +56,8 @@ class CheckEuDetailsAnswersController @Inject()(
               EuVatNumberSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
               EuTaxReferenceSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
               FixedEstablishmentTradingNameSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
-              FixedEstablishmentAddressSummary.row(request.userAnswers, waypoints, countryIndex, thisPage)
+              FixedEstablishmentAddressSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
+              TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, thisPage)
             ).flatten
           )
 

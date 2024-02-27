@@ -19,16 +19,16 @@ package models.etmp
 import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
 import formats.Format.eisDateFormatter
-import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
-import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
+import models.euDetails.{EuDetails, RegistrationType}
 import models.previousRegistrations.{NonCompliantDetails, PreviousRegistrationDetails}
+import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import play.api.libs.json.{JsSuccess, Json}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
@@ -106,7 +106,7 @@ class EtmpRegistrationRequestSpec extends SpecBase {
       val previousEuRegistrations: List[PreviousRegistrationDetails] = Gen.listOfN(numberOfRegistrations, previousRegistration).sample.value
       val euRegistration: EuDetails = EuDetails(
         euCountry = arbitraryCountry.arbitrary.sample.value,
-        sellsGoodsToEuConsumerMethod = Some(EuConsumerSalesMethod.FixedEstablishment),
+        hasFixedEstablishment = Some(true),
         registrationType = Some(arbitraryRegistrationType.arbitrary.sample.value),
         euVatNumber = Some(arbitraryEuVatNumber.sample.value),
         euTaxReference = Some(arbitraryEuTaxReference.sample.value),

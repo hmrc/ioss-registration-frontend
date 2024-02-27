@@ -15,8 +15,7 @@
  *@
 
 @import controllers.euDetails.routes
-@import models.euDetails.EuConsumerSalesMethod
-@import pages.euDetails.SellsGoodsToEuConsumerMethodPage
+@import pages.euDetails.HasFixedEstablishmentPage
 @import views.html.components.ButtonGroup
 
 @this(
@@ -29,22 +28,21 @@
 
 @(form: Form[_], waypoints: Waypoints, countryIndex: Index, country: Country)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("sellsGoodsToEuConsumerMethod.title", country.name))) {
+@layout(pageTitle = title(form, messages("hasFixedEstablishment.title", country.name))) {
 
-    @formHelper(action = routes.SellsGoodsToEuConsumerMethodController.onSubmit(waypoints, countryIndex), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.HasFixedEstablishmentController.onSubmit(waypoints, countryIndex), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
 
         @govukRadios(
-            RadiosViewModel(
+            RadiosViewModel.yesNo(
                 field = form("value"),
-                legend = LegendViewModel(messages("sellsGoodsToEuConsumerMethod.heading", country.name)).asPageHeading(),
-                items = EuConsumerSalesMethod.options
+                legend = LegendViewModel(messages("hasFixedEstablishment.heading", country.name)).asPageHeading()
             )
         )
 
-        @button("site.continue", SellsGoodsToEuConsumerMethodPage(countryIndex).route(waypoints).url, waypoints)
+        @button("site.continue", HasFixedEstablishmentPage(countryIndex).route(waypoints).url, waypoints)
     }
 }
