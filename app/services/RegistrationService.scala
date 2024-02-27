@@ -17,22 +17,22 @@
 package services
 
 import connectors.RegistrationConnector
-import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, DisplayRegistrationResponse, RegistrationResultResponse}
+import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, RegistrationResultResponse}
 import logging.Logging
-import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, TradingName, UserAnswers, Website}
 import models.Country.euCountries
 import models.amend.RegistrationWrapper
 import models.domain.PreviousSchemeDetails
-import models.etmp._
 import models.etmp.EtmpRegistrationRequest.buildEtmpRegistrationRequest
+import models.etmp._
 import models.etmp.amend.EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest
 import models.euDetails.{EuConsumerSalesMethod, EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
-import pages.{BankDetailsPage, BusinessContactDetailsPage}
+import models.{BankDetails, BusinessContactDetails, Country, InternationalAddress, TradingName, UserAnswers, Website}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
+import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
