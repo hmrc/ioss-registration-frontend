@@ -63,13 +63,18 @@ class RegistrationService @Inject()(
                          iossNumber: String,
                          rejoin: Boolean
                        )(implicit hc: HeaderCarrier): Future[AmendRegistrationResultResponse] = {
+    val newCommencementDate = if(rejoin) {
+      LocalDate.now(clock)
+    } else {
+      LocalDate.parse(registration.schemeDetails.commencementDate)
+    }
     registrationConnector.amendRegistration(
       buildEtmpAmendRegistrationRequest(
         answers = answers,
         registration = registration,
         vrn = vrn,
         iossNumber = iossNumber,
-        commencementDate = LocalDate.parse(registration.schemeDetails.commencementDate),
+        commencementDate = newCommencementDate,
         rejoin = rejoin
       ))
   }
