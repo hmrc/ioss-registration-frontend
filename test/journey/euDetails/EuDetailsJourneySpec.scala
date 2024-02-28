@@ -18,14 +18,14 @@ package journey.euDetails
 
 import generators.{Generators, ModelGenerators}
 import journey.JourneyHelpers
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.euDetails.RegistrationType
 import models.{CheckMode, Country, Index}
 import org.scalacheck.Gen
 import org.scalatest.freespec.AnyFreeSpec
-import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import pages.amend.ChangeRegistrationPage
 import pages.euDetails._
 import pages.website.WebsitePage
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import queries.euDetails.{AllEuDetailsRawQuery, EuDetailsQuery}
 
 class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGenerators with Generators {
@@ -33,6 +33,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
   private val maxCountries: Int = Country.euCountries.size
   private val countryIndex1: Index = Index(0)
   private val countryIndex2: Index = Index(1)
+  private val countryIndex3: Index = Index(2)
 
   private val euVatNumber: String = arbitraryEuVatNumber.sample.value
   private val countryCode: String = euVatNumber.substring(0, 2)
@@ -50,14 +51,14 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
   private val initialise = journeyOf(
     setUserAnswerTo(TaxRegisteredInEuPage, true),
     setUserAnswerTo(EuCountryPage(countryIndex1), country),
-    setUserAnswerTo(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment),
+    setUserAnswerTo(HasFixedEstablishmentPage(countryIndex1), true),
     setUserAnswerTo(RegistrationTypePage(countryIndex1), RegistrationType.VatNumber),
     setUserAnswerTo(EuVatNumberPage(countryIndex1), euVatNumber),
     setUserAnswerTo(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
     setUserAnswerTo(FixedEstablishmentAddressPage(countryIndex1), arbitraryInternationalAddress.arbitrary.sample.value),
     setUserAnswerTo(AddEuDetailsPage(Some(countryIndex1)), true),
     setUserAnswerTo(EuCountryPage(countryIndex2), arbitraryCountry.arbitrary.sample.value),
-    setUserAnswerTo(SellsGoodsToEuConsumerMethodPage(countryIndex2), EuConsumerSalesMethod.FixedEstablishment),
+    setUserAnswerTo(HasFixedEstablishmentPage(countryIndex2), true),
     setUserAnswerTo(RegistrationTypePage(countryIndex2), RegistrationType.TaxId),
     setUserAnswerTo(EuTaxReferencePage(countryIndex2), euTaxReference),
     setUserAnswerTo(FixedEstablishmentTradingNamePage(countryIndex2), tradingName),
@@ -65,7 +66,6 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
     setUserAnswerTo(AddEuDetailsPage(Some(countryIndex2)), false),
     goTo(CheckYourAnswersPage)
   )
-
 
   "must go directly to add website page if not registered for VAT in any EU countries" in {
     startingFrom(TaxRegisteredInEuPage)
@@ -75,7 +75,6 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
       )
   }
 
-
   s"must be asked for as many as necessary upto the maximum of $maxCountries EU countries" in {
 
     def generateEuDetails: Seq[JourneyStep[Unit]] = {
@@ -83,7 +82,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
         case (journeySteps: Seq[JourneyStep[Unit]], index: Int) =>
           journeySteps :+
             submitAnswer(EuCountryPage(Index(index)), country) :+
-            submitAnswer(SellsGoodsToEuConsumerMethodPage(Index(index)), EuConsumerSalesMethod.FixedEstablishment) :+
+            submitAnswer(HasFixedEstablishmentPage(Index(index)), true) :+
             submitAnswer(RegistrationTypePage(Index(index)), RegistrationType.VatNumber) :+
             submitAnswer(EuVatNumberPage(Index(index)), euVatNumber) :+
             submitAnswer(FixedEstablishmentTradingNamePage(Index(index)), Gen.oneOf(tradingNames).sample.value) :+
@@ -104,15 +103,54 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
 
   "users with one or more EU registration" - {
 
-    "the user can't register a country as they sell their goods via a dispatch warehouse from that country" in {
+    "the user can't register a country as they don't have a fixed establishment in that country" - {
 
-      startingFrom(TaxRegisteredInEuPage)
-        .run(
-          submitAnswer(TaxRegisteredInEuPage, true),
-          submitAnswer(EuCountryPage(countryIndex1), country),
-          submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.DispatchWarehouse),
-          pageMustBe(CannotRegisterFixedEstablishmentOperationOnlyPage)
+      "when the user has only entered one country" in {
+
+        startingFrom(TaxRegisteredInEuPage)
+          .run(
+            submitAnswer(TaxRegisteredInEuPage, true),
+            submitAnswer(EuCountryPage(countryIndex1), country),
+            submitAnswer(HasFixedEstablishmentPage(countryIndex1), false),
+            pageMustBe(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex1)),
+            removeAddToListItem(EuDetailsQuery(countryIndex1)),
+            pageMustBe(TaxRegisteredInEuPage),
+            answersMustNotContain(EuCountryPage(countryIndex1))
+          )
+      }
+
+      "when the user has entered multiple countries" in {
+
+        val initialise = journeyOf(
+          setUserAnswerTo(TaxRegisteredInEuPage, true),
+          setUserAnswerTo(EuCountryPage(countryIndex1), country),
+          setUserAnswerTo(HasFixedEstablishmentPage(countryIndex1), true),
+          setUserAnswerTo(RegistrationTypePage(countryIndex1), RegistrationType.VatNumber),
+          setUserAnswerTo(EuVatNumberPage(countryIndex1), euVatNumber),
+          setUserAnswerTo(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
+          setUserAnswerTo(FixedEstablishmentAddressPage(countryIndex1), arbitraryInternationalAddress.arbitrary.sample.value),
+          setUserAnswerTo(AddEuDetailsPage(Some(countryIndex1)), true),
+          setUserAnswerTo(EuCountryPage(countryIndex2), arbitraryCountry.arbitrary.sample.value),
+          setUserAnswerTo(HasFixedEstablishmentPage(countryIndex2), true),
+          setUserAnswerTo(RegistrationTypePage(countryIndex2), RegistrationType.TaxId),
+          setUserAnswerTo(EuTaxReferencePage(countryIndex2), euTaxReference),
+          setUserAnswerTo(FixedEstablishmentTradingNamePage(countryIndex2), tradingName),
+          setUserAnswerTo(FixedEstablishmentAddressPage(countryIndex2), arbitraryInternationalAddress.arbitrary.sample.value),
+          setUserAnswerTo(AddEuDetailsPage(Some(countryIndex2)), true)
         )
+
+        startingFrom(EuCountryPage(countryIndex3))
+          .run(
+            initialise,
+            submitAnswer(EuCountryPage(countryIndex3), arbitraryCountry.arbitrary.sample.value),
+            submitAnswer(HasFixedEstablishmentPage(countryIndex3), false),
+            pageMustBe(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex3)),
+            removeAddToListItem(EuDetailsQuery(countryIndex3)),
+            answersMustNotContain(EuDetailsQuery(countryIndex3)),
+            answersMustContain(EuDetailsQuery(countryIndex1)),
+            answersMustContain(EuDetailsQuery(countryIndex2))
+          )
+      }
     }
 
     "the user registers a country with a VAT number" in {
@@ -121,7 +159,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
         .run(
           submitAnswer(TaxRegisteredInEuPage, true),
           submitAnswer(EuCountryPage(countryIndex1), country),
-          submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment),
+          submitAnswer(HasFixedEstablishmentPage(countryIndex1), true),
           submitAnswer(RegistrationTypePage(countryIndex1), RegistrationType.VatNumber),
           submitAnswer(EuVatNumberPage(countryIndex1), euVatNumber),
           submitAnswer(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
@@ -136,7 +174,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
         .run(
           submitAnswer(TaxRegisteredInEuPage, true),
           submitAnswer(EuCountryPage(countryIndex1), country),
-          submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment),
+          submitAnswer(HasFixedEstablishmentPage(countryIndex1), true),
           submitAnswer(RegistrationTypePage(countryIndex1), RegistrationType.TaxId),
           submitAnswer(EuTaxReferencePage(countryIndex1), euTaxReference),
           submitAnswer(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
@@ -153,7 +191,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
           .run(
             submitAnswer(TaxRegisteredInEuPage, true),
             submitAnswer(EuCountryPage(countryIndex1), country),
-            submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment),
+            submitAnswer(HasFixedEstablishmentPage(countryIndex1), true),
             submitAnswer(RegistrationTypePage(countryIndex1), RegistrationType.TaxId),
             submitAnswer(EuTaxReferencePage(countryIndex1), euTaxReference),
             submitAnswer(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
@@ -172,7 +210,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
           .run(
             submitAnswer(TaxRegisteredInEuPage, true),
             submitAnswer(EuCountryPage(countryIndex1), country),
-            submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment),
+            submitAnswer(HasFixedEstablishmentPage(countryIndex1), true),
             submitAnswer(RegistrationTypePage(countryIndex1), RegistrationType.VatNumber),
             submitAnswer(EuVatNumberPage(countryIndex1), euVatNumber),
             submitAnswer(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
@@ -181,7 +219,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
             goTo(AddEuDetailsPage(Some(countryIndex1))),
             submitAnswer(AddEuDetailsPage(Some(countryIndex1)), true),
             submitAnswer(EuCountryPage(countryIndex2), country),
-            submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex2), EuConsumerSalesMethod.FixedEstablishment),
+            submitAnswer(HasFixedEstablishmentPage(countryIndex2), true),
             submitAnswer(RegistrationTypePage(countryIndex2), RegistrationType.TaxId),
             submitAnswer(EuTaxReferencePage(countryIndex2), euTaxReference),
             submitAnswer(FixedEstablishmentTradingNamePage(countryIndex2), tradingName),
@@ -202,7 +240,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
         val initialise = journeyOf(
           submitAnswer(TaxRegisteredInEuPage, true),
           submitAnswer(EuCountryPage(countryIndex1), country),
-          submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment),
+          submitAnswer(HasFixedEstablishmentPage(countryIndex1), true),
           submitAnswer(RegistrationTypePage(countryIndex1), RegistrationType.TaxId),
           submitAnswer(EuTaxReferencePage(countryIndex1), euTaxReference),
           submitAnswer(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
@@ -236,7 +274,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
         val initialise = journeyOf(
           submitAnswer(TaxRegisteredInEuPage, true),
           submitAnswer(EuCountryPage(countryIndex1), country),
-          submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex1), EuConsumerSalesMethod.FixedEstablishment),
+          submitAnswer(HasFixedEstablishmentPage(countryIndex1), true),
           submitAnswer(RegistrationTypePage(countryIndex1), RegistrationType.VatNumber),
           submitAnswer(EuVatNumberPage(countryIndex1), euVatNumber),
           submitAnswer(FixedEstablishmentTradingNamePage(countryIndex1), tradingName),
@@ -245,7 +283,7 @@ class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGen
           goTo(AddEuDetailsPage(Some(countryIndex1))),
           submitAnswer(AddEuDetailsPage(Some(countryIndex1)), true),
           submitAnswer(EuCountryPage(countryIndex2), arbitraryCountry.arbitrary.sample.value),
-          submitAnswer(SellsGoodsToEuConsumerMethodPage(countryIndex2), EuConsumerSalesMethod.FixedEstablishment),
+          submitAnswer(HasFixedEstablishmentPage(countryIndex2), true),
           submitAnswer(RegistrationTypePage(countryIndex2), RegistrationType.TaxId),
           submitAnswer(EuTaxReferencePage(countryIndex2), euTaxReference),
           submitAnswer(FixedEstablishmentTradingNamePage(countryIndex2), tradingName),

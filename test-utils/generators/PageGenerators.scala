@@ -47,8 +47,8 @@ trait PageGenerators {
   implicit lazy val arbitraryRegistrationTypePage: Arbitrary[RegistrationTypePage] =
     Arbitrary(RegistrationTypePage(Index(0)))
 
-  implicit lazy val arbitrarySellsGoodsToEuConsumerMethodPage: Arbitrary[SellsGoodsToEuConsumerMethodPage] =
-    Arbitrary(SellsGoodsToEuConsumerMethodPage(Index(0)))
+  implicit lazy val arbitrarySellsGoodsToEuConsumerMethodPage: Arbitrary[HasFixedEstablishmentPage] =
+    Arbitrary(HasFixedEstablishmentPage(Index(0)))
 
   implicit lazy val arbitraryEuCountryPage: Arbitrary[EuCountryPage] =
     Arbitrary(EuCountryPage(Index(0)))

@@ -18,12 +18,11 @@ package controllers.euDetails
 
 import base.SpecBase
 import forms.euDetails.EuCountryFormProvider
-import models.euDetails.EuConsumerSalesMethod
 import models.{Country, Index}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.euDetails.{EuCountryPage, SellsGoodsToEuConsumerMethodPage, TaxRegisteredInEuPage}
+import pages.euDetails.{EuCountryPage, HasFixedEstablishmentPage, TaxRegisteredInEuPage}
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
@@ -133,7 +132,7 @@ class EuCountryControllerSpec extends SpecBase with MockitoSugar {
       val userAnswers = basicUserAnswersWithVatInfo
         .set(TaxRegisteredInEuPage, true).success.value
         .set(EuCountryPage(countryIndex), country).success.value
-        .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+        .set(HasFixedEstablishmentPage(countryIndex), true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 

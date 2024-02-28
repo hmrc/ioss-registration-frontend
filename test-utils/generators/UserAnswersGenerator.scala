@@ -38,7 +38,7 @@ trait UserAnswersGenerator extends TryValues {
       arbitrary[(EuTaxReferencePage, JsValue)] ::
       arbitrary[(EuVatNumberPage, JsValue)] ::
       arbitrary[(RegistrationTypePage, JsValue)] ::
-      arbitrary[(SellsGoodsToEuConsumerMethodPage, JsValue)] ::
+      arbitrary[(HasFixedEstablishmentPage, JsValue)] ::
       arbitrary[(EuCountryPage, JsValue)] ::
       arbitrary[(TaxRegisteredInEuPage.type, JsValue)] ::
       arbitrary[(DeleteAllTradingNamesPage.type, JsValue)] ::

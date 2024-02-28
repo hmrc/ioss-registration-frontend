@@ -17,24 +17,40 @@
 package controllers.euDetails
 
 import controllers.actions.AuthenticatedControllerComponents
+import models.Index
 import pages.Waypoints
+import pages.euDetails.CannotRegisterFixedEstablishmentOperationOnlyPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.euDetails.EuDetailsQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.euDetails.CannotRegisterFixedEstablishmentOperationOnlyView
 
 import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class CannotRegisterFixedEstablishmentOperationOnlyController @Inject()(
                                                                          override val messagesApi: MessagesApi,
                                                                          cc: AuthenticatedControllerComponents,
                                                                          view: CannotRegisterFixedEstablishmentOperationOnlyView
-                                                                       ) extends FrontendBaseController with I18nSupport {
+                                                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
-      Ok(view())
+      Ok(view(waypoints, countryIndex))
+  }
+
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+    implicit request =>
+
+      for {
+        updatedAnswers <- Future.fromTry(request.userAnswers.remove(EuDetailsQuery(countryIndex)))
+        _ <- cc.sessionRepository.set(updatedAnswers)
+      } yield {
+        Redirect(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+      }
   }
 }

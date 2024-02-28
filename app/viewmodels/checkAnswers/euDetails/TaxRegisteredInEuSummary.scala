@@ -33,6 +33,22 @@ object TaxRegisteredInEuSummary  {
         val value = if (answer) "site.yes" else "site.no"
 
         SummaryListRowViewModel(
+          key     = "taxRegisteredInEu.mini.checkYourAnswersLabel",
+          value   = ValueViewModel(value),
+          actions = Seq(
+            ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
+              .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
+          )
+        )
+    }
+
+  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(TaxRegisteredInEuPage).map {
+      answer =>
+
+        val value = if (answer) "site.yes" else "site.no"
+
+        SummaryListRowViewModel(
           key     = "taxRegisteredInEu.checkYourAnswersLabel",
           value   = ValueViewModel(value),
           actions = Seq(

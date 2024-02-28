@@ -18,27 +18,26 @@ package controllers.euDetails
 
 import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
-import forms.euDetails.SellsGoodsToEuConsumerMethodFormProvider
+import forms.euDetails.HasFixedEstablishmentFormProvider
 import models.Index
-import models.euDetails.EuConsumerSalesMethod
 import pages.Waypoints
-import pages.euDetails.SellsGoodsToEuConsumerMethodPage
+import pages.euDetails.HasFixedEstablishmentPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
-import views.html.euDetails.SellsGoodsToEuConsumerMethodView
+import views.html.euDetails.HasFixedEstablishmentView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SellsGoodsToEuConsumerMethodController @Inject()(
-                                                        override val messagesApi: MessagesApi,
-                                                        cc: AuthenticatedControllerComponents,
-                                                        formProvider: SellsGoodsToEuConsumerMethodFormProvider,
-                                                        view: SellsGoodsToEuConsumerMethodView
+class HasFixedEstablishmentController @Inject()(
+                                                 override val messagesApi: MessagesApi,
+                                                 cc: AuthenticatedControllerComponents,
+                                                 formProvider: HasFixedEstablishmentFormProvider,
+                                                 view: HasFixedEstablishmentView
                                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -50,8 +49,8 @@ class SellsGoodsToEuConsumerMethodController @Inject()(
 
         country =>
 
-          val form: Form[EuConsumerSalesMethod] = formProvider(country)
-          val preparedForm = request.userAnswers.get(SellsGoodsToEuConsumerMethodPage(countryIndex)) match {
+          val form: Form[Boolean] = formProvider(country)
+          val preparedForm = request.userAnswers.get(HasFixedEstablishmentPage(countryIndex)) match {
             case None => form
             case Some(value) => form.fill(value)
           }
@@ -67,16 +66,16 @@ class SellsGoodsToEuConsumerMethodController @Inject()(
 
         country =>
 
-          val form: Form[EuConsumerSalesMethod] = formProvider(country)
+          val form: Form[Boolean] = formProvider(country)
           form.bindFromRequest().fold(
             formWithErrors =>
               BadRequest(view(formWithErrors, waypoints, countryIndex, country)).toFuture,
 
             value =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(SellsGoodsToEuConsumerMethodPage(countryIndex), value))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(HasFixedEstablishmentPage(countryIndex), value))
                 _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(SellsGoodsToEuConsumerMethodPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+              } yield Redirect(HasFixedEstablishmentPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
           )
       }
   }

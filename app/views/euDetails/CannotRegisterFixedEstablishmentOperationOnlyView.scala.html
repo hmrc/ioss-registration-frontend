@@ -14,16 +14,24 @@
  * limitations under the License.
  *@
 
+@import controllers.euDetails.routes
+
 @this(
         layout: templates.Layout,
+        formHelper: FormWithCSRF,
         govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, countryIndex: Index)(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("cannotRegisterFixedEstablishmentOperationOnly.title"))) {
 
-        <h1 class="govuk-heading-l">@messages("cannotRegisterFixedEstablishmentOperationOnly.heading")</h1>
+        @formHelper(action = routes.CannotRegisterFixedEstablishmentOperationOnlyController.onSubmit(waypoints, countryIndex), Symbol("autoComplete") -> "off") {
 
-        <p class="govuk-body">@Html(messages("cannotRegisterFixedEstablishmentOperationOnly.p"))</p>
+            <h1 class="govuk-heading-l">@messages("cannotRegisterFixedEstablishmentOperationOnly.heading")</h1>
+
+            @govukButton(
+                ButtonViewModel(messages("site.continue")).withAttribute("id", "continue")
+            )
+        }
     }

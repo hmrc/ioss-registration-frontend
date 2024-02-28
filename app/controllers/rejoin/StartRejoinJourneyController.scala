@@ -20,7 +20,6 @@ import connectors.RegistrationConnector
 import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
 import pages.Waypoints
-import pages.amend.ChangeRegistrationPage
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}

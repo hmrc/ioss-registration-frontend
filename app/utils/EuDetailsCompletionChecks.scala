@@ -16,7 +16,7 @@
 
 package utils
 
-import models.euDetails.{EuConsumerSalesMethod, EuOptionalDetails, RegistrationType}
+import models.euDetails.{EuOptionalDetails, RegistrationType}
 import models.requests.AuthenticatedDataRequest
 import models.{CountryWithValidationDetails, Index}
 import pages.Waypoints
@@ -71,18 +71,18 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
   }
 
   private def sellsGoodsToEuConsumersMethod(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    details.sellsGoodsToEuConsumerMethod.isEmpty ||
-      details.sellsGoodsToEuConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) && details.registrationType.isEmpty ||
+    details.hasFixedEstablishment.isEmpty ||
+      details.hasFixedEstablishment.contains(true) && details.registrationType.isEmpty ||
       (details.registrationType.contains(RegistrationType.VatNumber) && details.euVatNumber.isEmpty) ||
       (details.registrationType.contains(RegistrationType.TaxId) && details.euTaxReference.isEmpty) ||
       fixedEstablishment(isPartOfVatGroup, details)
   }
 
   private def fixedEstablishment(isPartOfVatGroup: Boolean, details: EuOptionalDetails): Boolean = {
-    !isPartOfVatGroup && details.sellsGoodsToEuConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment) &&
+    !isPartOfVatGroup && details.hasFixedEstablishment.contains(true) &&
       (details.registrationType.contains(RegistrationType.TaxId) || details.registrationType.contains(RegistrationType.VatNumber)) &&
       (details.fixedEstablishmentTradingName.isEmpty || details.fixedEstablishmentAddress.isEmpty) /*||
-      (isPartOfVatGroup && details.sellsGoodsToEuConsumerMethod.contains(EuConsumerSalesMethod.FixedEstablishment))*/
+      (isPartOfVatGroup && details.hasFixedEstablishment.contains(true))*/
   }
 
   def incompleteEuDetailsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
@@ -111,8 +111,8 @@ case object EuDetailsCompletionChecks extends CompletionChecks {
 
   private def incompleteCheckEuDetailsRedirect(euDetails: EuOptionalDetails, waypoints: Waypoints, index: Index): Option[Result] = {
     val redirectCalls: Seq[(Boolean, Call)] = Seq(
-      euDetails.sellsGoodsToEuConsumerMethod.isEmpty ->
-        controllers.euDetails.routes.SellsGoodsToEuConsumerMethodController.onPageLoad(waypoints, index),
+      euDetails.hasFixedEstablishment.isEmpty ->
+        controllers.euDetails.routes.HasFixedEstablishmentController.onPageLoad(waypoints, index),
 
       euDetails.registrationType.isEmpty ->
         controllers.euDetails.routes.RegistrationTypeController.onPageLoad(waypoints, index),

@@ -166,11 +166,11 @@ otherCountryExcludedAndQuarantined.heading = You cannot register for this servic
 otherCountryExcludedAndQuarantined.paragraph = {0} has blocked your account from One Stop Shop services until {1}.
 otherCountryExcludedAndQuarantined.contact = If you believe this is an error, contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 
-sellsGoodsToEuOrNi.title = Does your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland?
-sellsGoodsToEuOrNi.heading = Does your business sell goods from countries outside the EU to consumers in the EU or Northern Ireland?
-sellsGoodsToEuOrNi.caption = This includes selling goods from Great Britain but not Northern Ireland.
-sellsGoodsToEuOrNi.error.required = Select yes if your business sells goods from countries outside the EU to consumers in the EU or Northern Ireland
-sellsGoodsToEuOrNi.change.hidden = Sells goods from countries outside the EU to consumers in the EU or Northern Ireland
+sellsGoodsToEuOrNi.title = Does your business sell goods imported from countries outside the EU and Northern Ireland to consumers in the EU or Northern Ireland?
+sellsGoodsToEuOrNi.heading = Does your business sell goods imported from countries outside the EU and Northern Ireland to consumers in the EU or Northern Ireland?
+sellsGoodsToEuOrNi.caption = This does not include goods located in and sold from Great Britain to Northern Ireland.
+sellsGoodsToEuOrNi.error.required = Select yes if your business sell goods imported from countries outside the EU and Northern Ireland to consumers in the EU or Northern Ireland
+sellsGoodsToEuOrNi.change.hidden = sells goods imported from countries outside the EU and Northern Ireland to consumers in the EU or Northern Ireland
 
 cannotRegisterForIoss.title = You cannot register
 cannotRegisterForIoss.heading = You cannot register
@@ -195,16 +195,15 @@ cannotRegisterNoVatInUk.title = You cannot register
 cannotRegisterNoVatInUk.heading = You cannot register
 cannotRegisterNoVatInUk.p1 = Your business must be registered for VAT in the UK to use this service.
 
-businessBasedInNi.title = Are you a Northern Ireland business?
-businessBasedInNi.heading = Are you a Northern Ireland business?
-businessBasedInNi.caption = This means HMRC identifies your business as trading under the Northern Ireland Protocol.
-businessBasedInNi.error.required = Select yes if you are a Northern Ireland business
-businessBasedInNi.change.hidden = Northern Ireland based business
+businessBasedInNi.title = Is your business in Northern Ireland?
+businessBasedInNi.heading = Is your business in Northern Ireland?
+businessBasedInNi.error.required = Select yes if your business is in Northern Ireland
+businessBasedInNi.change.hidden = your business is in Northern Ireland
 
-norwegianBasedBusiness.title = Are you a Norwegian Business?
-norwegianBasedBusiness.heading = Are you a Norwegian Business?
-norwegianBasedBusiness.error.required = Select yes if you are a Norwegian Business
-norwegianBasedBusiness.change.hidden = Norwegian based business
+norwegianBasedBusiness.title = Is your business in Norway?
+norwegianBasedBusiness.heading = Is your business in Norway?
+norwegianBasedBusiness.error.required = Select yes if your business is in Norway
+norwegianBasedBusiness.change.hidden = your business is in Norway
 
 eligibleToRegister.title = Your business can register to use this service
 eligibleToRegister.heading = Your business can register to use this service
@@ -302,12 +301,12 @@ deleteAllTradingNames.warning = This will delete all the trading names you have 
 deleteAllTradingNames.error.required = Select yes if you want to remove all your alternative trading names from this scheme
 deleteAllTradingNames.change.hidden = Remove all your alternative trading names from this scheme
 
-taxRegisteredInEu.title = Is your business registered for VAT in EU countries?
-taxRegisteredInEu.heading = Is your business registered for VAT in EU countries?
+taxRegisteredInEu.title = Is your business registered for tax in EU countries?
+taxRegisteredInEu.heading = Is your business registered for tax in EU countries?
 taxRegisteredInEu.checkYourAnswersLabel = Registered for tax in EU countries
 taxRegisteredInEu.mini.checkYourAnswersLabel = VAT Registered
-taxRegisteredInEu.error.required = Select yes if your business registered for VAT in EU countries
-taxRegisteredInEu.change.hidden = if registered for VAT in EU countries
+taxRegisteredInEu.error.required = Select yes if your business is registered for tax in EU countries
+taxRegisteredInEu.change.hidden = if your business is registered for tax in EU countries
 
 euCountry.title = Enter an EU country where your business is registered for tax
 euCountry.heading = Enter an EU country where your business is registered for tax
@@ -315,17 +314,13 @@ euCountry.checkYourAnswersLabel = Country of tax registration
 euCountry.error.required = Select an EU country where your business is registered for tax
 euCountry.error.duplicate = You selected this country already. Select a different one
 
-sellsGoodsToEuConsumerMethod.title = How does your business sell goods in {0}
-sellsGoodsToEuConsumerMethod.heading = How does your business sell goods in {0}
-sellsGoodsToEuConsumerMethod.fixedEstablishment = Fixed establishment
-sellsGoodsToEuConsumerMethod.dispatchWarehouse = Dispatch warehouse
-sellsGoodsToEuConsumerMethod.checkYourAnswersLabel = How your business sells goods
-sellsGoodsToEuConsumerMethod.error.required = Select how your business sells goods in {0}
-sellsGoodsToEuConsumerMethod.change.hidden = SellsGoodsToEuConsumerMethod
+hasFixedEstablishment.title = Does your business have a fixed establishment in {0}
+hasFixedEstablishment.heading = Does your business have a fixed establishment in {0}
+hasFixedEstablishment.error.required = Select yes if your business has a fixed establishment in {0}
+hasFixedEstablishment.change.hidden = your business has a fixed establishment in {0}
 
-cannotRegisterFixedEstablishmentOperationOnly.title = You need to operate as a fixed establishment
-cannotRegisterFixedEstablishmentOperationOnly.heading = You need to operate as a fixed establishment
-cannotRegisterFixedEstablishmentOperationOnly.p = Sign into your <a href="/business-account" class="govuk-link">business tax account (opens in new tab)</a> to update your UK VAT details before registering for this scheme.
+cannotRegisterFixedEstablishmentOperationOnly.title = You only need to tell us about countries where you have a fixed establishment
+cannotRegisterFixedEstablishmentOperationOnly.heading = You only need to tell us about countries where you have a fixed establishment
 
 registrationType.title = What sort of registration do you have in {0}
 registrationType.heading = What sort of registration do you have in {0}
@@ -627,7 +622,7 @@ noMoreWelsh.submit = Yn eich blaen
 
 applicationComplete.title = You are registered for the Import One Stop Shop scheme
 applicationComplete.heading = You are registered for the Import One Stop Shop scheme
-applicationComplete.reference = Your reference number is <br><span class="govuk-!-font-weight-bold">{0}</span>
+applicationComplete.reference = Your IOSS number is <br><span class="govuk-!-font-weight-bold">{0}</span>
 applicationComplete.registration.text = We''ve received your registration for <span class="govuk-!-font-weight-bold">{0}</span>
 applicationComplete.registration.p1 = You can now use this service to fill out monthly returns for goods sold to consumers in the EU and Northern Ireland.
 applicationComplete.registration.p2 = You can also pay any Import One Stop Shop VAT that you owe.

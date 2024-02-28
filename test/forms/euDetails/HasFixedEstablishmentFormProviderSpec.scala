@@ -16,28 +16,27 @@
 
 package forms.euDetails
 
-import forms.behaviours.OptionFieldBehaviours
+import forms.behaviours.BooleanFieldBehaviours
 import models.Country
-import models.euDetails.EuConsumerSalesMethod
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.data.FormError
 
-class SellsGoodsToEuConsumerMethodFormProviderSpec extends OptionFieldBehaviours {
+class HasFixedEstablishmentFormProviderSpec extends BooleanFieldBehaviours {
 
-  private val requiredKey = "sellsGoodsToEuConsumerMethod.error.required"
+  private val requiredKey = "hasFixedEstablishment.error.required"
+  private val invalidKey = "error.boolean"
   private val country: Country = arbitrary[Country].sample.value
 
-  val form = new SellsGoodsToEuConsumerMethodFormProvider()(country)
+  val form = new HasFixedEstablishmentFormProvider()(country)
 
   ".value" - {
 
     val fieldName = "value"
 
-    behave like optionsField[EuConsumerSalesMethod](
+    behave like booleanField(
       form,
       fieldName,
-      validValues = EuConsumerSalesMethod.values,
-      invalidError = FormError(fieldName, "error.invalid", Seq(country.name))
+      invalidError = FormError(fieldName, invalidKey, Seq(country.name))
     )
 
     behave like mandatoryField(

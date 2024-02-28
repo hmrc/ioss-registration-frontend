@@ -19,15 +19,15 @@ package controllers.euDetails
 import base.SpecBase
 import connectors.RegistrationConnector
 import forms.euDetails.EuTaxReferenceFormProvider
-import models.{CheckMode, Country, Index, UserAnswers}
 import models.core.{Match, MatchType}
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.euDetails.RegistrationType
+import models.{CheckMode, Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
-import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoint, Waypoints}
 import pages.euDetails._
+import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoint, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -52,7 +52,7 @@ class EuTaxReferenceControllerSpec extends SpecBase with MockitoSugar {
   private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
-    .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(HasFixedEstablishmentPage(countryIndex), true).success.value
     .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
 
   private lazy val euTaxReferenceRoute: String = routes.EuTaxReferenceController.onPageLoad(waypoints, countryIndex).url

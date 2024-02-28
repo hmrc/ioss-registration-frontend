@@ -17,7 +17,7 @@
 package controllers.euDetails
 
 import base.SpecBase
-import models.euDetails.{EuConsumerSalesMethod, RegistrationType}
+import models.euDetails.RegistrationType
 import models.{Country, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -44,7 +44,7 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
   private val answers: UserAnswers = basicUserAnswersWithVatInfo
     .set(TaxRegisteredInEuPage, true).success.value
     .set(EuCountryPage(countryIndex), country).success.value
-    .set(SellsGoodsToEuConsumerMethodPage(countryIndex), EuConsumerSalesMethod.FixedEstablishment).success.value
+    .set(HasFixedEstablishmentPage(countryIndex), true).success.value
     .set(RegistrationTypePage(countryIndex), RegistrationType.TaxId).success.value
     .set(EuTaxReferencePage(countryIndex), "123456789").success.value
     .set(FixedEstablishmentTradingNamePage(countryIndex), "Trading name").success.value
@@ -71,7 +71,8 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
             RegistrationTypeSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
             EuTaxReferenceSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
             FixedEstablishmentTradingNameSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
-            FixedEstablishmentAddressSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex))).flatten
+            FixedEstablishmentAddressSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
+            TaxRegisteredInEuSummary.row(answers, waypoints, CheckEuDetailsAnswersPage(countryIndex))).flatten
         )
 
         status(result) mustBe OK

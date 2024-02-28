@@ -18,7 +18,6 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
-import pages.amend.ChangeRegistrationPage
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
