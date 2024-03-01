@@ -69,9 +69,13 @@ class PreviousOssNumberController @Inject()(
               case None => form
               case Some(value) => form.fill(value.previousSchemeNumber)
             }
-            CountryWithValidationDetails.euCountriesWithVRNValidationRules.filter(_.country.code == country.code).head match {
-              case countryWithValidationDetails =>
+
+            CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == country.code) match {
+              case Some(countryWithValidationDetails) =>
                 Future.successful(Ok(view(preparedForm, waypoints, countryIndex, schemeIndex, countryWithValidationDetails, previousSchemeHintText)))
+
+              case _ =>
+                throw new RuntimeException(s"Cannot find country code ${country.code} in euCountriesWithVRNValidationRules")
             }
         }
     }

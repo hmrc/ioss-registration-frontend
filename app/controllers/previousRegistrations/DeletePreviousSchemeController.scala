@@ -51,8 +51,6 @@ class DeletePreviousSchemeController @Inject()(
     cc.authAndGetData(waypoints.registrationModificationMode).async {
       implicit request: AuthenticatedDataRequest[AnyContent] =>
 
-        val isLastPreviousScheme = request.userAnswers.get(DeriveNumberOfPreviousSchemes(countryIndex)).get == lastSchemeForCountry
-
         getPreviousCountry(waypoints, countryIndex) {
           country: Country =>
             request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex))
@@ -75,6 +73,7 @@ class DeletePreviousSchemeController @Inject()(
                 case Some(value) => form.fill(value)
               }
 
+              val isLastPreviousScheme = request.userAnswers.get(DeriveNumberOfPreviousSchemes(countryIndex)).contains(lastSchemeForCountry)
               Future.successful(Ok(view(preparedForm, waypoints, countryIndex, schemeIndex, country, list, isLastPreviousScheme)))
             }
         }
