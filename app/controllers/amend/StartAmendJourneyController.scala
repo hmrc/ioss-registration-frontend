@@ -47,6 +47,7 @@ class StartAmendJourneyController @Inject()(
 
         registrationWrapperResponse match {
           case Right(registrationWrapper) =>
+            println(s"registrationWrapper: $registrationWrapper") // TODO need to pull previous registrations, also check how many there are.
             for {
               userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
               _ <- authenticatedUserAnswersRepository.set(userAnswers)

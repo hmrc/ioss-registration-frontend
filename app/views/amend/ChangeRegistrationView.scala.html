@@ -15,7 +15,7 @@
  *@
 
 @import controllers.amend.{routes => amendRoutes}
-@import pages.amend.ChangeRegistrationPage
+@import pages.amend.{ChangeRegistrationPage, ViewOrChangePreviousRegistrationPage}
 @import views.html.components.CancelAmendRegButton
 
 @this(
@@ -41,6 +41,11 @@
     <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
 
     <p class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</p>
+
+    @*TODO - Only show is previous registrations exist - needs boolean. Also check if previous reg count more than 1, go to option page*@
+    <p class="govuk-body govuk-!-margin-bottom-6">
+        <a class="govuk-link" id="change-previous-registrations" href="@ViewOrChangePreviousRegistrationPage.route(waypoints).url">@messages("changeRegistration.changePreviousRegistration")</a>
+    </p>
 
     <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 

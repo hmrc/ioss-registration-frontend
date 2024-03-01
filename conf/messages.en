@@ -657,6 +657,7 @@ continueRegistration.delete = No, delete my answers and start again
 changeRegistration.title = Change Your Registration
 changeRegistration.heading = Change Your Registration
 changeRegistration.reference = IOSS number: {0}
+changeRegistration.changePreviousRegistration = View or change your previous registration
 changeRegistration.details.heading = Import One Stop Shop details
 changeRegistration.info.p1 = Confirm these changes to save them to your account.
 
@@ -730,4 +731,12 @@ errorSubmittingRejoin.yourAccount = Back to your account
 cannotRejoin.title = You cannot use this service
 cannotRejoin.heading = You cannot use this service
 
+viewOrChangePreviousRegistration.title = Do you want to view or change the details of your previous IOSS registration, {0}
+viewOrChangePreviousRegistration.heading = Do you want to view or change the details of your previous IOSS registration, {0}
+viewOrChangePreviousRegistration.error.required = Select yes if you want to view or change the details of your previous IOSS registration, {0}
+viewOrChangePreviousRegistration.change.hidden = if you want to view or change the details of your previous IOSS registration, {0}
 
+viewOrChangePreviousRegistrationsMultiple.title = Which registration do you want to view or change?
+viewOrChangePreviousRegistrationsMultiple.heading = Which registration do you want to view or change?
+viewOrChangePreviousRegistrationsMultiple.error.required = Select which registration you want to view or change
+viewOrChangePreviousRegistrationsMultiple.change.hidden = which registration you want to view or change

@@ -37,6 +37,11 @@ import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
 trait ModelGenerators extends EitherValues {
 
+  implicit lazy val arbitraryViewOrChangePreviousRegistrationsMuiltiple: Arbitrary[ViewOrChangePreviousRegistrationsMuiltiple] =
+    Arbitrary {
+      Gen.oneOf(ViewOrChangePreviousRegistrationsMuiltiple.values.toSeq)
+    }
+
   private val maxFieldLength: Int = 35
   private val maxEuTaxReferenceLength: Int = 20
 

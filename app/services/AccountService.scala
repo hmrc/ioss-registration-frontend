@@ -16,7 +16,6 @@
 
 package services
 
-import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import uk.gov.hmrc.http.HeaderCarrier
 

@@ -263,3 +263,10 @@ POST        /rejoin-registration                                             con
 GET         /successful-rejoin                                               controllers.rejoin.RejoinCompleteController.onPageLoad()
 GET         /error-submitting-rejoin                                         controllers.rejoin.ErrorSubmittingRejoinController.onPageLoad()
 GET         /cannot-rejoin                                                   controllers.rejoin.CannotRejoinController.onPageLoad()
+
+#TODO -> Rename these
+GET         /viewOrChangePreviousRegistration                                controllers.amend.ViewOrChangePreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /viewOrChangePreviousRegistration                                controllers.amend.ViewOrChangePreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /viewOrChangePreviousRegistrationsMultiple                       controllers.amend.ViewOrChangePreviousRegistrationsMultipleController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /viewOrChangePreviousRegistrationsMultiple                       controllers.amend.ViewOrChangePreviousRegistrationsMultipleController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

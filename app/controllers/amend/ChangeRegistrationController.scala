@@ -54,6 +54,8 @@ class ChangeRegistrationController @Inject()(
   def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration) {
     implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
+  // TODO -> pass through boolean to view for previousReg exist
+
       val thisPage = ChangeRegistrationPage
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
