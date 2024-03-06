@@ -18,6 +18,7 @@ package pages.amend
 
 import controllers.amend.routes
 import models.UserAnswers
+import models.amend.PreviousRegistration
 import pages.{Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
@@ -31,12 +32,8 @@ case object ViewOrChangePreviousRegistrationsMultiplePage extends QuestionPage[S
   override def route(waypoints: Waypoints): Call =
     routes.ViewOrChangePreviousRegistrationsMultipleController.onPageLoad(waypoints)
 
-  // TODO -> Will need to populate how many previous registrations there are and match accordingly.
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    answers.get(this).map {
-      case "iossNumber 1" =>
-        ChangeRegistrationPage
-      case "iossNumber 2" =>
-        ChangeRegistrationPage
-    }.orRecover
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    StartAmendPreviousRegistrationJourneyPage
+  }
+
 }

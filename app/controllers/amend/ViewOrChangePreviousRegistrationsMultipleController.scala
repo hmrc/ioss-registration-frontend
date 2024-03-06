@@ -17,11 +17,19 @@
 package controllers.amend
 
 import controllers.actions.AuthenticatedControllerComponents
+import formats.Format.dateMonthYearFormatter
 import forms.amend.ViewOrChangePreviousRegistrationsMultipleFormProvider
+import models.amend.PreviousRegistration
 import pages.Waypoints
 import pages.amend.ViewOrChangePreviousRegistrationsMultiplePage
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PreviousRegistrationIossNumberQuery
+import services.AccountService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
+import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.amend.ViewOrChangePreviousRegistrationsMultipleView
@@ -29,40 +37,61 @@ import views.html.amend.ViewOrChangePreviousRegistrationsMultipleView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+
 class ViewOrChangePreviousRegistrationsMultipleController @Inject()(
                                                                      override val messagesApi: MessagesApi,
                                                                      cc: AuthenticatedControllerComponents,
                                                                      formProvider: ViewOrChangePreviousRegistrationsMultipleFormProvider,
+                                                                     accountService: AccountService,
                                                                      view: ViewOrChangePreviousRegistrationsMultipleView
                                                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss().async {
     implicit request =>
 
-      val form = formProvider()
-      val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationsMultiplePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
+      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-      Ok(view(preparedForm, waypoints))
+        val form: Form[String] = formProvider()
+        val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationsMultiplePage) match {
+          case None => form
+          case Some(value) => form.fill(value)
+        }
+
+        Ok(view(preparedForm, waypoints, iossAccountsRadioItems(previousRegistrations))).toFuture
+      }
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss().async {
     implicit request =>
 
-      val form = formProvider()
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          BadRequest(view(formWithErrors, waypoints)).toFuture,
+      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ViewOrChangePreviousRegistrationsMultiplePage, value))
-            _ <- cc.sessionRepository.set(updatedAnswers)
-          } yield Redirect(ViewOrChangePreviousRegistrationsMultiplePage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+        val form = formProvider()
+        form.bindFromRequest().fold(
+          formWithErrors =>
+            BadRequest(view(formWithErrors, waypoints, iossAccountsRadioItems(previousRegistrations))).toFuture,
+
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviousRegistrationIossNumberQuery, value))
+              _ <- cc.sessionRepository.set(updatedAnswers)
+            } yield Redirect(ViewOrChangePreviousRegistrationsMultiplePage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+        )
+      }
+  }
+
+  private def iossAccountsRadioItems(previousRegistrations: Seq[PreviousRegistration]): Seq[RadioItem] = {
+    previousRegistrations.map { previousRegistration =>
+      val startPeriod: String = previousRegistration.startPeriod.format(dateMonthYearFormatter)
+      val endPeriod: String = previousRegistration.endPeriod.format(dateMonthYearFormatter)
+      RadioItem(
+        content = Text(s"$startPeriod to $endPeriod"),
+        id = Some(s"ioss-number-${previousRegistration.iossNumber}"),
+        hint = Some(Hint(content = HtmlContent(s"IOSS number: ${previousRegistration.iossNumber}"))),
+        value = Some(previousRegistration.iossNumber)
       )
+    }
   }
 }

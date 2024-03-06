@@ -111,6 +111,14 @@ trait Constraints {
         Invalid(errorKey)
     }
 
+  protected def nonEmptySeq(errorKey: String): Constraint[Seq[_]] =
+    Constraint {
+      case seq if seq.nonEmpty =>
+        Valid
+      case _ =>
+        Invalid(errorKey)
+    }
+
   protected def notADuplicate[A](index: Index, existingAnswers: Seq[A], errorKey: String, args: Any*): Constraint[A] = {
 
     val indexedAnswers = existingAnswers.zipWithIndex

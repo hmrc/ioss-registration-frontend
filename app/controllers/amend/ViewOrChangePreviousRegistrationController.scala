@@ -18,11 +18,14 @@ package controllers.amend
 
 import controllers.actions.AuthenticatedControllerComponents
 import forms.amend.ViewOrChangePreviousRegistrationFormProvider
+import logging.Logging
 import pages.Waypoints
-import pages.amend.ViewOrChangePreviousRegistrationPage
+import pages.amend.{ViewOrChangePreviousRegistrationPage, ViewOrChangePreviousRegistrationsMultiplePage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PreviousRegistrationIossNumberQuery
+import services.AccountService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.amend.ViewOrChangePreviousRegistrationView
@@ -34,44 +37,61 @@ class ViewOrChangePreviousRegistrationController @Inject()(
                                                             override val messagesApi: MessagesApi,
                                                             cc: AuthenticatedControllerComponents,
                                                             formProvider: ViewOrChangePreviousRegistrationFormProvider,
+                                                            accountService: AccountService,
                                                             view: ViewOrChangePreviousRegistrationView
-                                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  // TODO -> Need previous registrations -> Can't use authAndRequireIoss() as defaults to current registration
-
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss().async {
     implicit request =>
 
-      val iossNumber: String = request.iossNumber
+      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-      val form: Form[Boolean] = formProvider(iossNumber)
+        val iossNumber: String = previousRegistrations.map(_.iossNumber).head
 
-      val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
+        val form: Form[Boolean] = formProvider(iossNumber)
+
+        val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
+        }
+
+        previousRegistrations.size match {
+          case 0 =>
+            val exception = new IllegalStateException("Must have one or more previous registrations")
+            logger.error(exception.getMessage, exception)
+            throw exception
+          case 1 =>
+            val iossNumber = previousRegistrations.map(_.iossNumber)
+            Ok(view(preparedForm, waypoints, iossNumber.head)).toFuture
+          case _ =>
+            Redirect(ViewOrChangePreviousRegistrationsMultiplePage.route(waypoints).url).toFuture
+        }
       }
-
-      Ok(view(preparedForm, waypoints, iossNumber))
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss().async {
     implicit request =>
 
-      val iossNumber: String = request.iossNumber
+      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-      val form: Form[Boolean] = formProvider(iossNumber)
+        val iossNumber: String = previousRegistrations.map(_.iossNumber).head
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          BadRequest(view(formWithErrors, waypoints, iossNumber)).toFuture,
+        val form: Form[Boolean] = formProvider(iossNumber)
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ViewOrChangePreviousRegistrationPage, value))
-            _ <- cc.sessionRepository.set(updatedAnswers)
-          } yield Redirect(ViewOrChangePreviousRegistrationPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
-      )
+        form.bindFromRequest().fold(
+          formWithErrors =>
+            BadRequest(view(formWithErrors, waypoints, iossNumber)).toFuture,
+
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(ViewOrChangePreviousRegistrationPage, value))
+              updateAnswersWithIossNumber <- Future.fromTry(updatedAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
+              _ <- cc.sessionRepository.set(updateAnswersWithIossNumber)
+
+            } yield Redirect(ViewOrChangePreviousRegistrationPage.navigate(waypoints, request.userAnswers, updateAnswersWithIossNumber).route)
+        )
+      }
   }
 }

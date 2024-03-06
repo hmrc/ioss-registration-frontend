@@ -21,26 +21,27 @@ import logging.Logging
 import models.CheckMode
 import models.domain.PreviousRegistration
 import models.requests.AuthenticatedMandatoryIossRequest
-import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import pages.amend.ChangeRegistrationPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
+import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PreviousRegistrationIossNumberQuery
 import services.RegistrationService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
-import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
-import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
-import viewmodels.checkAnswers.previousRegistrations.{PreviouslyRegisteredSummary, PreviousRegistrationSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.summarylist._
+import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ChangeRegistrationController @Inject()(
                                               override val messagesApi: MessagesApi,
@@ -54,13 +55,13 @@ class ChangeRegistrationController @Inject()(
   def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration) {
     implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
-  // TODO -> pass through boolean to view for previousReg exist
-
       val thisPage = ChangeRegistrationPage
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
-      val iossNumber: String = request.iossNumber
+      val previousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
+
+      val iossNumber: String = previousRegistration.getOrElse(request.iossNumber)
 
       val vatRegistrationDetailsList = SummaryListViewModel(
         rows = Seq(
@@ -74,11 +75,20 @@ class ChangeRegistrationController @Inject()(
 
       val list = detailsList(waypoints, thisPage)
       val isValid = validate()(request.request)
-      Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid))
+      val hasPreviousRegistrations: Boolean = previousRegistration.isDefined
+      val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
+
+      for {
+        updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
+        _ <- cc.sessionRepository.set(updatedAnswers)
+      } yield Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount))
   }
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
     implicit request =>
+
+      val iossNumber: String = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
+
       getFirstValidationErrorRedirect(waypoints)(request.request) match {
         case Some(errorRedirect) => if (incompletePrompt) {
           errorRedirect.toFuture
@@ -91,7 +101,7 @@ class ChangeRegistrationController @Inject()(
             answers = request.userAnswers,
             registration = request.registrationWrapper.registration,
             vrn = request.vrn,
-            request.iossNumber,
+            iossNumber,
             rejoin = false
           ).map {
             case Right(_) =>

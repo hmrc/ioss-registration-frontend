@@ -14,23 +14,9 @@
  * limitations under the License.
  */
 
-package pages.amend
-
-import controllers.amend.routes
-import models.UserAnswers
-import pages.{Page, QuestionPage, Waypoints}
+package queries
 import play.api.libs.json.JsPath
-import play.api.mvc.Call
 
-case object ViewOrChangePreviousRegistrationPage extends QuestionPage[Boolean] {
-
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "viewOrChangePreviousRegistration"
-
-  override def route(waypoints: Waypoints): Call =
-    routes.ViewOrChangePreviousRegistrationController.onPageLoad(waypoints)
-
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    StartAmendPreviousRegistrationJourneyPage
+case object PreviousRegistrationIossNumberQuery extends Gettable[String] with Settable[String] {
+  override def path: JsPath = JsPath \ "previousRegistrationIossNumber"
 }

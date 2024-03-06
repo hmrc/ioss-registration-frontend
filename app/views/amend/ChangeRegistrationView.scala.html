@@ -15,7 +15,7 @@
  *@
 
 @import controllers.amend.{routes => amendRoutes}
-@import pages.amend.{ChangeRegistrationPage, ViewOrChangePreviousRegistrationPage}
+@import pages.amend.{ChangeRegistrationPage, StartAmendJourneyPage, ViewOrChangePreviousRegistrationPage}
 @import views.html.components.CancelAmendRegButton
 
 @this(
@@ -27,7 +27,14 @@
         govukWarningText: GovukWarningText
 )
 
-@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, iossNumber: String, isValid: Boolean)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints,
+        vatRegistrationDetailsList: SummaryList,
+        list: SummaryList,
+        iossNumber: String,
+        isValid: Boolean,
+        hasPreviousRegistrations: Boolean,
+        isCurrentIossAccount: Boolean
+)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
 
@@ -42,10 +49,17 @@
 
     <p class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</p>
 
-    @*TODO - Only show is previous registrations exist - needs boolean. Also check if previous reg count more than 1, go to option page*@
-    <p class="govuk-body govuk-!-margin-bottom-6">
-        <a class="govuk-link" id="change-previous-registrations" href="@ViewOrChangePreviousRegistrationPage.route(waypoints).url">@messages("changeRegistration.changePreviousRegistration")</a>
-    </p>
+    @if(hasPreviousRegistrations) {
+        @if(isCurrentIossAccount) {
+            <p class="govuk-body govuk-!-margin-bottom-6">
+                <a class="govuk-link" id="change-previous-registrations" href="@ViewOrChangePreviousRegistrationPage.route(waypoints).url">@messages("changeRegistration.changePreviousRegistration")</a>
+            </p>
+        } else {
+            <p class="govuk-body govuk-!-margin-bottom-6">
+                <a class="govuk-link" id="return-to-current-registration" href="@StartAmendJourneyPage.route(waypoints).url">@messages("changeRegistration.toCurrentRegistration")</a>
+            </p>
+        }
+    }
 
     <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 

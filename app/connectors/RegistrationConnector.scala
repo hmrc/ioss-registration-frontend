@@ -51,6 +51,9 @@ class RegistrationConnector @Inject()(config: Configuration, httpClient: HttpCli
   def getRegistration()(implicit hc: HeaderCarrier): Future[DisplayRegistrationResponse] =
     httpClient.GET[DisplayRegistrationResponse](s"$baseUrl/registration")
 
+  def getRegistration(iossNumber: String)(implicit hc: HeaderCarrier): Future[DisplayRegistrationResponse] =
+    httpClient.GET[DisplayRegistrationResponse](s"$baseUrl/registration/$iossNumber")
+
   def getSavedExternalEntry()(implicit hc: HeaderCarrier): Future[ExternalEntryUrlResponse] = {
     httpClient.GET[ExternalEntryUrlResponse](s"$baseUrl/external-entry")
   }

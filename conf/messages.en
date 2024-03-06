@@ -658,6 +658,7 @@ changeRegistration.title = Change Your Registration
 changeRegistration.heading = Change Your Registration
 changeRegistration.reference = IOSS number: {0}
 changeRegistration.changePreviousRegistration = View or change your previous registration
+changeRegistration.toCurrentRegistration = Return to your current registration
 changeRegistration.details.heading = Import One Stop Shop details
 changeRegistration.info.p1 = Confirm these changes to save them to your account.
 

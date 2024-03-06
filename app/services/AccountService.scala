@@ -17,8 +17,10 @@
 package services
 
 import connectors.RegistrationConnector
+import models.amend.PreviousRegistration
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,4 +38,24 @@ class AccountService @Inject()(
         .map(_.value)
     }
   }
+
+  // TODO -> TEST
+  def getPreviousRegistrations()(implicit hc: HeaderCarrier): Future[Seq[PreviousRegistration]] = {
+    registrationConnector.getAccounts().map { accounts =>
+      val accountDetails: Seq[(LocalDate, String)] = accounts
+        .enrolments.map(e => e.activationDate -> e.identifiers.find(_.key == "IOSSNumber").map(_.value))
+        .collect {
+          case (Some(activationDate), Some(iossNumber)) => LocalDate.from(activationDate) -> iossNumber
+        }.sortBy(_._1)
+
+      accountDetails.zip(accountDetails.drop(1)).map { case ((activationDate, iossNumber), (nextActivationDate, _)) =>
+        PreviousRegistration(
+          startPeriod = activationDate,
+          endPeriod = nextActivationDate.minusMonths(1),
+          iossNumber = iossNumber
+        )
+      }
+    }
+  }
+
 }
