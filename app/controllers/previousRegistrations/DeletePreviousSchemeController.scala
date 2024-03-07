@@ -53,7 +53,6 @@ class DeletePreviousSchemeController @Inject()(
 
         getPreviousCountry(waypoints, countryIndex) {
           country: Country =>
-            request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex))
             if (waypoints.inAmend && getCurrentSchemeFromAnswers(country, countryIndex, schemeIndex)) {
               Future.successful(Redirect(pages.CannotRemoveExistingPreviousRegistrationsPage.route(waypoints)))
             } else {
