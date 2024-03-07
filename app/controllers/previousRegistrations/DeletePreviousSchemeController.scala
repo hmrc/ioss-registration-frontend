@@ -36,7 +36,6 @@ import viewmodels.govuk.summarylist._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-//banana
 class DeletePreviousSchemeController @Inject()(
                                                 override val messagesApi: MessagesApi,
                                                 cc: AuthenticatedControllerComponents,
