@@ -27,7 +27,7 @@ import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PreviousRegistrationIossNumberQuery
-import services.RegistrationService
+import services.{AccountService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.CompletionChecks
@@ -41,12 +41,13 @@ import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class ChangeRegistrationController @Inject()(
                                               override val messagesApi: MessagesApi,
                                               cc: AuthenticatedControllerComponents,
                                               registrationService: RegistrationService,
+                                              accountService: AccountService,
                                               view: ChangeRegistrationView
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
@@ -55,34 +56,35 @@ class ChangeRegistrationController @Inject()(
   def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration) {
     implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
-      val thisPage = ChangeRegistrationPage
+      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-      val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
+        val thisPage = ChangeRegistrationPage
 
-      val previousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
+        val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
-      val iossNumber: String = previousRegistration.getOrElse(request.iossNumber)
+        val selectedPreviousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
 
-      val vatRegistrationDetailsList = SummaryListViewModel(
-        rows = Seq(
-          VatRegistrationDetailsSummary.rowBusinessName(request.userAnswers),
-          VatRegistrationDetailsSummary.rowIndividualName(request.userAnswers),
-          VatRegistrationDetailsSummary.rowPartOfVatUkGroup(request.userAnswers),
-          VatRegistrationDetailsSummary.rowUkVatRegistrationDate(request.userAnswers),
-          VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)
-        ).flatten
-      )
+        val iossNumber: String = selectedPreviousRegistration.getOrElse(request.iossNumber)
 
-      val list = detailsList(waypoints, thisPage)
-      val isValid = validate()(request.request)
-      val hasPreviousRegistrations: Boolean = previousRegistration.isDefined
-      val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
+        val vatRegistrationDetailsList = SummaryListViewModel(
+          rows = Seq(
+            VatRegistrationDetailsSummary.rowBusinessName(request.userAnswers),
+            VatRegistrationDetailsSummary.rowIndividualName(request.userAnswers),
+            VatRegistrationDetailsSummary.rowPartOfVatUkGroup(request.userAnswers),
+            VatRegistrationDetailsSummary.rowUkVatRegistrationDate(request.userAnswers),
+            VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)
+          ).flatten
+        )
 
-      for {
-        updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
-        _ <- cc.sessionRepository.set(updatedAnswers)
-      } yield Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount))
+        val list = detailsList(waypoints, thisPage)
+        val isValid = validate()(request.request)
+        val hasPreviousRegistrations: Boolean = previousRegistrations.nonEmpty
+        val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
+
+        Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount)).toFuture
+      }
   }
+
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
     implicit request =>

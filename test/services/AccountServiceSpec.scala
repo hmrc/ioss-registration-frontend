@@ -19,6 +19,7 @@ package services
 import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
+import models.amend.PreviousRegistration
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
@@ -68,5 +69,20 @@ class AccountServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
       result mustBe Some("IM9009876543")
     }
 
+  }
+
+  "getPreviousRegistrations" - {
+
+    "must return all previous registrations without current registration" in {
+
+      val enrolments: EACDEnrolments = arbitraryEACDEnrolments.arbitrary.sample.value
+
+      when(mockRegistrationConnector.getAccounts()(any())) thenReturn enrolments.toFuture
+      val service = new AccountService(mockRegistrationConnector)
+
+      val result = service.getPreviousRegistrations().futureValue
+
+      result mustBe Seq(arbitraryPreviousRegistration)
+    }
   }
 }

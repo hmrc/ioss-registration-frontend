@@ -15,6 +15,8 @@
  *@
 
 @import controllers.amend.routes
+@import models.amend.PreviousRegistration
+@import models.amend.PreviousRegistration.options
 
 @this(
         layout: templates.Layout,
@@ -24,7 +26,7 @@
         govukButton: GovukButton
 )
 
-@(form: Form[_], waypoints: Waypoints, iossNumbers: Seq[RadioItem])(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, previousRegistrations: Seq[PreviousRegistration])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("viewOrChangePreviousRegistrationsMultiple.title"))) {
 
@@ -38,7 +40,7 @@
             RadiosViewModel(
                 field = form("value"),
                 legend = LegendViewModel(messages("viewOrChangePreviousRegistrationsMultiple.heading")).asPageHeading(),
-                items = iossNumbers
+                items = options(previousRegistrations)
             )
         )
 

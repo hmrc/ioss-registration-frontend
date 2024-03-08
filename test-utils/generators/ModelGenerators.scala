@@ -18,6 +18,7 @@ package generators
 
 import connectors.SavedUserAnswers
 import models._
+import models.amend.PreviousRegistration
 import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
@@ -36,11 +37,6 @@ import java.time.temporal.ChronoUnit
 import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
 trait ModelGenerators extends EitherValues {
-
-  implicit lazy val arbitraryViewOrChangePreviousRegistrationsMuiltiple: Arbitrary[ViewOrChangePreviousRegistrationsMuiltiple] =
-    Arbitrary {
-      Gen.oneOf(ViewOrChangePreviousRegistrationsMuiltiple.values.toSeq)
-    }
 
   private val maxFieldLength: Int = 35
   private val maxEuTaxReferenceLength: Int = 20
@@ -433,6 +429,20 @@ trait ModelGenerators extends EitherValues {
         enrolments <- Gen.listOfN(2, arbitraryEACDEnrolment.arbitrary)
       } yield EACDEnrolments(
         enrolments = enrolments
+      )
+    }
+  }
+
+  implicit val arbitraryPreviousRegistration: Arbitrary[PreviousRegistration] = {
+    Arbitrary {
+      for {
+        iossNumber <- Gen.alphaStr
+        startPeriod <- arbitraryDate.arbitrary
+        endPeriod <- arbitraryDate.arbitrary
+      } yield PreviousRegistration(
+        iossNumber = iossNumber,
+        startPeriod = startPeriod,
+        endPeriod = endPeriod
       )
     }
   }

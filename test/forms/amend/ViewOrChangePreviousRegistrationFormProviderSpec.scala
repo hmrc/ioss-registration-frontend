@@ -17,14 +17,16 @@
 package forms.amend
 
 import forms.behaviours.BooleanFieldBehaviours
+import org.scalacheck.Arbitrary.arbitrary
 import play.api.data.FormError
 
 class ViewOrChangePreviousRegistrationFormProviderSpec extends BooleanFieldBehaviours {
 
-  val requiredKey = "viewOrChangePreviousRegistration.error.required"
-  val invalidKey = "error.boolean"
+  private val requiredKey = "viewOrChangePreviousRegistration.error.required"
+  private val invalidKey = "error.boolean"
+  private val arbitraryIossNumber: String = arbitrary[String].sample.value
 
-  val form = new ViewOrChangePreviousRegistrationFormProvider()()
+  private val form = new ViewOrChangePreviousRegistrationFormProvider()(arbitraryIossNumber)
 
   ".value" - {
 
@@ -33,13 +35,13 @@ class ViewOrChangePreviousRegistrationFormProviderSpec extends BooleanFieldBehav
     behave like booleanField(
       form,
       fieldName,
-      invalidError = FormError(fieldName, invalidKey)
+      invalidError = FormError(fieldName, invalidKey, Seq(arbitraryIossNumber))
     )
 
     behave like mandatoryField(
       form,
       fieldName,
-      requiredError = FormError(fieldName, requiredKey)
+      requiredError = FormError(fieldName, requiredKey, Seq(arbitraryIossNumber))
     )
   }
 }

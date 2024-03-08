@@ -17,9 +17,7 @@
 package controllers.amend
 
 import controllers.actions.AuthenticatedControllerComponents
-import formats.Format.dateMonthYearFormatter
 import forms.amend.ViewOrChangePreviousRegistrationsMultipleFormProvider
-import models.amend.PreviousRegistration
 import pages.Waypoints
 import pages.amend.ViewOrChangePreviousRegistrationsMultiplePage
 import play.api.data.Form
@@ -27,9 +25,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PreviousRegistrationIossNumberQuery
 import services.AccountService
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
-import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
-import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.FutureSyntax.FutureOps
 import views.html.amend.ViewOrChangePreviousRegistrationsMultipleView
@@ -53,13 +48,13 @@ class ViewOrChangePreviousRegistrationsMultipleController @Inject()(
 
       accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-        val form: Form[String] = formProvider()
+        val form: Form[String] = formProvider(previousRegistrations)
         val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationsMultiplePage) match {
           case None => form
           case Some(value) => form.fill(value)
         }
 
-        Ok(view(preparedForm, waypoints, iossAccountsRadioItems(previousRegistrations))).toFuture
+        Ok(view(preparedForm, waypoints, previousRegistrations)).toFuture
       }
   }
 
@@ -68,10 +63,10 @@ class ViewOrChangePreviousRegistrationsMultipleController @Inject()(
 
       accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-        val form = formProvider()
+        val form: Form[String] = formProvider(previousRegistrations)
         form.bindFromRequest().fold(
           formWithErrors =>
-            BadRequest(view(formWithErrors, waypoints, iossAccountsRadioItems(previousRegistrations))).toFuture,
+            BadRequest(view(formWithErrors, waypoints, previousRegistrations)).toFuture,
 
           value =>
             for {
@@ -80,18 +75,5 @@ class ViewOrChangePreviousRegistrationsMultipleController @Inject()(
             } yield Redirect(ViewOrChangePreviousRegistrationsMultiplePage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
         )
       }
-  }
-
-  private def iossAccountsRadioItems(previousRegistrations: Seq[PreviousRegistration]): Seq[RadioItem] = {
-    previousRegistrations.map { previousRegistration =>
-      val startPeriod: String = previousRegistration.startPeriod.format(dateMonthYearFormatter)
-      val endPeriod: String = previousRegistration.endPeriod.format(dateMonthYearFormatter)
-      RadioItem(
-        content = Text(s"$startPeriod to $endPeriod"),
-        id = Some(s"ioss-number-${previousRegistration.iossNumber}"),
-        hint = Some(Hint(content = HtmlContent(s"IOSS number: ${previousRegistration.iossNumber}"))),
-        value = Some(previousRegistration.iossNumber)
-      )
-    }
   }
 }

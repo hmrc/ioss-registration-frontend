@@ -48,23 +48,21 @@ class ViewOrChangePreviousRegistrationController @Inject()(
 
       accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-        val iossNumber: String = previousRegistrations.map(_.iossNumber).head
-
-        val form: Form[Boolean] = formProvider(iossNumber)
-
-        val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
-        }
-
         previousRegistrations.size match {
           case 0 =>
             val exception = new IllegalStateException("Must have one or more previous registrations")
             logger.error(exception.getMessage, exception)
             throw exception
           case 1 =>
-            val iossNumber = previousRegistrations.map(_.iossNumber)
-            Ok(view(preparedForm, waypoints, iossNumber.head)).toFuture
+            val iossNumber: String = previousRegistrations.map(_.iossNumber).head
+
+            val form: Form[Boolean] = formProvider(iossNumber)
+
+            val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationPage) match {
+              case None => form
+              case Some(value) => form.fill(value)
+            }
+            Ok(view(preparedForm, waypoints, iossNumber)).toFuture
           case _ =>
             Redirect(ViewOrChangePreviousRegistrationsMultiplePage.route(waypoints).url).toFuture
         }

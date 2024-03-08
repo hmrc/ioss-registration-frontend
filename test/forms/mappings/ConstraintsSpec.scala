@@ -17,6 +17,7 @@
 package forms.mappings
 
 import generators.Generators
+import journey.JourneyHelpers
 import models.Index
 import org.scalacheck.Gen
 import org.scalatest.freespec.AnyFreeSpec
@@ -26,7 +27,7 @@ import play.api.data.validation.{Invalid, Valid}
 
 import java.time.LocalDate
 
-class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with Generators  with Constraints {
+class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with Generators with Constraints with JourneyHelpers {
 
 
   "firstError" - {
@@ -157,7 +158,7 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     "must return Valid for a date before or equal to the maximum" in {
 
       val gen: Gen[(LocalDate, LocalDate)] = for {
-        max  <- datesBetween(LocalDate.of(2000, 1, 1), LocalDate.of(3000, 1, 1))
+        max <- datesBetween(LocalDate.of(2000, 1, 1), LocalDate.of(3000, 1, 1))
         date <- datesBetween(LocalDate.of(2000, 1, 1), max)
       } yield (max, date)
 
@@ -172,7 +173,7 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     "must return Invalid for a date after the maximum" in {
 
       val gen: Gen[(LocalDate, LocalDate)] = for {
-        max  <- datesBetween(LocalDate.of(2000, 1, 1), LocalDate.of(3000, 1, 1))
+        max <- datesBetween(LocalDate.of(2000, 1, 1), LocalDate.of(3000, 1, 1))
         date <- datesBetween(max.plusDays(1), LocalDate.of(3000, 1, 2))
       } yield (max, date)
 
@@ -190,7 +191,7 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     "must return Valid for a date after or equal to the minimum" in {
 
       val gen: Gen[(LocalDate, LocalDate)] = for {
-        min  <- datesBetween(LocalDate.of(2000, 1, 1), LocalDate.of(3000, 1, 1))
+        min <- datesBetween(LocalDate.of(2000, 1, 1), LocalDate.of(3000, 1, 1))
         date <- datesBetween(min, LocalDate.of(3000, 1, 1))
       } yield (min, date)
 
@@ -205,7 +206,7 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     "must return Invalid for a date before the minimum" in {
 
       val gen: Gen[(LocalDate, LocalDate)] = for {
-        min  <- datesBetween(LocalDate.of(2000, 1, 2), LocalDate.of(3000, 1, 1))
+        min <- datesBetween(LocalDate.of(2000, 1, 2), LocalDate.of(3000, 1, 1))
         date <- datesBetween(LocalDate.of(2000, 1, 1), min.minusDays(1))
       } yield (min, date)
 
@@ -303,6 +304,28 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
 
       val result = notContainStrings(excludedStrings, "error.key")(answer)
       result mustEqual Invalid("error.key")
+    }
+  }
+
+  "validIossNumber" - {
+
+    val traderPreviousRegistrations = Gen.listOfN(3, arbitraryPreviousRegistration.arbitrary).sample.value
+
+    "must return Valid when the answer is a valid IOSS number registered to the trader" in {
+
+      val answer = traderPreviousRegistrations.head.iossNumber
+
+      val result = validIossNumber(traderPreviousRegistrations, "invalid.error.key")(answer)
+      result mustBe Valid
+    }
+
+    "must return Invalid when the answer is not a valid IOSS number registered to the trader" in {
+
+      val answer: String = arbitraryPreviousRegistration.arbitrary
+        .suchThat(_.iossNumber.toSeq != traderPreviousRegistrations.map(_.iossNumber)).sample.value.iossNumber
+
+      val result = validIossNumber(traderPreviousRegistrations, "invalid.error.key")(answer)
+      result mustEqual Invalid("invalid.error.key")
     }
   }
 }

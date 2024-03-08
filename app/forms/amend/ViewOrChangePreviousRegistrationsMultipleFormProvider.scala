@@ -17,14 +17,16 @@
 package forms.amend
 
 import forms.mappings.Mappings
+import models.amend.PreviousRegistration
 import play.api.data.Form
 
 import javax.inject.Inject
 
 class ViewOrChangePreviousRegistrationsMultipleFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[String] =
+  def apply(previousRegistrations: Seq[PreviousRegistration]): Form[String] =
     Form(
       "value" -> text("viewOrChangePreviousRegistrationsMultiple.error.required")
+        .verifying(validIossNumber(previousRegistrations, "viewOrChangePreviousRegistrationsMultiple.error.invalid"))
     )
 }

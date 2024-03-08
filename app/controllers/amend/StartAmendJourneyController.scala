@@ -23,13 +23,12 @@ import pages.Waypoints
 import pages.amend.ChangeRegistrationPage
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PreviousRegistrationIossNumberQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class StartAmendJourneyController @Inject()(
                                              override val messagesApi: MessagesApi,
@@ -43,14 +42,6 @@ class StartAmendJourneyController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
     implicit request =>
 
-      val iossNumber = request.iossNumber match {
-        case None =>
-          val exception = new IllegalStateException("Must have an IOSS number")
-          logger.error(exception.getMessage, exception)
-          throw exception
-        case Some(iossNumber) => iossNumber
-      }
-
       (for {
         registrationWrapperResponse <- registrationConnector.getRegistration()
       } yield {
@@ -59,7 +50,6 @@ class StartAmendJourneyController @Inject()(
           case Right(registrationWrapper) =>
             for {
               userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
-              userAnswers <- Future.fromTry(userAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
               _ <- authenticatedUserAnswersRepository.set(userAnswers)
             } yield Redirect(ChangeRegistrationPage.route(waypoints).url)
           case Left(error) =>

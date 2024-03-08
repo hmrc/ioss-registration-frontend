@@ -15,6 +15,7 @@
  */
 
 package queries
+import models.amend.PreviousRegistration
 import play.api.libs.json.JsPath
 
 case object PreviousRegistrationIossNumberQuery extends Gettable[String] with Settable[String] {

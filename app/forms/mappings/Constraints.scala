@@ -17,9 +17,10 @@
 package forms.mappings
 
 import models.Index
+import models.amend.PreviousRegistration
+import play.api.data.validation.{Constraint, Invalid, Valid}
 
 import java.time.LocalDate
-import play.api.data.validation.{Constraint, Invalid, Valid}
 
 trait Constraints {
 
@@ -132,7 +133,7 @@ trait Constraints {
     }
   }
 
-  def notContainStrings(excludedStrings: Set[String], errorKey: String): Constraint[String] = {
+  protected def notContainStrings(excludedStrings: Set[String], errorKey: String): Constraint[String] = {
     Constraint { answer =>
       val answerSet = answer.toLowerCase.split(" ").toSet
 
@@ -141,6 +142,15 @@ trait Constraints {
       } else {
         Valid
       }
+    }
+  }
+
+  protected def validIossNumber(previousRegistrations: Seq[PreviousRegistration], errorKey: String): Constraint[String] = {
+    Constraint {
+      case iossNumber if previousRegistrations.map(_.iossNumber).contains(iossNumber) =>
+        Valid
+      case _ =>
+        Invalid(errorKey)
     }
   }
 }

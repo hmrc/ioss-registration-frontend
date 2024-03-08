@@ -739,5 +739,7 @@ viewOrChangePreviousRegistration.change.hidden = if you want to view or change t
 
 viewOrChangePreviousRegistrationsMultiple.title = Which registration do you want to view or change?
 viewOrChangePreviousRegistrationsMultiple.heading = Which registration do you want to view or change?
+viewOrChangePreviousRegistrationsMultiple.hint = IOSS number: {0}
 viewOrChangePreviousRegistrationsMultiple.error.required = Select which registration you want to view or change
+viewOrChangePreviousRegistrationsMultiple.error.invalid = Select a valid previous registration.
 viewOrChangePreviousRegistrationsMultiple.change.hidden = which registration you want to view or change

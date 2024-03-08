@@ -28,10 +28,11 @@ import queries.PreviousRegistrationIossNumberQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+
+// TODO -> Tests
 
 class StartAmendPreviousRegistrationJourneyController @Inject()(
                                                                  override val messagesApi: MessagesApi,
