@@ -17,7 +17,7 @@
 package controllers.euDetails
 
 import controllers.GetCountry
-import controllers.actions.AuthenticatedControllerComponents
+import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
 import forms.euDetails.EuVatNumberFormProvider
 import models.{CountryWithValidationDetails, Index}
 import pages.Waypoints
@@ -45,7 +45,7 @@ class EuVatNumberController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
 
       getCountry(waypoints, countryIndex) {
@@ -65,41 +65,42 @@ class EuVatNumberController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
+      val isNotAmendingActiveRegistration = waypoints.registrationModificationMode != AmendingActiveRegistration
 
       getCountry(waypoints, countryIndex) {
-
         country =>
-
           val form: Form[String] = formProvider(country)
           form.bindFromRequest().fold(
             formWithErrors =>
-              CountryWithValidationDetails.euCountriesWithVRNValidationRules.filter(_.country.code == country.code).head match {
-                case countryWithValidationDetails =>
+              CountryWithValidationDetails.euCountriesWithVRNValidationRules.find(_.country.code == country.code) match {
+                case Some(countryWithValidationDetails) =>
                   BadRequest(view(formWithErrors, waypoints, countryIndex, countryWithValidationDetails)).toFuture
+
+                case _ =>
+                  throw new RuntimeException(s"Cannot find ${country.code} in euCountriesWithVRNValidationRules")
               },
 
-            value =>
+            euVrn =>
+              coreRegistrationValidationService.searchEuVrn(euVrn, country.code).flatMap {
 
-              coreRegistrationValidationService.searchEuVrn(value, country.code).flatMap {
-
-                case Some(activeMatch) if activeMatch.matchType.isActiveTrader && !waypoints.inAmend =>
+                case Some(activeMatch) if activeMatch.matchType.isActiveTrader && isNotAmendingActiveRegistration =>
                   Future.successful(
                     Redirect(
                       controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(
-                        waypoints,
-                        countryIndex
+                        waypoints = waypoints,
+                        countryCode = country.code
                       )
                     )
                   )
 
-                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && !waypoints.inAmend =>
+                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && isNotAmendingActiveRegistration =>
                   Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
 
                 case _ =>
                   for {
-                    updatedAnswers <- Future.fromTry(request.userAnswers.set(EuVatNumberPage(countryIndex), value))
+                    updatedAnswers <- Future.fromTry(request.userAnswers.set(EuVatNumberPage(countryIndex), euVrn))
                     _ <- cc.sessionRepository.set(updatedAnswers)
                   } yield Redirect(EuVatNumberPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
               }

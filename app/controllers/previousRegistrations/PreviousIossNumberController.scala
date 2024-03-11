@@ -17,7 +17,7 @@
 package controllers.previousRegistrations
 
 import controllers.GetCountry
-import controllers.actions.AuthenticatedControllerComponents
+import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
 import forms.previousRegistrations.PreviousIossNumberFormProvider
 import logging.Logging
 import models.core.MatchType
@@ -26,7 +26,7 @@ import models.previousRegistrations.{IntermediaryIdentificationNumberValidation,
 import models.requests.AuthenticatedDataRequest
 import models.{Country, Index, PreviousScheme, UserAnswers}
 import pages.previousRegistrations.{PreviousIossNumberPage, PreviousIossSchemePage, PreviousSchemePage}
-import pages.{JourneyRecoveryPage, Waypoints}
+import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.NonCompliantQuery
@@ -49,70 +49,74 @@ class PreviousIossNumberController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
-      getPreviousCountry(waypoints, countryIndex) { country =>
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode).async {
+      implicit request =>
+        getPreviousCountry(waypoints, countryIndex) { country =>
 
-        getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>
-
-          val form = formProvider(country, hasIntermediary)
-
-          val preparedForm = request.userAnswers.get(PreviousIossNumberPage(countryIndex, schemeIndex)) match {
-            case None => form
-            case Some(value) => form.fill(value)
-          }
-
-          Future.successful(Ok(view(
-            preparedForm, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country))))
-        }
-      }
-  }
-
-  def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
-      getPreviousCountry(waypoints, countryIndex) { country =>
-
-        getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>
-          getPreviousScheme(waypoints, countryIndex, schemeIndex) { previousScheme =>
+          getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>
 
             val form = formProvider(country, hasIntermediary)
 
-            form.bindFromRequest().fold(
-              formWithErrors =>
-                Future.successful(BadRequest(view(
-                  formWithErrors, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country)))),
+            val preparedForm = request.userAnswers.get(PreviousIossNumberPage(countryIndex, schemeIndex)) match {
+              case None => form
+              case Some(value) => form.fill(value)
+            }
 
-              value =>
-                coreRegistrationValidationService.searchScheme(
-                  searchNumber = value.previousSchemeNumber,
-                  previousScheme = previousScheme,
-                  intermediaryNumber = value.previousIntermediaryNumber,
-                  countryCode = country.code
-                ).flatMap {
-                  case Some(activeMatch) if !waypoints.inAmend && activeMatch.matchType.isActiveTrader =>
-                    Future.successful(
-                      Redirect(controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
-                        waypoints,
-                        activeMatch.memberState))
-                    )
-
-                  case Some(activeMatch) if !waypoints.inAmend && activeMatch.matchType.isQuarantinedTrader =>
-                    Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
-
-                  case Some(activeMatch) if activeMatch.matchType == MatchType.TransferringMSID =>
-                    saveAndRedirect(countryIndex, schemeIndex, value,
-                      Some(NonCompliantDetails(activeMatch.nonCompliantPayments, activeMatch.nonCompliantReturns)),
-                      waypoints
-                    )
-
-                  case _ =>
-                    saveAndRedirect(countryIndex, schemeIndex, value, None, waypoints)
-                }
-            )
+            Future.successful(Ok(view(
+              preparedForm, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country))))
           }
         }
-      }
-  }
+    }
+
+  def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode).async {
+      implicit request =>
+        getPreviousCountry(waypoints, countryIndex) { country =>
+
+          getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>
+            getPreviousScheme(waypoints, countryIndex, schemeIndex) { previousScheme: PreviousScheme =>
+
+              val form = formProvider(country, hasIntermediary)
+
+              val isNotAmendingActiveRegistration = waypoints.registrationModificationMode != AmendingActiveRegistration
+
+              form.bindFromRequest().fold(
+                formWithErrors =>
+                  Future.successful(BadRequest(view(
+                    formWithErrors, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country)))),
+
+                (previousSchemeNumbers) =>
+                  coreRegistrationValidationService.searchScheme(
+                    searchNumber = previousSchemeNumbers.previousSchemeNumber,
+                    previousScheme = previousScheme,
+                    intermediaryNumber = previousSchemeNumbers.previousIntermediaryNumber,
+                    countryCode = country.code
+                  ).flatMap {
+                    case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.matchType.isActiveTrader =>
+                      Future.successful(
+                        Redirect(controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
+                          EmptyWaypoints,
+                          activeMatch.memberState))
+                      )
+
+                    case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.matchType.isQuarantinedTrader =>
+                      Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(EmptyWaypoints)))
+
+                    case Some(activeMatch) if activeMatch.matchType == MatchType.TransferringMSID =>
+                      saveAndRedirect(countryIndex, schemeIndex, previousSchemeNumbers,
+                        Some(NonCompliantDetails(activeMatch.nonCompliantPayments, activeMatch.nonCompliantReturns)),
+                        waypoints
+                      )
+
+                    case _ =>
+                      saveAndRedirect(countryIndex, schemeIndex, previousSchemeNumbers, None, waypoints)
+                  }
+              )
+            }
+          }
+        }
+    }
 
   private def saveAndRedirect(
                                countryIndex: Index,

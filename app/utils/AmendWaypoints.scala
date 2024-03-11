@@ -16,6 +16,7 @@
 
 package utils
 
+import controllers.actions.{AmendingActiveRegistration, NotModifyingExistingRegistration, RegistrationModificationMode, RejoiningRegistration}
 import pages.amend.ChangeRegistrationPage
 import pages.rejoin.RejoinRegistrationPage
 import pages.{CheckAnswersPage, CheckYourAnswersPage, NonEmptyWaypoints, Waypoints}
@@ -23,6 +24,15 @@ import pages.{CheckAnswersPage, CheckYourAnswersPage, NonEmptyWaypoints, Waypoin
 object AmendWaypoints {
 
   implicit class AmendWaypointsOps(waypoints: Waypoints) {
+
+    def registrationModificationMode: RegistrationModificationMode =
+      if (isInMode(RejoinRegistrationPage)) {
+        RejoiningRegistration
+      } else if( isInMode(ChangeRegistrationPage))  {
+        AmendingActiveRegistration
+      }else {
+        NotModifyingExistingRegistration
+      }
 
     def inAmend: Boolean = {
       isInMode(ChangeRegistrationPage, RejoinRegistrationPage)

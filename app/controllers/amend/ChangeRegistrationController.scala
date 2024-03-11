@@ -51,7 +51,7 @@ class ChangeRegistrationController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss() {
+  def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration) {
     implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
       val thisPage = ChangeRegistrationPage
@@ -75,7 +75,7 @@ class ChangeRegistrationController @Inject()(
       Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid))
   }
 
-  def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndRequireIoss().async {
+  def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
     implicit request =>
       getFirstValidationErrorRedirect(waypoints)(request.request) match {
         case Some(errorRedirect) => if (incompletePrompt) {

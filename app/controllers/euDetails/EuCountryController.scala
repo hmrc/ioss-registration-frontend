@@ -42,7 +42,7 @@ class EuCountryController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode) {
     implicit request =>
 
       val form = formProvider(countryIndex, request.userAnswers.get(AllEuDetailsQuery).getOrElse(Seq.empty).map(_.euCountry))
@@ -55,7 +55,7 @@ class EuCountryController @Inject()(
       Ok(view(preparedForm, waypoints, countryIndex))
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
 
       val form = formProvider(countryIndex, request.userAnswers.get(AllEuDetailsQuery).getOrElse(Seq.empty).map(_.euCountry))

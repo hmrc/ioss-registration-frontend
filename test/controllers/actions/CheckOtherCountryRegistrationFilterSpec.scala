@@ -56,8 +56,8 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
     reset(mockCoreRegistrationValidationService)
   }
 
-  class Harness(inAmend: Boolean, service: CoreRegistrationValidationService) extends
-    CheckOtherCountryRegistrationFilterImpl(inAmend, service) {
+  class Harness(registrationModificationMode: RegistrationModificationMode, service: CoreRegistrationValidationService) extends
+    CheckOtherCountryRegistrationFilterImpl(registrationModificationMode, service) {
     def callFilter(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = filter(request)
   }
 
@@ -65,10 +65,10 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
   ".filter" - {
 
-    Seq(true, false).foreach {
-      inAmend =>
+    Seq(AmendingActiveRegistration, RejoiningRegistration, NotModifyingExistingRegistration).foreach {
+      registrationModificationMode =>
 
-        s"when inAmend is $inAmend" - {
+        s"when inAmend is $registrationModificationMode" - {
 
           "when matchType is FixedEstablishmentActiveNETP" - {
 
@@ -89,11 +89,11 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
                 val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers, None)
 
-                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+                val controller = new Harness(registrationModificationMode, mockCoreRegistrationValidationService)
 
                 val result = controller.callFilter(request).futureValue
 
-                if (!inAmend) {
+                if (registrationModificationMode != AmendingActiveRegistration) {
                   result mustBe Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(genericMatch.memberState).url))
                 } else {
                   result mustBe None
@@ -124,11 +124,11 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
                 val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers, None)
 
-                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+                val controller = new Harness(registrationModificationMode, mockCoreRegistrationValidationService)
 
                 val result = controller.callFilter(request).futureValue
 
-                if (!inAmend) {
+                if (registrationModificationMode != AmendingActiveRegistration) {
                   result mustBe Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(expectedMatch.memberState).url))
                 } else {
                   result mustBe None
@@ -158,11 +158,11 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
                 val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers, None)
 
-                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+                val controller = new Harness(registrationModificationMode, mockCoreRegistrationValidationService)
 
                 val result = controller.callFilter(request).futureValue
 
-                if (!inAmend) {
+                if (registrationModificationMode != AmendingActiveRegistration) {
                   result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
                     expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
                 } else {
@@ -193,11 +193,11 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
                 val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers, None)
 
-                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+                val controller = new Harness(registrationModificationMode, mockCoreRegistrationValidationService)
 
                 val result = controller.callFilter(request).futureValue
 
-                if (!inAmend) {
+                if (registrationModificationMode != AmendingActiveRegistration) {
                   result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
                     expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
                 } else {
@@ -229,11 +229,11 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
                 val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers, None)
 
-                val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+                val controller = new Harness(registrationModificationMode, mockCoreRegistrationValidationService)
 
                 val result = controller.callFilter(request).futureValue
 
-                if (!inAmend) {
+                if (registrationModificationMode != AmendingActiveRegistration) {
                   result mustBe Some(Redirect(controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
                     expectedMatch.memberState, expectedMatch.exclusionEffectiveDate.get).url))
                 } else {
@@ -261,7 +261,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
               val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers, None)
 
-              val controller = new Harness(inAmend, mockCoreRegistrationValidationService)
+              val controller = new Harness(registrationModificationMode, mockCoreRegistrationValidationService)
 
               val result = controller.callFilter(request).futureValue
 
@@ -295,7 +295,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, emptyUserAnswers, None)
 
-          val controller = new Harness(inAmend = false, mockCoreRegistrationValidationService)
+          val controller = new Harness(registrationModificationMode = NotModifyingExistingRegistration, mockCoreRegistrationValidationService)
 
           val result = controller.callFilter(request).failed
 

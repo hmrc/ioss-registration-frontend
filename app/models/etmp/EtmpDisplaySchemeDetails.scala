@@ -29,7 +29,9 @@ case class EtmpDisplaySchemeDetails(
                               unusableStatus: Boolean,
                               nonCompliantReturns: Option[String],
                               nonCompliantPayments: Option[String]
-                            )
+                            ){
+
+}
 
 object EtmpDisplaySchemeDetails {
 

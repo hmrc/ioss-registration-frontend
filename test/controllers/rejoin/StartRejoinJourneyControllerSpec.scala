@@ -18,17 +18,20 @@ package controllers.rejoin
 
 import base.SpecBase
 import connectors.RegistrationConnector
+import controllers.rejoin.validation.RejoinRegistrationValidation
+import models.CheckMode
 import models.amend.RegistrationWrapper
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito
 import org.mockito.MockitoSugar.when
+import org.mockito.{ArgumentMatchers, IdiomaticMockito, Mockito}
 import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.mockito.MockitoSugar.mock
+import org.scalatest.prop.TableDrivenPropertyChecks
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
-import pages.{EmptyWaypoints, Waypoints}
+import pages.{EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
 import play.api.inject.bind
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
@@ -36,21 +39,27 @@ import services.RegistrationService
 import utils.FutureSyntax.FutureOps
 
 import java.time.{Clock, LocalDate}
+import scala.concurrent.Future
 
-class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach {
+class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach with TableDrivenPropertyChecks with IdiomaticMockito {
 
   private val waypoints: Waypoints = EmptyWaypoints
+
+  private val rejoinWaypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
+
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val mockRegistrationService: RegistrationService = mock[RegistrationService]
   private val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
+  private val mockRejoinRegistrationValidation = mock[RejoinRegistrationValidation]
 
   override def beforeEach(): Unit = {
     Mockito.reset(mockRegistrationConnector)
     Mockito.reset(mockRegistrationService)
     Mockito.reset(mockAuthenticatedUserAnswersRepository)
+    Mockito.reset(mockRejoinRegistrationValidation)
   }
 
-  "tartRejoinJourney Controller" - {
+  "StartRejoinJourney Controller" - {
 
     "must redirect to Rejoin Registration when a registration wrapper has been successfully retrieved and is passes exclusion sanity checks" in {
       val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
@@ -60,6 +69,11 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
       when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
+      when(mockRejoinRegistrationValidation.validateEuRegistrations(
+        ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
+        ArgumentMatchers.eq(rejoinWaypoints)
+      )(any(),any(),any())) thenReturn Right(true).toFuture
+
       val application = applicationBuilder(
         userAnswers = Some(completeUserAnswersWithVatInfo),
         clock = Some(Clock.systemUTC())
@@ -67,6 +81,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
         .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
+        .overrides(bind[RejoinRegistrationValidation].toInstance(mockRejoinRegistrationValidation))
         .build()
 
       running(application) {
@@ -79,8 +94,8 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
       }
     }
 
-    def createRegistrationWrapperWithExclusion(effectiveDate : LocalDate): RegistrationWrapper = {
-      val exclusion  = EtmpExclusion(
+    def createRegistrationWrapperWithExclusion(effectiveDate: LocalDate): RegistrationWrapper = {
+      val exclusion = EtmpExclusion(
         exclusionReason = NoLongerSupplies,
         effectiveDate = effectiveDate,
         decisionDate = LocalDate.now(),
@@ -88,7 +103,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
       )
 
       val registration = registrationWrapper.registration
-      registrationWrapper.copy( registration = registration.copy(exclusions = List(exclusion)))
+      registrationWrapper.copy(registration = registration.copy(exclusions = List(exclusion)))
     }
 
 
@@ -119,9 +134,51 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
       }
     }
 
+    "validation on schemeDetails" - {
+      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
+
+      def createFilterPassingApplicationApplication(mockRejoinRegistrationValidation: RejoinRegistrationValidation) = {
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
+        when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+        when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+        applicationBuilder(
+          userAnswers = Some(completeUserAnswersWithVatInfo),
+          clock = Some(Clock.systemUTC())
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
+          .overrides(bind[RejoinRegistrationValidation].toInstance(mockRejoinRegistrationValidation))
+          .build()
+
+      }
+
+      "must redirect to Rejoin Registration when a registration wrapper has been successfully retrieved but it has infractions on euRegistrationDetails" in {
+          val invalidValidationRedirect = Call("POST", "/redirect-location")
+
+          val mockRejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
+          when(mockRejoinRegistrationValidation.validateEuRegistrations(
+            ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
+            ArgumentMatchers.eq(rejoinWaypoints))(any(), any(), any())
+          ).thenReturn(Future.successful(Left(invalidValidationRedirect)))
+
+          val application = createFilterPassingApplicationApplication(mockRejoinRegistrationValidation)
+          running(application) {
+            val request = FakeRequest(GET, routes.StartRejoinJourneyController.onPageLoad(rejoinWaypoints).url)
+            val result = route(application, request).value
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe invalidValidationRedirect.url
+          }
+
+      }
+    }
+
 
     "must redirect to Not Registered Page when no registration found" in {
-
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
       when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture

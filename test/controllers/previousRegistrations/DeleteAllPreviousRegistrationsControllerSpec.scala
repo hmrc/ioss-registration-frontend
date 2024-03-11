@@ -138,7 +138,8 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
 
       running(application) {
         forAll(nonAmendModeWayPoints) { case (_, nonAmendModeWayPoints) =>
-          Mockito.reset(mockSessionRepository, mockRegistrationConnector)
+          Mockito.reset(mockRegistrationConnector)
+          Mockito.reset(mockSessionRepository)
 
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -180,7 +181,9 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
 
       running(application) {
         forAll(dpDeleteOptions) { case (doDelete) =>
-          Mockito.reset(mockSessionRepository, mockRegistrationConnector)
+          Mockito.reset(mockSessionRepository)
+          Mockito.reset(mockRegistrationConnector)
+
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
           when(mockRegistrationConnector.getRegistration()(any()))

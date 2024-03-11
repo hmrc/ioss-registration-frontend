@@ -17,10 +17,12 @@
 package controllers.rejoin
 
 import connectors.RegistrationConnector
-import controllers.actions.AuthenticatedControllerComponents
+import controllers.actions.{AuthenticatedControllerComponents, RejoiningRegistration}
+import controllers.rejoin.validation.RejoinRegistrationValidation
 import logging.Logging
-import pages.Waypoints
+import models.CheckMode
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
+import pages.{EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.AuthenticatedUserAnswersRepository
@@ -35,24 +37,34 @@ class StartRejoinJourneyController @Inject()(
                                               override val messagesApi: MessagesApi,
                                               cc: AuthenticatedControllerComponents,
                                               registrationConnector: RegistrationConnector,
+                                              rejoinRegistrationValidator: RejoinRegistrationValidation,
                                               registrationService: RegistrationService,
                                               authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository,
                                               clock: Clock
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging {
   protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(inAmend = true).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(RejoiningRegistration).async {
     implicit request =>
       (for {
         registrationWrapperResponse <- registrationConnector.getRegistration()
       } yield {
-
         registrationWrapperResponse match {
           case Right(registrationWrapper) if registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock)) =>
-            for {
-              userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
-              _ <- authenticatedUserAnswersRepository.set(userAnswers)
-            } yield Redirect(RejoinRegistrationPage.route(waypoints).url)
+            val thisPage = RejoinRegistrationPage
+            val waypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, RejoinRegistrationPage.urlFragment))
+
+            rejoinRegistrationValidator.validateEuRegistrations(registrationWrapper, waypoints).flatMap {
+              case Left(redirect) =>
+                logger.info(s"Failed validating eu registrations, redirecting to '${redirect.url}'")
+                Future.successful(Redirect(redirect))
+
+              case _ =>
+                for {
+                  userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
+                  _ <- authenticatedUserAnswersRepository.set(userAnswers)
+                } yield Redirect(RejoinRegistrationPage.route(waypoints).url)
+            }
 
           case Right(_) =>
             logger.warn("Cannot rejoin registration")

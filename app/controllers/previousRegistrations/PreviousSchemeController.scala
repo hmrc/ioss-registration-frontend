@@ -33,65 +33,67 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PreviousSchemeController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        cc: AuthenticatedControllerComponents,
-                                        formProvider: PreviousSchemeTypeFormProvider,
-                                        view: PreviousSchemeView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry{
+                                          override val messagesApi: MessagesApi,
+                                          cc: AuthenticatedControllerComponents,
+                                          formProvider: PreviousSchemeTypeFormProvider,
+                                          view: PreviousSchemeView
+                                        )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
-      getPreviousCountry(waypoints, countryIndex) {
-        country =>
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode).async {
+      implicit request =>
+        getPreviousCountry(waypoints, countryIndex) {
+          country =>
 
-          val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
-            case Some(previousSchemesDetails) =>
+            val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
+              case Some(previousSchemesDetails) =>
 
-              val previousSchemes = previousSchemesDetails.flatMap(_.previousScheme)
-              formProvider(country.name, previousSchemes, schemeIndex)
+                val previousSchemes = previousSchemesDetails.flatMap(_.previousScheme)
+                formProvider(country.name, previousSchemes, schemeIndex)
 
-            case None =>
-              formProvider(country.name, Seq.empty, schemeIndex)
-          }
+              case None =>
+                formProvider(country.name, Seq.empty, schemeIndex)
+            }
 
-          val preparedForm = request.userAnswers.get(PreviousSchemeTypePage(countryIndex, schemeIndex)) match {
-            case None => form
-            case Some(value) => form.fill(value)
-          }
+            val preparedForm = request.userAnswers.get(PreviousSchemeTypePage(countryIndex, schemeIndex)) match {
+              case None => form
+              case Some(value) => form.fill(value)
+            }
 
-          Future.successful(Ok(view(preparedForm, waypoints, countryIndex, schemeIndex)))
-      }
+            Future.successful(Ok(view(preparedForm, waypoints, countryIndex, schemeIndex)))
+        }
 
 
-  }
+    }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
-      getPreviousCountry(waypoints, countryIndex) {
-        country =>
+  def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode).async {
+      implicit request =>
+        getPreviousCountry(waypoints, countryIndex) {
+          country =>
 
-          val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
-            case Some(previousSchemesDetails) =>
+            val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
+              case Some(previousSchemesDetails) =>
 
-              val previousSchemes = previousSchemesDetails.flatMap(_.previousScheme)
-              formProvider(country.name, previousSchemes, schemeIndex)
+                val previousSchemes = previousSchemesDetails.flatMap(_.previousScheme)
+                formProvider(country.name, previousSchemes, schemeIndex)
 
-            case None =>
-              formProvider(country.name, Seq.empty, schemeIndex)
-          }
+              case None =>
+                formProvider(country.name, Seq.empty, schemeIndex)
+            }
 
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              Future.successful(BadRequest(view(formWithErrors, waypoints, countryIndex, schemeIndex))),
+            form.bindFromRequest().fold(
+              formWithErrors =>
+                Future.successful(BadRequest(view(formWithErrors, waypoints, countryIndex, schemeIndex))),
 
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviousSchemeTypePage(countryIndex, schemeIndex), value))
-                _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(PreviousSchemeTypePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
-          )
-      }
-  }
+              value =>
+                for {
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviousSchemeTypePage(countryIndex, schemeIndex), value))
+                  _ <- cc.sessionRepository.set(updatedAnswers)
+                } yield Redirect(PreviousSchemeTypePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+            )
+        }
+    }
 }

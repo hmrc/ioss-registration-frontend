@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.AuthenticatedControllerComponents
+import controllers.actions.{AuthenticatedControllerComponents, NotModifyingExistingRegistration}
 import logging.Logging
 import models.CheckMode
 import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
@@ -51,7 +51,7 @@ class CheckYourAnswersController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(inAmend = false) {
+  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(NotModifyingExistingRegistration) {
     implicit request =>
 
       val thisPage = CheckYourAnswersPage

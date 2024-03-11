@@ -19,46 +19,46 @@ package controllers.rejoin
 import base.SpecBase
 import connectors.RegistrationConnector
 import controllers.actions.{FakeIossRequiredAction, IossRequiredAction}
+import controllers.rejoin.validation.RejoinRegistrationValidation
 import controllers.rejoin.{routes => rejoinRoutes}
-import models.{CheckMode, Index, UserAnswers}
-import models.amend.RegistrationWrapper
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
 import models.responses.InternalServerError
-import org.mockito.ArgumentMatchers
+import models.{CheckMode, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.{ArgumentMatchers, IdiomaticMockito}
 import pages._
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
 import play.api.i18n.Messages
 import play.api.inject.bind
+import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{running, _}
+import play.api.test.Helpers._
 import queries.euDetails.EuDetailsQuery
 import services._
-import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
-import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
-import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
-import viewmodels.checkAnswers.previousRegistrations.{PreviouslyRegisteredSummary, PreviousRegistrationSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.SummaryListFluency
+import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.rejoin.RejoinRegistrationView
 
 import java.time.{Clock, LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
-class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with SummaryListFluency {
+class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito with SummaryListFluency {
 
-  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
+  private val rejoinWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
   private val rejoinRegistrationPage = RejoinRegistrationPage
   private val registrationService = mock[RegistrationService]
   private val country = arbitraryCountry.arbitrary.sample.value
+  private val registrationValidationFailureRedirect = Call("GET", "/error")
 
   private val amendRegistrationResponse: AmendRegistrationResponse =
     AmendRegistrationResponse(
@@ -69,21 +69,56 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
       businessPartner = "businessPartner"
     )
 
-
-  "RejoinRegistrationC Controller" - {
+  "RejoinRegistration Controller" - {
 
     ".onPageLoad" - {
-      "must return OK and the correct view for a GET when the exclusion is valid" in {
-
+      "must redirect if registration does not meet requirements" in {
         val registrationConnector = mock[RegistrationConnector]
+        val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
 
         val registrationWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
         when(registrationConnector.getRegistration()(any()))
           .thenReturn(Future.successful(Right(registrationWithExclusionOnBoundary)))
 
+        when(rejoinRegistrationValidation.validateEuRegistrations(
+          ArgumentMatchers.eq(registrationWithExclusionOnBoundary),
+          ArgumentMatchers.eq(rejoinWaypoints)
+        )(any(), any(), any()))
+          .thenReturn(Future.successful(Left(registrationValidationFailureRedirect)))
+
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
-          .overrides(bind[IossRequiredAction]
-            .toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWithExclusionOnBoundary)))
+          .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, rejoinRoutes.RejoinRegistrationController.onPageLoad().url)
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe registrationValidationFailureRedirect.url
+        }
+      }
+
+      "must return OK and the correct view for a GET when the exclusion is valid" in {
+        val registrationConnector = mock[RegistrationConnector]
+        val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
+        val registrationWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
+        val fakeIossRequiredAction = new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWithExclusionOnBoundary)
+
+        when(registrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWithExclusionOnBoundary)))
+
+        when(rejoinRegistrationValidation.validateEuRegistrations(
+          ArgumentMatchers.eq(registrationWithExclusionOnBoundary),
+          ArgumentMatchers.eq(rejoinWaypoints)
+        )(any(), any(), any()))
+          .thenReturn(Future.successful(Right(true)))
+
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
+          .overrides(bind[IossRequiredAction].toInstance(fakeIossRequiredAction))
+          .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
           .overrides(bind[RegistrationConnector]
             .toInstance(registrationConnector))
           .build()
@@ -101,23 +136,30 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber, isValid = true)(request, messages(application)).toString
+          contentAsString(result) mustBe view(rejoinWaypoints, vatInfoList, list, iossNumber, isValid = true)(request, messages(application)).toString
         }
       }
 
       "must error when the exclusion is invalid" in {
-
         val registrationConnector = mock[RegistrationConnector]
+        val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
 
         val registrationWithExclusionInFuture = createRegistrationWrapperWithExclusion(LocalDate.now().plusDays(1))
+
         when(registrationConnector.getRegistration()(any()))
           .thenReturn(Future.successful(Right(registrationWithExclusionInFuture)))
 
+        when(rejoinRegistrationValidation.validateEuRegistrations(
+          ArgumentMatchers.eq(registrationWithExclusionInFuture),
+          ArgumentMatchers.eq(rejoinWaypoints)
+        )(any(), any(), any()))
+          .thenReturn(Future.successful(Right(true)))
+
+        val fakeIossRequiredAction = new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWithExclusionInFuture)
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
-          .overrides(bind[IossRequiredAction]
-            .toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWithExclusionInFuture)))
-          .overrides(bind[RegistrationConnector]
-            .toInstance(registrationConnector))
+          .overrides(bind[IossRequiredAction].toInstance(fakeIossRequiredAction))
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
           .build()
 
         running(application) {
@@ -125,7 +167,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe CannotRejoinRegistrationPage.route(waypoints).url
+          redirectLocation(result).value mustBe CannotRejoinRegistrationPage.route(rejoinWaypoints).url
         }
       }
     }
@@ -151,18 +193,57 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
     ".onSubmit" - {
 
+      "must redirect if registration does not meet requirements" - {
+
+        val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
+
+        val registrationConnector = mock[RegistrationConnector]
+        val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
+        when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
+
+        when(rejoinRegistrationValidation.validateEuRegistrations(
+          ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
+          ArgumentMatchers.eq(rejoinWaypoints)
+        )(any(), any(), any()))
+          .thenReturn(Future.successful(Left(registrationValidationFailureRedirect)))
+
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
+          .overrides(bind[RegistrationService].toInstance(registrationService))
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(rejoinWaypoints, incompletePrompt = false).url)
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe registrationValidationFailureRedirect.url
+        }
+      }
+
       "when the user has answered all necessary data and submission of the registration succeeds" - {
         "redirect to the next page" in {
 
           val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
 
           val registrationConnector = mock[RegistrationConnector]
+          val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
+
+          when(rejoinRegistrationValidation.validateEuRegistrations(
+            ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
+            ArgumentMatchers.eq(rejoinWaypoints)
+          )(any(), any(), any()))
+            .thenReturn(Future.successful(Right(true)))
 
           val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapperWithExclusionOnBoundary)))
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+            .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
             .build()
 
           when(registrationService.amendRegistration(
@@ -173,7 +254,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             rejoin = ArgumentMatchers.eq(true))(any())) thenReturn Right(amendRegistrationResponse).toFuture
 
           running(application) {
-            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
+            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(rejoinWaypoints, incompletePrompt = false).url)
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
@@ -188,16 +269,25 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val registrationWrapperWithExclusionInFuture = createRegistrationWrapperWithExclusion(LocalDate.now().plusDays(1))
 
           val registrationConnector = mock[RegistrationConnector]
+          val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionInFuture)))
+
+          when(rejoinRegistrationValidation.validateEuRegistrations(
+            ArgumentMatchers.eq(registrationWrapperWithExclusionInFuture),
+            ArgumentMatchers.eq(rejoinWaypoints)
+          )(any(), any(), any()))
+            .thenReturn(Future.successful(Right(true)))
 
           val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapperWithExclusionInFuture)))
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+            .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
             .build()
 
           running(application) {
-            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
+            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(rejoinWaypoints, incompletePrompt = false).url)
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
@@ -209,12 +299,21 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
 
           val registrationConnector = mock[RegistrationConnector]
+          val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
+
+          when(rejoinRegistrationValidation.validateEuRegistrations(
+            ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
+            ArgumentMatchers.eq(rejoinWaypoints)
+          )(any(), any(), any()))
+            .thenReturn(Future.successful(Right(true)))
 
           val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapperWithExclusionOnBoundary)))
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+            .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
             .build()
 
           when(registrationService.amendRegistration(
@@ -226,7 +325,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           )(any())) thenReturn Left(InternalServerError).toFuture
 
           running(application) {
-            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
+            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(rejoinWaypoints, incompletePrompt = false).url)
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
@@ -241,16 +340,25 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
 
           val registrationConnector = mock[RegistrationConnector]
+          val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
+
+          when(rejoinRegistrationValidation.validateEuRegistrations(
+            ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
+            ArgumentMatchers.eq(rejoinWaypoints)
+          )(any(), any(), any()))
+            .thenReturn(Future.successful(Right(true)))
 
           val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), clock = Some(Clock.systemUTC()))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapperWithExclusionOnBoundary)))
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+            .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
             .build()
 
           running(application) {
-            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = false).url)
+            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(rejoinWaypoints, incompletePrompt = false).url)
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
@@ -265,20 +373,29 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
 
           val registrationConnector = mock[RegistrationConnector]
+          val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
+
+          when(rejoinRegistrationValidation.validateEuRegistrations(
+            ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
+            ArgumentMatchers.eq(rejoinWaypoints)
+          )(any(), any(), any()))
+            .thenReturn(Future.successful(Right(true)))
 
           val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), clock = Some(Clock.systemUTC()))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapperWithExclusionOnBoundary)))
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+            .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
             .build()
 
           running(application) {
-            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = true).url)
+            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(rejoinWaypoints, incompletePrompt = true).url)
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
-            redirectLocation(result).value mustEqual controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints).url
+            redirectLocation(result).value mustEqual controllers.tradingNames.routes.HasTradingNameController.onPageLoad(rejoinWaypoints).url
           }
         }
 
@@ -286,8 +403,15 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
 
           val registrationConnector = mock[RegistrationConnector]
-          val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
+          val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
+
+          when(rejoinRegistrationValidation.validateEuRegistrations(
+            ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
+            ArgumentMatchers.eq(rejoinWaypoints)
+          )(any(), any(), any()))
+            .thenReturn(Future.successful(Right(true)))
 
           val answers = completeUserAnswers
             .set(TaxRegisteredInEuPage, true).success.value
@@ -297,14 +421,15 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val application = applicationBuilder(userAnswers = Some(answers), clock = Some(Clock.systemUTC()))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapperWithExclusionOnBoundary)))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+            .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
             .build()
 
           running(application) {
-            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = true).url)
+            val request = FakeRequest(POST, rejoinRoutes.RejoinRegistrationController.onSubmit(rejoinWaypoints, incompletePrompt = true).url)
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
-            redirectLocation(result).value mustEqual controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(waypoints).url
+            redirectLocation(result).value mustEqual controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(rejoinWaypoints).url
           }
         }
       }
@@ -322,19 +447,19 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
   private def getChangeRegistrationSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
 
-    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, waypoints, rejoinRegistrationPage)
-    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, waypoints, rejoinRegistrationPage)
-    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, waypoints, rejoinRegistrationPage, lockEditing = false)
-    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, waypoints, rejoinRegistrationPage)
-    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(answers, waypoints, rejoinRegistrationPage)
-    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(answers, waypoints, rejoinRegistrationPage)
-    val websiteSummaryRow = WebsiteSummary.checkAnswersRow(answers, waypoints, rejoinRegistrationPage)
-    val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(answers, waypoints, rejoinRegistrationPage)
-    val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(answers, waypoints, rejoinRegistrationPage)
-    val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(answers, waypoints, rejoinRegistrationPage)
-    val bankDetailsAccountNameSummaryRow = BankDetailsSummary.rowAccountName(answers, waypoints, rejoinRegistrationPage)
-    val bankDetailsBicSummaryRow = BankDetailsSummary.rowBIC(answers, waypoints, rejoinRegistrationPage)
-    val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(answers, waypoints, rejoinRegistrationPage)
+    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage, lockEditing = false)
+    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, rejoinWaypoints, rejoinRegistrationPage)
+    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val websiteSummaryRow = WebsiteSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val bankDetailsAccountNameSummaryRow = BankDetailsSummary.rowAccountName(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val bankDetailsBicSummaryRow = BankDetailsSummary.rowBIC(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(answers, rejoinWaypoints, rejoinRegistrationPage)
 
     Seq(
       hasTradingNameSummaryRow.map { sr =>

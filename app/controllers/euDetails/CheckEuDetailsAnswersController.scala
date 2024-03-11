@@ -43,49 +43,51 @@ class CheckEuDetailsAnswersController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend).async {
-    implicit request =>
-      getCountry(waypoints, countryIndex) {
-        country =>
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode).async {
+      implicit request =>
+        getCountry(waypoints, countryIndex) {
+          country =>
 
-          val thisPage = CheckEuDetailsAnswersPage(countryIndex)
+            val thisPage = CheckEuDetailsAnswersPage(countryIndex)
 
-          val list = SummaryListViewModel(
-            rows = Seq(
-              RegistrationTypeSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
-              EuVatNumberSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
-              EuTaxReferenceSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
-              FixedEstablishmentTradingNameSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
+            val list = SummaryListViewModel(
+              rows = Seq(
+                RegistrationTypeSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
+                EuVatNumberSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
+                EuTaxReferenceSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
+                FixedEstablishmentTradingNameSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
               FixedEstablishmentAddressSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
               TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, thisPage)
-            ).flatten
-          )
+              ).flatten
+            )
 
-          Future.successful(withCompleteDataModel[EuOptionalDetails](
-            countryIndex,
-            data = getIncompleteEuDetails _,
-            onFailure = (incomplete: Option[EuOptionalDetails]) => {
-              Ok(view(waypoints, countryIndex, country, list, incomplete.isDefined))
-            }) {
-            Ok(view(waypoints, countryIndex, country, list))
-          })
-      }
-  }
-
-  def onSubmit(waypoints: Waypoints, countryIndex: Index, incompletePromptShown: Boolean): Action[AnyContent] = cc.authAndGetData(waypoints.inAmend) {
-    implicit request =>
-      val incomplete = getIncompleteEuDetails(countryIndex)
-      if (incomplete.isEmpty) {
-        Redirect(CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
-      } else {
-        if (!incompletePromptShown) {
-          Redirect(routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex))
-        } else {
-          incompleteCheckEuDetailsRedirect(waypoints).map {
-            redirectIncompletePage =>
-              redirectIncompletePage
-          }.getOrElse(Redirect(routes.EuCountryController.onPageLoad(waypoints, countryIndex)))
+            Future.successful(withCompleteDataModel[EuOptionalDetails](
+              countryIndex,
+              data = getIncompleteEuDetails _,
+              onFailure = (incomplete: Option[EuOptionalDetails]) => {
+                Ok(view(waypoints, countryIndex, country, list, incomplete.isDefined))
+              }) {
+              Ok(view(waypoints, countryIndex, country, list))
+            })
         }
-      }
-  }
+    }
+
+  def onSubmit(waypoints: Waypoints, countryIndex: Index, incompletePromptShown: Boolean): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode) {
+      implicit request =>
+        val incomplete = getIncompleteEuDetails(countryIndex)
+        if (incomplete.isEmpty) {
+          Redirect(CheckEuDetailsAnswersPage(countryIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
+        } else {
+          if (!incompletePromptShown) {
+            Redirect(routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, countryIndex))
+          } else {
+            incompleteCheckEuDetailsRedirect(waypoints).map {
+              redirectIncompletePage =>
+                redirectIncompletePage
+            }.getOrElse(Redirect(routes.EuCountryController.onPageLoad(waypoints, countryIndex)))
+          }
+        }
+    }
 }

@@ -40,7 +40,7 @@ class FixedEstablishmentVRNAlreadyRegisteredControllerSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val request = FakeRequest(GET, routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, countryIndex).url)
+          val request = FakeRequest(GET, routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(EmptyWaypoints, country.code).url)
 
           val result = route(application, request).value
 

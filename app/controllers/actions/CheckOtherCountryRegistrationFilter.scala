@@ -29,7 +29,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckOtherCountryRegistrationFilterImpl @Inject()(
-                                                         inAmend: Boolean,
+                                                         registrationModificationMode: RegistrationModificationMode,
                                                          service: CoreRegistrationValidationService
                                                        )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
@@ -63,26 +63,29 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
             getEffectiveDate(activeMatch))
         ))
 
-      case _ => None
+      case _ =>
+        None
     }
   }
 
   private def isQuarantinedNotInAmend(activeMatch: Match) = {
-    !inAmend && (activeMatch.exclusionStatusCode.contains(exclusionStatusCode) ||
-      activeMatch.matchType == MatchType.OtherMSNETPQuarantinedNETP ||
-      activeMatch.matchType == MatchType.FixedEstablishmentQuarantinedNETP)
+    registrationModificationMode != AmendingActiveRegistration &&
+      (activeMatch.exclusionStatusCode.contains(exclusionStatusCode) ||
+        activeMatch.matchType == MatchType.OtherMSNETPQuarantinedNETP ||
+        activeMatch.matchType == MatchType.FixedEstablishmentQuarantinedNETP)
   }
 
   private def isActiveNotInAmend(activeMatch: Match) = {
-    !inAmend && (activeMatch.matchType == MatchType.OtherMSNETPActiveNETP ||
-      activeMatch.matchType == MatchType.FixedEstablishmentActiveNETP)
+    registrationModificationMode != AmendingActiveRegistration &&
+      (activeMatch.matchType == MatchType.OtherMSNETPActiveNETP ||
+        activeMatch.matchType == MatchType.FixedEstablishmentActiveNETP)
   }
 }
 
 class CheckOtherCountryRegistrationFilter @Inject()(
                                                      service: CoreRegistrationValidationService
                                                    )(implicit val executionContext: ExecutionContext) {
-  def apply(inAmend: Boolean): CheckOtherCountryRegistrationFilterImpl = {
-    new CheckOtherCountryRegistrationFilterImpl(inAmend, service)
+  def apply(registrationModificationMode: RegistrationModificationMode): CheckOtherCountryRegistrationFilterImpl = {
+    new CheckOtherCountryRegistrationFilterImpl(registrationModificationMode, service)
   }
 }
