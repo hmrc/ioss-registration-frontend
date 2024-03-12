@@ -53,10 +53,10 @@ class ChangeRegistrationController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration) {
+  def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
     implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
-      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
+      accountService.getPreviousRegistrations().map { previousRegistrations =>
 
         val thisPage = ChangeRegistrationPage
 
@@ -81,7 +81,7 @@ class ChangeRegistrationController @Inject()(
         val hasPreviousRegistrations: Boolean = previousRegistrations.nonEmpty
         val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
 
-        Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount)).toFuture
+        Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount))
       }
   }
 

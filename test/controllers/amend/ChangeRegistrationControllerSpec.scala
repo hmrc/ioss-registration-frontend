@@ -106,7 +106,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
 
-        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock =Some(Clock.systemUTC()))
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
           .build()
@@ -190,6 +190,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
     ".onSubmit" - {
 
       "when the user has answered all necessary data and submission of the registration succeeds" - {
+
         "redirect to the next page" in {
 
           val registrationConnector = mock[RegistrationConnector]
@@ -218,6 +219,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         }
 
         "when the user has answered all necessary data but submission of the registration fails" - {
+
           "redirect to error submitting amendment" in {
 
             val registrationConnector = mock[RegistrationConnector]
@@ -250,6 +252,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
       "when the user has not answered all necessary data" - {
 
         "the page is refreshed when the incomplete prompt was not shown" in {
+
           val registrationConnector = mock[RegistrationConnector]
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
 
@@ -270,6 +273,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         "the user is redirected when the incomplete prompt is shown" - {
 
           "to Has Trading Name when trading names are not populated correctly" in {
+
             val registrationConnector = mock[RegistrationConnector]
             when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
 
@@ -288,6 +292,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           }
 
           "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
+
             val registrationConnector = mock[RegistrationConnector]
             val registrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
             when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))

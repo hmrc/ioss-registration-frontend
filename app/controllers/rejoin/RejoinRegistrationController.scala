@@ -25,9 +25,9 @@ import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequ
 import models.{CheckMode, UserAnswers}
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
-import pages.{CheckAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
+import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.rejoin.NewIossReferenceQuery
 import services.RegistrationService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow

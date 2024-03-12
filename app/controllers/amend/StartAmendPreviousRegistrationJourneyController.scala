@@ -18,7 +18,7 @@ package controllers.amend
 
 import connectors.RegistrationConnector
 import controllers.AnswerExtractor
-import controllers.actions.AuthenticatedControllerComponents
+import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
 import logging.Logging
 import pages.Waypoints
 import pages.amend.ChangeRegistrationPage
@@ -42,7 +42,7 @@ class StartAmendPreviousRegistrationJourneyController @Inject()(
                                                                )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging with AnswerExtractor {
   protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(inAmend = true).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
     implicit request =>
       getAnswerAsync(PreviousRegistrationIossNumberQuery) { iossNumber =>
 

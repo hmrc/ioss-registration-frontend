@@ -16,7 +16,7 @@
 
 package controllers.amend
 
-import controllers.actions.AuthenticatedControllerComponents
+import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
 import forms.amend.ViewOrChangePreviousRegistrationsMultipleFormProvider
 import pages.Waypoints
 import pages.amend.ViewOrChangePreviousRegistrationsMultiplePage
@@ -43,7 +43,7 @@ class ViewOrChangePreviousRegistrationsMultipleController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss().async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
     implicit request =>
 
       accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
@@ -58,7 +58,7 @@ class ViewOrChangePreviousRegistrationsMultipleController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss().async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
     implicit request =>
 
       accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
