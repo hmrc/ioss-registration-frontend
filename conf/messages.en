@@ -722,7 +722,7 @@ rejoinComplete.feedback.link.text = What did you think of this service?
 rejoinComplete.feedback.30seconds = (takes 30 seconds)
 
 errorSubmittingRejoin.title = We have a problem with our service right now
-errorSubmittingRejoin.heading = We cannot update your registration
+errorSubmittingRejoin.heading = Your registration is not submitted
 errorSubmittingRejoin.tryAgainLater = You can <a class="govuk-link" href="{0}">try again later</a>.
 errorSubmittingRejoin.contactUs = If the problem continues, you can email us at <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 errorSubmittingRejoin.yourAccount = Back to your account
