@@ -45,24 +45,19 @@ class StartAmendPreviousRegistrationJourneyController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
     implicit request =>
       getAnswerAsync(PreviousRegistrationIossNumberQuery) { iossNumber =>
+        registrationConnector.getRegistration(iossNumber).flatMap {
 
-        (for {
-          registrationWrapperResponse <- registrationConnector.getRegistration(iossNumber)
-        } yield {
-
-          registrationWrapperResponse match {
-            case Right(registrationWrapper) =>
-              for {
-                userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
-                userAnswers <- Future.fromTry(userAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
-                _ <- authenticatedUserAnswersRepository.set(userAnswers)
-              } yield Redirect(ChangeRegistrationPage.route(waypoints).url)
-            case Left(error) =>
-              val exception = new Exception(error.body)
-              logger.error(exception.getMessage, exception)
-              throw exception
-          }
-        }).flatten
+          case Right(registrationWrapper) =>
+            for {
+              userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
+              userAnswers <- Future.fromTry(userAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
+              _ <- authenticatedUserAnswersRepository.set(userAnswers)
+            } yield Redirect(ChangeRegistrationPage.route(waypoints).url)
+          case Left(error) =>
+            val exception = new Exception(error.body)
+            logger.error(exception.getMessage, exception)
+            throw exception
+        }
       }
   }
 }
