@@ -18,7 +18,6 @@ package pages.amend
 
 import controllers.amend.routes
 import models.UserAnswers
-import models.amend.PreviousRegistration
 import pages.{Page, QuestionPage, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call

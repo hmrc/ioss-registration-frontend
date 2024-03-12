@@ -18,7 +18,6 @@ package controllers.amend
 
 import base.SpecBase
 import connectors.RegistrationConnector
-import controllers.actions.{FakeIossRequiredAction, IossRequiredAction}
 import forms.amend.ViewOrChangePreviousRegistrationFormProvider
 import models.UserAnswers
 import models.amend.PreviousRegistration
@@ -70,7 +69,6 @@ class ViewOrChangePreviousRegistrationControllerSpec extends SpecBase with Mocki
       when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
-        .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(emptyUserAnswersWithVatInfo), registrationWrapper)))
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .build()
@@ -95,7 +93,6 @@ class ViewOrChangePreviousRegistrationControllerSpec extends SpecBase with Mocki
       val userAnswers = emptyUserAnswersWithVatInfo.set(ViewOrChangePreviousRegistrationPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(userAnswers), registrationWrapper)))
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .build()
@@ -118,7 +115,6 @@ class ViewOrChangePreviousRegistrationControllerSpec extends SpecBase with Mocki
       when(mockAccountService.getPreviousRegistrations()(any())) thenReturn previousRegistrations.toFuture
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
-        .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(emptyUserAnswersWithVatInfo), registrationWrapper)))
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .build()
@@ -139,7 +135,6 @@ class ViewOrChangePreviousRegistrationControllerSpec extends SpecBase with Mocki
       when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
-        .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(emptyUserAnswersWithVatInfo), registrationWrapper)))
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .build()
@@ -166,7 +161,6 @@ class ViewOrChangePreviousRegistrationControllerSpec extends SpecBase with Mocki
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
-          .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(emptyUserAnswersWithVatInfo), registrationWrapper)))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
@@ -194,7 +188,6 @@ class ViewOrChangePreviousRegistrationControllerSpec extends SpecBase with Mocki
       when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
-        .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(emptyUserAnswersWithVatInfo), registrationWrapper)))
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .build()

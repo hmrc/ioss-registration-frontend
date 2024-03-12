@@ -17,7 +17,6 @@
 package services
 
 import base.SpecBase
-import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import models.amend.PreviousRegistration
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
@@ -28,14 +27,31 @@ import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AccountServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
   private implicit val emptyHc: HeaderCarrier = HeaderCarrier()
 
-  private val mockRegistrationConnector = mock[RegistrationConnector]
+  private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
+
+  private val enrolmentKey: String = "IOSSNumber"
+
+  private val enrolments: EACDEnrolments = EACDEnrolments(Seq(
+    EACDEnrolment(
+      service = "service",
+      state = "state",
+      activationDate = Some(LocalDateTime.of(2023, 7, 3, 10, 30)),
+      identifiers = Seq(EACDIdentifiers(enrolmentKey, "IM9009876543"))
+    ),
+    EACDEnrolment(
+      service = "service",
+      state = "state",
+      activationDate = Some(LocalDateTime.of(2023, 6, 1, 10, 30)),
+      identifiers = Seq(EACDIdentifiers(enrolmentKey, "IM9005555555"))
+    )
+  ))
 
   override protected def beforeEach(): Unit = {
     reset(mockRegistrationConnector)
@@ -44,22 +60,6 @@ class AccountServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
   "getAccounts" - {
 
     "return the most recent iossNumber" in {
-      val enrolmentKey = "IOSSNumber"
-
-      val enrolments = EACDEnrolments(Seq(
-        EACDEnrolment(
-          service = "service",
-          state = "state",
-          activationDate = Some(LocalDateTime.of(2023, 7, 3, 10, 30)),
-          identifiers = Seq(EACDIdentifiers(enrolmentKey, "IM9009876543"))
-        ),
-        EACDEnrolment(
-          service = "service",
-          state = "state",
-          activationDate = Some(LocalDateTime.of(2023, 6, 1, 10, 30)),
-          identifiers = Seq(EACDIdentifiers(enrolmentKey, "IM9005555555"))
-        )
-      ))
 
       when(mockRegistrationConnector.getAccounts()(any())) thenReturn enrolments.toFuture
       val service = new AccountService(mockRegistrationConnector)
@@ -68,21 +68,24 @@ class AccountServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterE
 
       result mustBe Some("IM9009876543")
     }
-
   }
 
   "getPreviousRegistrations" - {
 
     "must return all previous registrations without current registration" in {
 
-      val enrolments: EACDEnrolments = arbitraryEACDEnrolments.arbitrary.sample.value
+      val iossNumber: String = "IM9005555555"
+      val startPeriod: LocalDate = LocalDate.of(2023, 6, 1)
+      val endPeriod: LocalDate = LocalDate.of(2023, 6, 3)
+
+      val previousRegistration: PreviousRegistration = PreviousRegistration(iossNumber, startPeriod, endPeriod)
 
       when(mockRegistrationConnector.getAccounts()(any())) thenReturn enrolments.toFuture
       val service = new AccountService(mockRegistrationConnector)
 
       val result = service.getPreviousRegistrations().futureValue
 
-      result mustBe Seq(arbitraryPreviousRegistration)
+      result mustBe Seq(previousRegistration)
     }
   }
 }

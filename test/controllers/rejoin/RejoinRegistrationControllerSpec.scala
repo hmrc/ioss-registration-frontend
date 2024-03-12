@@ -26,6 +26,8 @@ import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
 import models.responses.InternalServerError
 import models.{CheckMode, Index, UserAnswers}
+import org.mockito.ArgumentMatchers
+import models.{CheckMode, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.{ArgumentMatchers, IdiomaticMockito}
@@ -69,7 +71,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
       businessPartner = "businessPartner"
     )
 
-  "RejoinRegistration Controller" - {
+  "RejoinRegistrationC Controller" - {
 
     ".onPageLoad" - {
       "must redirect if registration does not meet requirements" in {
@@ -110,6 +112,11 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
         when(registrationConnector.getRegistration()(any()))
           .thenReturn(Future.successful(Right(registrationWithExclusionOnBoundary)))
 
+        val application = applicationBuilder(
+          userAnswers = Some(completeUserAnswersWithVatInfo),
+          clock = Some(Clock.systemUTC()),
+          registrationWrapper = Some(registrationWithExclusionOnBoundary)
+        )
         when(rejoinRegistrationValidation.validateEuRegistrations(
           ArgumentMatchers.eq(registrationWithExclusionOnBoundary),
           ArgumentMatchers.eq(rejoinWaypoints)
@@ -160,6 +167,13 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
           .overrides(bind[IossRequiredAction].toInstance(fakeIossRequiredAction))
           .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
           .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+        val application = applicationBuilder(
+          userAnswers = Some(completeUserAnswersWithVatInfo),
+          clock = Some(Clock.systemUTC()),
+          registrationWrapper = Some(registrationWithExclusionInFuture)
+        )
+          .overrides(bind[RegistrationConnector]
+            .toInstance(registrationConnector))
           .build()
 
         running(application) {
@@ -233,6 +247,11 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
 
+          val application = applicationBuilder(
+            userAnswers = Some(completeUserAnswersWithVatInfo),
+            clock = Some(Clock.systemUTC()),
+            registrationWrapper = Some(registrationWrapperWithExclusionOnBoundary)
+          )
           when(rejoinRegistrationValidation.validateEuRegistrations(
             ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
             ArgumentMatchers.eq(rejoinWaypoints)
@@ -273,6 +292,11 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionInFuture)))
 
+          val application = applicationBuilder(
+            userAnswers = Some(completeUserAnswersWithVatInfo),
+            clock = Some(Clock.systemUTC()),
+            registrationWrapper = Some(registrationWrapperWithExclusionInFuture)
+          )
           when(rejoinRegistrationValidation.validateEuRegistrations(
             ArgumentMatchers.eq(registrationWrapperWithExclusionInFuture),
             ArgumentMatchers.eq(rejoinWaypoints)
@@ -303,6 +327,11 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
 
+          val application = applicationBuilder(
+            userAnswers = Some(completeUserAnswersWithVatInfo),
+            clock = Some(Clock.systemUTC()),
+            registrationWrapper = Some(registrationWrapperWithExclusionOnBoundary)
+          )
           when(rejoinRegistrationValidation.validateEuRegistrations(
             ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
             ArgumentMatchers.eq(rejoinWaypoints)
@@ -352,6 +381,11 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), clock = Some(Clock.systemUTC()))
             .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapperWithExclusionOnBoundary)))
+          val application = applicationBuilder(
+            userAnswers = Some(emptyUserAnswers),
+            clock = Some(Clock.systemUTC()),
+            registrationWrapper = Some(registrationWrapperWithExclusionOnBoundary)
+          )
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
@@ -377,6 +411,11 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
 
+          val application = applicationBuilder(
+            userAnswers = Some(emptyUserAnswers),
+            clock = Some(Clock.systemUTC()),
+            registrationWrapper = Some(registrationWrapperWithExclusionOnBoundary)
+          )
           when(rejoinRegistrationValidation.validateEuRegistrations(
             ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
             ArgumentMatchers.eq(rejoinWaypoints)
@@ -418,8 +457,11 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
             .set(EuCountryPage(Index(0)), country).success.value
             .remove(EuDetailsQuery(Index(0))).success.value
 
-          val application = applicationBuilder(userAnswers = Some(answers), clock = Some(Clock.systemUTC()))
-            .overrides(bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(Some(completeUserAnswersWithVatInfo), registrationWrapperWithExclusionOnBoundary)))
+          val application = applicationBuilder(
+            userAnswers = Some(answers),
+            clock = Some(Clock.systemUTC()),
+            registrationWrapper = Some(registrationWrapperWithExclusionOnBoundary)
+          )
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
             .build()

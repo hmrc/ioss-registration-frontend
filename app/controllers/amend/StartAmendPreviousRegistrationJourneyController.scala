@@ -32,7 +32,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-// TODO -> Tests
 
 class StartAmendPreviousRegistrationJourneyController @Inject()(
                                                                  override val messagesApi: MessagesApi,
@@ -42,6 +41,7 @@ class StartAmendPreviousRegistrationJourneyController @Inject()(
                                                                  authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
                                                                )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging with AnswerExtractor {
   protected def controllerComponents: MessagesControllerComponents = cc
+
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(inAmend = true).async {
     implicit request =>
       getAnswerAsync(PreviousRegistrationIossNumberQuery) { iossNumber =>

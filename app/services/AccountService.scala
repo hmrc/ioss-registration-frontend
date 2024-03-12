@@ -39,7 +39,6 @@ class AccountService @Inject()(
     }
   }
 
-  // TODO -> TEST
   def getPreviousRegistrations()(implicit hc: HeaderCarrier): Future[Seq[PreviousRegistration]] = {
     registrationConnector.getAccounts().map { accounts =>
       val accountDetails: Seq[(LocalDate, String)] = accounts
@@ -57,5 +56,4 @@ class AccountService @Inject()(
       }
     }
   }
-
 }

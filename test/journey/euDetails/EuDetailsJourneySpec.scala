@@ -16,7 +16,7 @@
 
 package journey.euDetails
 
-import generators.{Generators, ModelGenerators}
+import generators.Generators
 import journey.JourneyHelpers
 import models.euDetails.RegistrationType
 import models.{CheckMode, Country, Index}
