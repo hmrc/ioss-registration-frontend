@@ -67,7 +67,7 @@ object EuDetailsSummary {
       }
     )
 
-  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)
+  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
                      (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllEuDetailsQuery).map {
       euDetails =>
@@ -80,10 +80,14 @@ object EuDetailsSummary {
         SummaryListRowViewModel(
           key = "euDetails.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = Seq(
-            ActionItemViewModel("site.change", AddEuDetailsPage().changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("euDetails.change.hidden"))
-          )
+          actions = if (isCurrentIossAccount) {
+            Seq(
+              ActionItemViewModel("site.change", AddEuDetailsPage().changeLink(waypoints, sourcePage).url)
+                .withVisuallyHiddenText(messages("euDetails.change.hidden"))
+            )
+          } else {
+            Nil
+          }
         )
     }
 }

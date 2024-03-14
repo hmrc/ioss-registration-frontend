@@ -31,6 +31,12 @@ case object ViewOrChangePreviousRegistrationPage extends QuestionPage[Boolean] {
   override def route(waypoints: Waypoints): Call =
     routes.ViewOrChangePreviousRegistrationController.onPageLoad(waypoints)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
-    StartAmendPreviousRegistrationJourneyPage
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    answers.get(this).map {
+      case true =>
+        StartAmendPreviousRegistrationJourneyPage
+      case false =>
+        StartAmendJourneyPage
+    }.orRecover
+  }
 }

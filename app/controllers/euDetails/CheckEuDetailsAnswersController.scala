@@ -50,6 +50,7 @@ class CheckEuDetailsAnswersController @Inject()(
           country =>
 
             val thisPage = CheckEuDetailsAnswersPage(countryIndex)
+            val isCurrentIossAccount: Boolean = true
 
             val list = SummaryListViewModel(
               rows = Seq(
@@ -58,7 +59,7 @@ class CheckEuDetailsAnswersController @Inject()(
                 EuTaxReferenceSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
                 FixedEstablishmentTradingNameSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
               FixedEstablishmentAddressSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
-              TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, thisPage)
+              TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, thisPage, isCurrentIossAccount)
               ).flatten
             )
 

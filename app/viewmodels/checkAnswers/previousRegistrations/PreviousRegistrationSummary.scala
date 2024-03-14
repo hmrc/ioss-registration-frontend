@@ -54,7 +54,8 @@ object PreviousRegistrationSummary {
                        answers: UserAnswers,
                        existingPreviousRegistrations: Seq[PreviousRegistration],
                        waypoints: Waypoints,
-                       sourcePage: CheckAnswersPage
+                       sourcePage: CheckAnswersPage,
+                       isCurrentIossAccount: Boolean
                      )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllPreviousRegistrationsQuery).map {
       previousRegistrations =>
@@ -71,15 +72,19 @@ object PreviousRegistrationSummary {
         SummaryListRowViewModel(
           key = "previousRegistrations.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = Seq(
-            if (sameListOfCountries) {
-              ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
-                .withVisuallyHiddenText(messages("previousRegistrations.add.hidden"))
-            } else {
-              ActionItemViewModel("site.change", AddPreviousRegistrationPage().changeLink(waypoints, sourcePage).url)
-                .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
-            }
-          )
+          actions = if (isCurrentIossAccount) {
+            Seq(
+              if (sameListOfCountries) {
+                ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
+                  .withVisuallyHiddenText(messages("previousRegistrations.add.hidden"))
+              } else {
+                ActionItemViewModel("site.change", AddPreviousRegistrationPage().changeLink(waypoints, sourcePage).url)
+                  .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
+              }
+            )
+          } else {
+            Nil
+          }
         )
     }
 

@@ -69,6 +69,7 @@ class RejoinRegistrationController @Inject()(
       val registrationWrapper: RegistrationWrapper = request.registrationWrapper
       val date = LocalDate.now(clock)
       val canRejoin = registrationWrapper.registration.canRejoinRegistration(date)
+      val isCurrentIossAccount = true
 
       if (canRejoin) {
         val thisPage = RejoinRegistrationPage
@@ -78,7 +79,7 @@ class RejoinRegistrationController @Inject()(
           val iossNumber: String = request.iossNumber
           val userAnswers = request.userAnswers
 
-          val list = detailsList(waypoints, thisPage, userAnswers)
+          val list = detailsList(waypoints, thisPage, userAnswers, isCurrentIossAccount)
           val isValid = validate()(request.request)
 
           val vatRegistrationDetailsList = SummaryListViewModel(
@@ -112,24 +113,24 @@ class RejoinRegistrationController @Inject()(
     }
   }
 
-  private def detailsList(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers)
+  private def detailsList(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers, isCurrentIossAccount: Boolean)
                          (implicit request: AuthenticatedMandatoryIossRequest[AnyContent]) = {
     SummaryListViewModel(
       rows =
-        (getTradingNameRows(waypoints, sourcePage, userAnswers) ++
-          getPreviouslyRegisteredRows(waypoints, sourcePage, userAnswers) ++
-          getRegisteredInEuRows(waypoints, sourcePage, userAnswers) ++
-          getWebsitesRows(waypoints, sourcePage, userAnswers) ++
+        (getTradingNameRows(waypoints, sourcePage, userAnswers, isCurrentIossAccount) ++
+          getPreviouslyRegisteredRows(waypoints, sourcePage, userAnswers, isCurrentIossAccount) ++
+          getRegisteredInEuRows(waypoints, sourcePage, userAnswers, isCurrentIossAccount) ++
+          getWebsitesRows(waypoints, sourcePage, userAnswers, isCurrentIossAccount) ++
           getBusinessContactDetailsRows(waypoints, sourcePage, userAnswers) ++
           getBankDetailsRows(waypoints, sourcePage, userAnswers)
           ).flatten
     )
   }
 
-  private def getTradingNameRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers)
+  private def getTradingNameRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers, isCurrentIossAccount: Boolean)
                                 (implicit request: AuthenticatedMandatoryIossRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
-    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(userAnswers, waypoints, sourcePage)
-    Seq(HasTradingNameSummary.row(userAnswers, waypoints, sourcePage).map { sr =>
+    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(userAnswers, waypoints, sourcePage, isCurrentIossAccount)
+    Seq(HasTradingNameSummary.row(userAnswers, waypoints, sourcePage, isCurrentIossAccount).map { sr =>
       if (tradingNameSummaryRow.isDefined) {
         sr.withCssClass("govuk-summary-list__row--no-border")
       } else {
@@ -139,20 +140,21 @@ class RejoinRegistrationController @Inject()(
       tradingNameSummaryRow)
   }
 
-  private def getPreviouslyRegisteredRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers)
+  private def getPreviouslyRegisteredRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers, isCurrentIossAccount: Boolean)
                                          (implicit request: AuthenticatedMandatoryIossRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
 
     val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(
       answers = userAnswers,
       existingPreviousRegistrations = PreviousRegistration.fromEtmpPreviousEuRegistrationDetails(request.previousEURegistrationDetails),
-      waypoints = waypoints, sourcePage =
-        sourcePage
+      waypoints = waypoints,
+      sourcePage = sourcePage,
+      isCurrentIossAccount
     )
 
     val lockEditing: Boolean = userAnswers.get(PreviouslyRegisteredPage).contains(true)
 
     Seq(
-      PreviouslyRegisteredSummary.row(userAnswers, waypoints, sourcePage, lockEditing).map { sr =>
+      PreviouslyRegisteredSummary.row(userAnswers, waypoints, sourcePage, lockEditing, isCurrentIossAccount).map { sr =>
         if (previousRegistrationSummaryRow.isDefined) {
           sr.withCssClass("govuk-summary-list__row--no-border")
         } else {
@@ -163,11 +165,11 @@ class RejoinRegistrationController @Inject()(
     )
   }
 
-  private def getRegisteredInEuRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers)
+  private def getRegisteredInEuRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers, isCurrentIossAccount: Boolean)
                                    (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
-    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(userAnswers, waypoints, sourcePage)
+    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(userAnswers, waypoints, sourcePage, isCurrentIossAccount)
     Seq(
-      TaxRegisteredInEuSummary.row(userAnswers, waypoints, sourcePage).map { sr =>
+      TaxRegisteredInEuSummary.row(userAnswers, waypoints, sourcePage, isCurrentIossAccount).map { sr =>
         if (euDetailsSummaryRow.isDefined) {
           sr.withCssClass("govuk-summary-list__row--no-border")
         } else {
@@ -178,9 +180,9 @@ class RejoinRegistrationController @Inject()(
     )
   }
 
-  private def getWebsitesRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers)
+  private def getWebsitesRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers, isCurrentIossAccount: Boolean)
                              (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
-    Seq(WebsiteSummary.checkAnswersRow(userAnswers, waypoints, sourcePage))
+    Seq(WebsiteSummary.checkAnswersRow(userAnswers, waypoints, sourcePage, isCurrentIossAccount))
   }
 
   private def getBusinessContactDetailsRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers)

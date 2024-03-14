@@ -26,7 +26,12 @@ import viewmodels.implicits._
 
 object TaxRegisteredInEuSummary  {
 
-  def row(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(
+           answers: UserAnswers,
+           waypoints: Waypoints,
+           sourcePage: CheckAnswersPage,
+           isCurrentIossAccount: Boolean
+         )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TaxRegisteredInEuPage).map {
       answer =>
 
@@ -35,10 +40,14 @@ object TaxRegisteredInEuSummary  {
         SummaryListRowViewModel(
           key     = "taxRegisteredInEu.mini.checkYourAnswersLabel",
           value   = ValueViewModel(value),
-          actions = Seq(
-            ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
-          )
+          actions = if (isCurrentIossAccount) {
+            Seq(
+              ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
+                .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
+            )
+          } else {
+            Nil
+          }
         )
     }
 

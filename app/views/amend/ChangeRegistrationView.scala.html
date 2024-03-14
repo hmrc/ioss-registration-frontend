@@ -47,7 +47,9 @@
 
     <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
 
-    <p class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</p>
+    @if(hasPreviousRegistrations) {
+        <p class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</p>
+    }
 
     @if(hasPreviousRegistrations) {
         @if(isCurrentIossAccount) {
