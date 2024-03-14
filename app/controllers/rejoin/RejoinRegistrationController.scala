@@ -69,7 +69,7 @@ class RejoinRegistrationController @Inject()(
       val registrationWrapper: RegistrationWrapper = request.registrationWrapper
       val date = LocalDate.now(clock)
       val canRejoin = registrationWrapper.registration.canRejoinRegistration(date)
-      val isCurrentIossAccount = true
+      val isCurrentIossAccount: Boolean = true
 
       if (canRejoin) {
         val thisPage = RejoinRegistrationPage

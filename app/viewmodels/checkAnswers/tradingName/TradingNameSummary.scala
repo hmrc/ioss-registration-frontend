@@ -65,7 +65,7 @@ object TradingNameSummary {
                 .withVisuallyHiddenText(messages("tradingName.change.hidden"))
             )
           } else {
-            Seq.empty
+            Nil
           }
         )
     }

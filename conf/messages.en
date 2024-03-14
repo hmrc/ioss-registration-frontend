@@ -654,8 +654,8 @@ continueRegistration.error.required = Select yes if want to continue your regist
 continueRegistration.continue = Yes
 continueRegistration.delete = No, delete my answers and start again
 
-changeRegistration.title = Change Your Registration
-changeRegistration.heading = Change Your Registration
+changeRegistration.title = Change your registration
+changeRegistration.heading = Change your registration
 changeRegistration.reference = IOSS number: {0}
 changeRegistration.changePreviousRegistration = View or change your previous registration
 changeRegistration.toCurrentRegistration = Return to your current registration

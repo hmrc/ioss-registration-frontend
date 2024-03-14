@@ -55,7 +55,7 @@ class CheckYourAnswersController @Inject()(
     implicit request =>
 
       val thisPage = CheckYourAnswersPage
-      val isCurrentIossAccount = true
+      val isCurrentIossAccount: Boolean = true
 
       val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, CheckYourAnswersPage.urlFragment))
 

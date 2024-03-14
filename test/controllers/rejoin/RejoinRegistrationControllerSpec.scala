@@ -59,6 +59,8 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
   private val country = arbitraryCountry.arbitrary.sample.value
   private val registrationValidationFailureRedirect = Call("GET", "/error")
 
+  private val isCurrentIossAccount: Boolean = true
+
   private val amendRegistrationResponse: AmendRegistrationResponse =
     AmendRegistrationResponse(
       processingDateTime = LocalDateTime.now(),
@@ -476,13 +478,13 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
   private def getChangeRegistrationSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
 
-    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage)
-    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage)
-    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage, lockEditing = false)
-    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, rejoinWaypoints, rejoinRegistrationPage)
-    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage)
-    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage)
-    val websiteSummaryRow = WebsiteSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage, isCurrentIossAccount)
+    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage, isCurrentIossAccount)
+    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage, lockEditing = false, isCurrentIossAccount)
+    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, rejoinWaypoints, rejoinRegistrationPage, isCurrentIossAccount)
+    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage, isCurrentIossAccount)
+    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage, isCurrentIossAccount)
+    val websiteSummaryRow = WebsiteSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage, isCurrentIossAccount)
     val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(answers, rejoinWaypoints, rejoinRegistrationPage)
     val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(answers, rejoinWaypoints, rejoinRegistrationPage)
     val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(answers, rejoinWaypoints, rejoinRegistrationPage)
