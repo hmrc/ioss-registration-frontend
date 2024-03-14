@@ -39,7 +39,7 @@ object PreviousRegistration {
 
         RadioItem(
           content = Text(s"$startPeriod to $endPeriod"),
-          id = Some(s"value-$index"),
+          id = Some(s"value_$index"),
           value = Some(previousRegistration.iossNumber),
           hint = Some(Hint(content = HtmlContent(messages("viewOrChangePreviousRegistrationsMultiple.hint", previousRegistration.iossNumber))))
         )

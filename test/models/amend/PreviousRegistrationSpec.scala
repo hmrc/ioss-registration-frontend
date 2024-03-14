@@ -77,19 +77,19 @@ class PreviousRegistrationSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedResult = Seq(
           RadioItem(
             content = Text("December 2023 to January 2024"),
-            id = Some(s"value-0"),
+            id = Some(s"value_0"),
             value = Some("IM900123456789"),
             hint = Some(Hint(content = HtmlContent("IOSS number: IM900123456789")))
           ),
           RadioItem(
             content = Text("February 2024 to March 2024"),
-            id = Some(s"value-1"),
+            id = Some(s"value_1"),
             value = Some("IM900987654321"),
             hint = Some(Hint(content = HtmlContent("IOSS number: IM900987654321")))
           ),
           RadioItem(
             content = Text("March 2024 to April 2024"),
-            id = Some(s"value-2"),
+            id = Some(s"value_2"),
             value = Some("IM900123456321"),
             hint = Some(Hint(content = HtmlContent("IOSS number: IM900123456321")))
           )
