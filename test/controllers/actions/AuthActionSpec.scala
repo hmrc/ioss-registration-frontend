@@ -111,7 +111,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
       }
     }
 
-    "when the user is logged in as an Individual with a VAT enrolment, strong credentials and confidence level 200" - {
+    "when the user is logged in as an Individual with a VAT enrolment, strong credentials and confidence level 250" - {
 
       "must succeed" in {
 
@@ -123,7 +123,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           val actionBuilder = application.injector.instanceOf[DefaultActionBuilder]
 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
-            (Some(testCredentials) ~ vatEnrolment ~ Some(Individual) ~ ConfidenceLevel.L200 ~ None).toFuture
+            (Some(testCredentials) ~ vatEnrolment ~ Some(Individual) ~ ConfidenceLevel.L250 ~ None).toFuture
 
           val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService)
           val controller = new Harness(action, actionBuilder)
@@ -182,7 +182,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
       }
     }
 
-    "when the user has logged in as an Individual with a VAT enrolment and strong credentials, but confidence level less than 200" - {
+    "when the user has logged in as an Individual with a VAT enrolment and strong credentials, but confidence level less than 250" - {
 
       "must be redirected to uplift their confidence level" in {
 
@@ -201,7 +201,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           val result = controller.onPageLoad()(fakeRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value must startWith(s"${appConfig.ivUpliftUrl}?origin=IOSS&confidenceLevel=200")
+          redirectLocation(result).value must startWith(s"${appConfig.ivUpliftUrl}?origin=IOSS&confidenceLevel=250")
         }
       }
     }
@@ -218,7 +218,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           val actionBuilder = application.injector.instanceOf[DefaultActionBuilder]
 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
-            (Some(testCredentials) ~ Enrolments(Set.empty) ~ Some(Individual) ~ ConfidenceLevel.L200 ~ None).toFuture
+            (Some(testCredentials) ~ Enrolments(Set.empty) ~ Some(Individual) ~ ConfidenceLevel.L250 ~ None).toFuture
 
           val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService)
           val controller = new Harness(action, actionBuilder)

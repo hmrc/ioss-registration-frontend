@@ -84,7 +84,7 @@ class AuthenticatedIdentifierAction @Inject()(
       case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
           case (Some(vrn), futureMaybeIossNumber) =>
-            if (confidence >= ConfidenceLevel.L200) {
+            if (confidence >= ConfidenceLevel.L250) {
               futureMaybeIossNumber.map { maybeIossNumber =>
                 Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber))
               }
@@ -173,7 +173,7 @@ class AuthenticatedIdentifierAction @Inject()(
       config.ivUpliftUrl,
       Map(
         "origin" -> Seq(config.origin),
-        "confidenceLevel" -> Seq(ConfidenceLevel.L200.toString),
+        "confidenceLevel" -> Seq(ConfidenceLevel.L250.toString),
         "completionURL" -> Seq(urlBuilderService.loginContinueUrl(request).get(redirectPolicy).url),
         "failureURL" -> Seq(urlBuilderService.ivFailureUrl(request))
       )
