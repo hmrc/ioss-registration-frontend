@@ -54,7 +54,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   def ivJourneyResultUrl(journeyId: String): String = new URI(s"$ivJourneyServiceUrl$journeyId").toString
 
   private val exitSurveyBaseUrl: String = configuration.get[String]("microservice.services.feedback-frontend.host") +
-    configuration.get[String]("microservice.services.feedback-frontend.url")
+    configuration.get[String]("microservice.services.feedback-frontend.basePath")
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/${origin.toLowerCase}"
 
   val iossYourAccountUrl: String = configuration.get[String]("urls.yourAccountUrl")
