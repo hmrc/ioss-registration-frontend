@@ -16,7 +16,7 @@
 
 package controllers.amend
 
-import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
+import controllers.actions.{AmendingActiveRegistration, AmendingPreviousRegistration, AuthenticatedControllerComponents}
 import forms.amend.ViewOrChangePreviousRegistrationsMultipleFormProvider
 import pages.Waypoints
 import pages.amend.ViewOrChangePreviousRegistrationsMultiplePage
@@ -43,37 +43,39 @@ class ViewOrChangePreviousRegistrationsMultipleController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
-    implicit request =>
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
+    cc.authAndRequireIoss(AmendingPreviousRegistration, restrictFromPreviousRegistrations = false).async {
+      implicit request =>
 
-      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
+        accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-        val form: Form[String] = formProvider(previousRegistrations)
-        val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationsMultiplePage) match {
-          case None => form
-          case Some(value) => form.fill(value)
+          val form: Form[String] = formProvider(previousRegistrations)
+          val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationsMultiplePage) match {
+            case None => form
+            case Some(value) => form.fill(value)
+          }
+
+          Ok(view(preparedForm, waypoints, previousRegistrations)).toFuture
         }
+    }
 
-        Ok(view(preparedForm, waypoints, previousRegistrations)).toFuture
-      }
-  }
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] =
+    cc.authAndRequireIoss(AmendingPreviousRegistration, restrictFromPreviousRegistrations = false).async {
+      implicit request =>
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
-    implicit request =>
+        accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
+          val form: Form[String] = formProvider(previousRegistrations)
+          form.bindFromRequest().fold(
+            formWithErrors =>
+              BadRequest(view(formWithErrors, waypoints, previousRegistrations)).toFuture,
 
-        val form: Form[String] = formProvider(previousRegistrations)
-        form.bindFromRequest().fold(
-          formWithErrors =>
-            BadRequest(view(formWithErrors, waypoints, previousRegistrations)).toFuture,
-
-          value =>
-            for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviousRegistrationIossNumberQuery, value))
-              _ <- cc.sessionRepository.set(updatedAnswers)
-            } yield Redirect(ViewOrChangePreviousRegistrationsMultiplePage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
-        )
-      }
-  }
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(PreviousRegistrationIossNumberQuery, value))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(ViewOrChangePreviousRegistrationsMultiplePage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+          )
+        }
+    }
 }

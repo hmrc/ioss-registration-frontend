@@ -20,9 +20,9 @@ import config.FrontendAppConfig
 import controllers.actions._
 import forms.BusinessContactDetailsFormProvider
 import logging.Logging
+import models.BusinessContactDetails
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
-import models.BusinessContactDetails
 import pages.{BankDetailsPage, BusinessContactDetailsPage, Waypoints}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -44,53 +44,55 @@ class BusinessContactDetailsController @Inject()(
                                                   config: FrontendAppConfig,
                                                   view: BusinessContactDetailsView
                                                 )(implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport with Logging{
+  extends FrontendBaseController with I18nSupport with Logging {
 
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode) {
-    implicit request =>
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false) {
+      implicit request =>
 
-      val preparedForm = request.userAnswers.get(BusinessContactDetailsPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
-      Ok(view(preparedForm, waypoints))
-  }
-
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
-    implicit request: AuthenticatedDataRequest[AnyContent] =>
-
-      val messages = messagesApi.preferred(request)
-
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, waypoints))),
-
-        value => {
-          val emailAddress = value.emailAddress
-          val isMatchingEmailAddress = request.userAnswers.get(BusinessContactDetailsPage) match {
-            case Some(businessContactDetails) if waypoints.inAmend =>
-              businessContactDetails.emailAddress.contains(emailAddress)
-            case _ =>
-              false
-          }
-
-          val continueUrl = waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url
-
-          if (config.emailVerificationEnabled && !isMatchingEmailAddress) {
-            verifyEmailAndRedirect(waypoints, messages, continueUrl, value)
-          } else {
-            for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(BusinessContactDetailsPage, value))
-              _ <- cc.sessionRepository.set(updatedAnswers)
-            } yield Redirect(BusinessContactDetailsPage.navigate(waypoints, updatedAnswers, updatedAnswers).route)
-          }
+        val preparedForm = request.userAnswers.get(BusinessContactDetailsPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
         }
-      )
-  }
+
+        Ok(view(preparedForm, waypoints))
+    }
+
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false).async {
+      implicit request: AuthenticatedDataRequest[AnyContent] =>
+
+        val messages = messagesApi.preferred(request)
+
+        form.bindFromRequest().fold(
+          formWithErrors =>
+            Future.successful(BadRequest(view(formWithErrors, waypoints))),
+
+          value => {
+            val emailAddress = value.emailAddress
+            val isMatchingEmailAddress = request.userAnswers.get(BusinessContactDetailsPage) match {
+              case Some(businessContactDetails) if waypoints.inAmend =>
+                businessContactDetails.emailAddress.contains(emailAddress)
+              case _ =>
+                false
+            }
+
+            val continueUrl = waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url
+
+            if (config.emailVerificationEnabled && !isMatchingEmailAddress) {
+              verifyEmailAndRedirect(waypoints, messages, continueUrl, value)
+            } else {
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(BusinessContactDetailsPage, value))
+                _ <- cc.sessionRepository.set(updatedAnswers)
+              } yield Redirect(BusinessContactDetailsPage.navigate(waypoints, updatedAnswers, updatedAnswers).route)
+            }
+          }
+        )
+    }
 
 
   private def verifyEmailAndRedirect(

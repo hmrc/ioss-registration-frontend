@@ -64,7 +64,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
   )
 
   private val amendEmailVerificationResponse: EmailVerificationResponse = EmailVerificationResponse(
-    redirectUri = controllers.amend.routes.ChangeRegistrationController.onPageLoad().url
+    redirectUri = controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url
   )
 
   override def beforeEach(): Unit = {
@@ -354,7 +354,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
                 eqTo(emailVerificationRequest.continueUrl))(any())
           }
         }
-
       }
 
       "when email verification disabled" - {
@@ -480,7 +479,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
         val expectedAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.amend.routes.ChangeRegistrationController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
 
         verify(mockEmailVerificationService, times(1))
@@ -508,7 +507,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
       val amendEmailVerificationRequest = emailVerificationRequest.copy(
         email = emailVerificationRequest.email.map(_.copy(address = newEmailAddress)),
-        continueUrl = controllers.amend.routes.ChangeRegistrationController.onPageLoad().url
+        continueUrl = controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url
       )
 
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
@@ -558,6 +557,8 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
             eqTo(emailVerificationRequest.continueUrl))(any())
       }
     }
+
+    // TODO -> With previous registrations
   }
 
 }

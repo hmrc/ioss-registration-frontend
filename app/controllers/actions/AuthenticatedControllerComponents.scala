@@ -35,6 +35,8 @@ case object AmendingActiveRegistration extends ModifyingExistingRegistrationMode
 
 case object RejoiningRegistration extends ModifyingExistingRegistrationMode
 
+case object AmendingPreviousRegistration extends ModifyingExistingRegistrationMode
+
 trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def actionBuilder: DefaultActionBuilder
@@ -53,6 +55,8 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def checkRegistration: CheckRegistrationFilterProvider
 
+  def checkPreviousRegistration: CheckAmendPreviousRegistrationFilterProvider
+
   def checkEmailVerificationStatus: CheckEmailVerificationFilterProvider
 
   def retrieveSavedAnswers: SavedAnswersRetrievalActionProvider
@@ -61,11 +65,15 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def requireIoss: IossRequiredAction
 
-  def authAndGetData(registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+  def authAndGetData(
+                      registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
+                      restrictFromPreviousRegistrations: Boolean = true
+                    ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     val modifyingExistingRegistration = registrationModificationMode != NotModifyingExistingRegistration
     actionBuilder andThen
       identify andThen
       checkRegistration(modifyingExistingRegistration) andThen
+      checkPreviousRegistration(registrationModificationMode, restrictFromPreviousRegistrations) andThen
       getData andThen
       requireData(modifyingExistingRegistration) andThen
       checkOtherCountryRegistration(registrationModificationMode)
@@ -78,13 +86,17 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
   }
 
   def authAndGetDataAndCheckVerifyEmail(
-                                         registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration
+                                         registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
+                                         restrictFromPreviousRegistrations: Boolean = true
                                        ): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
-    authAndGetData(registrationModificationMode) andThen
+    authAndGetData(registrationModificationMode, restrictFromPreviousRegistrations) andThen
       checkEmailVerificationStatus(registrationModificationMode != NotModifyingExistingRegistration)
 
-  def authAndRequireIoss(modifyingExistingRegistrationMode: ModifyingExistingRegistrationMode): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
-    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode) andThen
+  def authAndRequireIoss(
+                          modifyingExistingRegistrationMode: ModifyingExistingRegistrationMode,
+                          restrictFromPreviousRegistrations: Boolean = true
+                        ): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
+    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations) andThen
       requireIoss() andThen
       checkBouncedEmail()
   }
@@ -109,5 +121,6 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                retrieveSavedAnswers: SavedAnswersRetrievalActionProvider,
                                                                checkRegistration: CheckRegistrationFilterProvider,
                                                                requireIoss: IossRequiredAction,
-                                                               checkBouncedEmail: CheckBouncedEmailFilterProvider
+                                                               checkBouncedEmail: CheckBouncedEmailFilterProvider,
+                                                               checkPreviousRegistration: CheckAmendPreviousRegistrationFilterProvider
                                                              ) extends AuthenticatedControllerComponents

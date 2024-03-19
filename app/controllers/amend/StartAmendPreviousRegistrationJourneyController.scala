@@ -18,10 +18,10 @@ package controllers.amend
 
 import connectors.RegistrationConnector
 import controllers.AnswerExtractor
-import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
+import controllers.actions.{AmendingPreviousRegistration, AuthenticatedControllerComponents}
 import logging.Logging
 import pages.Waypoints
-import pages.amend.ChangeRegistrationPage
+import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PreviousRegistrationIossNumberQuery
@@ -42,7 +42,7 @@ class StartAmendPreviousRegistrationJourneyController @Inject()(
                                                                )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging with AnswerExtractor {
   protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingPreviousRegistration, restrictFromPreviousRegistrations = false).async {
     implicit request =>
       getAnswerAsync(PreviousRegistrationIossNumberQuery) { iossNumber =>
         registrationConnector.getRegistration(iossNumber).flatMap {
@@ -52,7 +52,7 @@ class StartAmendPreviousRegistrationJourneyController @Inject()(
               userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
               userAnswers <- Future.fromTry(userAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
               _ <- authenticatedUserAnswersRepository.set(userAnswers)
-            } yield Redirect(ChangeRegistrationPage.route(waypoints).url)
+            } yield Redirect(ChangePreviousRegistrationPage.route(waypoints).url)
           case Left(error) =>
             val exception = new Exception(error.body)
             logger.error(exception.getMessage, exception)

@@ -121,6 +121,7 @@ trait SpecBase
         bind[SavedAnswersRetrievalActionProvider].toInstance(new FakeSavedAnswersRetrievalActionProvider(userAnswers, vrn)),
         bind[CheckBouncedEmailFilterProvider].toInstance(new FakeCheckBouncedEmailFilterProvider()),
         bind[IossRequiredActionImpl].toInstance(new FakeIossRequiredAction(userAnswers, registrationWrapper.getOrElse(this.registrationWrapper))()),
+        bind[CheckAmendPreviousRegistrationFilterProvider].toInstance(new FakeCheckAmendPreviousRegistrationFilterProvider()),
         bind[Clock].toInstance(clockToBind)
       )
   }

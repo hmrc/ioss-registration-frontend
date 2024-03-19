@@ -16,7 +16,7 @@
 
 package controllers.amend
 
-import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
+import controllers.actions.{AmendingPreviousRegistration, AuthenticatedControllerComponents}
 import forms.amend.ViewOrChangePreviousRegistrationFormProvider
 import logging.Logging
 import pages.Waypoints
@@ -43,53 +43,55 @@ class ViewOrChangePreviousRegistrationController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
-    implicit request =>
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
+    cc.authAndRequireIoss(AmendingPreviousRegistration, restrictFromPreviousRegistrations = false).async {
+      implicit request =>
 
-      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
+        accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-        previousRegistrations.size match {
-          case 0 =>
-            val exception = new IllegalStateException("Must have one or more previous registrations")
-            logger.error(exception.getMessage, exception)
-            throw exception
-          case 1 =>
-            val iossNumber: String = previousRegistrations.map(_.iossNumber).head
+          previousRegistrations.size match {
+            case 0 =>
+              val exception = new IllegalStateException("Must have one or more previous registrations")
+              logger.error(exception.getMessage, exception)
+              throw exception
+            case 1 =>
+              val iossNumber: String = previousRegistrations.map(_.iossNumber).head
 
-            val form: Form[Boolean] = formProvider(iossNumber)
+              val form: Form[Boolean] = formProvider(iossNumber)
 
-            val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationPage) match {
-              case None => form
-              case Some(value) => form.fill(value)
-            }
-            Ok(view(preparedForm, waypoints, iossNumber)).toFuture
-          case _ =>
-            Redirect(ViewOrChangePreviousRegistrationsMultiplePage.route(waypoints).url).toFuture
+              val preparedForm = request.userAnswers.get(ViewOrChangePreviousRegistrationPage) match {
+                case None => form
+                case Some(value) => form.fill(value)
+              }
+              Ok(view(preparedForm, waypoints, iossNumber)).toFuture
+            case _ =>
+              Redirect(ViewOrChangePreviousRegistrationsMultiplePage.route(waypoints).url).toFuture
+          }
         }
-      }
-  }
+    }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(AmendingActiveRegistration).async {
-    implicit request =>
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] =
+    cc.authAndRequireIoss(AmendingPreviousRegistration, restrictFromPreviousRegistrations = false).async {
+      implicit request =>
 
-      accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
+        accountService.getPreviousRegistrations().flatMap { previousRegistrations =>
 
-        val iossNumber: String = previousRegistrations.map(_.iossNumber).head
+          val iossNumber: String = previousRegistrations.map(_.iossNumber).head
 
-        val form: Form[Boolean] = formProvider(iossNumber)
+          val form: Form[Boolean] = formProvider(iossNumber)
 
-        form.bindFromRequest().fold(
-          formWithErrors =>
-            BadRequest(view(formWithErrors, waypoints, iossNumber)).toFuture,
+          form.bindFromRequest().fold(
+            formWithErrors =>
+              BadRequest(view(formWithErrors, waypoints, iossNumber)).toFuture,
 
-          value =>
-            for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(ViewOrChangePreviousRegistrationPage, value))
-              updateAnswersWithIossNumber <- Future.fromTry(updatedAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
-              _ <- cc.sessionRepository.set(updateAnswersWithIossNumber)
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(ViewOrChangePreviousRegistrationPage, value))
+                updateAnswersWithIossNumber <- Future.fromTry(updatedAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
+                _ <- cc.sessionRepository.set(updateAnswersWithIossNumber)
 
-            } yield Redirect(ViewOrChangePreviousRegistrationPage.navigate(waypoints, request.userAnswers, updateAnswersWithIossNumber).route)
-        )
-      }
-  }
+              } yield Redirect(ViewOrChangePreviousRegistrationPage.navigate(waypoints, request.userAnswers, updateAnswersWithIossNumber).route)
+          )
+        }
+    }
 }

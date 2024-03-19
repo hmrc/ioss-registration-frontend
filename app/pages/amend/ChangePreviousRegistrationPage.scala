@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,23 @@
 
 package pages.amend
 
-import controllers.amend.routes
+import controllers.amend.{routes => amendRoutes}
 import models.UserAnswers
-import pages.{Page, QuestionPage, Waypoints}
-import play.api.libs.json.JsPath
+import pages.{CheckAnswersPage, Page, Waypoints}
 import play.api.mvc.Call
 
-case object ViewOrChangePreviousRegistrationPage extends QuestionPage[Boolean] {
+object ChangePreviousRegistrationPage extends CheckAnswersPage {
 
-  override def path: JsPath = JsPath \ toString
+  override def isTheSamePage(other: Page): Boolean = other match {
+    case ChangeRegistrationPage => true
+    case _ => false
+  }
 
-  override def toString: String = "view-or-change-previous-registration"
+  override val urlFragment: String = "change-a-previous-registration"
 
   override def route(waypoints: Waypoints): Call =
-    routes.ViewOrChangePreviousRegistrationController.onPageLoad(waypoints)
+    amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true)
 
-  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    answers.get(this).map {
-      case true =>
-        StartAmendPreviousRegistrationJourneyPage
-      case false =>
-        StartAmendJourneyPage
-    }.orRecover
-  }
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
+    AmendCompletePage
 }

@@ -20,7 +20,7 @@ import base.SpecBase
 import controllers.routes
 import models.{BankDetails, Bic, CheckMode, Iban}
 import org.scalacheck.Arbitrary.arbitrary
-import pages.amend.ChangeRegistrationPage
+import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 
 class BankDetailsPageSpec extends SpecBase with PageBehaviours {
 
@@ -59,9 +59,15 @@ class BankDetailsPageSpec extends SpecBase with PageBehaviours {
       "to Change Your Registration" in {
         val amendWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
         BankDetailsPage.navigate(amendWaypoints, userAnswers, userAnswers).route
-          .mustEqual(controllers.amend.routes.ChangeRegistrationController.onPageLoad())
+          .mustEqual(controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false))
+      }
+
+      "to Change A PreviousRegistration" in {
+        val amendWaypoints: Waypoints =
+          EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
+        BankDetailsPage.navigate(amendWaypoints, userAnswers, userAnswers).route
+          .mustEqual(controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true))
       }
     }
-
   }
 }

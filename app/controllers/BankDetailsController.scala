@@ -38,30 +38,32 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
 
   override protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode) {
-    implicit request =>
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
+    cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false) {
+      implicit request =>
 
-      val preparedForm = request.userAnswers.get(BankDetailsPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
-      Ok(view(preparedForm, waypoints))
-  }
-
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
-    implicit request =>
-
-      form.bindFromRequest().fold(
-        formWithErrors => {
-          Future.successful(BadRequest(view(formWithErrors, waypoints)))
-        },
-        value => {
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsPage, value))
-            _ <- cc.sessionRepository.set(updatedAnswers)
-          } yield Redirect(BankDetailsPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+        val preparedForm = request.userAnswers.get(BankDetailsPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
         }
-      )
-  }
+
+        Ok(view(preparedForm, waypoints))
+    }
+
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false).async {
+      implicit request =>
+
+        form.bindFromRequest().fold(
+          formWithErrors => {
+            Future.successful(BadRequest(view(formWithErrors, waypoints)))
+          },
+          value => {
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsPage, value))
+              _ <- cc.sessionRepository.set(updatedAnswers)
+            } yield Redirect(BankDetailsPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+          }
+        )
+    }
 }

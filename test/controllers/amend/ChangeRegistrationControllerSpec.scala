@@ -115,7 +115,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         running(application) {
 
-          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad().url)
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
 
           implicit val msgs: Messages = messages(application)
           val result = route(application, request).value
@@ -144,7 +144,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         running(application) {
 
-          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad().url)
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true).url)
 
           implicit val msgs: Messages = messages(application)
           val result = route(application, request).value
@@ -176,7 +176,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         running(application) {
 
-          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad().url)
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true).url)
 
           implicit val msgs: Messages = messages(application)
           val result = route(application, request).value
@@ -272,7 +272,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
-            redirectLocation(result).value mustBe routes.ChangeRegistrationController.onPageLoad().url
+            redirectLocation(result).value mustBe routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url
           }
         }
 

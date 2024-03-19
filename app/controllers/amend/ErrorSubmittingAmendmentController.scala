@@ -18,29 +18,29 @@ package controllers.amend
 
 import config.FrontendAppConfig
 import controllers.actions.AuthenticatedControllerComponents
+import pages.Waypoints
 import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.amend.ErrorSubmittingAmendment
+import utils.AmendWaypoints.AmendWaypointsOps
+import views.html.amend.ErrorSubmittingAmendmentView
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class ErrorSubmittingAmendmentController @Inject()(
-                                                       cc: AuthenticatedControllerComponents,
-                                                       appConfig: FrontendAppConfig,
-                                                       view: ErrorSubmittingAmendment
-                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                                    cc: AuthenticatedControllerComponents,
+                                                    appConfig: FrontendAppConfig,
+                                                    view: ErrorSubmittingAmendmentView
+                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
 
-      Ok(view(appConfig.iossYourAccountUrl))
-
+      Ok(view(appConfig.iossYourAccountUrl, waypoints.inPreviousRegistrationAmend))
   }
-
 }
 

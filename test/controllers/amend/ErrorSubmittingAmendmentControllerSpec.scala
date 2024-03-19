@@ -21,7 +21,7 @@ import controllers.amend.{routes => amendRoutes}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.amend.ErrorSubmittingAmendment
+import views.html.amend.ErrorSubmittingAmendmentView
 
 class ErrorSubmittingAmendmentControllerSpec extends SpecBase with MockitoSugar {
 
@@ -37,11 +37,11 @@ class ErrorSubmittingAmendmentControllerSpec extends SpecBase with MockitoSugar 
 
           val result = route(application, request).value
 
-          val view = application.injector.instanceOf[ErrorSubmittingAmendment]
+          val view = application.injector.instanceOf[ErrorSubmittingAmendmentView]
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual
-            view("http://localhost:10193/pay-vat-on-goods-sold-to-eu/import-one-stop-shop-returns-payments")(request, messages(application)).toString
+            view("http://localhost:10193/pay-vat-on-goods-sold-to-eu/import-one-stop-shop-returns-payments", inPreviousRegistrationAmend = false)(request, messages(application)).toString
         }
       }
 
