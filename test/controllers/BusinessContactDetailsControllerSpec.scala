@@ -30,7 +30,7 @@ import org.mockito.Mockito._
 import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import pages.amend.ChangeRegistrationPage
+import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.http.Status.BAD_REQUEST
 import play.api.inject.bind
@@ -39,6 +39,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
 import services.{EmailVerificationService, SaveForLaterService}
+import utils.FutureSyntax.FutureOps
 import views.html.BusinessContactDetailsView
 
 import scala.concurrent.Future
@@ -50,11 +51,15 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
   private lazy val businessContactDetailsRoute = routes.BusinessContactDetailsController.onPageLoad(emptyWaypoints).url
   private lazy val amendBusinessContactDetailsRoute = routes.BusinessContactDetailsController.onPageLoad(amendWaypoints).url
+  private lazy val amendPreviousBusinessContactDetailsRoute = routes.BusinessContactDetailsController.onPageLoad(amendPreviousWaypoints).url
 
   private val userAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
 
   private val emptyWaypoints = EmptyWaypoints
   private val amendWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
+  private val amendPreviousWaypoints =
+    EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
+
   private val mockEmailVerificationService = mock[EmailVerificationService]
   private val mockRegistrationConnector = mock[RegistrationConnector]
   private val mockSaveForLaterService = mock[SaveForLaterService]
@@ -107,6 +112,26 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(form.fill(contactDetails), emptyWaypoints)(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct view for a GET when a previous registration is being amended" in {
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+
+        val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, amendPreviousBusinessContactDetailsRoute)
+
+          val view = application.injector.instanceOf[BusinessContactDetailsView]
+
+          val result = route(application, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(form, amendPreviousWaypoints)(request, messages(application)).toString
         }
       }
     }
@@ -450,7 +475,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
     "must save the answer and redirect to the next page if email is already verified and valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockRegistrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
@@ -496,10 +520,56 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
     }
 
+    "must save the answer and redirect to the next page if email is already verified and valid data is submitted for a previous registration" in {
+
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockRegistrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
+      when(mockEmailVerificationService.isEmailVerified(
+        eqTo(emailVerificationRequest.email.get.address),
+        eqTo(emailVerificationRequest.credId))(any())) thenReturn Future.successful(Verified)
+
+      val application =
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .configure("features.email-verification-enabled" -> "true")
+          .configure("features.enrolments-enabled" -> "false")
+          .overrides(
+            bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
+            bind[EmailVerificationService].toInstance(mockEmailVerificationService),
+            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, amendPreviousBusinessContactDetailsRoute)
+            .withFormUrlEncodedBody(("fullName", "name"), ("telephoneNumber", "0111 2223334"), ("emailAddress", "email@example.com"))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+
+        verify(mockEmailVerificationService, times(1))
+          .isEmailVerified(eqTo(emailVerificationRequest.email.get.address), eqTo(emailVerificationRequest.credId))(any())
+
+        verify(mockEmailVerificationService, times(0))
+          .createEmailVerificationRequest(
+            eqTo(emptyWaypoints),
+            eqTo(emailVerificationRequest.credId),
+            eqTo(emailVerificationRequest.email.get.address),
+            eqTo(emailVerificationRequest.pageTitle),
+            eqTo(emailVerificationRequest.continueUrl))(any())
+      }
+    }
+
     "must save the answer and redirect to the Business Contact Details page if email is not verified and valid data is submitted" in {
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       when(mockRegistrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
 
@@ -557,8 +627,5 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
             eqTo(emailVerificationRequest.continueUrl))(any())
       }
     }
-
-    // TODO -> With previous registrations
   }
-
 }

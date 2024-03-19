@@ -25,7 +25,7 @@ import org.mockito.MockitoSugar.when
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.amend.ChangeRegistrationPage
+import pages.amend.ChangePreviousRegistrationPage
 import pages.{EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -47,7 +47,7 @@ class StartAmendPreviousRegistrationJourneyControllerSpec extends SpecBase with 
 
   "StartAmendJourney Controller" - {
 
-    "must redirect to Change Registration when a registration wrapper has been successfully retrieved" in {
+    "must redirect to Change Previous Registration when a registration wrapper has been successfully retrieved" in {
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockRegistrationConnector.getRegistration(any())(any())) thenReturn Right(registrationWrapper).toFuture
@@ -67,7 +67,7 @@ class StartAmendPreviousRegistrationJourneyControllerSpec extends SpecBase with 
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe ChangeRegistrationPage.route(waypoints).url
+        redirectLocation(result).value mustBe ChangePreviousRegistrationPage.route(waypoints).url
       }
     }
 

@@ -62,11 +62,14 @@ class BankDetailsPageSpec extends SpecBase with PageBehaviours {
           .mustEqual(controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false))
       }
 
-      "to Change A PreviousRegistration" in {
-        val amendWaypoints: Waypoints =
-          EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
-        BankDetailsPage.navigate(amendWaypoints, userAnswers, userAnswers).route
-          .mustEqual(controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true))
+      "when amending a previous registration" - {
+
+        "to Change A PreviousRegistration" in {
+          val amendWaypoints: Waypoints =
+            EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
+          BankDetailsPage.navigate(amendWaypoints, userAnswers, userAnswers).route
+            .mustEqual(controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true))
+        }
       }
     }
   }
