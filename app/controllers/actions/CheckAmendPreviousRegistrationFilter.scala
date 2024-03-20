@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import config.FrontendAppConfig
 import logging.Logging
 import models.requests.AuthenticatedIdentifierRequest
 import play.api.mvc.Results.Redirect
@@ -27,24 +28,26 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckAmendPreviousRegistrationFilterImpl(
                                                 registrationModificationMode: RegistrationModificationMode,
-                                                restrictFromPreviousRegistrations: Boolean
+                                                restrictFromPreviousRegistrations: Boolean,
+                                                frontendAppConfig: FrontendAppConfig
                                               )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedIdentifierRequest] with Logging {
   override protected def filter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] = {
     if (registrationModificationMode == AmendingPreviousRegistration && restrictFromPreviousRegistrations) {
-      Some(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad().url)).toFuture
+      Some(Redirect(frontendAppConfig.iossYourAccountUrl)).toFuture
     } else {
       None.toFuture
     }
   }
 }
 
-class CheckAmendPreviousRegistrationFilterProvider @Inject()()(implicit executionContext: ExecutionContext) {
+class CheckAmendPreviousRegistrationFilterProvider @Inject()(frontendAppConfig: FrontendAppConfig)
+                                                            (implicit executionContext: ExecutionContext) {
 
   def apply(
              registrationModificationMode: RegistrationModificationMode,
              restrictFromPreviousRegistrations: Boolean
            ): CheckAmendPreviousRegistrationFilterImpl = {
-    new CheckAmendPreviousRegistrationFilterImpl(registrationModificationMode, restrictFromPreviousRegistrations)
+    new CheckAmendPreviousRegistrationFilterImpl(registrationModificationMode, restrictFromPreviousRegistrations, frontendAppConfig)
   }
 }

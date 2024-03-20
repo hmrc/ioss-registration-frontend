@@ -17,24 +17,25 @@
 package controllers.actions
 
 import base.SpecBase
+import config.FrontendAppConfig
 import models.requests.AuthenticatedIdentifierRequest
-import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
 import uk.gov.hmrc.auth.core.Enrolments
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 
 class CheckAmendPreviousRegistrationFilterSpec extends SpecBase {
 
   private val waypoints: Waypoints = EmptyWaypoints
 
-  class Harness(registrationModificationMode: ModifyingExistingRegistrationMode, restrictFromPreviousRegistrations: Boolean)
-    extends CheckAmendPreviousRegistrationFilterImpl(registrationModificationMode, restrictFromPreviousRegistrations) {
+  class Harness(registrationModificationMode: ModifyingExistingRegistrationMode, restrictFromPreviousRegistrations: Boolean, config: FrontendAppConfig)
+    extends CheckAmendPreviousRegistrationFilterImpl(registrationModificationMode, restrictFromPreviousRegistrations, config) {
     def callFilter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] = filter(request)
   }
 
@@ -46,8 +47,9 @@ class CheckAmendPreviousRegistrationFilterSpec extends SpecBase {
 
       running(app) {
 
+        val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
-        val controller = new Harness(registrationModificationMode = AmendingPreviousRegistration, restrictFromPreviousRegistrations = false)
+        val controller = new Harness(registrationModificationMode = AmendingPreviousRegistration, restrictFromPreviousRegistrations = false, config)
 
         val result = controller.callFilter(request).futureValue
 
@@ -61,12 +63,14 @@ class CheckAmendPreviousRegistrationFilterSpec extends SpecBase {
 
       running(app) {
 
+        val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
-        val controller = new Harness(registrationModificationMode = AmendingPreviousRegistration, restrictFromPreviousRegistrations = true)
+        val controller = new Harness(registrationModificationMode = AmendingPreviousRegistration, restrictFromPreviousRegistrations = true, config)
 
+        Some(RedirectUrl(config.iossYourAccountUrl))
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(JourneyRecoveryPage.route(waypoints).url))
+        result mustBe Some(Redirect(config.iossYourAccountUrl))
       }
     }
   }

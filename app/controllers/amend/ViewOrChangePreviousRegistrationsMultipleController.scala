@@ -16,7 +16,7 @@
 
 package controllers.amend
 
-import controllers.actions.{AmendingActiveRegistration, AmendingPreviousRegistration, AuthenticatedControllerComponents}
+import controllers.actions.{AmendingPreviousRegistration, AuthenticatedControllerComponents}
 import forms.amend.ViewOrChangePreviousRegistrationsMultipleFormProvider
 import pages.Waypoints
 import pages.amend.ViewOrChangePreviousRegistrationsMultiplePage

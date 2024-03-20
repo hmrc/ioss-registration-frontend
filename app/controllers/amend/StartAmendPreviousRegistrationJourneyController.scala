@@ -21,7 +21,7 @@ import controllers.AnswerExtractor
 import controllers.actions.{AmendingPreviousRegistration, AuthenticatedControllerComponents}
 import logging.Logging
 import pages.Waypoints
-import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
+import pages.amend.ChangePreviousRegistrationPage
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PreviousRegistrationIossNumberQuery

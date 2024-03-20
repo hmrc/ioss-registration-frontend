@@ -16,7 +16,9 @@
 
 package controllers.actions
 
+import config.FrontendAppConfig
 import models.requests.AuthenticatedIdentifierRequest
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
 import utils.FutureSyntax.FutureOps
 
@@ -24,16 +26,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class FakeCheckAmendPreviousRegistrationFilter
-  extends CheckAmendPreviousRegistrationFilterImpl(registrationModificationMode = AmendingPreviousRegistration, restrictFromPreviousRegistrations = false) {
+  extends CheckAmendPreviousRegistrationFilterImpl(
+    registrationModificationMode = AmendingPreviousRegistration,
+    restrictFromPreviousRegistrations = false,
+    mock[FrontendAppConfig]
+  ) {
 
   override protected def filter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] =
     None.toFuture
 }
 
-class FakeCheckAmendPreviousRegistrationFilterProvider extends CheckAmendPreviousRegistrationFilterProvider() {
+class FakeCheckAmendPreviousRegistrationFilterProvider extends CheckAmendPreviousRegistrationFilterProvider(mock[FrontendAppConfig]) {
 
   override def apply(
                       registrationModificationMode: RegistrationModificationMode,
                       restrictFromPreviousRegistrations: Boolean
-                    ): CheckAmendPreviousRegistrationFilterImpl = new FakeCheckAmendPreviousRegistrationFilter()
+                    ): CheckAmendPreviousRegistrationFilterImpl =
+    new FakeCheckAmendPreviousRegistrationFilter()
 }
