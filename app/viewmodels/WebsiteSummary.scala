@@ -43,7 +43,12 @@ object WebsiteSummary {
         )
     }
 
-  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
+  def checkAnswersRow(
+                       answers: UserAnswers,
+                       waypoints: Waypoints,
+                       sourcePage: CheckAnswersPage,
+                       isCurrentIossAccount: Boolean
+                     )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllWebsites).map {
       websites =>
 
@@ -56,10 +61,14 @@ object WebsiteSummary {
         SummaryListRowViewModel(
           key = "websites.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = Seq(
-            ActionItemViewModel("site.change", addWebsitePageChangeUrl)
-              .withVisuallyHiddenText(messages("websites.change.hidden"))
-          )
+          actions = if (isCurrentIossAccount) {
+            Seq(
+              ActionItemViewModel("site.change", addWebsitePageChangeUrl)
+                .withVisuallyHiddenText(messages("websites.change.hidden"))
+            )
+          } else {
+            Nil
+          }
         )
     }
 }

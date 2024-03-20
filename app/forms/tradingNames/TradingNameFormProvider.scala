@@ -34,6 +34,6 @@ class TradingNameFormProvider @Inject() extends Mappings {
           notADuplicate(thisIndex, existingAnswers, "tradingName.error.duplicate"),
           regexp(commonTextPattern, "tradingName.error.invalid"),
           notContainStrings(tradingNameReservedWords, "tradingName.error.usedReservedWord")
-        )),
+        ))
     )
 }

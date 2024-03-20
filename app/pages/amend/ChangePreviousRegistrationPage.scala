@@ -21,17 +21,17 @@ import models.UserAnswers
 import pages.{CheckAnswersPage, Page, Waypoints}
 import play.api.mvc.Call
 
-object ChangeRegistrationPage extends CheckAnswersPage {
+object ChangePreviousRegistrationPage extends CheckAnswersPage {
 
   override def isTheSamePage(other: Page): Boolean = other match {
     case ChangeRegistrationPage => true
     case _ => false
   }
 
-  override val urlFragment: String = "change-your-registration"
+  override val urlFragment: String = "change-a-previous-registration"
 
   override def route(waypoints: Waypoints): Call =
-    amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false)
+    amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     AmendCompletePage

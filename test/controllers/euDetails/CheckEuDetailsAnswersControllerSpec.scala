@@ -72,7 +72,7 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
             EuTaxReferenceSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
             FixedEstablishmentTradingNameSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
             FixedEstablishmentAddressSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
-            TaxRegisteredInEuSummary.row(answers, waypoints, CheckEuDetailsAnswersPage(countryIndex))).flatten
+            TaxRegisteredInEuSummary.row(answers, waypoints, CheckEuDetailsAnswersPage(countryIndex), isCurrentIossAccount = true)).flatten
         )
 
         status(result) mustBe OK

@@ -20,7 +20,7 @@
         govukPanel: GovukPanel
 )
 
-@(yourAccountUrl: String)(implicit request: Request[_], messages: Messages)
+@(yourAccountUrl: String, inPreviousRegistrationAmend: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("errorSubmittingAmendment.title")), showBackLink = false) {
 
@@ -30,7 +30,7 @@
     classes = "red-background"
   ))
 
-  <p class="govuk-body">@Html(messages("errorSubmittingAmendment.tryAgainLater", controllers.amend.routes.ChangeRegistrationController.onPageLoad().url))</p>
+  <p class="govuk-body">@Html(messages("errorSubmittingAmendment.tryAgainLater", controllers.amend.routes.ChangeRegistrationController.onPageLoad(inPreviousRegistrationAmend).url))</p>
 
   <p class="govuk-body">@Html(messages("errorSubmittingAmendment.contactUs"))</p>
 
@@ -39,6 +39,4 @@
             .asLink(yourAccountUrl)
             .withAttribute(("id", "backToYourAccount"))
   )
-
-
 }

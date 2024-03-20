@@ -16,8 +16,8 @@
 
 package utils
 
-import controllers.actions.{AmendingActiveRegistration, NotModifyingExistingRegistration, RegistrationModificationMode, RejoiningRegistration}
-import pages.amend.ChangeRegistrationPage
+import controllers.actions._
+import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.rejoin.RejoinRegistrationPage
 import pages.{CheckAnswersPage, CheckYourAnswersPage, NonEmptyWaypoints, Waypoints}
 
@@ -28,14 +28,20 @@ object AmendWaypoints {
     def registrationModificationMode: RegistrationModificationMode =
       if (isInMode(RejoinRegistrationPage)) {
         RejoiningRegistration
-      } else if( isInMode(ChangeRegistrationPage))  {
+      } else if(isInMode(ChangeRegistrationPage)) {
         AmendingActiveRegistration
-      }else {
+      } else if(isInMode(ChangePreviousRegistrationPage)) {
+        AmendingPreviousRegistration
+      } else {
         NotModifyingExistingRegistration
       }
 
     def inAmend: Boolean = {
-      isInMode(ChangeRegistrationPage, RejoinRegistrationPage)
+      isInMode(ChangeRegistrationPage, ChangePreviousRegistrationPage, RejoinRegistrationPage)
+    }
+
+    def inPreviousRegistrationAmend: Boolean = {
+      isInMode(ChangePreviousRegistrationPage)
     }
 
     private def isInMode(pages: CheckAnswersPage*) = {
@@ -55,7 +61,7 @@ object AmendWaypoints {
     def getNextCheckYourAnswersPageFromWaypoints: Option[CheckAnswersPage] = {
       waypoints match {
         case nonEmptyWaypoints: NonEmptyWaypoints =>
-          List(RejoinRegistrationPage, ChangeRegistrationPage, CheckYourAnswersPage).find { page =>
+          List(RejoinRegistrationPage, ChangeRegistrationPage, ChangePreviousRegistrationPage, CheckYourAnswersPage).find { page =>
             nonEmptyWaypoints.waypoints.toList.map(_.urlFragment).contains(page.urlFragment)
           }
 
@@ -64,5 +70,4 @@ object AmendWaypoints {
       }
     }
   }
-
 }

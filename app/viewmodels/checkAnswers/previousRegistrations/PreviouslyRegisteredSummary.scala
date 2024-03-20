@@ -26,15 +26,18 @@ import viewmodels.implicits._
 
 object PreviouslyRegisteredSummary {
 
-  def row(answers: UserAnswers,
-          waypoints: Waypoints,
-          sourcePage: CheckAnswersPage,
-          lockEditing: Boolean)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(
+           answers: UserAnswers,
+           waypoints: Waypoints,
+           sourcePage: CheckAnswersPage,
+           lockEditing: Boolean,
+           isCurrentIossAccount: Boolean
+         )(implicit messages: Messages): Option[SummaryListRow] =
 
     answers.get(PreviouslyRegisteredPage).map {
       otherOneStopRegistrations: Boolean =>
         val value = if (otherOneStopRegistrations) "site.yes" else "site.no"
-        val actions = if (lockEditing) {
+        val actions = if (lockEditing || !isCurrentIossAccount) {
           Nil
         } else {
 

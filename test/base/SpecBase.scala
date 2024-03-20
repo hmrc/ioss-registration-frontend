@@ -16,7 +16,7 @@
 
 package base
 
-import controllers.actions.{FakeCheckEmailVerificationFilter, _}
+import controllers.actions._
 import generators.Generators
 import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
@@ -40,7 +40,6 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.FakeRequest
 import testutils.RegistrationData.etmpDisplayRegistration
-import uk.gov.hmrc.auth.core.{Enrolment, Enrolments}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
 
@@ -102,7 +101,11 @@ trait SpecBase
       .set(BusinessContactDetailsPage, BusinessContactDetails("fullName", "0123456789", "testEmail@example.com")).success.value
       .set(BankDetailsPage, BankDetails("Account name", Some(bic), iban)).success.value
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, clock: Option[Clock] = None): GuiceApplicationBuilder = {
+  protected def applicationBuilder(
+                                    userAnswers: Option[UserAnswers] = None,
+                                    clock: Option[Clock] = None,
+                                    registrationWrapper: Option[RegistrationWrapper] = None
+                                  ): GuiceApplicationBuilder = {
 
     val clockToBind = clock.getOrElse(stubClockAtArbitraryDate)
 
@@ -117,6 +120,8 @@ trait SpecBase
         bind[CheckEmailVerificationFilterProvider].toInstance(new FakeCheckEmailVerificationFilter()),
         bind[SavedAnswersRetrievalActionProvider].toInstance(new FakeSavedAnswersRetrievalActionProvider(userAnswers, vrn)),
         bind[CheckBouncedEmailFilterProvider].toInstance(new FakeCheckBouncedEmailFilterProvider()),
+        bind[IossRequiredActionImpl].toInstance(new FakeIossRequiredAction(userAnswers, registrationWrapper.getOrElse(this.registrationWrapper))()),
+        bind[CheckAmendPreviousRegistrationFilterProvider].toInstance(new FakeCheckAmendPreviousRegistrationFilterProvider()),
         bind[Clock].toInstance(clockToBind)
       )
   }
@@ -138,10 +143,6 @@ trait SpecBase
     pageTitle = Some("VAT Import One Stop Shop scheme"),
     backUrl = Some("/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"),
     email = Some(verifyEmail)
-  )
-
-  val enrolments: Enrolments = Enrolments(
-    Set(Enrolment(key = "HMRC-IOSS-ORG", Seq.empty, "test", None))
   )
 
   val yourAccountUrl = "http://localhost:10193/pay-vat-on-goods-sold-to-eu/import-one-stop-shop-returns-payments"

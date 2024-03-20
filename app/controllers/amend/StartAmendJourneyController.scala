@@ -41,6 +41,7 @@ class StartAmendJourneyController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
     implicit request =>
+
       (for {
         registrationWrapperResponse <- registrationConnector.getRegistration()
       } yield {

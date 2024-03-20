@@ -18,6 +18,7 @@ package generators
 
 import connectors.SavedUserAnswers
 import models._
+import models.amend.PreviousRegistration
 import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
@@ -428,6 +429,20 @@ trait ModelGenerators extends EitherValues {
         enrolments <- Gen.listOfN(2, arbitraryEACDEnrolment.arbitrary)
       } yield EACDEnrolments(
         enrolments = enrolments
+      )
+    }
+  }
+
+  implicit val arbitraryPreviousRegistration: Arbitrary[PreviousRegistration] = {
+    Arbitrary {
+      for {
+        iossNumber <- Gen.alphaStr
+        startPeriod <- arbitraryDate.arbitrary
+        endPeriod <- arbitraryDate.arbitrary
+      } yield PreviousRegistration(
+        iossNumber = iossNumber,
+        startPeriod = startPeriod,
+        endPeriod = endPeriod
       )
     }
   }

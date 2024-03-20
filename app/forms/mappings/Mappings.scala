@@ -16,10 +16,11 @@
 
 package forms.mappings
 
-import java.time.LocalDate
+import models.{Bic, Enumerable, Iban}
 import play.api.data.FieldMapping
 import play.api.data.Forms.of
-import models.{Bic, Enumerable, Iban}
+
+import java.time.LocalDate
 
 trait Mappings extends Formatters with Constraints {
 

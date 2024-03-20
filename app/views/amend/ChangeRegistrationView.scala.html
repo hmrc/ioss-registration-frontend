@@ -15,7 +15,7 @@
  *@
 
 @import controllers.amend.{routes => amendRoutes}
-@import pages.amend.ChangeRegistrationPage
+@import pages.amend.{ChangeRegistrationPage, StartAmendJourneyPage, ViewOrChangePreviousRegistrationPage}
 @import views.html.components.CancelAmendRegButton
 
 @this(
@@ -27,7 +27,14 @@
         govukWarningText: GovukWarningText
 )
 
-@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, iossNumber: String, isValid: Boolean)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints,
+        vatRegistrationDetailsList: SummaryList,
+        list: SummaryList,
+        iossNumber: String,
+        isValid: Boolean,
+        hasPreviousRegistrations: Boolean,
+        isCurrentIossAccount: Boolean
+)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
 
@@ -40,7 +47,21 @@
 
     <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
 
-    <p class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</p>
+    @if(hasPreviousRegistrations) {
+        <p class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</p>
+    }
+
+    @if(hasPreviousRegistrations) {
+        @if(isCurrentIossAccount) {
+            <p class="govuk-body govuk-!-margin-bottom-6">
+                <a class="govuk-link" id="change-previous-registrations" href="@ViewOrChangePreviousRegistrationPage.route(waypoints).url">@messages("changeRegistration.changePreviousRegistration")</a>
+            </p>
+        } else {
+            <p class="govuk-body govuk-!-margin-bottom-6">
+                <a class="govuk-link" id="return-to-current-registration" href="@StartAmendJourneyPage.route(waypoints).url">@messages("changeRegistration.toCurrentRegistration")</a>
+            </p>
+        }
+    }
 
     <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 

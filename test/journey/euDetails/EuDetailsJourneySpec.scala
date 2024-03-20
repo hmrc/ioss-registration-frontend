@@ -16,7 +16,7 @@
 
 package journey.euDetails
 
-import generators.{Generators, ModelGenerators}
+import generators.Generators
 import journey.JourneyHelpers
 import models.euDetails.RegistrationType
 import models.{CheckMode, Country, Index}
@@ -28,7 +28,7 @@ import pages.website.WebsitePage
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import queries.euDetails.{AllEuDetailsRawQuery, EuDetailsQuery}
 
-class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGenerators with Generators {
+class EuDetailsJourneySpec extends AnyFreeSpec with JourneyHelpers with Generators {
 
   private val maxCountries: Int = Country.euCountries.size
   private val countryIndex1: Index = Index(0)

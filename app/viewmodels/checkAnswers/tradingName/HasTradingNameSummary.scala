@@ -24,21 +24,30 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object HasTradingNameSummary  {
+object HasTradingNameSummary {
 
-  def row(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(
+           answers: UserAnswers,
+           waypoints: Waypoints,
+           sourcePage: CheckAnswersPage,
+           isCurrentIossAccount: Boolean
+         )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(HasTradingNamePage).map {
       answer =>
 
         val value = if (answer) "site.yes" else "site.no"
 
         SummaryListRowViewModel(
-          key     = "hasTradingName.checkYourAnswersLabel",
-          value   = ValueViewModel(value),
-          actions = Seq(
-            ActionItemViewModel("site.change", HasTradingNamePage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("hasTradingName.change.hidden"))
-          )
+          key = "hasTradingName.checkYourAnswersLabel",
+          value = ValueViewModel(value),
+          actions = if (isCurrentIossAccount) {
+            Seq(
+              ActionItemViewModel("site.change", HasTradingNamePage.changeLink(waypoints, sourcePage).url)
+                .withVisuallyHiddenText(messages("hasTradingName.change.hidden"))
+            )
+          } else {
+            Nil
+          }
         )
     }
 }

@@ -1,265 +1,274 @@
 # microservice specific routes
 
-->          /hmrc-frontend                                                   hmrcfrontend.Routes
+->          /hmrc-frontend                                                hmrcfrontend.Routes
 
-GET         /                                                                controllers.IndexController.onPageLoad()
+GET         /                                                             controllers.IndexController.onPageLoad()
 
-GET         /assets/*file                                                    controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                                                 controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /language/:lang                                                  controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET         /language/:lang                                               controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
-GET         /refresh-session                                                 controllers.KeepAliveController.keepAlive
-GET         /refresh-session-unauthenticated                                 controllers.KeepAliveController.keepAliveUnauthenticated()
+GET         /refresh-session                                              controllers.KeepAliveController.keepAlive
+GET         /refresh-session-unauthenticated                              controllers.KeepAliveController.keepAliveUnauthenticated()
 
-GET         /there-is-a-problem                                              controllers.JourneyRecoveryController.onPageLoad(redirectUrl: Option[RedirectUrl] ?= None)
+GET         /there-is-a-problem                                           controllers.JourneyRecoveryController.onPageLoad(redirectUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                                              controllers.CheckYourAnswersController.onPageLoad()
-POST        /check-your-answers/:incompletePrompt                            controllers.CheckYourAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
+GET         /check-your-answers                                           controllers.CheckYourAnswersController.onPageLoad()
+POST        /check-your-answers/:incompletePrompt                         controllers.CheckYourAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
-GET         /identity-problem                                                controllers.auth.IdentityVerificationController.identityError(redirectUrl: RedirectUrl)
-GET         /identity-complete                                               controllers.auth.IdentityVerificationController.handleIvFailure(redirectUrl: RedirectUrl, journeyId: Option[String])
-GET         /iv/error                                                        controllers.auth.IvReturnController.error(continueUrl: RedirectUrl)
-GET         /iv/incomplete                                                   controllers.auth.IvReturnController.incomplete(continueUrl: RedirectUrl)
-GET         /iv/insufficient-evidence                                        controllers.auth.IvReturnController.insufficientEvidence(continueUrl: RedirectUrl)
-GET         /iv/locked-out                                                   controllers.auth.IvReturnController.lockedOut(continueUrl: RedirectUrl)
-GET         /iv/precondition-failed                                          controllers.auth.IvReturnController.preconditionFailed(continueUrl: RedirectUrl)
-GET         /iv/technical-issue                                              controllers.auth.IvReturnController.technicalIssue(continueUrl: RedirectUrl)
-GET         /iv/timeout                                                      controllers.auth.IvReturnController.timeout(continueUrl: RedirectUrl)
-GET         /iv/user-aborted                                                 controllers.auth.IvReturnController.userAborted(continueUrl: RedirectUrl)
-GET         /iv/insufficient-evidence-sources                                controllers.auth.IvReturnController.notEnoughEvidenceSources(continueUrl: RedirectUrl)
-GET         /iv/failed-matching                                              controllers.auth.IvReturnController.failedMatching(continueUrl: RedirectUrl)
-GET         /iv/failed-identity-verification                                 controllers.auth.IvReturnController.failed(continueUrl: RedirectUrl)
+GET         /identity-problem                                             controllers.auth.IdentityVerificationController.identityError(redirectUrl: RedirectUrl)
+GET         /identity-complete                                            controllers.auth.IdentityVerificationController.handleIvFailure(redirectUrl: RedirectUrl, journeyId: Option[String])
+GET         /iv/error                                                     controllers.auth.IvReturnController.error(continueUrl: RedirectUrl)
+GET         /iv/incomplete                                                controllers.auth.IvReturnController.incomplete(continueUrl: RedirectUrl)
+GET         /iv/insufficient-evidence                                     controllers.auth.IvReturnController.insufficientEvidence(continueUrl: RedirectUrl)
+GET         /iv/locked-out                                                controllers.auth.IvReturnController.lockedOut(continueUrl: RedirectUrl)
+GET         /iv/precondition-failed                                       controllers.auth.IvReturnController.preconditionFailed(continueUrl: RedirectUrl)
+GET         /iv/technical-issue                                           controllers.auth.IvReturnController.technicalIssue(continueUrl: RedirectUrl)
+GET         /iv/timeout                                                   controllers.auth.IvReturnController.timeout(continueUrl: RedirectUrl)
+GET         /iv/user-aborted                                              controllers.auth.IvReturnController.userAborted(continueUrl: RedirectUrl)
+GET         /iv/insufficient-evidence-sources                             controllers.auth.IvReturnController.notEnoughEvidenceSources(continueUrl: RedirectUrl)
+GET         /iv/failed-matching                                           controllers.auth.IvReturnController.failedMatching(continueUrl: RedirectUrl)
+GET         /iv/failed-identity-verification                              controllers.auth.IvReturnController.failed(continueUrl: RedirectUrl)
 
-GET         /account/sign-out-survey                                         controllers.auth.AuthController.signOut
-GET         /account/sign-out                                                controllers.auth.AuthController.signOutNoSurvey
-GET         /account/signed-out                                              controllers.auth.SignedOutController.onPageLoad
-GET         /account/login                                                   controllers.auth.AuthController.redirectToLogin(redirectUrl: RedirectUrl)
-GET         /account/register                                                controllers.auth.AuthController.redirectToRegister(redirectUrl: RedirectUrl)
-GET         /cannot-use-agent                                                controllers.auth.AuthController.unsupportedAffinityGroup()
-GET         /provider-unsupported                                            controllers.auth.AuthController.unsupportedAuthProvider(redirectUrl: RedirectUrl)
-GET         /credential-unsupported                                          controllers.auth.AuthController.insufficientEnrolments()
-GET         /account/role-unsupported                                        controllers.auth.AuthController.unsupportedCredentialRole()
+GET         /account/sign-out-survey                                      controllers.auth.AuthController.signOut
+GET         /account/sign-out                                             controllers.auth.AuthController.signOutNoSurvey
+GET         /account/signed-out                                           controllers.auth.SignedOutController.onPageLoad
+GET         /account/login                                                controllers.auth.AuthController.redirectToLogin(redirectUrl: RedirectUrl)
+GET         /account/register                                             controllers.auth.AuthController.redirectToRegister(redirectUrl: RedirectUrl)
+GET         /cannot-use-agent                                             controllers.auth.AuthController.unsupportedAffinityGroup()
+GET         /provider-unsupported                                         controllers.auth.AuthController.unsupportedAuthProvider(redirectUrl: RedirectUrl)
+GET         /credential-unsupported                                       controllers.auth.AuthController.insufficientEnrolments()
+GET         /account/role-unsupported                                     controllers.auth.AuthController.unsupportedCredentialRole()
 
-GET         /on-sign-in                                                      controllers.auth.AuthController.onSignIn()
-GET         /continue-on-sign-in                                             controllers.auth.AuthController.continueOnSignIn()
+GET         /on-sign-in                                                   controllers.auth.AuthController.onSignIn()
+GET         /continue-on-sign-in                                          controllers.auth.AuthController.continueOnSignIn()
 
-GET         /unauthorised                                                    controllers.UnauthorisedController.onPageLoad()
+GET         /unauthorised                                                 controllers.UnauthorisedController.onPageLoad()
 
-GET         /registration-service-error                                      controllers.VatApiDownController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /registration-service-error                                   controllers.VatApiDownController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /answers-deleted                                                 controllers.AnswersDeletedController.onPageLoad()
+GET         /answers-deleted                                              controllers.AnswersDeletedController.onPageLoad()
 
-GET         /progress-saved                                                  controllers.SavedProgressController.onPageLoad(continueUrl: RedirectUrl)
+GET         /progress-saved                                               controllers.SavedProgressController.onPageLoad(continueUrl: RedirectUrl)
 
-GET         /no-welsh-service                                                controllers.external.NoMoreWelshController.onPageLoad()
+GET         /no-welsh-service                                             controllers.external.NoMoreWelshController.onPageLoad()
 
 # Filter questions section
-GET         /ioss-registered                                                 controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /ioss-registered                                                 controllers.filters.RegisteredForIossInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /ioss-registered                                              controllers.filters.RegisteredForIossInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /ioss-registered                                              controllers.filters.RegisteredForIossInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-already-registered                              controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-already-registered                           controllers.filters.CannotRegisterAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /account-restore-error                                           controllers.ProblemWithAccountController.onPageLoad()
+GET         /account-restore-error                                        controllers.ProblemWithAccountController.onPageLoad()
 
-GET         /selling-goods-outside-single-market                             controllers.filters.SellsGoodsToEuOrNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /selling-goods-outside-single-market                             controllers.filters.SellsGoodsToEuOrNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /selling-goods-outside-single-market                          controllers.filters.SellsGoodsToEuOrNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /selling-goods-outside-single-market                          controllers.filters.SellsGoodsToEuOrNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-ioss                                            controllers.filters.CannotRegisterForIossController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-ioss                                         controllers.filters.CannotRegisterForIossController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /goods-value                                                     controllers.filters.GoodsConsignmentValueController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /goods-value                                                     controllers.filters.GoodsConsignmentValueController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /goods-value                                                  controllers.filters.GoodsConsignmentValueController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /goods-value                                                  controllers.filters.GoodsConsignmentValueController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /do-not-need-to-account-for-eu-vat                               controllers.filters.ConsignmentValueExceedsLimitController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /do-not-need-to-account-for-eu-vat                            controllers.filters.ConsignmentValueExceedsLimitController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /registered-for-vat-in-uk                                        controllers.filters.RegisteredForVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /registered-for-vat-in-uk                                        controllers.filters.RegisteredForVatInUkController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /registered-for-vat-in-uk                                     controllers.filters.RegisteredForVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /registered-for-vat-in-uk                                     controllers.filters.RegisteredForVatInUkController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-no-vat-in-uk                                    controllers.filters.CannotRegisterNoVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-no-vat-in-uk                                 controllers.filters.CannotRegisterNoVatInUkController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /ni-based                                                        controllers.filters.BusinessBasedInNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /ni-based                                                        controllers.filters.BusinessBasedInNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /ni-based                                                     controllers.filters.BusinessBasedInNiController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /ni-based                                                     controllers.filters.BusinessBasedInNiController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /norway-based                                                    controllers.filters.NorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /norway-based                                                    controllers.filters.NorwegianBasedBusinessController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /norway-based                                                 controllers.filters.NorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /norway-based                                                 controllers.filters.NorwegianBasedBusinessController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /register-to-use-service                                         controllers.filters.EligibleToRegisterController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /register-to-use-service                                         controllers.filters.EligibleToRegisterController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /register-to-use-service                                      controllers.filters.EligibleToRegisterController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /register-to-use-service                                      controllers.filters.EligibleToRegisterController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-no-ni-or-norway-business                        controllers.filters.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-no-ni-or-norway-business                     controllers.filters.CannotRegisterNoNiOrNorwayBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /already-registered-other-country                                controllers.filters.AlreadyRegisteredOtherCountryController.onPageLoad(countryCode: String)
+GET         /already-registered-other-country                             controllers.filters.AlreadyRegisteredOtherCountryController.onPageLoad(countryCode: String)
 
-GET         /other-country-excluded-and-quarantined                          controllers.filters.OtherCountryExcludedAndQuarantinedController.onPageLoad(countryCode: String, exclusionDate: String)
+GET         /other-country-excluded-and-quarantined                       controllers.filters.OtherCountryExcludedAndQuarantinedController.onPageLoad(countryCode: String, exclusionDate: String)
 
 # VAT details section
-GET         /confirm-vat-details                                             controllers.checkVatDetails.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /confirm-vat-details                                             controllers.checkVatDetails.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /confirm-vat-details                                          controllers.checkVatDetails.CheckVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /confirm-vat-details                                          controllers.checkVatDetails.CheckVatDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /register-different-business                                     controllers.checkVatDetails.UseOtherAccountController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /register-different-business                                  controllers.checkVatDetails.UseOtherAccountController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /update-vat-details                                              controllers.checkVatDetails.UpdateVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /update-vat-details                                           controllers.checkVatDetails.UpdateVatDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /expired-vrn-date                                                controllers.ExpiredVrnDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /expired-vrn-date                                             controllers.ExpiredVrnDateController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-no-ni-protocol                                  controllers.CannotRegisterNoNiProtocolController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-no-ni-protocol                               controllers.CannotRegisterNoNiProtocolController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-not-norwegian-based-business                    controllers.CannotRegisterNotNorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-not-norwegian-based-business                 controllers.CannotRegisterNotNorwegianBasedBusinessController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /cannot-register-non-established-taxable-person                  controllers.CannotRegisterNonEstablishedTaxablePersonController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cannot-register-non-established-taxable-person               controllers.CannotRegisterNonEstablishedTaxablePersonController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 # Trading name section
-GET         /have-uk-trading-name                                            controllers.tradingNames.HasTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /have-uk-trading-name                                            controllers.tradingNames.HasTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /have-uk-trading-name                                         controllers.tradingNames.HasTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /have-uk-trading-name                                         controllers.tradingNames.HasTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /uk-trading-name/:index                                          controllers.tradingNames.TradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /uk-trading-name/:index                                          controllers.tradingNames.TradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /uk-trading-name/:index                                       controllers.tradingNames.TradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /uk-trading-name/:index                                       controllers.tradingNames.TradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /add-uk-trading-name                                             controllers.tradingNames.AddTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /add-uk-trading-name                                             controllers.tradingNames.AddTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /add-uk-trading-name                                          controllers.tradingNames.AddTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /add-uk-trading-name                                          controllers.tradingNames.AddTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /remove-uk-trading-name/:index                                   controllers.tradingNames.DeleteTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /remove-uk-trading-name/:index                                   controllers.tradingNames.DeleteTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /remove-uk-trading-name/:index                                controllers.tradingNames.DeleteTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /remove-uk-trading-name/:index                                controllers.tradingNames.DeleteTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /remove-all-trading-names                                        controllers.tradingNames.DeleteAllTradingNamesController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /remove-all-trading-names                                        controllers.tradingNames.DeleteAllTradingNamesController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /remove-all-trading-names                                     controllers.tradingNames.DeleteAllTradingNamesController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /remove-all-trading-names                                     controllers.tradingNames.DeleteAllTradingNamesController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 # Previously registered details section
-GET         /previous-oss                                                    controllers.previousRegistrations.PreviouslyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /previous-oss                                                    controllers.previousRegistrations.PreviouslyRegisteredController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /previous-oss                                                 controllers.previousRegistrations.PreviouslyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /previous-oss                                                 controllers.previousRegistrations.PreviouslyRegisteredController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /previous-country/:index                                         controllers.previousRegistrations.PreviousEuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /previous-country/:index                                         controllers.previousRegistrations.PreviousEuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /previous-country/:index                                      controllers.previousRegistrations.PreviousEuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /previous-country/:index                                      controllers.previousRegistrations.PreviousEuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /previous-scheme/:countryIndex/:schemeIndex                      controllers.previousRegistrations.PreviousSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
-POST        /previous-scheme/:countryIndex/:schemeIndex                      controllers.previousRegistrations.PreviousSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+GET         /previous-scheme/:countryIndex/:schemeIndex                   controllers.previousRegistrations.PreviousSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+POST        /previous-scheme/:countryIndex/:schemeIndex                   controllers.previousRegistrations.PreviousSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 
-GET         /previous-oss-scheme-number/:countryIndex/:schemeIndex           controllers.previousRegistrations.PreviousOssNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
-POST        /previous-oss-scheme-number/:countryIndex/:schemeIndex           controllers.previousRegistrations.PreviousOssNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+GET         /previous-oss-scheme-number/:countryIndex/:schemeIndex        controllers.previousRegistrations.PreviousOssNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+POST        /previous-oss-scheme-number/:countryIndex/:schemeIndex        controllers.previousRegistrations.PreviousOssNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 
-GET         /previous-ioss-scheme/:countryIndex/:schemeIndex                 controllers.previousRegistrations.PreviousIossSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
-POST        /previous-ioss-scheme/:countryIndex/:schemeIndex                 controllers.previousRegistrations.PreviousIossSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+GET         /previous-ioss-scheme/:countryIndex/:schemeIndex              controllers.previousRegistrations.PreviousIossSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+POST        /previous-ioss-scheme/:countryIndex/:schemeIndex              controllers.previousRegistrations.PreviousIossSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 
-GET         /previous-ioss-number/:countryIndex/:schemeIndex                 controllers.previousRegistrations.PreviousIossNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
-POST        /previous-ioss-number/:countryIndex/:schemeIndex                 controllers.previousRegistrations.PreviousIossNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+GET         /previous-ioss-number/:countryIndex/:schemeIndex              controllers.previousRegistrations.PreviousIossNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+POST        /previous-ioss-number/:countryIndex/:schemeIndex              controllers.previousRegistrations.PreviousIossNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 
-GET         /previous-scheme-answers/:index                                  controllers.previousRegistrations.CheckPreviousSchemeAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /previous-scheme-answers/:index                                  controllers.previousRegistrations.CheckPreviousSchemeAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /previous-scheme-answers/:index                               controllers.previousRegistrations.CheckPreviousSchemeAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /previous-scheme-answers/:index                               controllers.previousRegistrations.CheckPreviousSchemeAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /remove-deregistration/:index                                    controllers.previousRegistrations.DeletePreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /remove-deregistration/:index                                    controllers.previousRegistrations.DeletePreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /remove-deregistration/:index                                 controllers.previousRegistrations.DeletePreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /remove-deregistration/:index                                 controllers.previousRegistrations.DeletePreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /remove-previous-scheme/:countryIndex/:schemeIndex               controllers.previousRegistrations.DeletePreviousSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
-POST        /remove-previous-scheme/:countryIndex/:schemeIndex               controllers.previousRegistrations.DeletePreviousSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+GET         /remove-previous-scheme/:countryIndex/:schemeIndex            controllers.previousRegistrations.DeletePreviousSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
+POST        /remove-previous-scheme/:countryIndex/:schemeIndex            controllers.previousRegistrations.DeletePreviousSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 
-GET         /previous-schemes-overview                                       controllers.previousRegistrations.AddPreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /previous-schemes-overview                                       controllers.previousRegistrations.AddPreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePromptShown: Boolean)
+GET         /previous-schemes-overview                                    controllers.previousRegistrations.AddPreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /previous-schemes-overview                                    controllers.previousRegistrations.AddPreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePromptShown: Boolean)
 
-GET         /cannot-delete-previous-registrations                            controllers.previousRegistrations.CannotRemoveExistingPreviousRegistrationsController.onPageLoad()
+GET         /cannot-delete-previous-registrations                         controllers.previousRegistrations.CannotRemoveExistingPreviousRegistrationsController.onPageLoad()
 
-GET         /remove-all-previous-registrations                               controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /remove-all-previous-registrations                               controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /remove-all-previous-registrations                            controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /remove-all-previous-registrations                            controllers.previousRegistrations.DeleteAllPreviousRegistrationsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /scheme-still-active                                             controllers.previousRegistrations.SchemeStillActiveController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String)
+GET         /scheme-still-active                                          controllers.previousRegistrations.SchemeStillActiveController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String)
 
-GET         /scheme-quarantined                                              controllers.previousRegistrations.SchemeQuarantinedController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /scheme-quarantined                                           controllers.previousRegistrations.SchemeQuarantinedController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 # EU details section
-GET         /tax-in-eu                                                       controllers.euDetails.TaxRegisteredInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /tax-in-eu                                                       controllers.euDetails.TaxRegisteredInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /tax-in-eu                                                    controllers.euDetails.TaxRegisteredInEuController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /tax-in-eu                                                    controllers.euDetails.TaxRegisteredInEuController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /eu-tax/:index                                                   controllers.euDetails.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /eu-tax/:index                                                   controllers.euDetails.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /eu-tax/:index                                                controllers.euDetails.EuCountryController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /eu-tax/:index                                                controllers.euDetails.EuCountryController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /how-do-you-operate/:index                                       controllers.euDetails.HasFixedEstablishmentController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /how-do-you-operate/:index                                       controllers.euDetails.HasFixedEstablishmentController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /how-do-you-operate/:index                                    controllers.euDetails.HasFixedEstablishmentController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /how-do-you-operate/:index                                    controllers.euDetails.HasFixedEstablishmentController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /cannot-register-need-to-operate-as-fe/:index                    controllers.euDetails.CannotRegisterFixedEstablishmentOperationOnlyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /cannot-register-need-to-operate-as-fe/:index                    controllers.euDetails.CannotRegisterFixedEstablishmentOperationOnlyController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /cannot-register-need-to-operate-as-fe/:index                 controllers.euDetails.CannotRegisterFixedEstablishmentOperationOnlyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /cannot-register-need-to-operate-as-fe/:index                 controllers.euDetails.CannotRegisterFixedEstablishmentOperationOnlyController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /registration-type/:index                                        controllers.euDetails.RegistrationTypeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /registration-type/:index                                        controllers.euDetails.RegistrationTypeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /registration-type/:index                                     controllers.euDetails.RegistrationTypeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /registration-type/:index                                     controllers.euDetails.RegistrationTypeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /eu-vat-number/:index                                            controllers.euDetails.EuVatNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /eu-vat-number/:index                                            controllers.euDetails.EuVatNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /eu-vat-number/:index                                         controllers.euDetails.EuVatNumberController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /eu-vat-number/:index                                         controllers.euDetails.EuVatNumberController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /eu-tax-number/:index                                            controllers.euDetails.EuTaxReferenceController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /eu-tax-number/:index                                            controllers.euDetails.EuTaxReferenceController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /eu-tax-number/:index                                         controllers.euDetails.EuTaxReferenceController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /eu-tax-number/:index                                         controllers.euDetails.EuTaxReferenceController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /eu-trading-name/:index                                          controllers.euDetails.FixedEstablishmentTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /eu-trading-name/:index                                          controllers.euDetails.FixedEstablishmentTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /eu-trading-name/:index                                       controllers.euDetails.FixedEstablishmentTradingNameController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /eu-trading-name/:index                                       controllers.euDetails.FixedEstablishmentTradingNameController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /eu-fixed-establishment-address/:index                           controllers.euDetails.FixedEstablishmentAddressController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /eu-fixed-establishment-address/:index                           controllers.euDetails.FixedEstablishmentAddressController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /eu-fixed-establishment-address/:index                        controllers.euDetails.FixedEstablishmentAddressController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /eu-fixed-establishment-address/:index                        controllers.euDetails.FixedEstablishmentAddressController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /check-tax-details/:index                                        controllers.euDetails.CheckEuDetailsAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /check-tax-details/:index                                        controllers.euDetails.CheckEuDetailsAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index, incompletePromptShown: Boolean)
+GET         /check-tax-details/:index                                     controllers.euDetails.CheckEuDetailsAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /check-tax-details/:index                                     controllers.euDetails.CheckEuDetailsAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index, incompletePromptShown: Boolean)
 
-GET         /add-tax-details                                                 controllers.euDetails.AddEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /add-tax-details                                                 controllers.euDetails.AddEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePromptShown: Boolean)
+GET         /add-tax-details                                              controllers.euDetails.AddEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /add-tax-details                                              controllers.euDetails.AddEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePromptShown: Boolean)
 
-GET         /remove-tax-details/:index                                       controllers.euDetails.DeleteEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /remove-tax-details/:index                                       controllers.euDetails.DeleteEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /remove-tax-details/:index                                    controllers.euDetails.DeleteEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /remove-tax-details/:index                                    controllers.euDetails.DeleteEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /remove-all-tax-details                                          controllers.euDetails.DeleteAllEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /remove-all-tax-details                                          controllers.euDetails.DeleteAllEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /remove-all-tax-details                                       controllers.euDetails.DeleteAllEuDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /remove-all-tax-details                                       controllers.euDetails.DeleteAllEuDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /excluded-vrn                                                    controllers.euDetails.ExcludedVRNController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /excluded-vrn                                                 controllers.euDetails.ExcludedVRNController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /fixed-establishment-vrn-already-registered                      controllers.euDetails.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String)
+GET         /fixed-establishment-vrn-already-registered                   controllers.euDetails.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String)
 
 # Business contact details section
-GET         /business-contact-details                                        controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /business-contact-details                                        controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /business-contact-details                                     controllers.BusinessContactDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /business-contact-details                                     controllers.BusinessContactDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 # Bank details section
-GET         /bank-details                                                    controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /bank-details                                                    controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /bank-details                                                 controllers.BankDetailsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /bank-details                                                 controllers.BankDetailsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 # Website section
-GET         /website-address/:index                                          controllers.website.WebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /website-address/:index                                          controllers.website.WebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /website-address/:index                                       controllers.website.WebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /website-address/:index                                       controllers.website.WebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /add-website-address                                             controllers.website.AddWebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /add-website-address                                             controllers.website.AddWebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /add-website-address                                          controllers.website.AddWebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /add-website-address                                          controllers.website.AddWebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /remove-website-address/:index                                   controllers.website.DeleteWebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /remove-website-address/:index                                   controllers.website.DeleteWebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /remove-website-address/:index                                controllers.website.DeleteWebsiteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /remove-website-address/:index                                controllers.website.DeleteWebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
 # Email verification section
-GET         /email-verification-codes-and-emails-exceeded                    controllers.EmailVerificationCodesAndEmailsExceededController.onPageLoad()
-GET         /email-verification-codes-exceeded                               controllers.EmailVerificationCodesExceededController.onPageLoad()
+GET         /email-verification-codes-and-emails-exceeded                 controllers.EmailVerificationCodesAndEmailsExceededController.onPageLoad()
+GET         /email-verification-codes-exceeded                            controllers.EmailVerificationCodesExceededController.onPageLoad()
 
 # Other
-GET         /successful                                                      controllers.ApplicationCompleteController.onPageLoad()
+GET         /successful                                                   controllers.ApplicationCompleteController.onPageLoad()
 
-GET         /error-submitting-registration                                   controllers.ErrorSubmittingRegistrationController.onPageLoad()
+GET         /error-submitting-registration                                controllers.ErrorSubmittingRegistrationController.onPageLoad()
 
-GET         /continue-registration                                           controllers.ContinueRegistrationController.onPageLoad()
-POST        /continue-registration                                           controllers.ContinueRegistrationController.onSubmit()
+GET         /continue-registration                                        controllers.ContinueRegistrationController.onPageLoad()
+POST        /continue-registration                                        controllers.ContinueRegistrationController.onSubmit()
 
-GET         /no-saved-registration                                           controllers.NoRegistrationInProgressController.onPageLoad()
+GET         /no-saved-registration                                        controllers.NoRegistrationInProgressController.onPageLoad()
 
-GET         /already-registered                                              controllers.AlreadyRegisteredController.onPageLoad()
+GET         /already-registered                                           controllers.AlreadyRegisteredController.onPageLoad()
 
 # Amend registration
-GET         /start-amend-journey                                             controllers.amend.StartAmendJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /start-amend-journey                                          controllers.amend.StartAmendJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /change-your-registration                                        controllers.amend.ChangeRegistrationController.onPageLoad()
-POST        /change-your-registration                                        controllers.amend.ChangeRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
+GET         /change-your-registration                                     controllers.amend.ChangeRegistrationController.onPageLoad(isPreviousRegistration: Boolean = false)
+GET         /change-a-previous-registration                               controllers.amend.ChangeRegistrationController.onPageLoad(isPreviousRegistration: Boolean = true)
+POST        /change-your-registration                                     controllers.amend.ChangeRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
-GET         /cancel-amend-registration                                       controllers.amend.CancelAmendRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST        /cancel-amend-registration                                       controllers.amend.CancelAmendRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /cancel-amend-registration                                    controllers.amend.CancelAmendRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /cancel-amend-registration                                    controllers.amend.CancelAmendRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /error-submitting-amendment                                      controllers.amend.ErrorSubmittingAmendmentController.onPageLoad()
+GET         /error-submitting-amendment                                   controllers.amend.ErrorSubmittingAmendmentController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /successful-amend                                                controllers.amend.AmendCompleteController.onPageLoad()
+GET         /successful-amend                                             controllers.amend.AmendCompleteController.onPageLoad()
 
-GET         /cannot-use-not-registered                                       controllers.NotRegisteredController.onPageLoad()
+GET         /cannot-use-not-registered                                    controllers.NotRegisteredController.onPageLoad()
 
-GET         /start-rejoin-journey                                            controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-GET         /rejoin-registration                                             controllers.rejoin.RejoinRegistrationController.onPageLoad()
-POST        /rejoin-registration                                             controllers.rejoin.RejoinRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
+GET         /start-rejoin-journey                                         controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /rejoin-registration                                          controllers.rejoin.RejoinRegistrationController.onPageLoad()
+POST        /rejoin-registration                                          controllers.rejoin.RejoinRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
-GET         /successful-rejoin                                               controllers.rejoin.RejoinCompleteController.onPageLoad()
-GET         /error-submitting-rejoin                                         controllers.rejoin.ErrorSubmittingRejoinController.onPageLoad()
-GET         /cannot-rejoin                                                   controllers.rejoin.CannotRejoinController.onPageLoad()
+GET         /successful-rejoin                                            controllers.rejoin.RejoinCompleteController.onPageLoad()
+GET         /error-submitting-rejoin                                      controllers.rejoin.ErrorSubmittingRejoinController.onPageLoad()
+GET         /cannot-rejoin                                                controllers.rejoin.CannotRejoinController.onPageLoad()
+
+GET         /change-your-previous-registration                            controllers.amend.ViewOrChangePreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /change-your-previous-registration                            controllers.amend.ViewOrChangePreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /change-your-previous-registrations                           controllers.amend.ViewOrChangePreviousRegistrationsMultipleController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /change-your-previous-registrations                           controllers.amend.ViewOrChangePreviousRegistrationsMultipleController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /start-amend-previous-journey/                                controllers.amend.StartAmendPreviousRegistrationJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
