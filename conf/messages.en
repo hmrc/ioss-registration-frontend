@@ -630,7 +630,7 @@ applicationComplete.registration.commencementDate = You can begin your {0} retur
 applicationComplete.next = What happens next
 applicationComplete.manageAccount = <a class="govuk-link" href="/business-account">Manage your Import One Stop Shop returns in your account.</a>
 applicationComplete.checkInformation.contact = We'’ll contact you if we need to check any information.
-applicationComplete.checkInformation.info = Read more information about <a class="govuk-link" href="https://www.gov.uk/guidance/completing-a-one-stop-shop-vat-return">how to complete an IOSS return.</a>
+applicationComplete.checkInformation.info = Read more information about <a class="govuk-link" href="https://www.gov.uk/guidance/completing-an-import-one-stop-shop-vat-return">how to complete an IOSS return.</a>
 applicationComplete.feedback.link.text = What did you think of this service?
 applicationComplete.feedback.30seconds = (takes 30 seconds)
 
@@ -687,7 +687,7 @@ errorSubmittingAmendment.yourAccount = Back to your account
 
 notRegistered.title = You cannot use this service
 notRegistered.heading = You cannot use this service
-notRegistered.label = You must register for the VAT Import One Stop Shop scheme to use this service.
+notRegistered.label = You must <a class="govuk-link" href="https://www.gov.uk/guidance/register-for-the-vat-import-one-stop-shop-scheme">register for the VAT Import One Stop Shop scheme</a> to use this service.
 
 noRegistrationInProgress.title = We did not find a registration in progress
 noRegistrationInProgress.heading = We did not find a registration in progress
