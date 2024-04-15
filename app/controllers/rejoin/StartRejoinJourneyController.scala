@@ -16,11 +16,14 @@
 
 package controllers.rejoin
 
-import connectors.RegistrationConnector
+import connectors.{RegistrationConnector, ReturnStatusConnector}
+import controllers.CheckCorrectionsTimeLimit.isOlderThanThreeYears
 import controllers.actions.{AuthenticatedControllerComponents, RejoiningRegistration}
 import controllers.rejoin.validation.RejoinRegistrationValidation
 import logging.Logging
-import models.CheckMode
+import models.requests.AuthenticatedMandatoryIossRequest
+import models.responses.ErrorResponse
+import models.{CheckMode, CurrentReturns, SubmissionStatus}
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
 import pages.{EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.MessagesApi
@@ -37,6 +40,7 @@ class StartRejoinJourneyController @Inject()(
                                               override val messagesApi: MessagesApi,
                                               cc: AuthenticatedControllerComponents,
                                               registrationConnector: RegistrationConnector,
+                                              returnStatusConnector: ReturnStatusConnector,
                                               rejoinRegistrationValidator: RejoinRegistrationValidation,
                                               registrationService: RegistrationService,
                                               authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository,
@@ -44,37 +48,58 @@ class StartRejoinJourneyController @Inject()(
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging {
   protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(RejoiningRegistration).async {
-    implicit request =>
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(RejoiningRegistration).async {
+    implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
       (for {
         registrationWrapperResponse <- registrationConnector.getRegistration()
+        currentReturnsResponse <- returnStatusConnector.getCurrentReturns(request.iossNumber)
       } yield {
-        registrationWrapperResponse match {
-          case Right(registrationWrapper) if registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock)) =>
-            val thisPage = RejoinRegistrationPage
-            val waypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, RejoinRegistrationPage.urlFragment))
+        val currentReturns = getResponseValue(currentReturnsResponse)
+        val registrationWrapper = getResponseValue(registrationWrapperResponse)
 
-            rejoinRegistrationValidator.validateEuRegistrations(registrationWrapper, waypoints).flatMap {
-              case Left(redirect) =>
-                logger.info(s"Failed validating eu registrations, redirecting to '${redirect.url}'")
-                Future.successful(Redirect(redirect))
+        if (registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock)) && !existsOutstandingReturns(currentReturns)) {
+          val thisPage = RejoinRegistrationPage
+          val waypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, RejoinRegistrationPage.urlFragment))
 
-              case _ =>
-                for {
-                  userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
-                  _ <- authenticatedUserAnswersRepository.set(userAnswers)
-                } yield Redirect(RejoinRegistrationPage.route(waypoints).url)
-            }
+          rejoinRegistrationValidator.validateEuRegistrations(registrationWrapper, waypoints)(hc(request), request.request, ec).flatMap {
+            case Left(redirect) =>
+              logger.info(s"Failed validating eu registrations, redirecting to '${redirect.url}'")
+              Future.successful(Redirect(redirect))
 
-          case Right(_) =>
-            logger.warn("Cannot rejoin registration")
-            Future.successful(Redirect(CannotRejoinRegistrationPage.route(waypoints).url))
-
-          case Left(error) =>
-            val exception = new Exception(error.body)
-            logger.error(exception.getMessage, exception)
-            throw exception
+            case _ =>
+              for {
+                userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
+                _ <- authenticatedUserAnswersRepository.set(userAnswers)
+              } yield Redirect(RejoinRegistrationPage.route(waypoints).url)
+          }
+        } else {
+          logger.warn("Cannot rejoin registration")
+          Future.successful(Redirect(CannotRejoinRegistrationPage.route(waypoints).url))
         }
       }).flatten
+  }
+
+  private def getResponseValue[A](response: Either[ErrorResponse, A]): A = {
+    response match {
+      case Right(value) => value
+      case Left(error) =>
+        val exception = new Exception(error.body)
+        logger.error(exception.getMessage, exception)
+        throw exception
+    }
+  }
+
+  private def existsOutstandingReturns(currentReturns: CurrentReturns): Boolean = {
+    val existsOutstandingReturn = {
+      if (currentReturns.finalReturnsCompleted) {
+        false
+      } else {
+        currentReturns.returns.exists { currentReturn =>
+          Seq(SubmissionStatus.Due, SubmissionStatus.Overdue, SubmissionStatus.Next).contains(currentReturn.submissionStatus) &&
+            !isOlderThanThreeYears(currentReturn.dueDate, clock)
+        }
+      }
+    }
+    existsOutstandingReturn
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package config
+package controllers
 
-object Constants {
+import config.Constants.correctionsPeriodsLimit
 
-  val maxTradingNames: Int = 10
-  val maxWebsites: Int = 10
+import java.time.{Clock, LocalDate}
 
-  val tradingNameReservedWords: Set[String] = Set("limited", "ltd", "llp", "plc")
-  val maxSchemes: Int = 3
-  val addQuarantineYears: Int = 2
-  val lastSchemeForCountry: Int = 1
-  val maxOssSchemes: Int = 2
-  val maxIossSchemes: Int = 1
-  val emailVerificationMaxEmails: Int = 10
-  val correctionsPeriodsLimit: Int = 3
+object CheckCorrectionsTimeLimit {
+
+  def isOlderThanThreeYears(dueDate: LocalDate, clock: Clock): Boolean = {
+    val today: LocalDate = LocalDate.now(clock)
+    today.isAfter(dueDate.plusYears(correctionsPeriodsLimit))
+  }
 }
