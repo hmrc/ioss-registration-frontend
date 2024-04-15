@@ -17,9 +17,10 @@
 package controllers.rejoin
 
 import base.SpecBase
+import config.Constants.correctionsPeriodsLimit
 import connectors.{RegistrationConnector, ReturnStatusConnector}
 import controllers.rejoin.validation.RejoinRegistrationValidation
-import models.{CheckMode, CurrentReturns}
+import models.{CheckMode, CurrentReturns, Return, SubmissionStatus}
 import models.amend.RegistrationWrapper
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
@@ -144,6 +145,46 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
       }
     }
 
+    "must redirect to Cannot Rejoin Registration Page when there are outstanding returns" in {
+      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
+
+      val dueReturn = Return(
+        firstDay = LocalDate.now(),
+        lastDay = LocalDate.now(),
+        dueDate = LocalDate.now().minusYears(correctionsPeriodsLimit - 1),
+        submissionStatus = SubmissionStatus.Due,
+        inProgress = true,
+        isOldest = true
+      )
+
+      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
+      when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+      when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+        Right(CurrentReturns(returns = Seq(dueReturn), finalReturnsCompleted = false)).toFuture
+
+      val application = applicationBuilder(
+        userAnswers = Some(completeUserAnswersWithVatInfo),
+        clock = Some(Clock.systemUTC())
+      )
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
+        .overrides(bind[RejoinRegistrationValidation].toInstance(mockRejoinRegistrationValidation))
+        .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.StartRejoinJourneyController.onPageLoad(waypoints).url)
+
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe CannotRejoinRegistrationPage.route(waypoints).url
+      }
+    }
+
     "validation on schemeDetails" - {
       val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
 
@@ -189,7 +230,6 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
       }
     }
-
 
     "must redirect to Not Registered Page when no registration found" in {
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
