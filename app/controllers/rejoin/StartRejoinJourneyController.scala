@@ -17,13 +17,13 @@
 package controllers.rejoin
 
 import connectors.{RegistrationConnector, ReturnStatusConnector}
-import controllers.CheckCorrectionsTimeLimit.isOlderThanThreeYears
+import controllers.CheckOutstandingReturns.existsOutstandingReturns
 import controllers.actions.{AuthenticatedControllerComponents, RejoiningRegistration}
 import controllers.rejoin.validation.RejoinRegistrationValidation
 import logging.Logging
+import models.CheckMode
 import models.requests.AuthenticatedMandatoryIossRequest
 import models.responses.ErrorResponse
-import models.{CheckMode, CurrentReturns, SubmissionStatus}
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
 import pages.{EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.MessagesApi
@@ -57,7 +57,7 @@ class StartRejoinJourneyController @Inject()(
         val currentReturns = getResponseValue(currentReturnsResponse)
         val registrationWrapper = getResponseValue(registrationWrapperResponse)
 
-        if (registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock)) && !existsOutstandingReturns(currentReturns)) {
+        if (registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock)) && !existsOutstandingReturns(currentReturns, clock)) {
           val thisPage = RejoinRegistrationPage
           val waypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, RejoinRegistrationPage.urlFragment))
 
@@ -87,19 +87,5 @@ class StartRejoinJourneyController @Inject()(
         logger.error(exception.getMessage, exception)
         throw exception
     }
-  }
-
-  private def existsOutstandingReturns(currentReturns: CurrentReturns): Boolean = {
-    val existsOutstandingReturn = {
-      if (currentReturns.finalReturnsCompleted) {
-        false
-      } else {
-        currentReturns.returns.exists { currentReturn =>
-          Seq(SubmissionStatus.Due, SubmissionStatus.Overdue, SubmissionStatus.Next).contains(currentReturn.submissionStatus) &&
-            !isOlderThanThreeYears(currentReturn.dueDate, clock)
-        }
-      }
-    }
-    existsOutstandingReturn
   }
 }
