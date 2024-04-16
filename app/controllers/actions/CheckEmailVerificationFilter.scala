@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import controllers.routes
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import logging.Logging
@@ -24,8 +25,9 @@ import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleE
 import models.requests.AuthenticatedDataRequest
 import pages.BusinessContactDetailsPage
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionFilter, Result}
-import services.EmailVerificationService
+import play.api.mvc.{ActionFilter, AnyContent, Call, Result}
+import play.mvc
+import services.{EmailVerificationService, SaveForLaterService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
@@ -37,6 +39,7 @@ class CheckEmailVerificationFilterImpl(
                                         inAmend: Boolean,
                                         frontendAppConfig: FrontendAppConfig,
                                         emailVerificationService: EmailVerificationService,
+                                        saveForLaterService: SaveForLaterService,
                                         registrationConnector: RegistrationConnector
                                       )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
@@ -75,21 +78,24 @@ class CheckEmailVerificationFilterImpl(
                                                      request: AuthenticatedDataRequest[_],
                                                      contactDetails: BusinessContactDetails
                                                    )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
-    emailVerificationService.isEmailVerified(contactDetails.emailAddress, request.userId).map {
+    emailVerificationService.isEmailVerified(contactDetails.emailAddress, request.userId).flatMap {
       case Verified =>
         logger.info("CheckEmailVerificationFilter - Verified")
-        None
+        None.toFuture
       case LockedTooManyLockedEmails =>
         logger.info("CheckEmailVerificationFilter - LockedTooManyLockedEmails")
-        Some(Redirect(controllers.routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad().url))
+        Some(Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad().url)).toFuture
 
       case LockedPasscodeForSingleEmail =>
         logger.info("CheckEmailVerificationFilter - LockedPasscodeForSingleEmail")
-        Some(Redirect(controllers.routes.EmailVerificationCodesExceededController.onPageLoad().url))
+        saveForLaterService.saveAnswers(
+          routes.EmailVerificationCodesExceededController.onPageLoad().url,
+          request.uri
+        )(request, executionContext, hc).map(result => Some(result))
 
       case _ =>
         logger.info("CheckEmailVerificationFilter - Not Verified")
-        Some(Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad().url))
+        Some(Redirect(routes.BusinessContactDetailsController.onPageLoad().url)).toFuture
     }
   }
 }
@@ -97,10 +103,11 @@ class CheckEmailVerificationFilterImpl(
 class CheckEmailVerificationFilterProvider @Inject()(
                                                       frontendAppConfig: FrontendAppConfig,
                                                       emailVerificationService: EmailVerificationService,
+                                                      saveForLaterService: SaveForLaterService,
                                                       registrationConnector: RegistrationConnector
                                                     )(implicit val executionContext: ExecutionContext) {
   def apply(inAmend: Boolean): CheckEmailVerificationFilterImpl = {
-    new CheckEmailVerificationFilterImpl(inAmend, frontendAppConfig, emailVerificationService, registrationConnector)
+    new CheckEmailVerificationFilterImpl(inAmend, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector)
   }
 }
 
