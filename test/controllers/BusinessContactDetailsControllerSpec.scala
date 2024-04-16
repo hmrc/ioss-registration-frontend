@@ -24,7 +24,7 @@ import models.CheckMode
 import models.emailVerification.EmailVerificationResponse
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.responses.UnexpectedResponseStatus
-import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalacheck.Gen
@@ -256,7 +256,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
               eqTo(emailVerificationRequest.email.get.address),
               eqTo(emailVerificationRequest.credId))(any())) thenReturn LockedPasscodeForSingleEmail.toFuture
 
-            when(mockSaveForLaterService.saveAnswers(anyString(), anyString())(any(), any(), any())) thenReturn
+            when(mockSaveForLaterService.saveAnswers(any(), any())(any(), any(), any())) thenReturn
               Redirect(routes.EmailVerificationCodesExceededController.onPageLoad()).toFuture
 
             val request =
@@ -265,26 +265,26 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
                   ("fullName", "name"),
                   ("telephoneNumber", "0111 2223334"),
                   ("emailAddress", "email@example.com"))
-            
+
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
 
-//            val expected: String = routes.EmailVerificationCodesExceededController.onPageLoad().url
-//            val actual: String = redirectLocation(result).value
-//
-//            actual mustBe expected
+            val expected: String = routes.EmailVerificationCodesExceededController.onPageLoad().url
+            val actual: String = redirectLocation(result).value
 
-//            verify(mockEmailVerificationService, times(1))
-//              .isEmailVerified(eqTo(emailVerificationRequest.email.get.address), eqTo(emailVerificationRequest.credId))(any())
-//
-//            verifyNoMoreInteractions(mockEmailVerificationService)
-//
-//            verify(mockSaveForLaterService, times(1))
-//              .saveAnswers(
-//                eqTo(routes.EmailVerificationCodesExceededController.onPageLoad()),
-//                eqTo(routes.BusinessContactDetailsController.onPageLoad(emptyWaypoints))
-//              )(any(), any(), any())
+            actual mustBe expected
+
+            verify(mockEmailVerificationService, times(1))
+              .isEmailVerified(eqTo(emailVerificationRequest.email.get.address), eqTo(emailVerificationRequest.credId))(any())
+
+            verifyNoMoreInteractions(mockEmailVerificationService)
+
+            verify(mockSaveForLaterService, times(1))
+              .saveAnswers(
+                eqTo(routes.EmailVerificationCodesExceededController.onPageLoad()),
+                eqTo(routes.BusinessContactDetailsController.onPageLoad(emptyWaypoints))
+              )(any(), any(), any())
           }
         }
 
@@ -305,7 +305,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
               eqTo(emailVerificationRequest.email.get.address),
               eqTo(emailVerificationRequest.credId))(any())) thenReturn Future.successful(LockedTooManyLockedEmails)
 
-            when(mockSaveForLaterService.saveAnswers(anyString(), anyString())(any(), any(), any())) thenReturn
+            when(mockSaveForLaterService.saveAnswers(any(), any())(any(), any(), any())) thenReturn
               Future.successful(Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad()))
 
             val request =

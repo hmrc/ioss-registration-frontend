@@ -22,7 +22,7 @@ import connectors.RegistrationConnector
 import controllers.routes
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
-import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatestplus.mockito.MockitoSugar
@@ -134,7 +134,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           when(mockEmailVerificationService.isEmailVerified(
             eqTo(contactDetails.emailAddress), eqTo(userAnswersId))(any())) thenReturn LockedPasscodeForSingleEmail.toFuture
 
-          when(mockSaveForLaterService.saveAnswers(anyString(), anyString())(any(), any(), any())) thenReturn
+          when(mockSaveForLaterService.saveAnswersRedirect(any(), any())(any(), any(), any())) thenReturn
             Redirect(routes.EmailVerificationCodesExceededController.onPageLoad()).toFuture
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
@@ -146,7 +146,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           result mustBe Some(Redirect(controllers.routes.EmailVerificationCodesExceededController.onPageLoad().url))
 
           verify(mockSaveForLaterService, times(1))
-            .saveAnswers(
+            .saveAnswersRedirect(
               eqTo(routes.EmailVerificationCodesExceededController.onPageLoad().url),
               eqTo(request.uri)
             )(any(), any(), any())

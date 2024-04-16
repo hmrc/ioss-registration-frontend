@@ -22,7 +22,7 @@ import models.requests.AuthenticatedDataRequest
 import models.responses.etmp.EtmpEnrolmentResponse
 import models.responses.{ConflictFound, InternalServerError => ServerError}
 import models.{CheckMode, Index}
-import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -153,7 +153,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
       "must save the answers and audit the event and redirect the Error Submitting Registration page when back end returns any other Error Response" in {
 
         when(mockRegistrationService.createRegistration(any(), any())(any())) thenReturn Left(ServerError).toFuture
-        when(mockSaveForLaterService.saveAnswers(anyString(), anyString())(any(), any(), any())) thenReturn
+        when(mockSaveForLaterService.saveAnswers(any(), any())(any(), any(), any())) thenReturn
           Redirect(ErrorSubmittingRegistrationPage.route(waypoints).url).toFuture
         doNothing().when(mockAuditService).audit(any())(any(), any())
 
@@ -178,7 +178,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe ErrorSubmittingRegistrationPage.route(waypoints).url
           verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
-          verify(mockSaveForLaterService, times(1)).saveAnswers(anyString(), anyString())(any(), any(), any())
+          verify(mockSaveForLaterService, times(1)).saveAnswers(any(), any())(any(), any(), any())
         }
       }
 

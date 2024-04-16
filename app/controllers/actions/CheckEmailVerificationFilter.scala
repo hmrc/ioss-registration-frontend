@@ -16,17 +16,16 @@
 
 package controllers.actions
 
-import controllers.routes
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
+import controllers.routes
 import logging.Logging
 import models.BusinessContactDetails
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
 import pages.BusinessContactDetailsPage
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionFilter, AnyContent, Call, Result}
-import play.mvc
+import play.api.mvc.{ActionFilter, Result}
 import services.{EmailVerificationService, SaveForLaterService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -88,7 +87,7 @@ class CheckEmailVerificationFilterImpl(
 
       case LockedPasscodeForSingleEmail =>
         logger.info("CheckEmailVerificationFilter - LockedPasscodeForSingleEmail")
-        saveForLaterService.saveAnswers(
+        saveForLaterService.saveAnswersRedirect(
           routes.EmailVerificationCodesExceededController.onPageLoad().url,
           request.uri
         )(request, executionContext, hc).map(result => Some(result))

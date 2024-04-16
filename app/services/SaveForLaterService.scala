@@ -39,10 +39,11 @@ class SaveForLaterService @Inject()(
                    redirectLocation: Call,
                    originLocation: Call
                  )(implicit request: AuthenticatedDataRequest[_], ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
-    saveAnswers(redirectLocation.url, originLocation.url)
+    saveAnswersRedirect(redirectLocation.url, originLocation.url)
   }
 
-  def saveAnswers(
+  // TODO -> Change method name
+  def saveAnswersRedirect(
                    redirectLocation: String,
                    originLocation: String
                  )(implicit request: AuthenticatedDataRequest[_], ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
