@@ -17,17 +17,18 @@
 package controllers.rejoin
 
 import base.SpecBase
-import connectors.RegistrationConnector
+import config.Constants.correctionsPeriodsLimit
+import connectors.{RegistrationConnector, ReturnStatusConnector}
 import controllers.rejoin.validation.RejoinRegistrationValidation
 import controllers.rejoin.{routes => rejoinRoutes}
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
 import models.responses.InternalServerError
-import models.{CheckMode, Index, UserAnswers}
+import models.{CheckMode, CurrentReturns, Index, Return, SubmissionStatus, UserAnswers}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.{ArgumentMatchers, IdiomaticMockito}
 import org.mockito.Mockito._
+import org.mockito.{ArgumentMatchers, IdiomaticMockito}
 import pages._
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
@@ -56,6 +57,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
   private val rejoinWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
   private val rejoinRegistrationPage = RejoinRegistrationPage
   private val registrationService = mock[RegistrationService]
+  private val mockReturnStatusConnector = mock[ReturnStatusConnector]
   private val country = arbitraryCountry.arbitrary.sample.value
   private val registrationValidationFailureRedirect = Call("GET", "/error")
 
@@ -70,7 +72,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
       businessPartner = "businessPartner"
     )
 
-  "RejoinRegistrationC Controller" - {
+  "RejoinRegistration Controller" - {
 
     ".onPageLoad" - {
 
@@ -89,9 +91,13 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
         )(any(), any(), any()))
           .thenReturn(Future.successful(Left(registrationValidationFailureRedirect)))
 
+        when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+          Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
           .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
           .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
           .build()
 
         running(application) {
@@ -113,6 +119,9 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
         when(registrationConnector.getRegistration()(any()))
           .thenReturn(Future.successful(Right(registrationWithExclusionOnBoundary)))
 
+        when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+          Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
         val application = applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
           clock = Some(Clock.systemUTC()),
@@ -120,6 +129,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
         )
           .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
           .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
           .build()
 
         when(rejoinRegistrationValidation.validateEuRegistrations(
@@ -161,6 +171,9 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
         )(any(), any(), any()))
           .thenReturn(Future.successful(Right(true)))
 
+        when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+          Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
         val application = applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
           clock = Some(Clock.systemUTC()),
@@ -168,6 +181,53 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
         )
           .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
           .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+          .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, rejoinRoutes.RejoinRegistrationController.onPageLoad().url)
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe CannotRejoinRegistrationPage.route(rejoinWaypoints).url
+        }
+      }
+
+      "must redirect to Cannot Rejoin Registration Page when there are outstanding returns" in {
+        val registrationConnector = mock[RegistrationConnector]
+        val rejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+
+        val registrationWithExclusionInFuture = createRegistrationWrapperWithExclusion(LocalDate.now())
+
+        val dueReturn = Return(
+          firstDay = LocalDate.now(),
+          lastDay = LocalDate.now(),
+          dueDate = LocalDate.now().minusYears(correctionsPeriodsLimit - 1),
+          submissionStatus = SubmissionStatus.Due,
+          inProgress = true,
+          isOldest = true
+        )
+
+        when(registrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWithExclusionInFuture)))
+
+        when(rejoinRegistrationValidation.validateEuRegistrations(
+          ArgumentMatchers.eq(registrationWithExclusionInFuture),
+          ArgumentMatchers.eq(rejoinWaypoints)
+        )(any(), any(), any()))
+          .thenReturn(Future.successful(Right(true)))
+
+        when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+          Right(CurrentReturns(returns = Seq(dueReturn), finalReturnsCompleted = false)).toFuture
+
+        val application = applicationBuilder(
+          userAnswers = Some(completeUserAnswersWithVatInfo),
+          clock = Some(Clock.systemUTC()),
+          registrationWrapper = Some(registrationWithExclusionInFuture)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+          .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
           .build()
 
         running(application) {
@@ -215,10 +275,14 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
         )(any(), any(), any()))
           .thenReturn(Future.successful(Left(registrationValidationFailureRedirect)))
 
+        when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+          Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
           .overrides(bind[RegistrationService].toInstance(registrationService))
           .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
           .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+          .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
           .build()
 
         running(application) {
@@ -240,6 +304,9 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
 
+          when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+            Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
           val application = applicationBuilder(
             userAnswers = Some(completeUserAnswersWithVatInfo),
             clock = Some(Clock.systemUTC()),
@@ -248,6 +315,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+            .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
             .build()
 
           when(rejoinRegistrationValidation.validateEuRegistrations(
@@ -285,6 +353,9 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionInFuture)))
 
+          when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+            Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
           val application = applicationBuilder(
             userAnswers = Some(completeUserAnswersWithVatInfo),
             clock = Some(Clock.systemUTC()),
@@ -293,6 +364,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+            .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
             .build()
 
           when(rejoinRegistrationValidation.validateEuRegistrations(
@@ -319,6 +391,9 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
 
+          when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+            Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
           val application = applicationBuilder(
             userAnswers = Some(completeUserAnswersWithVatInfo),
             clock = Some(Clock.systemUTC()),
@@ -327,6 +402,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+            .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
             .build()
 
           when(rejoinRegistrationValidation.validateEuRegistrations(
@@ -370,6 +446,9 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
           )(any(), any(), any()))
             .thenReturn(Future.successful(Right(true)))
 
+          when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+            Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
           val application = applicationBuilder(
             userAnswers = Some(emptyUserAnswers),
             clock = Some(Clock.systemUTC()),
@@ -378,6 +457,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+            .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
             .build()
 
           running(application) {
@@ -401,6 +481,9 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
           when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
 
+          when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+            Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
           val application = applicationBuilder(
             userAnswers = Some(emptyUserAnswers),
             clock = Some(Clock.systemUTC()),
@@ -409,6 +492,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
             .overrides(bind[RegistrationService].toInstance(registrationService))
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+            .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
             .build()
 
           when(rejoinRegistrationValidation.validateEuRegistrations(
@@ -441,6 +525,9 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
           )(any(), any(), any()))
             .thenReturn(Future.successful(Right(true)))
 
+          when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+            Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
           val answers = completeUserAnswers
             .set(TaxRegisteredInEuPage, true).success.value
             .set(EuCountryPage(Index(0)), country).success.value
@@ -453,6 +540,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
           )
             .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
             .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+            .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
             .build()
 
           running(application) {

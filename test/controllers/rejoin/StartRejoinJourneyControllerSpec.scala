@@ -17,9 +17,10 @@
 package controllers.rejoin
 
 import base.SpecBase
-import connectors.RegistrationConnector
+import config.Constants.correctionsPeriodsLimit
+import connectors.{RegistrationConnector, ReturnStatusConnector}
 import controllers.rejoin.validation.RejoinRegistrationValidation
-import models.CheckMode
+import models.{CheckMode, CurrentReturns, Return, SubmissionStatus}
 import models.amend.RegistrationWrapper
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
@@ -45,18 +46,21 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
   private val waypoints: Waypoints = EmptyWaypoints
 
-  private val rejoinWaypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
+  private val rejoinWaypoints: NonEmptyWaypoints =
+    EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val mockRegistrationService: RegistrationService = mock[RegistrationService]
   private val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
   private val mockRejoinRegistrationValidation = mock[RejoinRegistrationValidation]
+  private val mockReturnStatusConnector = mock[ReturnStatusConnector]
 
   override def beforeEach(): Unit = {
     Mockito.reset(mockRegistrationConnector)
     Mockito.reset(mockRegistrationService)
     Mockito.reset(mockAuthenticatedUserAnswersRepository)
     Mockito.reset(mockRejoinRegistrationValidation)
+    Mockito.reset(mockReturnStatusConnector)
   }
 
   "StartRejoinJourney Controller" - {
@@ -74,6 +78,9 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
         ArgumentMatchers.eq(rejoinWaypoints)
       )(any(),any(),any())) thenReturn Right(true).toFuture
 
+      when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+        Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
       val application = applicationBuilder(
         userAnswers = Some(completeUserAnswersWithVatInfo),
         clock = Some(Clock.systemUTC())
@@ -82,6 +89,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
         .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
         .overrides(bind[RejoinRegistrationValidation].toInstance(mockRejoinRegistrationValidation))
+        .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
         .build()
 
       running(application) {
@@ -114,6 +122,8 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
       when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+      when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+        Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
 
       val application = applicationBuilder(
         userAnswers = Some(completeUserAnswersWithVatInfo),
@@ -122,6 +132,47 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
         .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
+        .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.StartRejoinJourneyController.onPageLoad(waypoints).url)
+
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe CannotRejoinRegistrationPage.route(waypoints).url
+      }
+    }
+
+    "must redirect to Cannot Rejoin Registration Page when there are outstanding returns" in {
+      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
+
+      val dueReturn = Return(
+        firstDay = LocalDate.now(),
+        lastDay = LocalDate.now(),
+        dueDate = LocalDate.now().minusYears(correctionsPeriodsLimit - 1),
+        submissionStatus = SubmissionStatus.Due,
+        inProgress = true,
+        isOldest = true
+      )
+
+      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
+      when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+      when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+        Right(CurrentReturns(returns = Seq(dueReturn), finalReturnsCompleted = false)).toFuture
+
+      val application = applicationBuilder(
+        userAnswers = Some(completeUserAnswersWithVatInfo),
+        clock = Some(Clock.systemUTC())
+      )
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+        .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
+        .overrides(bind[RejoinRegistrationValidation].toInstance(mockRejoinRegistrationValidation))
+        .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
         .build()
 
       running(application) {
@@ -142,6 +193,8 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
         when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
         when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
         when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+        when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+          Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
 
         applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
@@ -151,6 +204,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
           .overrides(bind[RejoinRegistrationValidation].toInstance(mockRejoinRegistrationValidation))
+          .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
           .build()
 
       }
@@ -176,7 +230,6 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
       }
     }
-
 
     "must redirect to Not Registered Page when no registration found" in {
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture

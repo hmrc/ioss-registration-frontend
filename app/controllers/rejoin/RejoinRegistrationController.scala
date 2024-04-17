@@ -16,6 +16,8 @@
 
 package controllers.rejoin
 
+import connectors.ReturnStatusConnector
+import controllers.CheckOutstandingReturns.existsOutstandingReturns
 import controllers.actions._
 import controllers.rejoin.validation.RejoinRegistrationValidation
 import logging.Logging
@@ -47,10 +49,12 @@ import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+import models.responses.ErrorResponse
 
 class RejoinRegistrationController @Inject()(
                                               override val messagesApi: MessagesApi,
                                               cc: AuthenticatedControllerComponents,
+                                              returnStatusConnector: ReturnStatusConnector,
                                               registrationService: RegistrationService,
                                               rejoinRegistrationValidator: RejoinRegistrationValidation,
                                               view: RejoinRegistrationView,
@@ -71,33 +75,38 @@ class RejoinRegistrationController @Inject()(
       val canRejoin = registrationWrapper.registration.canRejoinRegistration(date)
       val isCurrentIossAccount: Boolean = true
 
-      if (canRejoin) {
-        val thisPage = RejoinRegistrationPage
-        val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, RejoinRegistrationPage.urlFragment))
-        defendAgainstInvalidExistingRegistrations(registrationWrapper, waypoints) {
+      returnStatusConnector.getCurrentReturns(request.iossNumber).flatMap { currentReturnsResponse =>
+        val currentReturns = getResponseValue(currentReturnsResponse)
 
-          val iossNumber: String = request.iossNumber
-          val userAnswers = request.userAnswers
+        if (canRejoin && !existsOutstandingReturns(currentReturns, clock)) {
+          val thisPage = RejoinRegistrationPage
+          val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, RejoinRegistrationPage.urlFragment))
+          defendAgainstInvalidExistingRegistrations(registrationWrapper, waypoints) {
 
-          val list = detailsList(waypoints, thisPage, userAnswers, isCurrentIossAccount)
-          val isValid = validate()(request.request)
+            val iossNumber: String = request.iossNumber
+            val userAnswers = request.userAnswers
 
-          val vatRegistrationDetailsList = SummaryListViewModel(
-            rows = Seq(
-              VatRegistrationDetailsSummary.rowBusinessName(userAnswers),
-              VatRegistrationDetailsSummary.rowIndividualName(userAnswers),
-              VatRegistrationDetailsSummary.rowPartOfVatUkGroup(userAnswers),
-              VatRegistrationDetailsSummary.rowUkVatRegistrationDate(userAnswers),
-              VatRegistrationDetailsSummary.rowBusinessAddress(userAnswers)
-            ).flatten
-          )
+            val list = detailsList(waypoints, thisPage, userAnswers, isCurrentIossAccount)
+            val isValid = validate()(request.request)
 
-          Future.successful(Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid)))
+            val vatRegistrationDetailsList = SummaryListViewModel(
+              rows = Seq(
+                VatRegistrationDetailsSummary.rowBusinessName(userAnswers),
+                VatRegistrationDetailsSummary.rowIndividualName(userAnswers),
+                VatRegistrationDetailsSummary.rowPartOfVatUkGroup(userAnswers),
+                VatRegistrationDetailsSummary.rowUkVatRegistrationDate(userAnswers),
+                VatRegistrationDetailsSummary.rowBusinessAddress(userAnswers)
+              ).flatten
+            )
+
+            Future.successful(Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid)))
+          }
+        }
+        else {
+          Future.successful(Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url))
         }
       }
-      else {
-        Future.successful(Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url))
-      }
+
   }
 
   private def defendAgainstInvalidExistingRegistrations(registrationWrapper: RegistrationWrapper, waypoints: Waypoints)
@@ -208,44 +217,58 @@ class RejoinRegistrationController @Inject()(
 
       val canRejoin = request.registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock))
 
-      if (canRejoin) {
+      returnStatusConnector.getCurrentReturns(request.iossNumber).flatMap { currentReturnsResponse =>
+        val currentReturns = getResponseValue(currentReturnsResponse)
 
-        defendAgainstInvalidExistingRegistrations(request.registrationWrapper, waypoints) {
+        if (canRejoin && !existsOutstandingReturns(currentReturns, clock)) {
+          defendAgainstInvalidExistingRegistrations(request.registrationWrapper, waypoints) {
 
-          getFirstValidationErrorRedirect(waypoints)(request.request) match {
-            case Some(errorRedirect) => if (incompletePrompt) {
-              errorRedirect.toFuture
-            } else {
-              Redirect(routes.RejoinRegistrationController.onPageLoad()).toFuture
-            }
-
-            case None =>
-              val userAnswers = request.userAnswers
-              registrationService.amendRegistration(
-                answers = userAnswers,
-                registration = request.registrationWrapper.registration,
-                vrn = request.vrn,
-                iossNumber = request.iossNumber,
-                rejoin = true
-              ).flatMap {
-                case Right(amendRegistrationResponse) =>
-                  userAnswers.set(NewIossReferenceQuery, amendRegistrationResponse.iossReference) match {
-                    case Failure(throwable) =>
-                      logger.error(s"Unexpected result on updating answers with new IOSS Reference: ${throwable.getMessage}", throwable)
-                      Future.successful(Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()))
-                    case Success(updatedUserAnswers) =>
-                      cc.sessionRepository.set(updatedUserAnswers).map { _ =>
-                        Redirect(RejoinRegistrationPage.navigate(EmptyWaypoints, userAnswers, userAnswers).route)
-                      }
-                  }
-                case Left(e) =>
-                  logger.error(s"Unexpected result on submit: ${e.body}")
-                  Future.successful(Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()))
+            getFirstValidationErrorRedirect(waypoints)(request.request) match {
+              case Some(errorRedirect) => if (incompletePrompt) {
+                errorRedirect.toFuture
+              } else {
+                Redirect(routes.RejoinRegistrationController.onPageLoad()).toFuture
               }
+
+              case None =>
+                val userAnswers = request.userAnswers
+                registrationService.amendRegistration(
+                  answers = userAnswers,
+                  registration = request.registrationWrapper.registration,
+                  vrn = request.vrn,
+                  iossNumber = request.iossNumber,
+                  rejoin = true
+                ).flatMap {
+                  case Right(amendRegistrationResponse) =>
+                    userAnswers.set(NewIossReferenceQuery, amendRegistrationResponse.iossReference) match {
+                      case Failure(throwable) =>
+                        logger.error(s"Unexpected result on updating answers with new IOSS Reference: ${throwable.getMessage}", throwable)
+                        Future.successful(Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()))
+                      case Success(updatedUserAnswers) =>
+                        cc.sessionRepository.set(updatedUserAnswers).map { _ =>
+                          Redirect(RejoinRegistrationPage.navigate(EmptyWaypoints, userAnswers, userAnswers).route)
+                        }
+                    }
+                  case Left(e) =>
+                    logger.error(s"Unexpected result on submit: ${e.body}")
+                    Future.successful(Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()))
+                }
+            }
           }
+        } else {
+          Future.successful(Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url))
         }
-      } else {
-        Future.successful(Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url))
       }
+
+  }
+
+  private def getResponseValue[A](response: Either[ErrorResponse, A]): A = {
+    response match {
+      case Right(value) => value
+      case Left(error) =>
+        val exception = new Exception(error.body)
+        logger.error(exception.getMessage, exception)
+        throw exception
+    }
   }
 }
