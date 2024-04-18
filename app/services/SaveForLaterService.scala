@@ -25,6 +25,7 @@ import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Result}
 import repositories.AuthenticatedUserAnswersRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,8 +39,16 @@ class SaveForLaterService @Inject()(
                    redirectLocation: Call,
                    originLocation: Call
                  )(implicit request: AuthenticatedDataRequest[_], ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
+    saveAnswersRedirect(redirectLocation.url, originLocation.url)
+  }
+
+  // TODO -> Change method name
+  def saveAnswersRedirect(
+                   redirectLocation: String,
+                   originLocation: String
+                 )(implicit request: AuthenticatedDataRequest[_], ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
     logger.info("saving answers")
-    Future.fromTry(request.userAnswers.set(SavedProgressPage, originLocation.url)).flatMap {
+    Future.fromTry(request.userAnswers.set(SavedProgressPage, originLocation)).flatMap {
       updatedAnswers =>
         val save4LaterRequest = SaveForLaterRequest(updatedAnswers.data, request.vrn)
         saveForLaterConnector.submit(save4LaterRequest).flatMap {
@@ -51,12 +60,11 @@ class SaveForLaterService @Inject()(
             }
           case Right(None) =>
             logger.error(s"Unexpected result on submit")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture
           case Left(e) =>
             logger.error(s"Unexpected result on submit: ${e.toString}")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture
         }
     }
   }
-
 }
