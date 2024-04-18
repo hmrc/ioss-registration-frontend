@@ -74,7 +74,7 @@
 
         @if(isValid) {
             @formHelper(action = controllers.rejoin.routes.RejoinRegistrationController.onSubmit(waypoints, incompletePrompt = false)) {
-                @button("site.confirm", RejoinRegistrationPage.route(waypoints).url, EmptyWaypoints)
+                @button("site.submit", RejoinRegistrationPage.route(waypoints).url, EmptyWaypoints)
             }
         } else {
             <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
