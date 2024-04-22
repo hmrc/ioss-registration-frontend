@@ -84,7 +84,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the first page after filter questions and delete saved answers when Delete submitted" in {
+    "must redirect to the index page and delete saved answers when Delete submitted" in {
 
       val userAnswersRepository = mock[AuthenticatedUserAnswersRepository]
       val saveForLaterConnector = mock[SaveForLaterConnector]
@@ -108,7 +108,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.auth.routes.AuthController.onSignIn().url
+        redirectLocation(result).value mustEqual controllers.routes.IndexController.onPageLoad().url
         verify(saveForLaterConnector, times(1)).delete()(any())
         verify(userAnswersRepository, times(1)).clear(any())
       }
