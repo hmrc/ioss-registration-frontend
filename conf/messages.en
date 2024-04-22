@@ -741,3 +741,7 @@ viewOrChangePreviousRegistrationsMultiple.hint = IOSS number: {0}
 viewOrChangePreviousRegistrationsMultiple.error.required = Select which registration you want to view or change
 viewOrChangePreviousRegistrationsMultiple.error.invalid = Select a valid previous registration.
 viewOrChangePreviousRegistrationsMultiple.change.hidden = which registration you want to view or change
+
+problemWithAccount.title = There is a problem with your account
+problemWithAccount.heading = There is a problem with your account
+problemWithAccount.contact = Contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a> to restore your account.

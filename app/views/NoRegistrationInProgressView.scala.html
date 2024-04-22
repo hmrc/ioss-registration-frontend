@@ -19,7 +19,7 @@
         govukButton: GovukButton
 )
 
-@(redirectURL: String = controllers.routes.AlreadyRegisteredController.onPageLoad().url)(implicit request: Request[_], messages: Messages)
+@(redirectURL: String = controllers.routes.IndexController.onPageLoad().url)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("noRegistrationInProgress.title"))) {
 

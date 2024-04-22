@@ -63,7 +63,7 @@ class ContinueRegistrationController @Inject()(
               for {
                 _ <- cc.sessionRepository.clear(request.userId)
                 _ <- saveForLaterConnector.delete()
-              } yield Redirect(controllers.auth.routes.AuthController.onSignIn())
+              } yield Redirect(controllers.routes.IndexController.onPageLoad())
             case _ => Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
           }
       )
