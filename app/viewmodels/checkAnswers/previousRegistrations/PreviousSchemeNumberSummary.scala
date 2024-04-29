@@ -30,9 +30,15 @@ object PreviousSchemeNumberSummary {
     answers.get(PreviousOssNumberPage(countryIndex, schemeIndex)).map {
       answer =>
 
+        val registrationNumber: String = if (answer.previousSchemeNumber.startsWith("EU")) {
+          answer.previousSchemeNumber
+        } else {
+          "EU" + answer.previousSchemeNumber
+        }
+
         SummaryListRowViewModel(
           key = "previousSchemeNumber.checkYourAnswersLabel",
-          value = ValueViewModel(HtmlFormat.escape(answer.previousSchemeNumber).toString),
+          value = ValueViewModel(HtmlFormat.escape(registrationNumber).toString),
           actions = Seq()
         )
     }
