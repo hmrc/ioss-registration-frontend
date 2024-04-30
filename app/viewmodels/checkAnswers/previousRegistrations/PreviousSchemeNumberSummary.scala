@@ -16,7 +16,7 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Index, UserAnswers}
+import models.{Index, PreviousScheme, UserAnswers}
 import pages.previousRegistrations.PreviousOssNumberPage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
@@ -26,14 +26,14 @@ import viewmodels.implicits._
 
 object PreviousSchemeNumberSummary {
 
-  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, previousScheme: Option[PreviousScheme])
+         (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PreviousOssNumberPage(countryIndex, schemeIndex)).map {
       answer =>
-
-        val registrationNumber: String = if (answer.previousSchemeNumber.startsWith("EU")) {
-          answer.previousSchemeNumber
-        } else {
+        val registrationNumber: String = if (previousScheme.contains(PreviousScheme.OSSNU)) {
           "EU" + answer.previousSchemeNumber
+        } else {
+          answer.previousSchemeNumber
         }
 
         SummaryListRowViewModel(

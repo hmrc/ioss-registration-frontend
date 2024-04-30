@@ -19,6 +19,7 @@ package controllers.previousRegistrations
 import config.Constants.lastSchemeForCountry
 import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
+import controllers.previousRegistrations.GetPreviousScheme.getPreviousScheme
 import forms.previousRegistrations.DeletePreviousSchemeFormProvider
 import models.requests.AuthenticatedDataRequest
 import models.{Country, Index, PreviousScheme}
@@ -55,24 +56,26 @@ class DeletePreviousSchemeController @Inject()(
             if (waypoints.inAmend && getCurrentSchemeFromAnswers(country, countryIndex, schemeIndex)) {
               Future.successful(Redirect(pages.CannotRemoveExistingPreviousRegistrationsPage.route(waypoints)))
             } else {
-              val list =
-                SummaryListViewModel(
-                  rows = Seq(
-                    DeletePreviousSchemeSummary.row(request.userAnswers, countryIndex, schemeIndex),
-                    PreviousSchemeNumberSummary.row(request.userAnswers, countryIndex, schemeIndex),
-                    PreviousIntermediaryNumberSummary.row(request.userAnswers, countryIndex, schemeIndex)
-                  ).flatten
-                )
+              getPreviousScheme(waypoints, countryIndex, schemeIndex) { previousScheme =>
+                val list =
+                  SummaryListViewModel(
+                    rows = Seq(
+                      DeletePreviousSchemeSummary.row(request.userAnswers, countryIndex, schemeIndex),
+                      PreviousSchemeNumberSummary.row(request.userAnswers, countryIndex, schemeIndex, Some(previousScheme)),
+                      PreviousIntermediaryNumberSummary.row(request.userAnswers, countryIndex, schemeIndex)
+                    ).flatten
+                  )
 
-              val form = formProvider(country)
+                val form = formProvider(country)
 
-              val preparedForm = request.userAnswers.get(DeletePreviousSchemePage(countryIndex, schemeIndex)) match {
-                case None => form
-                case Some(value) => form.fill(value)
+                val preparedForm = request.userAnswers.get(DeletePreviousSchemePage(countryIndex, schemeIndex)) match {
+                  case None => form
+                  case Some(value) => form.fill(value)
+                }
+
+                val isLastPreviousScheme = request.userAnswers.get(DeriveNumberOfPreviousSchemes(countryIndex)).contains(lastSchemeForCountry)
+                Future.successful(Ok(view(preparedForm, waypoints, countryIndex, schemeIndex, country, list, isLastPreviousScheme)))
               }
-
-              val isLastPreviousScheme = request.userAnswers.get(DeriveNumberOfPreviousSchemes(countryIndex)).contains(lastSchemeForCountry)
-              Future.successful(Ok(view(preparedForm, waypoints, countryIndex, schemeIndex, country, list, isLastPreviousScheme)))
             }
         }
 
@@ -98,33 +101,35 @@ class DeletePreviousSchemeController @Inject()(
                 new InvalidAmendModeOperationException(s"The schema in country ${country.code} has been registered so cannot be deleted")
               )
             } else {
-              val list =
-                SummaryListViewModel(
-                  rows = Seq(
-                    DeletePreviousSchemeSummary.row(request.userAnswers, countryIndex, schemeIndex),
-                    PreviousSchemeNumberSummary.row(request.userAnswers, countryIndex, schemeIndex),
-                    PreviousIntermediaryNumberSummary.row(request.userAnswers, countryIndex, schemeIndex)
-                  ).flatten
+              getPreviousScheme(waypoints, countryIndex, schemeIndex) { previousScheme =>
+                val list =
+                  SummaryListViewModel(
+                    rows = Seq(
+                      DeletePreviousSchemeSummary.row(request.userAnswers, countryIndex, schemeIndex),
+                      PreviousSchemeNumberSummary.row(request.userAnswers, countryIndex, schemeIndex, Some(previousScheme)),
+                      PreviousIntermediaryNumberSummary.row(request.userAnswers, countryIndex, schemeIndex)
+                    ).flatten
+                  )
+
+                val form = formProvider(country)
+
+                form.bindFromRequest().fold(
+                  formWithErrors =>
+                    Future.successful(BadRequest(view(formWithErrors, waypoints, countryIndex, schemeIndex, country, list, isLastPreviousScheme))),
+
+                  value =>
+                    if (value) {
+                      for {
+                        updatedAnswers <- Future.fromTry(request.userAnswers.remove(PreviousSchemeForCountryQuery(countryIndex, schemeIndex)))
+                        _ <- cc.sessionRepository.set(updatedAnswers)
+                      } yield Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+                    } else {
+                      Future.successful(
+                        Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
+                      )
+                    }
                 )
-
-              val form = formProvider(country)
-
-              form.bindFromRequest().fold(
-                formWithErrors =>
-                  Future.successful(BadRequest(view(formWithErrors, waypoints, countryIndex, schemeIndex, country, list, isLastPreviousScheme))),
-
-                value =>
-                  if (value) {
-                    for {
-                      updatedAnswers <- Future.fromTry(request.userAnswers.remove(PreviousSchemeForCountryQuery(countryIndex, schemeIndex)))
-                      _ <- cc.sessionRepository.set(updatedAnswers)
-                    } yield Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
-                  } else {
-                    Future.successful(
-                      Redirect(DeletePreviousSchemePage(countryIndex, schemeIndex).navigate(waypoints, request.userAnswers, request.userAnswers).route)
-                    )
-                  }
-              )
+              }
             }
         }
     }

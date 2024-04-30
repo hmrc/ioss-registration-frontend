@@ -54,11 +54,11 @@ class CheckPreviousSchemeAnswersController @Inject()(
 
           request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(index)).map { previousSchemes =>
             val canAddScheme = previousSchemes.size < Constants.maxSchemes
-            val lists = previousSchemes.zipWithIndex.map { case (_, schemeIndex) =>
+            val lists = previousSchemes.zipWithIndex.map { case (scheme, schemeIndex) =>
               SummaryListViewModel(
                 rows = Seq(
                   PreviousSchemeSummary.row(request.userAnswers, index, Index(schemeIndex), country, existingSchemes, waypoints),
-                  PreviousSchemeNumberSummary.row(request.userAnswers, index, Index(schemeIndex)),
+                  PreviousSchemeNumberSummary.row(request.userAnswers, index, Index(schemeIndex), scheme.previousScheme),
                   PreviousIntermediaryNumberSummary.row(request.userAnswers, index, Index(schemeIndex))
                 ).flatten
               )
@@ -96,11 +96,11 @@ class CheckPreviousSchemeAnswersController @Inject()(
 
           val existingSchemes = Seq.empty
 
-          val lists = previousSchemes.zipWithIndex.map { case (_, schemeIndex) =>
+          val lists = previousSchemes.zipWithIndex.map { case (scheme, schemeIndex) =>
             SummaryListViewModel(
               rows = Seq(
                 PreviousSchemeSummary.row(request.userAnswers, index, Index(schemeIndex), country, existingSchemes, waypoints),
-                PreviousSchemeNumberSummary.row(request.userAnswers, index, Index(schemeIndex)),
+                PreviousSchemeNumberSummary.row(request.userAnswers, index, Index(schemeIndex), scheme.previousScheme),
                 PreviousIntermediaryNumberSummary.row(request.userAnswers, index, Index(schemeIndex))
               ).flatten
             )
