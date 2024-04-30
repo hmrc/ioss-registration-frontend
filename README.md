@@ -12,6 +12,8 @@ Requirements
 
 This service is written in [Scala](http://www.scala-lang.org/) and [Play](http://playframework.com/), so needs at least a [JRE] to run.
 
+Suggestion: Node v18.19.1 should be installed.
+
 ## Run the application
 
 To update from Nexus and start all services from the RELEASE version instead of snapshot

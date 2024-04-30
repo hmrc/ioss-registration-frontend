@@ -20,19 +20,22 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
+import models.CheckMode
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatestplus.mockito.MockitoSugar
-import pages.BusinessContactDetailsPage
+import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}
+import pages.amend.ChangeRegistrationPage
 import play.api.inject.bind
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
 import services.{EmailVerificationService, SaveForLaterService}
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -55,6 +58,11 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
   private val mockSaveForLaterService = mock[SaveForLaterService]
   private val validEmailAddressUserAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
   private val mockRegistrationConnector = mock[RegistrationConnector]
+
+  private val expectedWaypoints =
+    EmptyWaypoints.setNextWaypoint(
+      Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
+    )
 
   ".filter" - {
 
@@ -99,7 +107,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
         }
       }
 
-      "must redirect to Business Contact Details page when an email address is not verified" in {
+      "must redirect to Business Contact Details page when an email address is not verified and not in amend" in {
 
         val app = applicationBuilder(None)
           .configure("features.email-verification-enabled" -> "true")
@@ -117,7 +125,39 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val result = controller.callFilter(request).futureValue
 
-          result mustBe Some(Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad().url))
+          result mustBe Some(Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad(expectedWaypoints).url))
+        }
+      }
+
+      "must redirect to Business Contact Details page when an email address is not verified and in amend" in  {
+
+        val app = applicationBuilder(None)
+          .configure("features.email-verification-enabled" -> "true")
+          .overrides(bind[EmailVerificationService].toInstance(mockEmailVerificationService))
+          .build()
+
+        running(app) {
+
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(
+            registrationWrapper.copy(
+              registration = registrationWrapper.registration.copy(
+                schemeDetails = registrationWrapper.registration.schemeDetails.copy(
+                  businessEmailId = "newEmail@domain.com"
+                )
+              )
+            )
+          ).toFuture
+
+          when(mockEmailVerificationService.isEmailVerified(
+            eqTo(contactDetails.emailAddress), eqTo(userAnswersId))(any())) thenReturn NotVerified.toFuture
+
+          val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
+          val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+          val controller = new Harness(inAmend = true, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val result = controller.callFilter(request).futureValue
+
+          result mustBe Some(Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad(expectedWaypoints).url))
         }
       }
 
