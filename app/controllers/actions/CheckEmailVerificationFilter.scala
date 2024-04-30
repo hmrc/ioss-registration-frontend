@@ -20,10 +20,11 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
 import logging.Logging
-import models.BusinessContactDetails
+import models.{BusinessContactDetails, CheckMode}
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
-import pages.BusinessContactDetailsPage
+import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}
+import pages.amend.ChangeRegistrationPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import services.{EmailVerificationService, SaveForLaterService}
@@ -47,11 +48,11 @@ class CheckEmailVerificationFilterImpl(
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    if (frontendAppConfig.emailVerificationEnabled && !inAmend) {
+    if (frontendAppConfig.emailVerificationEnabled) {
       request.userAnswers.get(BusinessContactDetailsPage) match {
         case Some(contactDetails) =>
           if(inAmend) {
-            registrationConnector.getRegistration().flatMap {
+            registrationConnector.getRegistration()(hc).flatMap {
               case Right(registrationWrapper) =>
                 if(registrationWrapper.registration.schemeDetails.businessEmailId != contactDetails.emailAddress) {
                   checkVerificationStatusAndGetRedirect(request, contactDetails)
@@ -94,7 +95,11 @@ class CheckEmailVerificationFilterImpl(
 
       case _ =>
         logger.info("CheckEmailVerificationFilter - Not Verified")
-        Some(Redirect(routes.BusinessContactDetailsController.onPageLoad().url)).toFuture
+        val waypoints =
+          EmptyWaypoints.setNextWaypoint(
+            Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
+          )
+        Some(Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoints).url)).toFuture
     }
   }
 }

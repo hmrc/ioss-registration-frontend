@@ -73,13 +73,7 @@ class BusinessContactDetailsController @Inject()(
 
           value => {
             val emailAddress = value.emailAddress
-            val isMatchingEmailAddress = request.userAnswers.get(BusinessContactDetailsPage) match {
-              case Some(businessContactDetails) if waypoints.inAmend =>
-                businessContactDetails.emailAddress.contains(emailAddress)
-              case _ =>
-                false
-            }
-
+            val isMatchingEmailAddress = isMatchingEmailAddressFromWrapper(request, waypoints, emailAddress)
             val continueUrl = waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url
 
             if (config.emailVerificationEnabled && !isMatchingEmailAddress) {
@@ -94,6 +88,17 @@ class BusinessContactDetailsController @Inject()(
         )
     }
 
+  private def isMatchingEmailAddressFromWrapper(request: AuthenticatedDataRequest[AnyContent], waypoints: Waypoints, emailAddress: String) = {
+    request.registrationWrapper match {
+      case Some(registrationWrapper) if waypoints.inAmend =>
+        val verifiedOriginalEmailAddress = registrationWrapper.registration.schemeDetails.businessEmailId
+          verifiedOriginalEmailAddress.contains(emailAddress)
+      case Some(_) => false
+      case None =>
+        logger.error("Failed to get email from registration wrapper")
+        false
+    }
+  }
 
   private def verifyEmailAndRedirect(
                                       waypoints: Waypoints,
