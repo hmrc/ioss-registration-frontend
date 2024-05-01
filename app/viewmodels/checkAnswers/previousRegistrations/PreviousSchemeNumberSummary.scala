@@ -30,7 +30,7 @@ object PreviousSchemeNumberSummary {
          (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PreviousOssNumberPage(countryIndex, schemeIndex)).map {
       answer =>
-        val registrationNumber: String = if (previousScheme.contains(PreviousScheme.OSSNU)) {
+        val previousSchemeNumber: String = if (previousScheme.contains(PreviousScheme.OSSNU)) {
           "EU" + answer.previousSchemeNumber
         } else {
           answer.previousSchemeNumber
@@ -38,7 +38,7 @@ object PreviousSchemeNumberSummary {
 
         SummaryListRowViewModel(
           key = "previousSchemeNumber.checkYourAnswersLabel",
-          value = ValueViewModel(HtmlFormat.escape(registrationNumber).toString),
+          value = ValueViewModel(HtmlFormat.escape(previousSchemeNumber).toString),
           actions = Seq()
         )
     }
