@@ -30,8 +30,10 @@ object PreviousSchemeNumberSummary {
          (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PreviousOssNumberPage(countryIndex, schemeIndex)).map {
       answer =>
-        val previousSchemeNumber: String = if (previousScheme.contains(PreviousScheme.OSSNU)) {
-          "EU" + answer.previousSchemeNumber
+        val euPrefix: String = "EU"
+        val previousSchemeNumber: String =
+          if (previousScheme.contains(PreviousScheme.OSSNU) && !answer.previousSchemeNumber.startsWith(euPrefix)) {
+          euPrefix + answer.previousSchemeNumber
         } else {
           answer.previousSchemeNumber
         }
