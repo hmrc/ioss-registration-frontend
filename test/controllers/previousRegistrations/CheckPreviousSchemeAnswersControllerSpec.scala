@@ -78,7 +78,7 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
         val lists = Seq(SummaryListViewModel(
           Seq(
             PreviousSchemeSummary.row(baseUserAnswers, index, index, country, Seq.empty, waypoints),
-            PreviousSchemeNumberSummary.row(baseUserAnswers, index, index)
+            PreviousSchemeNumberSummary.row(baseUserAnswers, index, index, None)
           ).flatten
         ))
 
@@ -143,7 +143,7 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
           val list = Seq(SummaryListViewModel(
             Seq(
               PreviousSchemeSummary.row(baseUserAnswers, index, index, country, Seq.empty, waypoints),
-              PreviousSchemeNumberSummary.row(baseUserAnswers, index, index)
+              PreviousSchemeNumberSummary.row(baseUserAnswers, index, index, None)
             ).flatten
           ))
 

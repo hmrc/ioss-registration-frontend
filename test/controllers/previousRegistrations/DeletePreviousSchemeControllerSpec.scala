@@ -82,7 +82,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
       val list = SummaryListViewModel(
         Seq(
           DeletePreviousSchemeSummary.row(baseUserAnswers, index, index),
-          PreviousSchemeNumberSummary.row(baseUserAnswers, index, index)
+          PreviousSchemeNumberSummary.row(baseUserAnswers, index, index, None)
         ).flatten
       )
 
@@ -117,7 +117,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
       val list = SummaryListViewModel(
         Seq(
           DeletePreviousSchemeSummary.row(baseUserAnswers, index, index),
-          PreviousSchemeNumberSummary.row(baseUserAnswers, index, index)
+          PreviousSchemeNumberSummary.row(baseUserAnswers, index, index, None)
         ).flatten
       )
 
@@ -145,7 +145,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
       val list = SummaryListViewModel(
         Seq(
           DeletePreviousSchemeSummary.row(baseUserAnswers, index, index),
-          PreviousSchemeNumberSummary.row(baseUserAnswers, index, index)
+          PreviousSchemeNumberSummary.row(baseUserAnswers, index, index, None)
         ).flatten
       )
 
@@ -259,7 +259,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
       val list = SummaryListViewModel(
         Seq(
           DeletePreviousSchemeSummary.row(baseUserAnswers, index, index),
-          PreviousSchemeNumberSummary.row(baseUserAnswers, index, index)
+          PreviousSchemeNumberSummary.row(baseUserAnswers, index, index, None)
         ).flatten
       )
 

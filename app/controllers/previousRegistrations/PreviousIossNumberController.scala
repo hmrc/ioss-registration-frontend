@@ -18,6 +18,7 @@ package controllers.previousRegistrations
 
 import controllers.GetCountry
 import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerComponents}
+import controllers.previousRegistrations.GetPreviousScheme.getPreviousScheme
 import forms.previousRegistrations.PreviousIossNumberFormProvider
 import logging.Logging
 import models.core.MatchType
@@ -25,7 +26,7 @@ import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.{IntermediaryIdentificationNumberValidation, IossRegistrationNumberValidation, NonCompliantDetails}
 import models.requests.AuthenticatedDataRequest
 import models.{Country, Index, PreviousScheme, UserAnswers}
-import pages.previousRegistrations.{PreviousIossNumberPage, PreviousIossSchemePage, PreviousSchemePage}
+import pages.previousRegistrations.{PreviousIossNumberPage, PreviousIossSchemePage}
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -76,7 +77,6 @@ class PreviousIossNumberController @Inject()(
 
           getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>
             getPreviousScheme(waypoints, countryIndex, schemeIndex) { previousScheme: PreviousScheme =>
-
               val form = formProvider(country, hasIntermediary)
 
               val isNotAmendingActiveRegistration = waypoints.registrationModificationMode != AmendingActiveRegistration
@@ -86,7 +86,7 @@ class PreviousIossNumberController @Inject()(
                   Future.successful(BadRequest(view(
                     formWithErrors, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country)))),
 
-                (previousSchemeNumbers) =>
+                previousSchemeNumbers =>
                   coreRegistrationValidationService.searchScheme(
                     searchNumber = previousSchemeNumbers.previousSchemeNumber,
                     previousScheme = previousScheme,
@@ -155,17 +155,6 @@ class PreviousIossNumberController @Inject()(
         block(hasIntermediary)
     }.getOrElse {
       logger.error("Failed to get intermediary")
-      Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
-    }
-
-  private def getPreviousScheme(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index)
-                               (block: PreviousScheme => Future[Result])
-                               (implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] =
-    request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
-      previousScheme =>
-        block(previousScheme)
-    }.getOrElse {
-      logger.error("Failed to get previous scheme")
       Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
     }
 
