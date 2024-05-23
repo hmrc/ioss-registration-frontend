@@ -17,8 +17,13 @@
 package controllers.actions
 
 import base.SpecBase
+import config.FrontendAppConfig
+import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.{BusinessContactDetails, CheckMode}
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}
 import pages.amend.ChangeRegistrationPage
@@ -26,15 +31,24 @@ import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
+import services.EmailVerificationService
+import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import play.api.inject.bind
 
 class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
 
-  class Harness extends CheckBouncedEmailFilterImpl() {
+  class Harness(
+                 frontendAppConfig: FrontendAppConfig,
+                 emailVerificationService: EmailVerificationService
+               )
+    extends CheckBouncedEmailFilterImpl(frontendAppConfig, emailVerificationService) {
     def callFilter(request: AuthenticatedMandatoryIossRequest[_]): Future[Option[Result]] = filter(request)
   }
+
+  private val mockEmailVerificationService = mock[EmailVerificationService]
 
   private val authDataRequest = AuthenticatedDataRequest(
     FakeRequest(),
@@ -51,33 +65,136 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
 
       "and email is the same as answers" - {
 
-        "must redirect to Intercept Unusable Email" in {
+        "and email address is not verified" - {
 
-          val app = applicationBuilder(None)
-            .build()
+          "must redirect to Intercept Unusable Email" in {
 
-          val testEmail = "test@test.com"
+            val app = applicationBuilder(None)
+              .overrides(bind[EmailVerificationService].toInstance(mockEmailVerificationService))
+              .build()
 
-          val userAnswers = completeUserAnswers.set(BusinessContactDetailsPage, BusinessContactDetails("test name", "123456", testEmail)).success.value
+            val testEmail = "test@test.com"
 
-          val regWrapperWithUnusableEmail = registrationWrapper.copy(registration =
-            registrationWrapper.registration.copy(schemeDetails =
-              registrationWrapper.registration.schemeDetails.copy(unusableStatus = true, businessEmailId = testEmail)))
+            val userAnswers = completeUserAnswers.set(BusinessContactDetailsPage, BusinessContactDetails("test name", "123456", testEmail)).success.value
 
-          val changeRegWaypoint = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
+            val regWrapperWithUnusableEmail = registrationWrapper.copy(registration =
+              registrationWrapper.registration.copy(schemeDetails =
+                registrationWrapper.registration.schemeDetails.copy(unusableStatus = true, businessEmailId = testEmail)))
 
-          running(app) {
+            val changeRegWaypoint = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
-            val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
-            val controller = new Harness
+            running(app) {
 
-            val result = controller.callFilter(request).futureValue
+              when(mockEmailVerificationService.isEmailVerified(
+                eqTo(testEmail), eqTo(userAnswersId))(any())) thenReturn NotVerified.toFuture
 
-            result.value mustEqual Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad(changeRegWaypoint))
+              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
+              val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+              val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 
+              val result = controller.callFilter(request).futureValue
+
+              result.value mustEqual Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad(changeRegWaypoint))
+
+            }
           }
         }
 
+        "and verification attempts on maximum email addresses are exceeded" - {
+
+          "must redirect to Email Verification Codes and Emails Exceeded page" in {
+
+            val app = applicationBuilder(None)
+              .overrides(bind[EmailVerificationService].toInstance(mockEmailVerificationService))
+              .build()
+
+            val testEmail = "test@test.com"
+
+            val userAnswers = completeUserAnswers.set(BusinessContactDetailsPage, BusinessContactDetails("test name", "123456", testEmail)).success.value
+
+            val regWrapperWithUnusableEmail = registrationWrapper.copy(registration =
+              registrationWrapper.registration.copy(schemeDetails =
+                registrationWrapper.registration.schemeDetails.copy(unusableStatus = true, businessEmailId = testEmail)))
+
+            running(app) {
+
+              when(mockEmailVerificationService.isEmailVerified(
+                eqTo(testEmail), eqTo(userAnswersId))(any())) thenReturn LockedTooManyLockedEmails.toFuture
+
+              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
+              val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+              val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
+
+              val result = controller.callFilter(request).futureValue
+
+              result.value mustEqual Redirect(controllers.routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad().url)
+            }
+          }
+        }
+
+        "and verification attempts on a single email are exceeded" - {
+
+          "must redirect to Email Verification Codes Exceeded page" in {
+
+            val app = applicationBuilder(None)
+              .overrides(bind[EmailVerificationService].toInstance(mockEmailVerificationService))
+              .build()
+
+            val testEmail = "test@test.com"
+
+            val userAnswers = completeUserAnswers.set(BusinessContactDetailsPage, BusinessContactDetails("test name", "123456", testEmail)).success.value
+
+            val regWrapperWithUnusableEmail = registrationWrapper.copy(registration =
+              registrationWrapper.registration.copy(schemeDetails =
+                registrationWrapper.registration.schemeDetails.copy(unusableStatus = true, businessEmailId = testEmail)))
+
+            running(app) {
+
+              when(mockEmailVerificationService.isEmailVerified(
+                eqTo(testEmail), eqTo(userAnswersId))(any())) thenReturn LockedPasscodeForSingleEmail.toFuture
+
+              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
+              val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+              val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
+
+              val result = controller.callFilter(request).futureValue
+
+              result.value mustEqual Redirect(controllers.routes.EmailVerificationCodesExceededController.onPageLoad().url)
+            }
+          }
+        }
+
+        "and email address is verified" - {
+
+          "must be None" in {
+
+            val app = applicationBuilder(None)
+              .overrides(bind[EmailVerificationService].toInstance(mockEmailVerificationService))
+              .build()
+
+            val testEmail = "test@test.com"
+
+            val userAnswers = completeUserAnswers.set(BusinessContactDetailsPage, BusinessContactDetails("test name", "123456", testEmail)).success.value
+
+            val regWrapperWithUnusableEmail = registrationWrapper.copy(registration =
+              registrationWrapper.registration.copy(schemeDetails =
+                registrationWrapper.registration.schemeDetails.copy(unusableStatus = true, businessEmailId = testEmail)))
+
+            running(app) {
+
+              when(mockEmailVerificationService.isEmailVerified(
+                eqTo(testEmail), eqTo(userAnswersId))(any())) thenReturn Verified.toFuture
+
+              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
+              val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+              val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
+
+              val result = controller.callFilter(request).futureValue
+
+              result mustBe None
+            }
+          }
+        }
       }
 
       "and email has been updated" - {
@@ -98,7 +215,8 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
 
           running(app) {
             val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, updatedUserAnswers)
-            val controller = new Harness
+            val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+            val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 
             val result = controller.callFilter(request).futureValue
 
@@ -117,8 +235,10 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
           .build()
 
         running(app) {
-          val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, registrationWrapper, completeUserAnswersWithVatInfo)
-          val controller = new Harness
+          val request = AuthenticatedMandatoryIossRequest(
+            authDataRequest, testCredentials, vrn, iossNumber, registrationWrapper, completeUserAnswersWithVatInfo)
+          val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+          val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 
           val result = controller.callFilter(request).futureValue
 

@@ -16,12 +16,18 @@
 
 package controllers.actions
 
+import config.FrontendAppConfig
 import models.requests.AuthenticatedMandatoryIossRequest
 import play.api.mvc.Result
+import services.EmailVerificationService
 
 import scala.concurrent.{ExecutionContext, Future}
+import org.scalatestplus.mockito.MockitoSugar.mock
 
-class FakeCheckBouncedEmailFilter extends CheckBouncedEmailFilterImpl()(ExecutionContext.Implicits.global) {
+class FakeCheckBouncedEmailFilter extends CheckBouncedEmailFilterImpl(
+  mock[FrontendAppConfig],
+  mock[EmailVerificationService]
+)(ExecutionContext.Implicits.global) {
 
   override protected def filter[A](request: AuthenticatedMandatoryIossRequest[A]): Future[Option[Result]] = {
     Future.successful(None)
@@ -29,10 +35,11 @@ class FakeCheckBouncedEmailFilter extends CheckBouncedEmailFilterImpl()(Executio
 
 }
 
-class FakeCheckBouncedEmailFilterProvider()
-  extends CheckBouncedEmailFilterProvider()(ExecutionContext.Implicits.global) {
+class FakeCheckBouncedEmailFilterProvider() extends CheckBouncedEmailFilterProvider(
+  mock[FrontendAppConfig],
+  mock[EmailVerificationService]
+)(ExecutionContext.Implicits.global) {
 
   override def apply(): CheckBouncedEmailFilterImpl = new FakeCheckBouncedEmailFilter()
 
 }
-
