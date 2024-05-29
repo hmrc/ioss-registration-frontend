@@ -20,23 +20,24 @@ import config.Service
 import connectors.test.TestOnlyEmailPasscodeHttpParser.{TestOnlyEmailPasscodeReads, TestOnlyEmailPasscodeResponse}
 import logging.Logging
 import play.api.Configuration
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
+import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TestOnlyEmailPasscodeConnector @Inject()(
-                                                httpClient: HttpClient,
+                                                httpClientV2: HttpClientV2,
                                                 config: Configuration
                                               )(implicit ec: ExecutionContext) extends Logging {
 
   private val service = config.get[Service]("microservice.services.email-verification")
 
-  private val getTestOnlyPasscodeUrl: String =
-    s"${service.protocol}://${service.host}:${service.port}/test-only/passcodes"
+  private val getTestOnlyPasscodeUrl: URL =
+    url"${service.protocol}://${service.host}:${service.port}/test-only/passcodes"
 
-  def getTestOnlyPasscode()(implicit hc: HeaderCarrier): Future[TestOnlyEmailPasscodeResponse] = {
-    httpClient.GET[TestOnlyEmailPasscodeResponse](getTestOnlyPasscodeUrl)
-  }
+  def getTestOnlyPasscode()(implicit hc: HeaderCarrier): Future[TestOnlyEmailPasscodeResponse] =
+    httpClientV2.get(getTestOnlyPasscodeUrl).execute[TestOnlyEmailPasscodeResponse]
 }

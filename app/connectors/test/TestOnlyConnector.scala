@@ -20,26 +20,26 @@ import config.Service
 import connectors.test.TestOnlyExternalResponseHttpParser.{ExternalResponseReads, ExternalResponseResponse}
 import models.external.ExternalRequest
 import play.api.Configuration
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
+import java.net.URL
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestOnlyConnector @Inject()(
                                    config: Configuration,
-                                   httpClient: HttpClient
+                                   httpClientV2: HttpClientV2
                                  )(implicit ec: ExecutionContext) {
 
   private val baseUrl = config.get[Service](s"microservice.services.ioss-registration")
 
   def externalEntry(externalRequest: ExternalRequest, maybeLang: Option[String])(implicit hc: HeaderCarrier): Future[ExternalResponseResponse] = {
-    val url =
-      maybeLang match {
-        case Some(lang) =>
-          s"$baseUrl/external-entry?lang=$lang"
-        case None =>
-          s"$baseUrl/external-entry"
-      }
-    httpClient.POST[ExternalRequest, ExternalResponseResponse](url, externalRequest)
+    val url: URL = maybeLang match {
+      case Some(lang) => url"$baseUrl/external-entry?lang=$lang"
+      case None => url"$baseUrl/external-entry"
+    }
+    httpClientV2.post(url).withBody(Json.toJson(externalRequest)).execute[ExternalResponseResponse]
   }
 }
