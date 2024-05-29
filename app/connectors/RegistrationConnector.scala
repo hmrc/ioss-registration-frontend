@@ -57,5 +57,5 @@ class RegistrationConnector @Inject()(config: Configuration, httpClientV2: HttpC
     httpClientV2.get(url"$baseUrl/external-entry").execute[ExternalEntryUrlResponse]
 
   def getAccounts()(implicit hc: HeaderCarrier): Future[EACDEnrolments] =
-    httpClientV2.get(url"$baseUrl/accounturl").execute[EACDEnrolments]
+    httpClientV2.get(url"$baseUrl/accounts").execute[EACDEnrolments]
 }
