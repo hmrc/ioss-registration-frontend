@@ -21,7 +21,9 @@ import connectors.ValidateCoreRegistrationHttpParser.{ValidateCoreRegistrationRe
 import logging.Logging
 import models.core.CoreRegistrationRequest
 import models.responses.{EisError, EisErrorResponse}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpException}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpException, StringContextOps}
 
 import java.time.Instant
 import javax.inject.Inject
@@ -29,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ValidateCoreRegistrationConnector @Inject()(
                                                    frontendAppConfig: FrontendAppConfig,
-                                                   httpClient: HttpClient
+                                                   httpClientV2: HttpClientV2
                                                  )(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
   private val baseUrl = frontendAppConfig.coreValidationUrl
@@ -37,12 +39,8 @@ class ValidateCoreRegistrationConnector @Inject()(
   def validateCoreRegistration(
                                 coreRegistrationRequest: CoreRegistrationRequest
                               )(implicit hc: HeaderCarrier): Future[ValidateCoreRegistrationResponse] = {
-
-    val url = s"$baseUrl/validate-core-registration"
-    httpClient.POST[CoreRegistrationRequest, ValidateCoreRegistrationResponse](
-      url,
-      coreRegistrationRequest
-    ).recover {
+    val url = url"$baseUrl/validate-core-registration"
+    httpClientV2.post(url).withBody(Json.toJson(coreRegistrationRequest)).execute[ValidateCoreRegistrationResponse].recover {
       case e: HttpException =>
         logger.error(
           s"Unexpected error response from backend"

@@ -17,27 +17,30 @@
 package connectors
 
 import config.Service
-import connectors.EmailVerificationHttpParser.{ReturnEmailVerificationResponse, ReturnVerificationStatus, ReturnVerificationStatusReads, ReturnEmailVerificationReads}
+import connectors.EmailVerificationHttpParser.{ReturnEmailVerificationReads, ReturnEmailVerificationResponse, ReturnVerificationStatus, ReturnVerificationStatusReads}
 import logging.Logging
 import models.emailVerification.EmailVerificationRequest
 import models.responses.UnexpectedResponseStatus
 import play.api.Configuration
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpException}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpException, StringContextOps}
 
+import java.net.URL
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailVerificationConnector @Inject()(
                                             config: Configuration,
-                                            httpClient: HttpClient
+                                            httpClientV2: HttpClientV2
                                           ) extends HttpErrorFunctions with Logging {
 
   private val baseUrl = config.get[Service]("microservice.services.email-verification")
 
   def getStatus(credId: String)
                (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[ReturnVerificationStatus] = {
-    val url = s"$baseUrl/verification-status/$credId"
-    httpClient.GET[ReturnVerificationStatus](url)
+    val url: URL = url"$baseUrl/verification-status/$credId"
+    httpClientV2.get(url).execute[ReturnVerificationStatus]
       .recover {
         case e: HttpException =>
           logger.error(s"VerificationStatus received an unexpected error with status: ${e.responseCode}")
@@ -47,8 +50,8 @@ class EmailVerificationConnector @Inject()(
 
   def verifyEmail(emailVerificationRequest: EmailVerificationRequest)
                  (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[ReturnEmailVerificationResponse] = {
-    val url = s"${baseUrl}/verify-email"
-    httpClient.POST[EmailVerificationRequest, ReturnEmailVerificationResponse](url, emailVerificationRequest)
+    val url: URL = url"$baseUrl/verify-email"
+    httpClientV2.post(url).withBody(Json.toJson(emailVerificationRequest)).execute[ReturnEmailVerificationResponse]
       .recover {
         case e: HttpException =>
           logger.error(s"EmailVerificationResponse received an unexpected error with status: ${e.responseCode}")
