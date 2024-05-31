@@ -27,13 +27,12 @@ import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.amend.ErrorSubmittingAmendmentView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
 class ErrorSubmittingAmendmentController @Inject()(
                                                     cc: AuthenticatedControllerComponents,
                                                     appConfig: FrontendAppConfig,
                                                     view: ErrorSubmittingAmendmentView
-                                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                                  ) extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 

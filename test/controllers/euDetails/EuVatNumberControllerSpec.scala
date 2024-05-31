@@ -61,7 +61,7 @@ class EuVatNumberControllerSpec extends SpecBase with IdiomaticMockito with Tabl
 
   private lazy val euVatNumberRoute: String = routes.EuVatNumberController.onPageLoad(emptyWaypoints, countryIndex).url
 
-  private def euVatNumberSubmitRoute(waypoints: Waypoints = EmptyWaypoints): String = routes.EuVatNumberController.onSubmit(waypoints, countryIndex).url
+  private def euVatNumberSubmitRoute(waypoints: Waypoints): String = routes.EuVatNumberController.onSubmit(waypoints, countryIndex).url
 
   private lazy val amendEuVatNumberSubmitRoute: String = routes.EuVatNumberController.onSubmit(amendWaypoints, countryIndex).url
 

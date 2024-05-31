@@ -24,12 +24,11 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.rejoin.CannotRejoinView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
 class CannotRejoinController @Inject()(
                                         cc: AuthenticatedControllerComponents,
                                         view: CannotRejoinView
-                                      )(implicit ec: ExecutionContext)
+                                      )
   extends FrontendBaseController
     with I18nSupport
     with Logging {
