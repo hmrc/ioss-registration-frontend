@@ -19,7 +19,6 @@ package controllers.actions
 import base.SpecBase
 import config.FrontendAppConfig
 import models.requests.AuthenticatedIdentifierRequest
-import pages.{EmptyWaypoints, Waypoints}
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
@@ -31,8 +30,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CheckAmendPreviousRegistrationFilterSpec extends SpecBase {
-
-  private val waypoints: Waypoints = EmptyWaypoints
 
   class Harness(registrationModificationMode: ModifyingExistingRegistrationMode, restrictFromPreviousRegistrations: Boolean, config: FrontendAppConfig)
     extends CheckAmendPreviousRegistrationFilterImpl(registrationModificationMode, restrictFromPreviousRegistrations, config) {
