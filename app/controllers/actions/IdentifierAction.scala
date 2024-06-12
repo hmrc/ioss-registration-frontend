@@ -18,8 +18,8 @@ package controllers.actions
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import controllers.routes
 import controllers.auth.{routes => authRoutes}
+import controllers.routes
 import logging.Logging
 import models.requests.{AuthenticatedIdentifierRequest, SessionRequest}
 import play.api.mvc.Results._
@@ -30,9 +30,9 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.domain.Vrn
-import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative}
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
+import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
@@ -66,10 +66,10 @@ class AuthenticatedIdentifierAction @Inject()(
       Retrievals.credentials and
         Retrievals.allEnrolments and
         Retrievals.affinityGroup and
-        Retrievals.confidenceLevel and
-        Retrievals.credentialRole) {
+        Retrievals.confidenceLevel
+    ) {
 
-      case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == User =>
+      case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
           case (Some(vrn), futureMaybeIossNumber) =>
             futureMaybeIossNumber.map { maybeIossNumber =>
@@ -78,10 +78,7 @@ class AuthenticatedIdentifierAction @Inject()(
           case _ => throw InsufficientEnrolments()
         }
 
-      case _ ~ _ ~ Some(Organisation) ~ _ ~ Some(credentialRole) if credentialRole == Assistant =>
-        throw UnsupportedCredentialRole()
-
-      case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence ~ _ =>
+      case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
           case (Some(vrn), futureMaybeIossNumber) =>
             if (confidence >= ConfidenceLevel.L250) {
