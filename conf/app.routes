@@ -49,7 +49,7 @@ GET         /registration-service-error                                   contro
 
 GET         /answers-deleted                                              controllers.AnswersDeletedController.onPageLoad()
 
-GET         /progress-saved                                               controllers.SavedProgressController.onPageLoad(continueUrl: RedirectUrl)
+GET         /progress-saved                                               controllers.SavedProgressController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, continueUrl: RedirectUrl)
 
 GET         /no-welsh-service                                             controllers.external.NoMoreWelshController.onPageLoad()
 
@@ -234,8 +234,8 @@ GET         /successful                                                   contro
 
 GET         /error-submitting-registration                                controllers.ErrorSubmittingRegistrationController.onPageLoad()
 
-GET         /continue-registration                                        controllers.ContinueRegistrationController.onPageLoad()
-POST        /continue-registration                                        controllers.ContinueRegistrationController.onSubmit()
+GET         /continue-registration                                        controllers.ContinueRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST        /continue-registration                                        controllers.ContinueRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /no-saved-registration                                        controllers.NoRegistrationInProgressController.onPageLoad()
 
@@ -253,7 +253,7 @@ POST        /cancel-amend-registration                                    contro
 
 GET         /error-submitting-amendment                                   controllers.amend.ErrorSubmittingAmendmentController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET         /successful-amend                                             controllers.amend.AmendCompleteController.onPageLoad()
+GET         /successful-amend                                             controllers.amend.AmendCompleteController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /cannot-use-not-registered                                    controllers.NotRegisteredController.onPageLoad()
 
@@ -272,3 +272,5 @@ GET         /change-your-previous-registrations                           contro
 POST        /change-your-previous-registrations                           controllers.amend.ViewOrChangePreviousRegistrationsMultipleController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /start-amend-previous-journey/                                controllers.amend.StartAmendPreviousRegistrationJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET         /amend-there-is-a-problem                                     controllers.amend.AmendJourneyRecoveryController.onPageLoad()

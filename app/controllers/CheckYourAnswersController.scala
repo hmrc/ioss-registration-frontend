@@ -157,6 +157,7 @@ class CheckYourAnswersController @Inject()(
                 RegistrationAuditType.CreateRegistration, request.userAnswers, None, SubmissionResult.Failure)
               )
               saveForLaterService.saveAnswers(
+                waypoints,
                 ErrorSubmittingRegistrationPage.route(waypoints),
                 CheckYourAnswersPage.route(waypoints)
               )

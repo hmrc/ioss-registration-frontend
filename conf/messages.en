@@ -745,3 +745,7 @@ viewOrChangePreviousRegistrationsMultiple.change.hidden = which registration you
 problemWithAccount.title = There is a problem with your account
 problemWithAccount.heading = There is a problem with your account
 problemWithAccount.contact = Contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a> to restore your account.
+
+amendJourneyRecovery.title = Sorry, there is a problem with the service
+amendJourneyRecovery.heading = Sorry, there is a problem with the service
+amendJourneyRecovery.guidance = For your security, we deleted your answers.

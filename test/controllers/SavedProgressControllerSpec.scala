@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.SavedProgressPage
+import pages.{EmptyWaypoints, SavedProgressPage, Waypoints}
 import play.api.inject.bind
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
@@ -39,6 +39,8 @@ import java.time.{Clock, Instant, LocalDate, ZoneId}
 import scala.concurrent.Future
 
 class SavedProgressControllerSpec extends SpecBase {
+
+  private val waypoints: Waypoints = EmptyWaypoints
 
   "SavedProgress Controller" - {
 
@@ -77,7 +79,7 @@ class SavedProgressControllerSpec extends SpecBase {
 
       running(app) {
 
-        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(RedirectUrl("/test")).url)
+        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(waypoints, RedirectUrl("/test")).url)
 
         val result = route(app, request).value
 
@@ -125,7 +127,7 @@ class SavedProgressControllerSpec extends SpecBase {
 
       running(app) {
 
-        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(RedirectUrl("/test")).url)
+        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(waypoints, RedirectUrl("/test")).url)
 
         val result = route(app, request).value
 
@@ -157,7 +159,7 @@ class SavedProgressControllerSpec extends SpecBase {
 
       running(app) {
 
-        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(RedirectUrl("/test")).url)
+        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(waypoints, RedirectUrl("/test")).url)
 
         val result = route(app, request).value
 
@@ -186,7 +188,7 @@ class SavedProgressControllerSpec extends SpecBase {
 
       running(app) {
 
-        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(RedirectUrl("/test")).url)
+        val request = FakeRequest(GET, routes.SavedProgressController.onPageLoad(waypoints, RedirectUrl("/test")).url)
 
         val result = route(app, request).value
 

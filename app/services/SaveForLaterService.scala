@@ -17,10 +17,9 @@
 package services
 
 import connectors.{SaveForLaterConnector, SavedUserAnswers}
-import controllers.routes
 import logging.Logging
 import models.requests.{AuthenticatedDataRequest, SaveForLaterRequest}
-import pages.SavedProgressPage
+import pages.{JourneyRecoveryPage, SavedProgressPage, Waypoints}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Result}
 import repositories.AuthenticatedUserAnswersRepository
@@ -36,17 +35,19 @@ class SaveForLaterService @Inject()(
                                    ) extends Logging {
 
   def saveAnswers(
+                   waypoints: Waypoints,
                    redirectLocation: Call,
                    originLocation: Call
                  )(implicit request: AuthenticatedDataRequest[_], ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
-    saveAnswersRedirect(redirectLocation.url, originLocation.url)
+    saveAnswersRedirect(waypoints, redirectLocation.url, originLocation.url)
   }
 
-  // TODO -> Change method name
+
   def saveAnswersRedirect(
-                   redirectLocation: String,
-                   originLocation: String
-                 )(implicit request: AuthenticatedDataRequest[_], ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
+                           waypoints: Waypoints,
+                           redirectLocation: String,
+                           originLocation: String
+                         )(implicit request: AuthenticatedDataRequest[_], ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
     logger.info("saving answers")
     Future.fromTry(request.userAnswers.set(SavedProgressPage, originLocation)).flatMap {
       updatedAnswers =>
@@ -60,10 +61,10 @@ class SaveForLaterService @Inject()(
             }
           case Right(None) =>
             logger.error(s"Unexpected result on submit")
-            Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture
+            Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
           case Left(e) =>
             logger.error(s"Unexpected result on submit: ${e.toString}")
-            Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture
+            Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture
         }
     }
   }

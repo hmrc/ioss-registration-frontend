@@ -19,8 +19,8 @@ package controllers.amend
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.actions._
-import controllers.routes
 import models.UserAnswers
+import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -41,31 +41,33 @@ class AmendCompleteController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(): Action[AnyContent] = (cc.actionBuilder andThen cc.identify andThen cc.getData andThen cc.requireData(isInAmendMode = false)).async {
-    implicit request => {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
+    (cc.actionBuilder andThen cc.identify andThen cc.getData andThen cc.requireData(isInAmendMode = false)).async {
 
-      for {
-        externalEntryUrl <- registrationConnector.getSavedExternalEntry()
-      } yield {
-        {
-          for {
-            organisationName <- getOrganisationName(request.userAnswers)
-          } yield {
-            val savedUrl = externalEntryUrl.fold(_ => None, _.url)
-            Ok(
-              view(
-                request.vrn,
-                frontendAppConfig.feedbackUrl,
-                savedUrl,
-                frontendAppConfig.iossYourAccountUrl,
-                organisationName
+      implicit request => {
+
+        for {
+          externalEntryUrl <- registrationConnector.getSavedExternalEntry()
+        } yield {
+          {
+            for {
+              organisationName <- getOrganisationName(request.userAnswers)
+            } yield {
+              val savedUrl = externalEntryUrl.fold(_ => None, _.url)
+              Ok(
+                view(
+                  request.vrn,
+                  frontendAppConfig.feedbackUrl,
+                  savedUrl,
+                  frontendAppConfig.iossYourAccountUrl,
+                  organisationName
+                )
               )
-            )
-          }
-        }.getOrElse(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            }
+          }.getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url))
+        }
       }
     }
-  }
 
   private def getOrganisationName(answers: UserAnswers): Option[String] =
     answers.vatInfo match {

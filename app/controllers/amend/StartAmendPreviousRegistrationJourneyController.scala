@@ -44,7 +44,7 @@ class StartAmendPreviousRegistrationJourneyController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingPreviousRegistration, restrictFromPreviousRegistrations = false).async {
     implicit request =>
-      getAnswerAsync(PreviousRegistrationIossNumberQuery) { iossNumber =>
+      getAnswerAsync(waypoints, PreviousRegistrationIossNumberQuery) { iossNumber =>
         registrationConnector.getRegistration(iossNumber).flatMap {
 
           case Right(registrationWrapper) =>

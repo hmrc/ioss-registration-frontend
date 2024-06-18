@@ -46,7 +46,7 @@ class DeleteTradingNameController @Inject()(
 
   def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode) {
     implicit request =>
-      getAnswer(TradingNamePage(index)) {
+      getAnswer(waypoints, TradingNamePage(index)) {
         tradingName =>
 
           Ok(view(form, waypoints, index, tradingName))
@@ -55,7 +55,7 @@ class DeleteTradingNameController @Inject()(
 
   def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
-      getAnswerAsync(TradingNamePage(index)) {
+      getAnswerAsync(waypoints, TradingNamePage(index)) {
         tradingName =>
 
           form.bindFromRequest().fold(

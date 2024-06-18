@@ -111,6 +111,7 @@ class BusinessContactDetailsController @Inject()(
       case LockedPasscodeForSingleEmail =>
         logger.info("saving as locked passcode for single email")
         saveForLaterService.saveAnswers(
+          waypoints,
           routes.EmailVerificationCodesExceededController.onPageLoad(),
           routes.BusinessContactDetailsController.onPageLoad(waypoints)
         )
@@ -118,6 +119,7 @@ class BusinessContactDetailsController @Inject()(
       case LockedTooManyLockedEmails =>
         logger.info("saving as too many locked emails")
         saveForLaterService.saveAnswers(
+          waypoints,
           routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad(),
           routes.BusinessContactDetailsController.onPageLoad(waypoints)
         )

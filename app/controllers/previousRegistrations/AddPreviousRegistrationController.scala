@@ -25,7 +25,7 @@ import models.previousRegistrations.PreviousRegistrationDetailsWithOptionalVatNu
 import models.requests.AuthenticatedDataRequest
 import models.{CheckMode, Country}
 import pages.previousRegistrations.AddPreviousRegistrationPage
-import pages.{Waypoint, Waypoints}
+import pages.{JourneyRecoveryPage, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
@@ -106,7 +106,7 @@ class AddPreviousRegistrationController @Inject()(
           if (incompletePromptShown) {
             incompletePreviousRegistrationRedirect(waypoints).map(
               redirectIncompletePage => redirectIncompletePage.toFuture
-            ).getOrElse(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()).toFuture)
+            ).getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
           } else {
             Future.successful(Redirect(routes.AddPreviousRegistrationController.onPageLoad(waypoints)))
           }

@@ -20,10 +20,10 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
 import logging.Logging
-import models.{BusinessContactDetails, CheckMode}
+import models.{BusinessContactDetails, CheckMode, NormalMode}
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import pages.amend.ChangeRegistrationPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
@@ -51,11 +51,14 @@ class CheckEmailVerificationFilterImpl(
     if (frontendAppConfig.emailVerificationEnabled) {
       request.userAnswers.get(BusinessContactDetailsPage) match {
         case Some(contactDetails) =>
-          if(inAmend) {
+          if (inAmend) {
             registrationConnector.getRegistration()(hc).flatMap {
               case Right(registrationWrapper) =>
-                if(registrationWrapper.registration.schemeDetails.businessEmailId != contactDetails.emailAddress) {
-                  checkVerificationStatusAndGetRedirect(request, contactDetails)
+                if (registrationWrapper.registration.schemeDetails.businessEmailId != contactDetails.emailAddress) {
+                  val waypoints = EmptyWaypoints.setNextWaypoint(
+                    Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
+                  )
+                  checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails)
                 } else {
                   None.toFuture
                 }
@@ -65,7 +68,10 @@ class CheckEmailVerificationFilterImpl(
                 throw exception
             }
           } else {
-            checkVerificationStatusAndGetRedirect(request, contactDetails)
+            val waypoints = EmptyWaypoints.setNextWaypoint(
+              Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
+            )
+            checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails)
           }
         case None => None.toFuture
       }
@@ -75,6 +81,7 @@ class CheckEmailVerificationFilterImpl(
   }
 
   private def checkVerificationStatusAndGetRedirect(
+                                                     waypoints: Waypoints,
                                                      request: AuthenticatedDataRequest[_],
                                                      contactDetails: BusinessContactDetails
                                                    )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
@@ -89,6 +96,7 @@ class CheckEmailVerificationFilterImpl(
       case LockedPasscodeForSingleEmail =>
         logger.info("CheckEmailVerificationFilter - LockedPasscodeForSingleEmail")
         saveForLaterService.saveAnswersRedirect(
+          waypoints,
           routes.EmailVerificationCodesExceededController.onPageLoad().url,
           request.uri
         )(request, executionContext, hc).map(result => Some(result))

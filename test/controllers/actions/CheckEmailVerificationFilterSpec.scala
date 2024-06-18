@@ -173,7 +173,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           when(mockEmailVerificationService.isEmailVerified(
             eqTo(contactDetails.emailAddress), eqTo(userAnswersId))(any())) thenReturn LockedPasscodeForSingleEmail.toFuture
 
-          when(mockSaveForLaterService.saveAnswersRedirect(any(), any())(any(), any(), any())) thenReturn
+          when(mockSaveForLaterService.saveAnswersRedirect(any(), any(), any())(any(), any(), any())) thenReturn
             Redirect(routes.EmailVerificationCodesExceededController.onPageLoad()).toFuture
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
@@ -186,6 +186,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           verify(mockSaveForLaterService, times(1))
             .saveAnswersRedirect(
+              any(),
               eqTo(routes.EmailVerificationCodesExceededController.onPageLoad().url),
               eqTo(request.uri)
             )(any(), any(), any())
