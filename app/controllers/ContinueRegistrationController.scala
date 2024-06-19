@@ -20,7 +20,7 @@ import connectors.SaveForLaterConnector
 import controllers.actions._
 import forms.ContinueRegistrationFormProvider
 import models.ContinueRegistration
-import pages.SavedProgressPage
+import pages.{JourneyRecoveryPage, SavedProgressPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.http.HttpVerbs.GET
@@ -41,7 +41,7 @@ class ContinueRegistrationController @Inject()(
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
     implicit request =>
         request.userAnswers.get(SavedProgressPage).map(
           _ => Ok(view(form))
@@ -51,7 +51,7 @@ class ContinueRegistrationController @Inject()(
 
   }
 
-  def onSubmit(): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -64,7 +64,7 @@ class ContinueRegistrationController @Inject()(
                 _ <- cc.sessionRepository.clear(request.userId)
                 _ <- saveForLaterConnector.delete()
               } yield Redirect(controllers.routes.IndexController.onPageLoad())
-            case _ => Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            case _ => Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url))
           }
       )
   }

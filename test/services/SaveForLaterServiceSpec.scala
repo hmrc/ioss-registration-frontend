@@ -26,7 +26,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.EmptyWaypoints
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.AnyContent
 import play.api.mvc.Results.Redirect
@@ -44,6 +44,8 @@ class SaveForLaterServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers, None)
   implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, None, emptyUserAnswers, None)
+
+  private val waypoints: Waypoints = EmptyWaypoints
 
   private val mockSaveForLaterConnector = mock[SaveForLaterConnector]
   private val mockUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
@@ -73,7 +75,7 @@ class SaveForLaterServiceSpec extends SpecBase with BeforeAndAfterEach {
       when(mockSaveForLaterConnector.submit(any())(any())) thenReturn Future.successful(Right(Some(savedUserAnswers)))
       when(mockUserAnswersRepository.set(any())) thenReturn Future.successful(true)
 
-      val result = saveForLaterService.saveAnswers(redirectLocation, originLocation)
+      val result = saveForLaterService.saveAnswers(waypoints, redirectLocation, originLocation)
 
       result.futureValue mustBe Redirect(redirectLocation)
 
@@ -86,7 +88,7 @@ class SaveForLaterServiceSpec extends SpecBase with BeforeAndAfterEach {
       when(mockSaveForLaterConnector.submit(any())(any())) thenReturn Future.successful(Right(None))
       when(mockUserAnswersRepository.set(any())) thenReturn Future.successful(false)
 
-      val result = saveForLaterService.saveAnswers(redirectLocation, originLocation)
+      val result = saveForLaterService.saveAnswers(waypoints, redirectLocation, originLocation)
 
       result.futureValue mustBe Redirect(errorLocation)
 
@@ -99,7 +101,7 @@ class SaveForLaterServiceSpec extends SpecBase with BeforeAndAfterEach {
       when(mockSaveForLaterConnector.submit(any())(any())) thenReturn Future.successful(Left(NotFound))
       when(mockUserAnswersRepository.set(any())) thenReturn Future.successful(false)
 
-      val result = saveForLaterService.saveAnswers(redirectLocation, originLocation)
+      val result = saveForLaterService.saveAnswers(waypoints, redirectLocation, originLocation)
 
       result.futureValue mustBe Redirect(errorLocation)
 

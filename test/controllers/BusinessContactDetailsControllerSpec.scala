@@ -256,7 +256,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
               eqTo(emailVerificationRequest.email.get.address),
               eqTo(emailVerificationRequest.credId))(any())) thenReturn LockedPasscodeForSingleEmail.toFuture
 
-            when(mockSaveForLaterService.saveAnswers(any(), any())(any(), any(), any())) thenReturn
+            when(mockSaveForLaterService.saveAnswers(any(), any(), any())(any(), any(), any())) thenReturn
               Redirect(routes.EmailVerificationCodesExceededController.onPageLoad()).toFuture
 
             val request =
@@ -282,6 +282,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
             verify(mockSaveForLaterService, times(1))
               .saveAnswers(
+                eqTo(emptyWaypoints),
                 eqTo(routes.EmailVerificationCodesExceededController.onPageLoad()),
                 eqTo(routes.BusinessContactDetailsController.onPageLoad(emptyWaypoints))
               )(any(), any(), any())
@@ -305,7 +306,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
               eqTo(emailVerificationRequest.email.get.address),
               eqTo(emailVerificationRequest.credId))(any())) thenReturn Future.successful(LockedTooManyLockedEmails)
 
-            when(mockSaveForLaterService.saveAnswers(any(), any())(any(), any(), any())) thenReturn
+            when(mockSaveForLaterService.saveAnswers(any(), any(), any())(any(), any(), any())) thenReturn
               Future.successful(Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad()))
 
             val request =
@@ -321,6 +322,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
             verifyNoMoreInteractions(mockEmailVerificationService)
             verify(mockSaveForLaterService, times(1))
               .saveAnswers(
+                eqTo(emptyWaypoints),
                 eqTo(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad()),
                 eqTo(routes.BusinessContactDetailsController.onPageLoad())
               )(any(), any(), any())

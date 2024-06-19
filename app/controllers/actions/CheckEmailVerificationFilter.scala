@@ -20,11 +20,11 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
 import logging.Logging
-import models.{BusinessContactDetails, CheckMode}
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}
+import models.{BusinessContactDetails, CheckMode}
 import pages.amend.ChangeRegistrationPage
+import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import services.{EmailVerificationService, SaveForLaterService}
@@ -37,6 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckEmailVerificationFilterImpl(
                                         inAmend: Boolean,
+                                        waypoints: Waypoints,
                                         frontendAppConfig: FrontendAppConfig,
                                         emailVerificationService: EmailVerificationService,
                                         saveForLaterService: SaveForLaterService,
@@ -51,11 +52,11 @@ class CheckEmailVerificationFilterImpl(
     if (frontendAppConfig.emailVerificationEnabled) {
       request.userAnswers.get(BusinessContactDetailsPage) match {
         case Some(contactDetails) =>
-          if(inAmend) {
+          if (inAmend) {
             registrationConnector.getRegistration()(hc).flatMap {
               case Right(registrationWrapper) =>
-                if(registrationWrapper.registration.schemeDetails.businessEmailId != contactDetails.emailAddress) {
-                  checkVerificationStatusAndGetRedirect(request, contactDetails)
+                if (registrationWrapper.registration.schemeDetails.businessEmailId != contactDetails.emailAddress) {
+                  checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails)
                 } else {
                   None.toFuture
                 }
@@ -65,7 +66,7 @@ class CheckEmailVerificationFilterImpl(
                 throw exception
             }
           } else {
-            checkVerificationStatusAndGetRedirect(request, contactDetails)
+            checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails)
           }
         case None => None.toFuture
       }
@@ -75,6 +76,7 @@ class CheckEmailVerificationFilterImpl(
   }
 
   private def checkVerificationStatusAndGetRedirect(
+                                                     waypoints: Waypoints,
                                                      request: AuthenticatedDataRequest[_],
                                                      contactDetails: BusinessContactDetails
                                                    )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
@@ -89,6 +91,7 @@ class CheckEmailVerificationFilterImpl(
       case LockedPasscodeForSingleEmail =>
         logger.info("CheckEmailVerificationFilter - LockedPasscodeForSingleEmail")
         saveForLaterService.saveAnswersRedirect(
+          waypoints,
           routes.EmailVerificationCodesExceededController.onPageLoad().url,
           request.uri
         )(request, executionContext, hc).map(result => Some(result))
@@ -110,8 +113,8 @@ class CheckEmailVerificationFilterProvider @Inject()(
                                                       saveForLaterService: SaveForLaterService,
                                                       registrationConnector: RegistrationConnector
                                                     )(implicit val executionContext: ExecutionContext) {
-  def apply(inAmend: Boolean): CheckEmailVerificationFilterImpl = {
-    new CheckEmailVerificationFilterImpl(inAmend, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector)
+  def apply(inAmend: Boolean, waypoints: Waypoints): CheckEmailVerificationFilterImpl = {
+    new CheckEmailVerificationFilterImpl(inAmend, waypoints, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector)
   }
 }
 

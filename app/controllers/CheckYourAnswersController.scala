@@ -51,7 +51,7 @@ class CheckYourAnswersController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(NotModifyingExistingRegistration) {
+  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(NotModifyingExistingRegistration, waypoints = EmptyWaypoints) {
     implicit request =>
 
       val thisPage = CheckYourAnswersPage
@@ -157,6 +157,7 @@ class CheckYourAnswersController @Inject()(
                 RegistrationAuditType.CreateRegistration, request.userAnswers, None, SubmissionResult.Failure)
               )
               saveForLaterService.saveAnswers(
+                waypoints,
                 ErrorSubmittingRegistrationPage.route(waypoints),
                 CheckYourAnswersPage.route(waypoints)
               )

@@ -48,7 +48,7 @@ class StartRejoinJourneyController @Inject()(
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging {
   protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(RejoiningRegistration).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(RejoiningRegistration, waypoints = waypoints).async {
     implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
       (for {
         registrationWrapperResponse <- registrationConnector.getRegistration()

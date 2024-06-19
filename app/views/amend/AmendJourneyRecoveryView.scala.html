@@ -1,5 +1,5 @@
-/*
- * Copyright 2023 HM Revenue & Customs
+@*
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,23 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package utils
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton
+)
 
-import controllers.routes
-import controllers.amend.{routes => amendRoutes}
-import pages.Waypoints
-import play.api.mvc.Call
-import utils.AmendWaypoints.AmendWaypointsOps
+@(redirectLink: String)(implicit request: Request[_], messages: Messages)
 
-object CheckJourneyRecovery {
+@layout(pageTitle = titleNoForm(messages("amendJourneyRecovery.title"))) {
 
-  def determineJourneyRecovery(waypoints: Waypoints): Call = {
-    if (waypoints.inAmend) {
-      amendRoutes.AmendJourneyRecoveryController.onPageLoad()
-    } else {
-      routes.JourneyRecoveryController.onPageLoad()
-    }
-  }
+  <h1 class="govuk-heading-l">@messages("amendJourneyRecovery.heading")</h1>
+
+  <p class="govuk-body">@messages("amendJourneyRecovery.guidance")</p>
+
+  <p class="govuk-body">
+  @govukButton(
+    ButtonViewModel(messages("site.continue"))
+    .asLink(redirectLink)
+  )
+  </p>
+
 }

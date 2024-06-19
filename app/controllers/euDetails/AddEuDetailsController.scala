@@ -21,8 +21,8 @@ import controllers.actions.AuthenticatedControllerComponents
 import forms.euDetails.AddEuDetailsFormProvider
 import models.Country
 import models.euDetails.EuOptionalDetails
-import pages.Waypoints
 import pages.euDetails.AddEuDetailsPage
+import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -76,7 +76,7 @@ class AddEuDetailsController @Inject()(
           if (incompletePromptShown) {
             incompleteCheckEuDetailsRedirect(waypoints).map(
               redirectIncompletePage => redirectIncompletePage.toFuture
-            ).getOrElse(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()).toFuture)
+            ).getOrElse(Redirect(JourneyRecoveryPage.route(waypoints).url).toFuture)
           } else {
             Future.successful(Redirect(routes.AddEuDetailsController.onPageLoad(waypoints)))
           }

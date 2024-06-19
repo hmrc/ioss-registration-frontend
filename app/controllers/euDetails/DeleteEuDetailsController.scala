@@ -45,7 +45,7 @@ class DeleteEuDetailsController @Inject()(
 
   def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode) {
     implicit request =>
-      getAnswer(EuDetailsQuery(countryIndex)) {
+      getAnswer(waypoints, EuDetailsQuery(countryIndex)) {
         euDetails =>
 
           val form: Form[Boolean] = formProvider(euDetails.euCountry)
@@ -56,7 +56,7 @@ class DeleteEuDetailsController @Inject()(
 
   def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
-      getAnswerAsync(EuDetailsQuery(countryIndex)) {
+      getAnswerAsync(waypoints, EuDetailsQuery(countryIndex)) {
         euDetails =>
 
           val form: Form[Boolean] = formProvider(euDetails.euCountry)

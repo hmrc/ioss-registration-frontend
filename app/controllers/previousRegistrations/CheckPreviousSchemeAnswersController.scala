@@ -22,7 +22,7 @@ import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.CheckPreviousSchemeAnswersFormProvider
 import models.requests.AuthenticatedDataRequest
 import models.{Country, Index, PreviousScheme}
-import pages.Waypoints
+import pages.{JourneyRecoveryPage, Waypoints}
 import pages.previousRegistrations.CheckPreviousSchemeAnswersPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -68,7 +68,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
 
             Future.successful(Ok(view(form, waypoints, lists, index, country, canAddScheme)))
 
-          }.getOrElse(Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())))
+          }.getOrElse(Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url)))
       }
   }
 
@@ -118,7 +118,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
                 _ <- cc.sessionRepository.set(updatedAnswers)
               } yield Redirect(CheckPreviousSchemeAnswersPage(index).navigate(waypoints, request.userAnswers, updatedAnswers).route)
           )
-        }.getOrElse(Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())))
+        }.getOrElse(Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url)))
       }
   }
 }

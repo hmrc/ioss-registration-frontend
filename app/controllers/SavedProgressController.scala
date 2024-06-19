@@ -22,7 +22,7 @@ import controllers.actions.AuthenticatedControllerComponents
 import logging.Logging
 import models.UserAnswers
 import models.requests.SaveForLaterRequest
-import pages.SavedProgressPage
+import pages.{JourneyRecoveryPage, SavedProgressPage, Waypoints}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
@@ -47,7 +47,7 @@ class SavedProgressController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(continueUrl: RedirectUrl): Action[AnyContent] = cc.authAndGetData().async {
+  def onPageLoad(waypoints: Waypoints, continueUrl: RedirectUrl): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
       val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
       val answersExpiry = request.userAnswers.lastUpdated.plus(appConfig.saveForLaterTtl, ChronoUnit.DAYS)
@@ -73,10 +73,10 @@ class SavedProgressController @Inject()(
               }
             case (Left(e), _) =>
               logger.error(s"Unexpected result on submit: ${e.toString}")
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+              Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url))
             case (Right(None), _) =>
               logger.error(s"Unexpected result on submit, no saved for later result and no external url")
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+              Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url))
           }
       }
   }

@@ -16,14 +16,12 @@
 
 package pages
 
-import controllers.routes
-import models.UserAnswers
 import play.api.mvc.Call
+import utils.CheckJourneyRecovery.determineJourneyRecovery
 
 object JourneyRecoveryPage extends Page {
 
-  override def route(waypoints: Waypoints): Call =
-    routes.JourneyRecoveryController.onPageLoad()
-
-  override def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = ???
+  override def route(waypoints: Waypoints): Call = {
+    determineJourneyRecovery(waypoints)
+  }
 }

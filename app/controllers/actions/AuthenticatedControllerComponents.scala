@@ -17,6 +17,7 @@
 package controllers.actions
 
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest, AuthenticatedOptionalDataRequest}
+import pages.Waypoints
 import play.api.http.FileMimeTypes
 import play.api.i18n.{Langs, MessagesApi}
 import play.api.mvc._
@@ -87,16 +88,18 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def authAndGetDataAndCheckVerifyEmail(
                                          registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
-                                         restrictFromPreviousRegistrations: Boolean = true
+                                         restrictFromPreviousRegistrations: Boolean = true,
+                                         waypoints: Waypoints
                                        ): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
     authAndGetData(registrationModificationMode, restrictFromPreviousRegistrations) andThen
-      checkEmailVerificationStatus(registrationModificationMode != NotModifyingExistingRegistration)
+      checkEmailVerificationStatus(registrationModificationMode != NotModifyingExistingRegistration, waypoints)
 
   def authAndRequireIoss(
                           modifyingExistingRegistrationMode: ModifyingExistingRegistrationMode,
-                          restrictFromPreviousRegistrations: Boolean = true
+                          restrictFromPreviousRegistrations: Boolean = true,
+                          waypoints: Waypoints
                         ): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
-    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations) andThen
+    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations, waypoints) andThen
       requireIoss() andThen
       checkBouncedEmail()
   }

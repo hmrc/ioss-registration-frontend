@@ -24,7 +24,7 @@
     )
 
     @if(waypoints.currentMode == CheckMode) {
-        <a id="saveProgress" role="button" href="@routes.SavedProgressController.onPageLoad(RedirectUrl(continueUrl))" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+        <a id="saveProgress" role="button" href="@routes.SavedProgressController.onPageLoad(waypoints, RedirectUrl(continueUrl))" class="govuk-button govuk-button--secondary" data-module="govuk-button">
         @messages("saveProgress.button")
         </a>
     }

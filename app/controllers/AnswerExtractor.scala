@@ -18,6 +18,7 @@ package controllers
 
 import logging.Logging
 import models.requests.AuthenticatedDataRequest
+import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.libs.json.Reads
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Result}
@@ -28,7 +29,7 @@ import scala.concurrent.Future
 
 trait AnswerExtractor extends Logging {
 
-  def getAnswer[A](query: Gettable[A])
+  def getAnswer[A](waypoints: Waypoints, query: Gettable[A])
                   (block: A => Result)
                   (implicit request: AuthenticatedDataRequest[AnyContent], ev: Reads[A]): Result =
     request.userAnswers
@@ -36,10 +37,10 @@ trait AnswerExtractor extends Logging {
       .map(block(_))
       .getOrElse({
         logAnswerNotFoundMessage(query)
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Redirect(JourneyRecoveryPage.route(waypoints))
       })
 
-  def getAnswerAsync[A](query: Gettable[A])
+  def getAnswerAsync[A](waypoints: Waypoints, query: Gettable[A])
                        (block: A => Future[Result])
                        (implicit request: AuthenticatedDataRequest[AnyContent], ev: Reads[A]): Future[Result] =
     request.userAnswers
@@ -47,7 +48,7 @@ trait AnswerExtractor extends Logging {
       .map(block(_))
       .getOrElse({
         logAnswerNotFoundMessage(query)
-        Redirect(routes.JourneyRecoveryController.onPageLoad()).toFuture
+        Redirect(JourneyRecoveryPage.route(waypoints)).toFuture
       })
 
   private def logAnswerNotFoundMessage[T](query: Gettable[T]): Unit = logger.warn(s"$query question has not been answered")

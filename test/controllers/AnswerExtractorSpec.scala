@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import models.UserAnswers
 import models.requests.AuthenticatedDataRequest
-import pages.{QuestionPage, Waypoints}
+import pages.{EmptyWaypoints, QuestionPage, Waypoints}
 import play.api.libs.json.{JsPath, Json}
 import play.api.mvc.Results.{Ok, Redirect}
 import play.api.mvc.{AnyContent, Call, Result}
@@ -30,6 +30,8 @@ import utils.FutureSyntax.FutureOps
 import scala.concurrent.Future
 
 class AnswerExtractorSpec extends SpecBase {
+
+  private val waypoints: Waypoints = EmptyWaypoints
 
   private object TestPage extends QuestionPage[Int] {
     override def path: JsPath = JsPath \ "test"
@@ -42,14 +44,14 @@ class AnswerExtractorSpec extends SpecBase {
 
   private class TestController extends AnswerExtractor {
 
-    def get(query: Gettable[Int])(implicit request: AuthenticatedDataRequest[AnyContent]): Result =
-      getAnswer(query) {
+    def get(waypoints: Waypoints, query: Gettable[Int])(implicit request: AuthenticatedDataRequest[AnyContent]): Result =
+      getAnswer(waypoints, query) {
         answer =>
           Ok(Json.toJson(answer))
       }
 
-    def getAsync(query: Gettable[Int])(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] =
-      getAnswerAsync(query) {
+    def getAsync(waypoints: Waypoints, query: Gettable[Int])(implicit request: AuthenticatedDataRequest[AnyContent]): Future[Result] =
+      getAnswerAsync(waypoints, query) {
         answer =>
           Ok(Json.toJson(answer)).toFuture
       }
@@ -64,7 +66,7 @@ class AnswerExtractorSpec extends SpecBase {
 
       val controller = new TestController()
 
-      controller.get(TestPage) mustBe Ok(Json.toJson(1))
+      controller.get(waypoints, TestPage) mustBe Ok(Json.toJson(1))
     }
 
     "must redirect to Journey Recovery when the answer does not exist in user answers" in {
@@ -73,7 +75,7 @@ class AnswerExtractorSpec extends SpecBase {
 
       val controller = new TestController()
 
-      controller.get(TestPage) mustBe Redirect(routes.JourneyRecoveryController.onPageLoad())
+      controller.get(waypoints, TestPage) mustBe Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
 
@@ -86,7 +88,7 @@ class AnswerExtractorSpec extends SpecBase {
 
       val controller = new TestController()
 
-      controller.getAsync(TestPage).futureValue mustBe Ok(Json.toJson(1))
+      controller.getAsync(waypoints, TestPage).futureValue mustBe Ok(Json.toJson(1))
     }
 
     "must redirect to Journey Recovery when the answer does not exist in user answers" in {
@@ -95,7 +97,7 @@ class AnswerExtractorSpec extends SpecBase {
 
       val controller = new TestController()
 
-      controller.getAsync(TestPage).futureValue mustBe Redirect(routes.JourneyRecoveryController.onPageLoad())
+      controller.getAsync(waypoints, TestPage).futureValue mustBe Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
 }
