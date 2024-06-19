@@ -22,9 +22,9 @@ import controllers.routes
 import logging.Logging
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
-import models.{BusinessContactDetails, CheckMode, NormalMode}
+import models.{BusinessContactDetails, CheckMode}
 import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import services.{EmailVerificationService, SaveForLaterService}
@@ -37,6 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckEmailVerificationFilterImpl(
                                         inAmend: Boolean,
+                                        waypoints: Waypoints,
                                         frontendAppConfig: FrontendAppConfig,
                                         emailVerificationService: EmailVerificationService,
                                         saveForLaterService: SaveForLaterService,
@@ -55,9 +56,6 @@ class CheckEmailVerificationFilterImpl(
             registrationConnector.getRegistration()(hc).flatMap {
               case Right(registrationWrapper) =>
                 if (registrationWrapper.registration.schemeDetails.businessEmailId != contactDetails.emailAddress) {
-                  val waypoints = EmptyWaypoints.setNextWaypoint(
-                    Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
-                  )
                   checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails)
                 } else {
                   None.toFuture
@@ -68,9 +66,6 @@ class CheckEmailVerificationFilterImpl(
                 throw exception
             }
           } else {
-            val waypoints = EmptyWaypoints.setNextWaypoint(
-              Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
-            )
             checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails)
           }
         case None => None.toFuture
@@ -118,8 +113,8 @@ class CheckEmailVerificationFilterProvider @Inject()(
                                                       saveForLaterService: SaveForLaterService,
                                                       registrationConnector: RegistrationConnector
                                                     )(implicit val executionContext: ExecutionContext) {
-  def apply(inAmend: Boolean): CheckEmailVerificationFilterImpl = {
-    new CheckEmailVerificationFilterImpl(inAmend, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector)
+  def apply(inAmend: Boolean, waypoints: Waypoints): CheckEmailVerificationFilterImpl = {
+    new CheckEmailVerificationFilterImpl(inAmend, waypoints, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector)
   }
 }
 

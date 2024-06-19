@@ -28,7 +28,7 @@ import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}
+import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
@@ -44,12 +44,13 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
   class Harness(
                  inAmend: Boolean,
+                 waypoints: Waypoints,
                  frontendAppConfig: FrontendAppConfig,
                  emailVerificationService: EmailVerificationService,
                  saveForLaterService: SaveForLaterService,
                  registrationConnector: RegistrationConnector
                )
-    extends CheckEmailVerificationFilterImpl(inAmend, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector) {
+    extends CheckEmailVerificationFilterImpl(inAmend, waypoints, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector) {
     def callFilter(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = filter(request)
   }
 
@@ -77,7 +78,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, basicUserAnswersWithVatInfo, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = false, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = false,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -98,7 +107,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = false, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = false,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -120,7 +137,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = false, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = false,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -128,7 +153,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
         }
       }
 
-      "must redirect to Business Contact Details page when an email address is not verified and in amend" in  {
+      "must redirect to Business Contact Details page when an email address is not verified and in amend" in {
 
         val app = applicationBuilder(None)
           .configure("features.email-verification-enabled" -> "true")
@@ -152,7 +177,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = true, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = true,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -178,7 +211,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = false, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = false,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -208,7 +249,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = false, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = false,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -229,7 +278,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, basicUserAnswersWithVatInfo, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = false, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = false,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -250,7 +307,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, basicUserAnswersWithVatInfo, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = true, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = true,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -271,7 +336,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = true, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = true,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
@@ -293,7 +366,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, validEmailAddressUserAnswers, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-          val controller = new Harness(inAmend = true, frontendAppConfig, mockEmailVerificationService, mockSaveForLaterService, mockRegistrationConnector)
+
+          val controller = new Harness(
+            inAmend = true,
+            waypoints = expectedWaypoints,
+            frontendAppConfig = frontendAppConfig,
+            emailVerificationService = mockEmailVerificationService,
+            saveForLaterService = mockSaveForLaterService,
+            registrationConnector = mockRegistrationConnector
+          )
 
           val result = controller.callFilter(request).futureValue
 
