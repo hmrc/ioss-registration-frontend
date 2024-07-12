@@ -27,8 +27,8 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
   val lengthKey = "website.error.length"
   val invalidKey = "website.error.invalid"
   val maxLength = 250
-  val validData = "www.validwebsite.com"
-  val validData2 = "validwebsite.com"
+  val validData = "https://www.validwebsite.com"
+  val validData2 = "https://validwebsite.com"
   val index = Index(0)
   val emptyExistingAnswers = Seq.empty[String]
 
