@@ -24,5 +24,5 @@ object Validation {
   val bankAccountNamePattern = """^[A-Za-z0-9/\-?:()\.,'+]+( [A-Za-z0-9/\-?:()\.,'+]+)*$"""
   val alphaNumericWithSpace = """^[a-zA-Z0-9 ]+$"""
   val postcodePattern = """^[A-Za-z0-9 ]{0,100}$"""
-  val websitePattern = """^((https?://)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,})(\:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?)*$"""
+  val websitePattern = """^(https?:\/\/(?:www\.)?)[a-zA-Z0-9\[\]_~:\-\/?#@\!&'()*+,;=% ]+\.[a-zA-Z]{2,5}(\.[a-zA-Z]{2,5})?(:\d{1,5})?(\/[a-zA-Z0-9_-]+\/?)*$"""
 }
