@@ -20,7 +20,7 @@ import connectors.SavedUserAnswers
 import models._
 import models.amend.PreviousRegistration
 import models.domain.ModelHelpers.normaliseSpaces
-import models.domain.{EuTaxIdentifier, EuTaxIdentifierType, PreviousSchemeNumbers, TradeDetails}
+import models.domain.PreviousSchemeNumbers
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
 import models.etmp._
 import models.etmp.amend.EtmpAmendRegistrationChangeLog
@@ -40,19 +40,6 @@ trait ModelGenerators extends EitherValues {
 
   private val maxFieldLength: Int = 35
   private val maxEuTaxReferenceLength: Int = 20
-
-  implicit val arbitraryEuTaxIdentifierType: Arbitrary[EuTaxIdentifierType] =
-    Arbitrary {
-      Gen.oneOf(EuTaxIdentifierType.values)
-    }
-
-  implicit val arbitraryEuTaxIdentifier: Arbitrary[EuTaxIdentifier] =
-    Arbitrary {
-      for {
-        identifierType <- arbitrary[EuTaxIdentifierType]
-        value <- Gen.option(arbitrary[Int].toString)
-      } yield EuTaxIdentifier(identifierType, value)
-    }
 
   implicit lazy val arbitraryCheckVatDetails: Arbitrary[CheckVatDetails] =
     Arbitrary {
@@ -240,15 +227,6 @@ trait ModelGenerators extends EitherValues {
         iban        <- arbitrary[Iban]
       } yield BankDetails(accountName, bic, iban)
     }
-
-  implicit lazy val arbitraryFixedEstablishment: Arbitrary[TradeDetails] =
-    Arbitrary {
-      for {
-        tradingName <- arbitrary[String]
-        address <- arbitrary[InternationalAddress]
-      } yield TradeDetails(tradingName, address)
-    }
-
 
   implicit lazy val arbitraryIban: Arbitrary[Iban] =
     Arbitrary {
