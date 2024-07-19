@@ -19,58 +19,59 @@
 @import viewmodels.InputWidth._
 
 @this(
-    layout: templates.Layout,
-    formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
-    govukInput: GovukInput,
-    button: ButtonGroup
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukInput: GovukInput,
+        button: ButtonGroup
 )
 
 @(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("businessContactDetails.title"))) {
+  @layout(pageTitle = title(form, messages("businessContactDetails.title"))) {
 
     @formHelper(action = routes.BusinessContactDetailsController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
-        }
+      @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummaryViewModel(form))
+      }
 
-        <h1 class="govuk-heading-l govuk-!-margin-bottom-3">@messages("businessContactDetails.heading")</h1>
-        <p class="govuk-body govuk-!-margin-bottom-4">@messages("businessContactDetailsWithBta.p1")</p>
-        <p class="govuk-body govuk-!-margin-bottom-6">@Html(messages("businessContactDetailsWithBta.p2"))</p>
+      <h1 class="govuk-heading-l govuk-!-margin-bottom-3">@messages("businessContactDetails.heading")</h1>
+      <p class="govuk-body govuk-!-margin-bottom-4">@messages("businessContactDetailsWithBta.p1")</p>
+      <p class="govuk-body govuk-!-margin-bottom-6">@messages("businessContactDetailsWithBta.p2")</p>
 
-        @govukInput(
-            InputViewModel(
-                field = form("fullName"),
-                label = LabelViewModel(messages("businessContactDetails.fullName")).withCssClass("govuk-label--m")
-            )
-            .withWidth(Full)
-            .withAutocomplete("name")
-            .withSpellcheck(on = false)
+      @govukInput(
+        InputViewModel(
+          field = form("fullName"),
+          label = LabelViewModel(messages("businessContactDetails.fullName")).withCssClass("govuk-label--m")
         )
+        .withWidth(Full)
+        .withAutocomplete("name")
+        .withSpellcheck(on = false)
+      )
 
-        @govukInput(
-            InputViewModel(
-                field = form("telephoneNumber"),
-                label = LabelViewModel(messages("businessContactDetails.telephoneNumber")).withCssClass("govuk-label--m")
-            )
-            .withWidth(Fixed20)
-            .withInputType("tel")
-            .withInputMode("numeric")
-            .withAutocomplete("tel")
+      @govukInput(
+        InputViewModel(
+          field = form("telephoneNumber"),
+          label = LabelViewModel(messages("businessContactDetails.telephoneNumber")).withCssClass("govuk-label--m")
         )
+        .withWidth(Fixed20)
+        .withInputType("tel")
+        .withInputMode("numeric")
+        .withAutocomplete("tel")
+      )
 
-        @govukInput(
-            InputViewModel(
-                field = form("emailAddress"),
-                label = LabelViewModel(messages("businessContactDetails.emailAddress")).withCssClass("govuk-label--m")
-            )
-            .withWidth(Full)
-            .withHint(HintViewModel(messages("businessContactDetails.emailHint")))
-            .asEmail()
+      @govukInput(
+        InputViewModel(
+          field = form("emailAddress"),
+          label = LabelViewModel(messages("businessContactDetails.emailAddress")).withCssClass("govuk-label--m")
         )
+        .withWidth(Full)
+        .asEmail()
+      )
 
-        @button("site.continue", BusinessContactDetailsPage.route(waypoints).url, waypoints)
+      <p class="govuk-body">@messages("businessContactDetails.emailHint")</p>
+
+      @button("businessContactDetails.button.sendCode", BusinessContactDetailsPage.route(waypoints).url, waypoints)
     }
-}
+  }

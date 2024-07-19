@@ -423,7 +423,7 @@ businessContactDetailsWithBta.p2 = We''ll only contact you by email or through y
 businessContactDetails.fullName = Contact name or business department
 businessContactDetails.telephoneNumber = Telephone number
 businessContactDetails.emailAddress = Email address
-businessContactDetails.emailHint = We''ll send you an email to confirm this is correct.
+businessContactDetails.emailHint = We''ll send you a code to confirm your email address is correct.
 businessContactDetails.checkYourAnswersLabel = Your contact details
 businessContactDetails.error.fullName.required = Enter your full name or business department
 businessContactDetails.error.telephoneNumber.required = Enter your business telephone number
@@ -436,6 +436,7 @@ businessContactDetails.error.emailAddress.length = Email address must be 50 char
 businessContactDetails.error.emailAddress.invalid = Enter an email address in the correct format, like yourname@example.com
 businessContactDetails.fullName.change.hidden = Full name
 businessContactDetails.change.hidden = your business contact details
+businessContactDetails.button.sendCode = Send code and continue
 
 previouslyRegistered.title = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
 previouslyRegistered.heading = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
