@@ -43,7 +43,7 @@
                 label = LabelViewModel(messages("website.heading")).asPageHeading()
             )
             .withWidth(Full)
-            .withHint(HintViewModel(messages("website.hint")))
+            .withHint(HintViewModel(HtmlContent(Html(messages("website.hint")))))
         )
 
     @button("site.continue",  WebsitePage(index).route(waypoints).url, waypoints)
