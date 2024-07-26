@@ -53,13 +53,12 @@ class StartRejoinJourneyController @Inject()(
       (for {
         registrationWrapperResponse <- registrationConnector.getRegistration()
         currentReturnsResponse <- returnStatusConnector.getCurrentReturns(request.iossNumber)
-        vatCustomerInfoResponse <- registrationConnector.getVatCustomerInfo()
       } yield {
         val currentReturns = getResponseValue(currentReturnsResponse)
         val registrationWrapper = getResponseValue(registrationWrapperResponse)
-        val vatCustomerInfo = getResponseValue(vatCustomerInfoResponse)
+        val deregistrationDecisionDate = registrationWrapper.vatInfo.deregistrationDecisionDate
 
-        if (vatCustomerInfo.deregistrationDecisionDate.isDefined) {
+        if (deregistrationDecisionDate.isDefined) {
           logger.warn("Expired VRN - Cannot rejoin registration")
           Future.successful(Redirect(CannotRejoinRegistrationPage.route(waypoints).url))
 
