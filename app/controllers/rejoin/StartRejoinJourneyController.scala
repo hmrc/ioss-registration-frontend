@@ -56,8 +56,13 @@ class StartRejoinJourneyController @Inject()(
       } yield {
         val currentReturns = getResponseValue(currentReturnsResponse)
         val registrationWrapper = getResponseValue(registrationWrapperResponse)
+        val deregistrationDecisionDate = registrationWrapper.vatInfo.deregistrationDecisionDate
 
-        if (registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock)) && !existsOutstandingReturns(currentReturns, clock)) {
+        if (deregistrationDecisionDate.isDefined) {
+          logger.warn("Expired VRN - Cannot rejoin registration")
+          Future.successful(Redirect(CannotRejoinRegistrationPage.route(waypoints).url))
+
+        } else if (registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock)) && !existsOutstandingReturns(currentReturns, clock)) {
           val thisPage = RejoinRegistrationPage
           val waypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, RejoinRegistrationPage.urlFragment))
 
