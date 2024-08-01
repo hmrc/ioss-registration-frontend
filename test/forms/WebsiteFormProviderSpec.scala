@@ -77,8 +77,8 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
     )
 
     "must fail to bind when given a duplicate value" in {
-      val existingAnswers = Seq("foo", "bar")
-      val answer = "bar"
+      val existingAnswers = Seq("https://foo", "https://bar")
+      val answer = "https://bar"
       val form = new WebsiteFormProvider()(index, existingAnswers)
 
       val result = form.bind(Map(fieldName -> answer)).apply(fieldName)
