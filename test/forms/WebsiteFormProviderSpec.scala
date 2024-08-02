@@ -65,13 +65,13 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
     }
 
     "must not bind invalid website data with missing ." in {
-      val invalidWebsite = "https://www.websitecom"
+      val invalidWebsite = "https://websitecom"
       val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
       result.errors mustBe Seq(FormError(fieldName, invalidKey, Seq(websitePattern)))
     }
 
     "must not bind invalid website data with incorrect https://" in {
-      val invalidWebsite = "https:/www.websitecom"
+      val invalidWebsite = "https:/www.website.com"
       val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
       result.errors mustBe Seq(FormError(fieldName, invalidKey, Seq(websitePattern)))
     }
