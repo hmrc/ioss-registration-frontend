@@ -584,8 +584,9 @@ website.checkYourAnswersLabel = Website address
 website.error.required = Enter a website address
 website.error.length = Website address must be 250 characters or less
 website.error.duplicate = You entered this website address already. Enter a different one.
-website.error.invalid = Enter a website address in the correct format, like www.gov.uk
+website.error.invalid = Enter a website address in the correct format, like https://www.gov.uk
 website.change.hidden = website address
+website.change.heading = What is your website address?
 
 websites.checkYourAnswersLabel = Trading websites
 websites.change.hidden = Trading websites
@@ -602,6 +603,8 @@ addWebsite.error.required = Select yes if you need to add a website address
 addWebsite.addAnother.hint = You can add up to 10 websites that you use to sell your goods.
 addWebsite.change.hidden = {0}
 addWebsite.remove.hidden = {0}
+addWebsite.checkWebsiteAddress.singular = Check your website address is correct.
+addWebsite.checkWebsiteAddress = Check your website addresses are correct.
 
 deleteWebsite.title = Are you sure you need to remove {0}?
 deleteWebsite.heading = Are you sure you need to remove {0}?

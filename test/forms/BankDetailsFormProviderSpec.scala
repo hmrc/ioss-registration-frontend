@@ -40,7 +40,7 @@ class BankDetailsFormProviderSpec extends  StringFieldBehaviours {
 
     s"do not bind strings that contain forbidden characters" in {
       val result = form.bind(Map(fieldName -> "A & B")).apply(fieldName)
-      result.errors must contain only FormError(fieldName, invalid, Seq("^[A-Za-z0-9\\/\\-?:().,'+ ]*$"))
+      result.errors must contain only FormError(fieldName, invalid, Seq("""^[A-Za-z0-9/\-?:()\.,'+]+( [A-Za-z0-9/\-?:()\.,'+]+)*$"""))
     }
 
     behave like fieldWithMaxLength(

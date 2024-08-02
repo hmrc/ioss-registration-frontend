@@ -28,6 +28,13 @@ class WebsiteFormProvider @Inject() extends Mappings {
   def apply(thisIndex: Index, existingAnswers: Seq[String]): Form[String] =
     Form(
       "value" -> text("website.error.required")
+        .transform[String](
+          value => {
+            val withPrefix = if (value.startsWith("http") || value.startsWith("https://")) value else s"https://$value"
+            withPrefix.toLowerCase
+          },
+          identity
+        )
         .verifying(firstError(
           maxLength(250, "website.error.length"),
           notADuplicate(thisIndex, existingAnswers, "website.error.duplicate"),

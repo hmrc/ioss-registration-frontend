@@ -42,6 +42,8 @@
 
             <h1 class="govuk-heading-l">@messages("addWebsite.heading" + messageSuffix, list.size)</h1>
 
+            <p class="govuk-body">@messages("addWebsite.checkWebsiteAddress" + messageSuffix, list.size)</p>
+
             @addToList(list, itemSize = Long, "addWebsite.change.hidden", "addWebsite.remove.hidden")
 
             @if(canAddWebsites) {

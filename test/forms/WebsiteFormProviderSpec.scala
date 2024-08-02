@@ -27,8 +27,9 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
   val lengthKey = "website.error.length"
   val invalidKey = "website.error.invalid"
   val maxLength = 250
-  val validData = "www.validwebsite.com"
-  val validData2 = "validwebsite.com"
+  val validData = "https://www.validwebsite.com"
+  val validData2 = "https://validwebsite.com"
+  val validData3 = "http://www.validwebsite.com"
   val index = Index(0)
   val emptyExistingAnswers = Seq.empty[String]
 
@@ -51,6 +52,12 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
       result.errors mustBe empty
     }
 
+    "bind valid website with http:// prefix" in {
+      val result = form.bind(Map(fieldName -> validData3)).apply(fieldName)
+      result.value.value mustBe validData3
+      result.errors mustBe empty
+    }
+
     "must not bind invalid website data" in {
       val invalidWebsite = "invalid"
       val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
@@ -58,7 +65,13 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
     }
 
     "must not bind invalid website data with missing ." in {
-      val invalidWebsite = "www.websitecom"
+      val invalidWebsite = "https://websitecom"
+      val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
+      result.errors mustBe Seq(FormError(fieldName, invalidKey, Seq(websitePattern)))
+    }
+
+    "must not bind invalid website data with incorrect https://" in {
+      val invalidWebsite = "https:/www.website.com"
       val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
       result.errors mustBe Seq(FormError(fieldName, invalidKey, Seq(websitePattern)))
     }
@@ -77,8 +90,8 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
     )
 
     "must fail to bind when given a duplicate value" in {
-      val existingAnswers = Seq("foo", "bar")
-      val answer = "bar"
+      val existingAnswers = Seq("https://foo", "https://bar")
+      val answer = "https://bar"
       val form = new WebsiteFormProvider()(index, existingAnswers)
 
       val result = form.bind(Map(fieldName -> answer)).apply(fieldName)
