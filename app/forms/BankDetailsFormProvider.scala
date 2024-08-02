@@ -29,6 +29,7 @@ class BankDetailsFormProvider @Inject() extends Mappings {
   def apply(): Form[BankDetails] = Form(
     mapping(
       "accountName" -> text("bankDetails.error.accountName.required")
+        .transform[String](_.trim.replaceAll("\\s{2,}", " "), identity)
         .verifying(firstError(
           maxLength(70, "bankDetails.error.accountName.length"),
           regexp(Validation.bankAccountNamePattern, "bankDetails.error.accountName.invalid")
