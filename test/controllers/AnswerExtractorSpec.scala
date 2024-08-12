@@ -19,7 +19,9 @@ package controllers
 import base.SpecBase
 import models.UserAnswers
 import models.requests.AuthenticatedDataRequest
-import pages.{EmptyWaypoints, QuestionPage, Waypoints}
+import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
+import pages.rejoin.RejoinRegistrationPage
+import pages.{EmptyWaypoints, NonEmptyWaypoints, QuestionPage, Waypoint, Waypoints}
 import play.api.libs.json.{JsPath, Json}
 import play.api.mvc.Results.{Ok, Redirect}
 import play.api.mvc.{AnyContent, Call, Result}
@@ -32,6 +34,9 @@ import scala.concurrent.Future
 class AnswerExtractorSpec extends SpecBase {
 
   private val waypoints: Waypoints = EmptyWaypoints
+  private val rejoinWaypoint: Waypoints = NonEmptyWaypoints(Waypoint.fromString(RejoinRegistrationPage.urlFragment).get, Nil)
+  private val amendActiveWaypoints: Waypoints = NonEmptyWaypoints(Waypoint.fromString(ChangeRegistrationPage.urlFragment).get, Nil)
+  private val amendPreviousWaypoints: Waypoints = NonEmptyWaypoints(Waypoint.fromString(ChangePreviousRegistrationPage.urlFragment).get, Nil)
 
   private object TestPage extends QuestionPage[Int] {
     override def path: JsPath = JsPath \ "test"
@@ -77,6 +82,34 @@ class AnswerExtractorSpec extends SpecBase {
 
       controller.get(waypoints, TestPage) mustBe Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
+
+    "must redirect to RejoinRegistrationPage when the answer does not exist and waypoints are in RejoiningRegistration mode" in {
+
+      implicit val request: AuthenticatedDataRequest[AnyContent] = buildRequest(emptyUserAnswers)
+
+      val controller = new TestController()
+
+      controller.get(rejoinWaypoint, TestPage) mustBe Redirect(RejoinRegistrationPage.route(rejoinWaypoint))
+    }
+
+    "must redirect to ChangeRegistrationPage when the answer does not exist and waypoints are in AmendingActiveRegistration mode" in {
+
+      implicit val request: AuthenticatedDataRequest[AnyContent] = buildRequest(emptyUserAnswers)
+
+      val controller = new TestController()
+
+      controller.get(amendActiveWaypoints, TestPage) mustBe Redirect(ChangeRegistrationPage.route(amendActiveWaypoints))
+    }
+
+    "must redirect to ChangePreviousRegistrationPage when the answer does not exist and waypoints are in AmendingPreviousRegistration mode" in {
+
+      implicit val request: AuthenticatedDataRequest[AnyContent] = buildRequest(emptyUserAnswers)
+
+      val controller = new TestController()
+
+      controller.get(amendPreviousWaypoints, TestPage) mustBe Redirect(ChangePreviousRegistrationPage.route(amendPreviousWaypoints))
+
+    }
   }
 
   "getAnswerAsync" - {
@@ -98,6 +131,34 @@ class AnswerExtractorSpec extends SpecBase {
       val controller = new TestController()
 
       controller.getAsync(waypoints, TestPage).futureValue mustBe Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
+
+    "must redirect to RejoinRegistrationPage when the answer does not exist and waypoints are in RejoiningRegistration mode" in {
+
+      implicit val request: AuthenticatedDataRequest[AnyContent] = buildRequest(emptyUserAnswers)
+
+      val controller = new TestController()
+
+      controller.getAsync(rejoinWaypoint, TestPage).futureValue mustBe Redirect(RejoinRegistrationPage.route(rejoinWaypoint))
+    }
+
+    "must redirect to ChangeRegistrationPage when the answer does not exist and waypoints are in AmendingActiveRegistration mode" in {
+
+      implicit val request: AuthenticatedDataRequest[AnyContent] = buildRequest(emptyUserAnswers)
+
+      val controller = new TestController()
+
+      controller.getAsync(amendActiveWaypoints, TestPage).futureValue mustBe Redirect(ChangeRegistrationPage.route(amendActiveWaypoints))
+    }
+
+    "must redirect to ChangePreviousRegistrationPage when the answer does not exist and waypoints are in AmendingPreviousRegistration mode" in {
+
+      implicit val request: AuthenticatedDataRequest[AnyContent] = buildRequest(emptyUserAnswers)
+
+      val controller = new TestController()
+
+      controller.getAsync(amendPreviousWaypoints, TestPage).futureValue mustBe Redirect(ChangePreviousRegistrationPage.route(amendPreviousWaypoints))
+
     }
   }
 }
