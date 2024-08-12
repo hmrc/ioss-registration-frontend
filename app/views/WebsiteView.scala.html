@@ -37,13 +37,30 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        @govukInput(
-            InputViewModel(
-                field = form("value"),
-                label = LabelViewModel(messages("website.heading")).asPageHeading()
+        @if(form("value").value.exists(value => value.startsWith("https://") || value.startsWith("http://")))  {
+            @govukInput(
+                InputViewModel(
+                    field = form("value"),
+                    label = LabelViewModel(messages("website.change.heading")).asPageHeading()
+                )
+                .withWidth(Full)
             )
-            .withWidth(Full)
-        )
+        } else {
+            @govukInput(
+                InputViewModel(
+                    field = form("value"),
+                    label = LabelViewModel(
+                        if(form("value").value.isEmpty) {
+                            messages("website.heading")
+                        } else {
+                            messages("website.change.heading")
+                        }
+                    ).asPageHeading()
+                )
+                .withWidth(Full)
+                .withPrefix(PrefixOrSuffix(content = Text("https://")))
+            )
+        }
 
     @button("site.continue",  WebsitePage(index).route(waypoints).url, waypoints)
 

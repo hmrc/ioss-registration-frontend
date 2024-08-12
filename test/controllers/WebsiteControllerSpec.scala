@@ -93,10 +93,10 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, websiteRoute)
-            .withFormUrlEncodedBody(("value", "www.example.com"))
+            .withFormUrlEncodedBody(("value", "https://www.example.com"))
 
         val result = route(application, request).value
-        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("www.example.com")).success.value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("https://www.example.com")).success.value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
