@@ -16,37 +16,42 @@
 
 @import components.ButtonGroup
 @import pages.previousRegistrations.PreviousEuCountryPage
-@import viewmodels.InputWidth
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichSelect
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.accessibleautocomplete.AccessibleAutocomplete
+
 
 @this(
-    layout: templates.Layout,
-    formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
-    govukInput: GovukInput,
-    govukSelect: GovukSelect,
-    button: ButtonGroup
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukInput: GovukInput,
+        govukSelect: GovukSelect,
+        button: ButtonGroup
 )
 
 @(form: Form[_], waypoints: Waypoints, index: Index)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("previousEuCountry.title"))) {
 
-    @formHelper(action = controllers.previousRegistrations.routes.PreviousEuCountryController.onSubmit(waypoints, index)) {
+  @formHelper(action = controllers.previousRegistrations.routes.PreviousEuCountryController.onSubmit(waypoints, index)) {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
-        }
-
-        @govukSelect(
-            SelectViewModel(
-                field = form("value"),
-                items = Country.euCountrySelectItems,
-                label = LabelViewModel(messages("previousEuCountry.heading")).asPageHeading()
-            )
-            .withCssClass(InputWidth.Fixed20.toString)
-            .withCssClass("autocomplete")
-        )
-
-        @button("site.continue",  PreviousEuCountryPage(index).route(waypoints).url, waypoints)
+    @if(form.errors.nonEmpty) {
+      @govukErrorSummary(ErrorSummaryViewModel(form))
     }
+
+    @govukSelect(
+      SelectViewModel(
+        field = form("value"),
+        items = Country.euCountrySelectItems,
+        label = LabelViewModel(messages("previousEuCountry.heading")).asPageHeading()
+      ).asAccessibleAutocomplete(Some(
+        AccessibleAutocomplete(
+          showAllValues = true,
+          defaultValue = Some("")
+        )
+      ))
+    )
+
+    @button("site.continue", PreviousEuCountryPage(index).route(waypoints).url, waypoints)
+  }
 }
