@@ -16,7 +16,8 @@
 
 @import controllers.euDetails.routes
 @import pages.euDetails.EuCountryPage
-@import viewmodels.InputWidth
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichSelect
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.accessibleautocomplete.AccessibleAutocomplete
 @import views.html.components.ButtonGroup
 
 @this(
@@ -31,22 +32,25 @@
 
 @layout(pageTitle = title(form, messages("euCountry.title"))) {
 
-    @formHelper(action = routes.EuCountryController.onSubmit(waypoints, countryIndex)) {
+  @formHelper(action = routes.EuCountryController.onSubmit(waypoints, countryIndex)) {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
-        }
-
-        @govukSelect(
-            SelectViewModel(
-                field = form("value"),
-                items = Country.euCountrySelectItems,
-                label = LabelViewModel(messages("euCountry.heading")).asPageHeading()
-            )
-            .withCssClass(InputWidth.Fixed20.toString)
-            .withCssClass("autocomplete")
-        )
-
-        @button("site.continue", EuCountryPage(countryIndex).route(waypoints).url, waypoints)
+    @if(form.errors.nonEmpty) {
+      @govukErrorSummary(ErrorSummaryViewModel(form))
     }
+
+    @govukSelect(
+      SelectViewModel(
+        field = form("value"),
+        items = Country.euCountrySelectItems,
+        label = LabelViewModel(messages("euCountry.heading")).asPageHeading()
+      ).asAccessibleAutocomplete(Some(
+        AccessibleAutocomplete(
+          showAllValues = true,
+          defaultValue = Some("")
+        )
+      ))
+    )
+
+    @button("site.continue", EuCountryPage(countryIndex).route(waypoints).url, waypoints)
+  }
 }
