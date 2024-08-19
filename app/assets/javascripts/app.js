@@ -110,8 +110,11 @@ document.addEventListener('DOMContentLoaded', function (event) {
 
 function showTheSpinner() {
 
+    const processingWheel = document.getElementById("processing-wheel");
+
     //make the spinning wheel visible
-    document.getElementById("processing-wheel").hidden = false;
+    processingWheel.removeAttribute("aria-hidden");
+    processingWheel.hidden = false;
 
     //make the elements hidden
     document.getElementById("processing-button-group").style.visibility = 'hidden';
