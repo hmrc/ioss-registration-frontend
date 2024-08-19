@@ -42,7 +42,7 @@
                 field = form("value"),
                 label = LabelViewModel(messages("euVatNumber.heading", countryWithValidationDetails.country.name)).asPageHeading()
             )
-            .withWidth(Fixed10)
+            .withWidth(Full)
             .withHint(HintViewModel(HtmlContent(Html(
                 messages(
                     "euVatNumber.hint",
