@@ -38,7 +38,7 @@ object BusinessContactDetailsSummary  {
           value   = ValueViewModel(HtmlContent(value)),
           actions = Seq(
             ActionItemViewModel("site.change", BusinessContactDetailsPage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("businessContactDetails.change.hidden"))
+              .withVisuallyHiddenText(messages("businessContactDetails.change.fullName.hidden"))
           )
         )
     }
@@ -54,7 +54,7 @@ object BusinessContactDetailsSummary  {
           value   = ValueViewModel(HtmlContent(value)),
           actions = Seq(
             ActionItemViewModel("site.change", BusinessContactDetailsPage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("businessContactDetails.change.hidden"))
+              .withVisuallyHiddenText(messages("businessContactDetails.change.telephoneNumber.hidden"))
           )
         )
     }
@@ -70,7 +70,7 @@ object BusinessContactDetailsSummary  {
           value   = ValueViewModel(HtmlContent(value)),
           actions = Seq(
             ActionItemViewModel("site.change", BusinessContactDetailsPage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("businessContactDetails.change.hidden"))
+              .withVisuallyHiddenText(messages("businessContactDetails.change.emailAddress.hidden"))
 
           )
         )
