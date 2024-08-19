@@ -574,6 +574,9 @@ bankDetails.error.iban.checksum = Enter a valid IBAN
 bankDetails.error.accountName.invalid = Name on the account must only include letters, numbers, hyphens, spaces and apostrophes
 bankDetails.error.bic.invalid = Enter a valid BIC
 bankDetails.change.hidden = your bank account details
+bankDetails.change.accountName.hidden = the name on this bank account
+bankDetails.change.bic.hidden = your BIC or SWIFT code
+bankDetails.change.iban.hidden = your IBAN
 
 error.missing_answers = Some of your information is missing. You must complete this before you can submit your changes.
 error.missing_answers_header = Some information is missing.

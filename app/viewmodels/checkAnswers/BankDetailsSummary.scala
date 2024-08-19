@@ -39,7 +39,7 @@ object BankDetailsSummary {
           value = ValueViewModel(HtmlContent(value)),
           actions = Seq(
             ActionItemViewModel("site.change", createBusinessDetailsChangeLinkUrl(waypoints, sourcePage))
-              .withVisuallyHiddenText(messages("bankDetails.change.hidden"))
+              .withVisuallyHiddenText(messages("bankDetails.change.accountName.hidden"))
           )
         )
     }
@@ -63,7 +63,7 @@ object BankDetailsSummary {
           value = ValueViewModel(HtmlContent(value)),
           actions = Seq(
             ActionItemViewModel("site.change", createBusinessDetailsChangeLinkUrl(waypoints, sourcePage))
-              .withVisuallyHiddenText(messages("bankDetails.change.hidden"))
+              .withVisuallyHiddenText(messages("bankDetails.change.bic.hidden"))
           )
         )
     }
