@@ -28,15 +28,15 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist._
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object PreviousSchemeSummary  {
+object PreviousSchemeSummary {
 
   def getSummaryLists(
-                               previousSchemes: List[SchemeDetailsWithOptionalVatNumber],
-                               countryIndex: Index,
-                               country: Country,
-                               existingSchemes: Seq[PreviousScheme],
-                               waypoints: Waypoints
-                             )(implicit request: AuthenticatedDataRequest[_], messages: Messages): List[SummaryList]  = {
+                       previousSchemes: List[SchemeDetailsWithOptionalVatNumber],
+                       countryIndex: Index,
+                       country: Country,
+                       existingSchemes: Seq[PreviousScheme],
+                       waypoints: Waypoints
+                     )(implicit request: AuthenticatedDataRequest[_], messages: Messages): List[SummaryList] = {
 
 
     previousSchemes.zipWithIndex.flatMap { case (scheme, schemeIndex) =>
@@ -53,9 +53,10 @@ object PreviousSchemeSummary  {
             actions = Some(Actions(
               items = if (!isExistingScheme) {
                 Seq(
-                  ActionItemViewModel("site.remove", controllers.previousRegistrations.routes.DeletePreviousSchemeController.onPageLoad(
-                    waypoints, countryIndex, Index(schemeIndex)).url)
-                    .withVisuallyHiddenText(messages("site.remove.hidden", country.name, HtmlFormat.escape(messages(s"previousScheme.$previousAnsweredScheme"))))
+                  ActionItemViewModel(
+                    "site.remove",
+                    controllers.previousRegistrations.routes.DeletePreviousSchemeController.onPageLoad(waypoints, countryIndex, Index(schemeIndex)).url
+                  ).withVisuallyHiddenText(messages("site.remove.hidden", country.name, HtmlFormat.escape(messages(s"previousScheme.$previousAnsweredScheme"))))
                 )
               } else {
                 Seq.empty

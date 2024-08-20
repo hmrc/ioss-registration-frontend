@@ -21,6 +21,7 @@ import controllers.routes
 import forms.previousRegistrations.CheckPreviousSchemeAnswersFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.{Country, Index, PreviousScheme}
+import models.requests.AuthenticatedDataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito
@@ -33,6 +34,7 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
 import repositories.AuthenticatedUserAnswersRepository
 import viewmodels.checkAnswers.previousRegistrations.{PreviousSchemeNumberSummary, PreviousSchemeSummary}
 import viewmodels.govuk.SummaryListFluency
@@ -71,16 +73,15 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
       running(application) {
         implicit val msgs: Messages = messages(application)
         val request = FakeRequest(GET, checkPreviousSchemeAnswersRoute)
+        val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Some(iossNumber), baseUserAnswers, None)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[CheckPreviousSchemeAnswersView]
-        val lists = Seq(SummaryListViewModel(
-          Seq(
-            PreviousSchemeSummary.row(baseUserAnswers, index, index, country, Seq.empty, waypoints),
-            PreviousSchemeNumberSummary.row(baseUserAnswers, index, index, None)
-          ).flatten
-        ))
+
+        val previousSchemes = baseUserAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(index)).get
+
+        val lists = PreviousSchemeSummary.getSummaryLists(previousSchemes, index, country, Seq.empty, waypoints)(authDataRequest, msgs)
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, waypoints, lists, index, country, canAddScheme = true)(request, messages(application)).toString
@@ -136,21 +137,21 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
             FakeRequest(POST, checkPreviousSchemeAnswersRoute)
               .withFormUrlEncodedBody(("value", ""))
 
+          val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Some(iossNumber), baseUserAnswers, None)
+
           val boundForm = form.bind(Map("value" -> ""))
 
           val view = application.injector.instanceOf[CheckPreviousSchemeAnswersView]
           implicit val msgs: Messages = messages(application)
-          val list = Seq(SummaryListViewModel(
-            Seq(
-              PreviousSchemeSummary.row(baseUserAnswers, index, index, country, Seq.empty, waypoints),
-              PreviousSchemeNumberSummary.row(baseUserAnswers, index, index, None)
-            ).flatten
-          ))
+
+          val previousSchemes = baseUserAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(index)).get
+
+          val lists = PreviousSchemeSummary.getSummaryLists(previousSchemes, index, country, Seq.empty, waypoints)(authDataRequest, msgs)
 
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, waypoints, list, index, country, canAddScheme = true)(request, implicitly).toString
+          contentAsString(result) mustEqual view(boundForm, waypoints, lists, index, country, canAddScheme = true)(request, implicitly).toString
         }
       }
 
