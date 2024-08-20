@@ -18,7 +18,7 @@ package controllers.euDetails
 
 import controllers.actions.AuthenticatedControllerComponents
 import models.Index
-import pages.Waypoints
+import pages.{EmptyWaypoints, Waypoints}
 import pages.euDetails.CannotRegisterFixedEstablishmentOperationOnlyPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -50,7 +50,7 @@ class CannotRegisterFixedEstablishmentOperationOnlyController @Inject()(
         updatedAnswers <- Future.fromTry(request.userAnswers.remove(EuDetailsQuery(countryIndex)))
         _ <- cc.sessionRepository.set(updatedAnswers)
       } yield {
-        Redirect(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+        Redirect(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex).navigate(EmptyWaypoints, request.userAnswers, updatedAnswers).route)
       }
   }
 }
