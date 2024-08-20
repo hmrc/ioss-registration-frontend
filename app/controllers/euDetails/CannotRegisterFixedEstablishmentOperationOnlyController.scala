@@ -51,7 +51,7 @@ class CannotRegisterFixedEstablishmentOperationOnlyController @Inject()(
         _ <- cc.sessionRepository.set(updatedAnswers)
       } yield {
         val updatedWaypoints = waypoints match {
-          case w: NonEmptyWaypoints if w.next.page == AddEuDetailsPage(Some(countryIndex)) =>
+          case w: NonEmptyWaypoints if w.next.page.isTheSamePage(AddEuDetailsPage(Some(countryIndex))) =>
             Waypoints(w.waypoints.tail)
           case w => w
         }
