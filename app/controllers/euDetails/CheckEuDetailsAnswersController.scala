@@ -53,8 +53,8 @@ class CheckEuDetailsAnswersController @Inject()(
 
             val list = SummaryListViewModel(
               rows = Seq(
-                RegistrationTypeSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
                 HasFixedEstablishmentSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
+                RegistrationTypeSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
                 EuVatNumberSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
                 EuTaxReferenceSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
                 FixedEstablishmentTradingNameSummary.row(request.userAnswers, waypoints, countryIndex, thisPage),
