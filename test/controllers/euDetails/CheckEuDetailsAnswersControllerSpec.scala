@@ -68,11 +68,12 @@ class CheckEuDetailsAnswersControllerSpec extends SpecBase with SummaryListFluen
 
         val list = SummaryListViewModel(
           Seq(
+            HasFixedEstablishmentSummary.row(answers, country, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
             RegistrationTypeSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
             EuTaxReferenceSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
             FixedEstablishmentTradingNameSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
             FixedEstablishmentAddressSummary.row(answers, waypoints, countryIndex, CheckEuDetailsAnswersPage(countryIndex)),
-            TaxRegisteredInEuSummary.row(answers, waypoints, CheckEuDetailsAnswersPage(countryIndex), isCurrentIossAccount = true)).flatten
+          ).flatten
         )
 
         status(result) mustBe OK

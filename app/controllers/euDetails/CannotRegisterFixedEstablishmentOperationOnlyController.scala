@@ -18,8 +18,8 @@ package controllers.euDetails
 
 import controllers.actions.AuthenticatedControllerComponents
 import models.Index
-import pages.Waypoints
-import pages.euDetails.CannotRegisterFixedEstablishmentOperationOnlyPage
+import pages.{EmptyWaypoints, NonEmptyWaypoints, Waypoints}
+import pages.euDetails.{AddEuDetailsPage, CannotRegisterFixedEstablishmentOperationOnlyPage, CheckEuDetailsAnswersPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.euDetails.EuDetailsQuery
@@ -50,7 +50,12 @@ class CannotRegisterFixedEstablishmentOperationOnlyController @Inject()(
         updatedAnswers <- Future.fromTry(request.userAnswers.remove(EuDetailsQuery(countryIndex)))
         _ <- cc.sessionRepository.set(updatedAnswers)
       } yield {
-        Redirect(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex).navigate(waypoints, request.userAnswers, updatedAnswers).route)
+        val updatedWaypoints = waypoints match {
+          case w: NonEmptyWaypoints if w.next.page.isTheSamePage(CheckEuDetailsAnswersPage(countryIndex)) =>
+            Waypoints(w.waypoints.tail)
+          case w => w
+        }
+        Redirect(CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex).navigate(updatedWaypoints, request.userAnswers, updatedAnswers).route)
       }
   }
 }

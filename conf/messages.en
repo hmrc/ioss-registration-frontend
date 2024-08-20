@@ -319,6 +319,7 @@ hasFixedEstablishment.title = Does your business have a fixed establishment in {
 hasFixedEstablishment.heading = Does your business have a fixed establishment in {0}
 hasFixedEstablishment.error.required = Select yes if your business has a fixed establishment in {0}
 hasFixedEstablishment.change.hidden = your business has a fixed establishment in {0}
+hasFixedEstablishment.checkYourAnswersLabel = Has fixed establishment
 
 cannotRegisterFixedEstablishmentOperationOnly.title = You only need to tell us about countries where you have a fixed establishment
 cannotRegisterFixedEstablishmentOperationOnly.heading = You only need to tell us about countries where you have a fixed establishment
