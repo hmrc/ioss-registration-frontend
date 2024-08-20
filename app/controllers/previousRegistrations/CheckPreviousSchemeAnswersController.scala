@@ -20,13 +20,17 @@ import config.Constants
 import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.CheckPreviousSchemeAnswersFormProvider
-import models.requests.AuthenticatedDataRequest
 import models.{Country, Index, PreviousScheme}
+import models.previousRegistrations.SchemeDetailsWithOptionalVatNumber
+import models.requests.AuthenticatedDataRequest
 import pages.{JourneyRecoveryPage, Waypoints}
-import pages.previousRegistrations.CheckPreviousSchemeAnswersPage
-import play.api.i18n.{I18nSupport, MessagesApi}
+import pages.previousRegistrations.{CheckPreviousSchemeAnswersPage, PreviousSchemePage}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.twirl.api.HtmlFormat
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Actions, Card, CardTitle}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
 import viewmodels.checkAnswers.previousRegistrations.{PreviousIntermediaryNumberSummary, PreviousSchemeNumberSummary, PreviousSchemeSummary}
@@ -54,15 +58,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
 
           request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(index)).map { previousSchemes =>
             val canAddScheme = previousSchemes.size < Constants.maxSchemes
-            val lists = previousSchemes.zipWithIndex.map { case (scheme, schemeIndex) =>
-              SummaryListViewModel(
-                rows = Seq(
-                  PreviousSchemeSummary.row(request.userAnswers, index, Index(schemeIndex), country, existingSchemes, waypoints),
-                  PreviousSchemeNumberSummary.row(request.userAnswers, index, Index(schemeIndex), scheme.previousScheme),
-                  PreviousIntermediaryNumberSummary.row(request.userAnswers, index, Index(schemeIndex))
-                ).flatten
-              )
-            }
+            val lists = PreviousSchemeSummary.getSummaryLists(previousSchemes, index, country, existingSchemes, waypoints)
 
             val form = formProvider(country)
 
