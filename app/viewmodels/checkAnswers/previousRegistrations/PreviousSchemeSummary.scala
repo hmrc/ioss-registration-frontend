@@ -44,13 +44,12 @@ object PreviousSchemeSummary  {
         val isExistingScheme = existingSchemes.contains(previousAnsweredScheme)
         SummaryListViewModel(
           rows = Seq(
-            PreviousSchemeSummary.row(request.userAnswers, countryIndex, Index(schemeIndex), country, existingSchemes, waypoints),
             PreviousSchemeNumberSummary.row(request.userAnswers, countryIndex, Index(schemeIndex), scheme.previousScheme),
             PreviousIntermediaryNumberSummary.row(request.userAnswers, countryIndex, Index(schemeIndex))
           ).flatten
         ).withCard(
           card = Card(
-            title = Some(CardTitle(content = HtmlContent(HtmlFormat.escape((s"previousScheme.$previousAnsweredScheme"))))),
+            title = Some(CardTitle(content = HtmlContent(HtmlFormat.escape(messages(s"previousScheme.$previousAnsweredScheme"))))),
             actions = Some(Actions(
               items = if (!isExistingScheme) {
                 Seq(
@@ -68,31 +67,4 @@ object PreviousSchemeSummary  {
     }
   }
 
-  def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index, country: Country, existingPreviousSchemes: Seq[PreviousScheme], waypoints: Waypoints)
-         (implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
-      previousAnsweredScheme: PreviousScheme =>
-
-        val isExistingScheme = existingPreviousSchemes.contains(previousAnsweredScheme)
-
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"previousScheme.$previousAnsweredScheme"))
-          )
-        )
-
-        SummaryListRowViewModel(
-          key     = "previousScheme.checkYourAnswersLabel",
-          value   = value,
-          actions = if (!isExistingScheme) {
-            Seq(
-              ActionItemViewModel("site.remove", controllers.previousRegistrations.routes.DeletePreviousSchemeController.onPageLoad(
-                waypoints, countryIndex, schemeIndex).url)
-                .withVisuallyHiddenText(messages("site.remove.hidden", country.name, HtmlFormat.escape(messages(s"previousScheme.$previousAnsweredScheme"))))
-            )
-          } else {
-            Seq.empty
-          }
-        )
-    }
 }

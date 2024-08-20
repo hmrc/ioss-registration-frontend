@@ -92,15 +92,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
 
           val existingSchemes = Seq.empty
 
-          val lists = previousSchemes.zipWithIndex.map { case (scheme, schemeIndex) =>
-            SummaryListViewModel(
-              rows = Seq(
-                PreviousSchemeSummary.row(request.userAnswers, index, Index(schemeIndex), country, existingSchemes, waypoints),
-                PreviousSchemeNumberSummary.row(request.userAnswers, index, Index(schemeIndex), scheme.previousScheme),
-                PreviousIntermediaryNumberSummary.row(request.userAnswers, index, Index(schemeIndex))
-              ).flatten
-            )
-          }
+          val lists = PreviousSchemeSummary.getSummaryLists(previousSchemes, index, country, existingSchemes, waypoints)
 
           val form = formProvider(country)
 
