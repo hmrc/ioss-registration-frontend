@@ -24,7 +24,7 @@ import models.previousRegistrations.PreviousSchemeHintText
 import models.requests.AuthenticatedDataRequest
 import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, WithName}
 import pages.Waypoints
-import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
+import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage, PreviousSchemeTypePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
@@ -62,10 +62,16 @@ class PreviousOssNumberController @Inject()(
                 val isEditing = maybeCurrentAnswer.isDefined
                 val thereIsAnotherOssScheme = editingOssScheme.size > 1
                 val isEditingAndSecondSchemeExists = isEditing && thereIsAnotherOssScheme
-                val providingForm = if(isEditing && !thereIsAnotherOssScheme) {
-                  formProvider(country, Seq.empty)
-                } else {
-                  formProvider(country, previousSchemes)
+                val editingSchemeType = request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex))
+                val providingForm = (maybeCurrentAnswer, editingSchemeType) match {
+                  case (Some(_), Some(currentAnswerSchemeType)) => if (thereIsAnotherOssScheme) {
+
+                    formProvider(country, previousSchemes.filterNot(_ == currentAnswerSchemeType))
+                  } else {
+                    formProvider(country, Seq.empty)
+                  }
+                  case _ =>
+                    formProvider(country, Seq.empty)
                 }
                 (isEditingAndSecondSchemeExists, providingForm)
               case None =>
@@ -104,10 +110,16 @@ class PreviousOssNumberController @Inject()(
                 val isEditing = maybeCurrentAnswer.isDefined
                 val thereIsAnotherOssScheme = editingOssScheme.size > 1
                 val isEditingAndSecondSchemeExists = isEditing && thereIsAnotherOssScheme
-                val providingForm = if(isEditing && !thereIsAnotherOssScheme) {
-                  formProvider(country, Seq.empty)
-                } else {
-                  formProvider(country, previousSchemes)
+                val editingSchemeType = request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex))
+                val providingForm = (maybeCurrentAnswer, editingSchemeType) match {
+                  case (Some(_), Some(currentAnswerSchemeType)) => if (thereIsAnotherOssScheme) {
+
+                    formProvider(country, previousSchemes.filterNot(_ == currentAnswerSchemeType))
+                  } else {
+                    formProvider(country, Seq.empty)
+                  }
+                  case _ =>
+                    formProvider(country, Seq.empty)
                 }
                 (isEditingAndSecondSchemeExists, providingForm)
               case None =>
