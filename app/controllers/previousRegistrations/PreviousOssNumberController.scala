@@ -20,11 +20,12 @@ import controllers.GetCountry
 import controllers.actions._
 import forms.previousRegistrations.PreviousOssNumberFormProvider
 import models.domain.PreviousSchemeNumbers
-import models.previousRegistrations.PreviousSchemeHintText
+import models.previousRegistrations.{PreviousSchemeHintText, SchemeDetailsWithOptionalVatNumber}
 import models.requests.AuthenticatedDataRequest
 import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, WithName}
 import pages.Waypoints
 import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage, PreviousSchemeTypePage}
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
@@ -57,23 +58,7 @@ class PreviousOssNumberController @Inject()(
 
             val (isEditingAndAnotherOssScheme, form) = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
               case Some(previousSchemeDetails) =>
-                val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
-                val editingOssScheme = previousSchemes.filter(previousScheme => previousScheme == PreviousScheme.OSSU || previousScheme == PreviousScheme.OSSNU)
-                val isEditing = maybeCurrentAnswer.isDefined
-                val thereIsAnotherOssScheme = editingOssScheme.size > 1
-                val isEditingAndSecondSchemeExists = isEditing && thereIsAnotherOssScheme
-                val editingSchemeType = request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex))
-                val providingForm = (maybeCurrentAnswer, editingSchemeType) match {
-                  case (Some(_), Some(currentAnswerSchemeType)) => if (thereIsAnotherOssScheme) {
-
-                    formProvider(country, previousSchemes.filterNot(_ == currentAnswerSchemeType))
-                  } else {
-                    formProvider(country, Seq.empty)
-                  }
-                  case _ =>
-                    formProvider(country, Seq.empty)
-                }
-                (isEditingAndSecondSchemeExists, providingForm)
+                getFormAndIfEditingExistingWithSecondaryScheme(countryIndex, schemeIndex, request, country, maybeCurrentAnswer, previousSchemeDetails)
               case None =>
                 (false, formProvider(country, Seq.empty))
             }
@@ -95,6 +80,33 @@ class PreviousOssNumberController @Inject()(
         }
     }
 
+  private def getFormAndIfEditingExistingWithSecondaryScheme(
+                                                              countryIndex: Index,
+                                                              schemeIndex: Index,
+                                                              request: AuthenticatedDataRequest[AnyContent],
+                                                              country: Country,
+                                                              maybeCurrentAnswer: Option[PreviousSchemeNumbers],
+                                                              previousSchemeDetails: List[SchemeDetailsWithOptionalVatNumber]
+                                                            ): (Boolean, Form[String]) = {
+    val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
+    val editingOssScheme = previousSchemes.filter(previousScheme => previousScheme == PreviousScheme.OSSU || previousScheme == PreviousScheme.OSSNU)
+    val isEditing = maybeCurrentAnswer.isDefined
+    val thereIsAnotherOssScheme = editingOssScheme.size > 1
+    val isEditingAndSecondSchemeExists = isEditing && thereIsAnotherOssScheme
+    val editingSchemeType = request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex))
+    val providingForm = (maybeCurrentAnswer, editingSchemeType) match {
+      case (Some(_), Some(currentAnswerSchemeType)) => if (thereIsAnotherOssScheme) {
+
+        formProvider(country, previousSchemes.filterNot(_ == currentAnswerSchemeType))
+      } else {
+        formProvider(country, Seq.empty)
+      }
+      case _ =>
+        formProvider(country, Seq.empty)
+    }
+    (isEditingAndSecondSchemeExists, providingForm)
+  }
+
   def onSubmit(waypoints: Waypoints, countryIndex: Index, schemeIndex: Index): Action[AnyContent] =
     cc.authAndGetData(waypoints.registrationModificationMode).async {
       implicit request =>
@@ -105,23 +117,7 @@ class PreviousOssNumberController @Inject()(
 
             val (isEditingAndAnotherOssScheme, form) = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
               case Some(previousSchemeDetails) =>
-                val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
-                val editingOssScheme = previousSchemes.filter(previousScheme => previousScheme == PreviousScheme.OSSU || previousScheme == PreviousScheme.OSSNU)
-                val isEditing = maybeCurrentAnswer.isDefined
-                val thereIsAnotherOssScheme = editingOssScheme.size > 1
-                val isEditingAndSecondSchemeExists = isEditing && thereIsAnotherOssScheme
-                val editingSchemeType = request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex))
-                val providingForm = (maybeCurrentAnswer, editingSchemeType) match {
-                  case (Some(_), Some(currentAnswerSchemeType)) => if (thereIsAnotherOssScheme) {
-
-                    formProvider(country, previousSchemes.filterNot(_ == currentAnswerSchemeType))
-                  } else {
-                    formProvider(country, Seq.empty)
-                  }
-                  case _ =>
-                    formProvider(country, Seq.empty)
-                }
-                (isEditingAndSecondSchemeExists, providingForm)
+                getFormAndIfEditingExistingWithSecondaryScheme(countryIndex, schemeIndex, request, country, maybeCurrentAnswer, previousSchemeDetails)
               case None =>
                 (false, formProvider(country, Seq.empty))
             }
