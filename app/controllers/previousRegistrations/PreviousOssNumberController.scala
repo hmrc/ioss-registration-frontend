@@ -62,7 +62,7 @@ class PreviousOssNumberController @Inject()(
                 val isEditing = maybeCurrentAnswer.isDefined
                 val thereIsAnotherOssScheme = editingOssScheme.size > 1
                 val isEditingAndSecondSchemeExists = isEditing && thereIsAnotherOssScheme
-                val providingForm = if(isEditingAndSecondSchemeExists) {
+                val providingForm = if(!isEditingAndSecondSchemeExists) {
                   formProvider(country, Seq.empty)
                 } else {
                   formProvider(country, previousSchemes)
@@ -104,7 +104,7 @@ class PreviousOssNumberController @Inject()(
                 val isEditing = maybeCurrentAnswer.isDefined
                 val thereIsAnotherOssScheme = editingOssScheme.size > 1
                 val isEditingAndSecondSchemeExists = isEditing && thereIsAnotherOssScheme
-                val providingForm = if(isEditingAndSecondSchemeExists) {
+                val providingForm = if(!isEditingAndSecondSchemeExists) {
                   formProvider(country, Seq.empty)
                 } else {
                   formProvider(country, previousSchemes)
