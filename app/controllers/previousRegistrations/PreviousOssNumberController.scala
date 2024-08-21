@@ -55,17 +55,19 @@ class PreviousOssNumberController @Inject()(
 
             val maybeCurrentAnswer = request.userAnswers.get(PreviousOssNumberPage(countryIndex, schemeIndex))
 
-            val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex, maybeCurrentAnswer.isDefined)
-
-            val form = (maybeCurrentAnswer.isDefined, request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex))) match {
-              case (false, Some(previousSchemeDetails)) =>
-
+            val (isEditingAndAnotherOssScheme, form) = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
+              case Some(previousSchemeDetails) =>
                 val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
-                formProvider(country, previousSchemes)
+                val editingOssScheme = previousSchemes.filter(previousScheme => previousScheme == PreviousScheme.OSSU || previousScheme == PreviousScheme.OSSNU)
+                val isEditing = maybeCurrentAnswer.isDefined
+                val thereIsAnotherOssScheme = editingOssScheme.size > 1
+                (isEditing && thereIsAnotherOssScheme, formProvider(country, previousSchemes))
 
-              case (_, _) =>
-                formProvider(country, Seq.empty)
+              case None =>
+                (false, formProvider(country, Seq.empty))
             }
+
+            val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex, maybeCurrentAnswer.isDefined && !isEditingAndAnotherOssScheme)
 
             val preparedForm = maybeCurrentAnswer match {
               case None => form
@@ -90,15 +92,18 @@ class PreviousOssNumberController @Inject()(
 
             val maybeCurrentAnswer = request.userAnswers.get(PreviousOssNumberPage(countryIndex, schemeIndex))
 
-            val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex, maybeCurrentAnswer.isDefined)
-
-            val form = (maybeCurrentAnswer.isDefined, request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex))) match {
-              case (false, Some(previousSchemeDetails)) =>
+            val (isEditingAndAnotherOssScheme, form) = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
+              case Some(previousSchemeDetails) =>
                 val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
-                formProvider(country, previousSchemes)
-              case (_, _) =>
-                formProvider(country, Seq.empty)
+                val editingOssScheme = previousSchemes.filter(previousScheme => previousScheme == PreviousScheme.OSSU || previousScheme == PreviousScheme.OSSNU)
+                val isEditing = maybeCurrentAnswer.isDefined
+                val thereIsAnotherOssScheme = editingOssScheme.size > 1
+                (isEditing && thereIsAnotherOssScheme, formProvider(country, previousSchemes))
+              case None =>
+                (false, formProvider(country, Seq.empty))
             }
+
+            val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex, maybeCurrentAnswer.isDefined && !isEditingAndAnotherOssScheme)
 
             form.bindFromRequest().fold(
               formWithErrors =>
