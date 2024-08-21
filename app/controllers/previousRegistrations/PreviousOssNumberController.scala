@@ -57,13 +57,13 @@ class PreviousOssNumberController @Inject()(
 
             val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex, maybeCurrentAnswer.isDefined)
 
-            val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
-              case Some(previousSchemeDetails) =>
+            val form = (maybeCurrentAnswer.isDefined, request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex))) match {
+              case (false, Some(previousSchemeDetails)) =>
 
                 val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
                 formProvider(country, previousSchemes)
 
-              case None =>
+              case (_, _) =>
                 formProvider(country, Seq.empty)
             }
 
@@ -92,12 +92,11 @@ class PreviousOssNumberController @Inject()(
 
             val previousSchemeHintText = determinePreviousSchemeHintText(countryIndex, maybeCurrentAnswer.isDefined)
 
-            val form = request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex)) match {
-              case Some(previousSchemeDetails) =>
+            val form = (maybeCurrentAnswer.isDefined, request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(countryIndex))) match {
+              case (false, Some(previousSchemeDetails)) =>
                 val previousSchemes = previousSchemeDetails.flatMap(_.previousScheme)
                 formProvider(country, previousSchemes)
-
-              case None =>
+              case (_, _) =>
                 formProvider(country, Seq.empty)
             }
 
