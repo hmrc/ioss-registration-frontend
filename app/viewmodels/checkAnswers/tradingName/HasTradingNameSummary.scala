@@ -50,4 +50,16 @@ object HasTradingNameSummary {
           }
         )
     }
+
+  def amendedRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(HasTradingNamePage).map {
+      answer =>
+
+        val value = if (answer) "site.yes" else "site.no"
+
+        SummaryListRowViewModel(
+          key = KeyViewModel("hasTradingName.checkYourAnswersLabel").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(value),
+        )
+    }
 }

@@ -21,16 +21,28 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.amend.{routes => amendRoutes}
 import controllers.routes
-import models.UserAnswers
+import models.{Country, UserAnswers}
+import models.amend.RegistrationWrapper
 import models.external.ExternalEntryUrl
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.BusinessContactDetailsPage
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import queries.AllWebsites
+import queries.euDetails.AllEuOptionalDetailsQuery
+import queries.tradingNames.AllTradingNames
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import viewmodels.WebsiteSummary
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
+import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
+import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.govuk.all.SummaryListViewModel
 import views.html.amend.AmendCompleteView
 
 import scala.concurrent.Future
@@ -70,6 +82,8 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           val config = application.injector.instanceOf[FrontendAppConfig]
           val result = route(application, request).value
           val view = application.injector.instanceOf[AmendCompleteView]
+          implicit val msgs: Messages = messages(application)
+          val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(userAnswers, Some(registrationWrapper)))
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(
@@ -78,6 +92,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             None,
             yourAccountUrl,
             "Company name",
+            summaryList
           )(request, messages(application)).toString
         }
       }
@@ -95,5 +110,74 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         }
       }
     }
+  }
+
+  private def getAmendedRegistrationSummaryList(
+                                                answers: UserAnswers,
+                                                registrationWrapper: Option[RegistrationWrapper]
+                                              )(implicit msgs: Messages): Seq[SummaryListRow] = {
+
+    val hasTradingNameSummaryRow = HasTradingNameSummary.amendedRow(answers)
+    val tradingNameSummaryRow = TradingNameSummary.amendedAnswersRow(answers)
+    val removedTradingNameRow = TradingNameSummary.removedAnswersRow(getRemovedTradingNames(answers, registrationWrapper))
+    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.amendedRow(answers)
+    val previousRegistrationSummaryRow = PreviousRegistrationSummary.amendedAnswersRow(answers)
+    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.amendedRow(answers)
+    val euDetailsSummaryRow = EuDetailsSummary.amendedAnswersRow(answers)
+    val removedEuDetailsRow = EuDetailsSummary.removedAnswersRow(getRemovedEuDetailsRow(answers, registrationWrapper))
+    val websiteSummaryRow = WebsiteSummary.amendedAnswersRow(answers)
+    val removedWebsiteRow = WebsiteSummary.removedAnswersRow(getRemovedWebsites(answers, registrationWrapper))
+    val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.amendedRowContactName(answers)
+    val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.amendedRowTelephoneNumber(answers)
+    val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.amendedRowEmailAddress(answers)
+    val bankDetailsAccountNameSummaryRow = BankDetailsSummary.amendedRowAccountName(answers)
+    val bankDetailsBicSummaryRow = BankDetailsSummary.amendedRowBIC(answers)
+    val bankDetailsIbanSummaryRow = BankDetailsSummary.amendedRowIBAN(answers)
+
+    Seq(
+      hasTradingNameSummaryRow,
+      tradingNameSummaryRow,
+      removedTradingNameRow,
+      previouslyRegisteredSummaryRow,
+      previousRegistrationSummaryRow,
+      taxRegisteredInEuSummaryRow,
+      euDetailsSummaryRow,
+      removedEuDetailsRow,
+      websiteSummaryRow,
+      removedWebsiteRow,
+      businessContactDetailsContactNameSummaryRow,
+      businessContactDetailsTelephoneSummaryRow,
+      businessContactDetailsEmailSummaryRow,
+      bankDetailsAccountNameSummaryRow,
+      bankDetailsBicSummaryRow,
+      bankDetailsIbanSummaryRow
+    ).flatten
+  }
+
+  private def getRemovedTradingNames(answers: UserAnswers, registrationWrapper: Option[RegistrationWrapper]): Seq[String] = {
+
+    val amendedAnswers = answers.get(AllTradingNames).getOrElse(List.empty)
+    val originalAnswers = registrationWrapper.map(_.registration.tradingNames.map(_.tradingName)).getOrElse(List.empty)
+
+    originalAnswers.diff(amendedAnswers)
+
+  }
+
+  private def getRemovedEuDetailsRow(answers: UserAnswers, registrationWrapper: Option[RegistrationWrapper]): Seq[Country] = {
+
+    val amendedAnswers = answers.get(AllEuOptionalDetailsQuery).map(_.map(_.euCountry.code)).getOrElse(List.empty)
+    val originalAnswers = registrationWrapper.map(_.registration.schemeDetails.euRegistrationDetails.map(_.issuedBy)).getOrElse(List.empty)
+
+    val removedCountryCodes = originalAnswers.diff(amendedAnswers)
+
+    removedCountryCodes.flatMap(Country.fromCountryCode)
+  }
+
+  private def getRemovedWebsites(answers: UserAnswers, registrationWrapper: Option[RegistrationWrapper]): Seq[String] = {
+
+    val amendedAnswers = answers.get(AllWebsites).getOrElse(List.empty)
+    val originalAnswers = registrationWrapper.map(_.registration.schemeDetails.websites.map(_.websiteAddress)).getOrElse(List.empty)
+
+    originalAnswers.diff(amendedAnswers)
   }
 }

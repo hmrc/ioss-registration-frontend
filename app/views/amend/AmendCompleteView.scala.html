@@ -18,7 +18,8 @@
 
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        govukSummaryList: GovukSummaryList,
 )
 
 @(
@@ -26,7 +27,8 @@
     feedbackLink: String,
     externalUrl: Option[String] = None,
     yourAccountUrl: String,
-    organisationName: String
+    organisationName: String,
+    list: SummaryList
 )(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendComplete.title")), showBackLink = false) {
@@ -35,7 +37,17 @@
             <h1 class="govuk-panel__title">@messages("amendComplete.heading")</h1>
         </div>
 
-        @*<div class="govuk-body">@messages("amendComplete.info")</div>*@
+        @if(list.rows.nonEmpty) {
+            <div class="govuk-body">@messages("amendComplete.info")</div>
+        } else {
+            <div class="govuk-body">@messages("amendComplete.info.noChanges")</div>
+        }
+
+        @govukSummaryList(
+            SummaryListViewModel(
+                list.rows
+            ).withCssClass("govuk-body govuk-!-margin-bottom-7")
+        )
 
         @externalUrl match {
           case Some(url) => {
