@@ -24,7 +24,7 @@ import models.previousRegistrations.{PreviousSchemeHintText, SchemeDetailsWithOp
 import models.requests.AuthenticatedDataRequest
 import models.{Country, CountryWithValidationDetails, Index, PreviousScheme, WithName}
 import pages.Waypoints
-import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage, PreviousSchemeTypePage}
+import pages.previousRegistrations.{PreviousOssNumberPage, PreviousSchemePage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
