@@ -21,12 +21,10 @@ import connectors.RegistrationConnector
 import controllers.actions._
 import logging.Logging
 import models.{Country, TradingName, UserAnswers, Website}
-import models.amend.RegistrationWrapper
 import models.domain.PreviousSchemeDetails
 import models.etmp.EtmpDisplayEuRegistrationDetails
 import models.euDetails.EuOptionalDetails
-import models.requests.AuthenticatedDataRequest
-import models.responses.ErrorResponse
+import models.requests.AuthenticatedMandatoryIossRequest
 import pages.{BankDetailsPage, BusinessContactDetailsPage, JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -59,21 +57,19 @@ class AmendCompleteController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
-    (cc.actionBuilder andThen cc.identify andThen cc.getData andThen cc.requireData(isInAmendMode = false)).async {
+    cc.authAndRequireIoss(AmendingActiveRegistration, restrictFromPreviousRegistrations = false, waypoints = waypoints).async {
 
       implicit request => {
 
         for {
           externalEntryUrl <- registrationConnector.getSavedExternalEntry()
-          registration <- registrationConnector.getRegistration()
         } yield {
           {
             for {
               organisationName <- getOrganisationName(request.userAnswers)
             } yield {
-              val registrationWrapper = getResponseValue(registration)
               val savedUrl = externalEntryUrl.fold(_ => None, _.url)
-              val list: SummaryList = detailsList(Some(registrationWrapper))
+              val list: SummaryList = detailsList
               Ok(
                 view(
                   request.vrn,
@@ -97,28 +93,28 @@ class AmendCompleteController @Inject()(
       case _ => None
     }
 
-  private def detailsList(registrationWrapper: Option[RegistrationWrapper])(implicit request: AuthenticatedDataRequest[AnyContent]) = {
+  private def detailsList()(implicit request: AuthenticatedMandatoryIossRequest[AnyContent]) = {
     SummaryListViewModel(
       rows = (
-        getHasTradingNameRows(registrationWrapper) ++
-          getTradingNameRows(registrationWrapper) ++
-          getHasPreviouslyRegistered(registrationWrapper) ++
-          getPreviouslyRegisteredRows(registrationWrapper) ++
-          getCountriesWithNewSchemes(registrationWrapper) ++
-          getHasRegisteredInEuRows(registrationWrapper) ++
-          getRegisteredInEuRows(registrationWrapper) ++
-          getChangedEuDetailsRows(registrationWrapper) ++
-          getWebsitesRows(registrationWrapper) ++
-          getBusinessContactDetailsRows(registrationWrapper) ++
-          getBankDetailsRows(registrationWrapper)
+        getHasTradingNameRows() ++
+          getTradingNameRows() ++
+          getHasPreviouslyRegistered() ++
+          getPreviouslyRegisteredRows() ++
+          getCountriesWithNewSchemes() ++
+          getHasRegisteredInEuRows() ++
+          getRegisteredInEuRows() ++
+          getChangedEuDetailsRows() ++
+          getWebsitesRows() ++
+          getBusinessContactDetailsRows() ++
+          getBankDetailsRows()
         ).flatten
     )
   }
 
-  private def getHasTradingNameRows(registrationWrapper: Option[RegistrationWrapper])
-                                   (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getHasTradingNameRows()
+                                   (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = registrationWrapper.map(_.registration.tradingNames).getOrElse(List.empty)
+    val originalAnswers = request.registrationWrapper.registration.tradingNames
     val amendedAnswers = request.userAnswers.get(AllTradingNames).getOrElse(List.empty)
     val hasChangedToNo = amendedAnswers.isEmpty && originalAnswers.nonEmpty
     val hasChangedToYes = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || originalAnswers.isEmpty
@@ -133,10 +129,10 @@ class AmendCompleteController @Inject()(
     }
   }
 
-  private def getTradingNameRows(registrationWrapper: Option[RegistrationWrapper])
-                                (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getTradingNameRows()
+                                (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = registrationWrapper.map(_.registration.tradingNames.map(_.tradingName)).getOrElse(List.empty)
+    val originalAnswers = request.registrationWrapper.registration.tradingNames.map(_.tradingName)
     val amendedAnswers = request.userAnswers.get(AllTradingNames).map(_.map(_.name)).getOrElse(List.empty)
     val addedTradingName = amendedAnswers.diff(originalAnswers)
     val removedTradingNames = originalAnswers.diff(amendedAnswers)
@@ -161,12 +157,10 @@ class AmendCompleteController @Inject()(
     Seq(addedTradingNameRow, removedTradingNameRow).flatten
   }
 
-  private def getHasPreviouslyRegistered(registrationWrapper: Option[RegistrationWrapper])
-                                        (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getHasPreviouslyRegistered()
+                                        (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = registrationWrapper
-      .map(_.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct)
-      .getOrElse(List.empty)
+    val originalAnswers = request.registrationWrapper.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct
     val amendedAnswers = request.userAnswers.get(AllPreviousRegistrationsQuery).map(_.map(_.previousEuCountry.code)).getOrElse(List.empty)
     val hasChangedToNo = amendedAnswers.diff(originalAnswers)
     val hasChangedToYes = originalAnswers.diff(amendedAnswers)
@@ -182,12 +176,9 @@ class AmendCompleteController @Inject()(
 
   }
 
-  private def getPreviouslyRegisteredRows(registrationWrapper: Option[RegistrationWrapper])
-                                         (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getPreviouslyRegisteredRows()(implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = registrationWrapper
-      .map(_.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct)
-      .getOrElse(List.empty)
+    val originalAnswers = request.registrationWrapper.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct
     val amendedAnswers = request.userAnswers.get(AllPreviousRegistrationsQuery).map(_.map(_.previousEuCountry.code)).getOrElse(List.empty)
 
     val newPreviouslyRegisteredCountry = amendedAnswers.filterNot { addedCountry =>
@@ -210,12 +201,10 @@ class AmendCompleteController @Inject()(
 
   }
 
-  private def getCountriesWithNewSchemes(
-                                          registrationWrapper: Option[RegistrationWrapper]
-                                        )(implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getCountriesWithNewSchemes()(implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
     val amendedDetails = request.userAnswers.get(AllPreviousRegistrationsQuery).getOrElse(List.empty)
-    val registrationDetails = registrationWrapper.map(_.registration.schemeDetails.previousEURegistrationDetails).getOrElse(List.empty)
+    val registrationDetails = request.registrationWrapper.registration.schemeDetails.previousEURegistrationDetails
 
     val changedSchemeDetails = amendedDetails.flatMap { amendedCountry =>
       val matchingEuCountry = registrationDetails.filter(_.issuedBy == amendedCountry.previousEuCountry.code)
@@ -240,10 +229,10 @@ class AmendCompleteController @Inject()(
     }
   }
 
-  private def getHasRegisteredInEuRows(registrationWrapper: Option[RegistrationWrapper])
-                                      (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getHasRegisteredInEuRows()
+                                      (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = registrationWrapper.map(_.registration.schemeDetails.euRegistrationDetails).map(_.map(_.issuedBy)).getOrElse(List.empty)
+    val originalAnswers = request.registrationWrapper.registration.schemeDetails.euRegistrationDetails.map(_.issuedBy)
     val amendedAnswers = request.userAnswers.get(AllEuDetailsQuery).map(_.map(_.euCountry.code)).getOrElse(List.empty)
     val hasChangedToNo = amendedAnswers.isEmpty && originalAnswers.nonEmpty
     val hasChangedToYes = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || originalAnswers.isEmpty
@@ -258,13 +247,10 @@ class AmendCompleteController @Inject()(
     }
   }
 
-  private def getRegisteredInEuRows(registrationWrapper: Option[RegistrationWrapper])
-                                   (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getRegisteredInEuRows()
+                                   (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = registrationWrapper
-      .map(_.registration.schemeDetails.euRegistrationDetails)
-      .map(_.map(_.issuedBy))
-      .getOrElse(List.empty)
+    val originalAnswers = request.registrationWrapper.registration.schemeDetails.euRegistrationDetails.map(_.issuedBy)
 
     val amendedAnswers = request.userAnswers
       .get(AllEuDetailsQuery)
@@ -300,11 +286,11 @@ class AmendCompleteController @Inject()(
     Seq(addedEuDetailsRow, removedEuDetailsRow).flatten
   }
 
-  private def getChangedEuDetailsRows(registrationWrapper: Option[RegistrationWrapper])
-                                     (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getChangedEuDetailsRows()
+                                     (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
     val userEuDetails = request.userAnswers.get(AllEuOptionalDetailsQuery).getOrElse(List.empty)
-    val registrationEuDetails = registrationWrapper.map(_.registration.schemeDetails.euRegistrationDetails).getOrElse(List.empty)
+    val registrationEuDetails = request.registrationWrapper.registration.schemeDetails.euRegistrationDetails
 
     val changedEuDetailCountries: Seq[Country] = userEuDetails.flatMap { userDetail =>
       registrationEuDetails.find(_.issuedBy == userDetail.euCountry.code) match {
@@ -324,10 +310,10 @@ class AmendCompleteController @Inject()(
   }
 
 
-  private def getWebsitesRows(registrationWrapper: Option[RegistrationWrapper])
-                             (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getWebsitesRows()
+                             (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = registrationWrapper.map(_.registration.schemeDetails.websites.map(_.websiteAddress)).getOrElse(List.empty)
+    val originalAnswers = request.registrationWrapper.registration.schemeDetails.websites.map(_.websiteAddress)
     val amendedUA = request.userAnswers.get(AllWebsites).map(_.map(_.site)).getOrElse(List.empty)
     val addedWebsites = amendedUA.diff(originalAnswers)
     val removedWebsites = originalAnswers.diff(amendedUA)
@@ -351,28 +337,28 @@ class AmendCompleteController @Inject()(
     Seq(addedWebsiteRow, removedWebsiteRow).flatten
   }
 
-  private def getBusinessContactDetailsRows(registrationWrapper: Option[RegistrationWrapper])
-                                           (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getBusinessContactDetailsRows()
+                                           (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalContactName = registrationWrapper.map(_.registration.schemeDetails.contactName)
-    val originalTelephone = registrationWrapper.map(_.registration.schemeDetails.businessTelephoneNumber)
-    val originalEmail = registrationWrapper.map(_.registration.schemeDetails.businessEmailId)
+    val originalContactName = request.registrationWrapper.registration.schemeDetails.contactName
+    val originalTelephone = request.registrationWrapper.registration.schemeDetails.businessTelephoneNumber
+    val originalEmail = request.registrationWrapper.registration.schemeDetails.businessEmailId
     val amendedUA = request.userAnswers.get(BusinessContactDetailsPage)
 
     Seq(
-      if (originalContactName != amendedUA.map(_.fullName)) {
+      if (!amendedUA.map(_.fullName).contains(originalContactName)) {
         BusinessContactDetailsSummary.amendedRowContactName(request.userAnswers)
       } else {
         None
       },
 
-      if (originalTelephone != amendedUA.map(_.telephoneNumber)) {
+      if (!amendedUA.map(_.telephoneNumber).contains(originalTelephone)) {
         BusinessContactDetailsSummary.amendedRowTelephoneNumber(request.userAnswers)
       } else {
         None
       },
 
-      if (originalEmail != amendedUA.map(_.emailAddress)) {
+      if (!amendedUA.map(_.emailAddress).contains(originalEmail)) {
         BusinessContactDetailsSummary.amendedRowEmailAddress(request.userAnswers)
       } else {
         None
@@ -380,41 +366,31 @@ class AmendCompleteController @Inject()(
     )
   }
 
-  private def getBankDetailsRows(registrationWrapper: Option[RegistrationWrapper])
-                                (implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getBankDetailsRows()
+                                (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = registrationWrapper.map(_.registration.bankDetails)
+    val originalAnswers = request.registrationWrapper.registration.bankDetails
     val amendedUA = request.userAnswers.get(BankDetailsPage)
 
     Seq(
-      if (originalAnswers.map(_.accountName) != amendedUA.map(_.accountName)) {
+      if (!amendedUA.map(_.accountName).contains(originalAnswers.accountName)) {
         BankDetailsSummary.amendedRowAccountName(request.userAnswers)
       } else {
         None
       },
 
-      if (originalAnswers.map(_.bic) != amendedUA.map(_.bic)) {
+      if (!amendedUA.map(_.bic).contains(originalAnswers.bic)) {
         BankDetailsSummary.amendedRowBIC(request.userAnswers)
       } else {
         None
       },
 
-      if (originalAnswers.map(_.iban) != amendedUA.map(_.iban)) {
+      if (!amendedUA.map(_.iban).contains(originalAnswers.iban)) {
         BankDetailsSummary.amendedRowIBAN(request.userAnswers)
       } else {
         None
       }
     )
-  }
-
-  private def getResponseValue[A](response: Either[ErrorResponse, A]): A = {
-    response match {
-      case Right(value) => value
-      case Left(error) =>
-        val exception = new Exception(error.body)
-        logger.error(exception.getMessage, exception)
-        throw exception
-    }
   }
 
   private def hasDetailsChanged(userDetails: EuOptionalDetails, registrationDetails: EtmpDisplayEuRegistrationDetails): Boolean = {
