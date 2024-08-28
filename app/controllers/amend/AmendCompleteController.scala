@@ -22,6 +22,7 @@ import controllers.actions._
 import logging.Logging
 import models.{Country, TradingName, UserAnswers, Website}
 import models.amend.RegistrationWrapper
+import models.domain.PreviousSchemeDetails
 import models.etmp.EtmpDisplayEuRegistrationDetails
 import models.euDetails.EuOptionalDetails
 import models.requests.AuthenticatedDataRequest
@@ -103,6 +104,7 @@ class AmendCompleteController @Inject()(
           getTradingNameRows(registrationWrapper) ++
           getHasPreviouslyRegistered(registrationWrapper) ++
           getPreviouslyRegisteredRows(registrationWrapper) ++
+          getCountriesWithNewSchemes(registrationWrapper) ++
           getHasRegisteredInEuRows(registrationWrapper) ++
           getRegisteredInEuRows(registrationWrapper) ++
           getChangedEuDetailsRows(registrationWrapper) ++
@@ -206,6 +208,35 @@ class AmendCompleteController @Inject()(
       Seq.empty
     }
 
+  }
+
+  private def getCountriesWithNewSchemes(
+                                          registrationWrapper: Option[RegistrationWrapper]
+                                        )(implicit request: AuthenticatedDataRequest[_]): Seq[Option[SummaryListRow]] = {
+
+    val amendedDetails = request.userAnswers.get(AllPreviousRegistrationsQuery).getOrElse(List.empty)
+    val registrationDetails = registrationWrapper.map(_.registration.schemeDetails.previousEURegistrationDetails).getOrElse(List.empty)
+
+    val changedSchemeDetails = amendedDetails.flatMap { amendedCountry =>
+
+      val matchingEuCountry = registrationDetails.filter(_.issuedBy == amendedCountry.previousEuCountry.code)
+      val existingSchemeDetails = matchingEuCountry.map(PreviousSchemeDetails.fromEtmpPreviousEuRegistrationDetails)
+      val newSchemes = amendedCountry.previousSchemesDetails.filterNot { scheme =>
+        existingSchemeDetails.exists(_.previousSchemeNumbers == scheme.previousSchemeNumbers)
+      }
+
+      if (newSchemes.nonEmpty) {
+        Some(amendedCountry.previousEuCountry)
+      } else {
+        None
+      }
+    }
+
+    if (changedSchemeDetails.nonEmpty) {
+      Seq(PreviousRegistrationSummary.changedAnswersRow(changedSchemeDetails))
+    } else {
+      Seq.empty
+    }
   }
 
   private def getHasRegisteredInEuRows(registrationWrapper: Option[RegistrationWrapper])
@@ -372,7 +403,6 @@ class AmendCompleteController @Inject()(
       } else {
         None
       }
-
     )
   }
 
