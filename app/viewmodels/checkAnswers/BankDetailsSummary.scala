@@ -84,5 +84,40 @@ object BankDetailsSummary {
           )
         )
     }
+
+  def amendedRowAccountName(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(BankDetailsPage).map {
+      answer =>
+        val value = HtmlFormat.escape(answer.accountName).toString
+
+        SummaryListRowViewModel(
+          key = KeyViewModel("bankDetails.accountName").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(HtmlContent(value))
+        )
+    }
+
+  def amendedRowBIC(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(BankDetailsPage).map {
+      answer =>
+        val value = Seq(
+          answer.bic.map(bic => HtmlFormat.escape(bic.toString))
+        ).flatten.mkString
+
+        SummaryListRowViewModel(
+          key = KeyViewModel("bankDetails.bic").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(HtmlContent(value))
+        )
+    }
+
+  def amendedRowIBAN(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(BankDetailsPage).map {
+      answer =>
+        val value = HtmlFormat.escape(answer.iban.toString).toString
+
+        SummaryListRowViewModel(
+          key = KeyViewModel("bankDetails.iban").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(HtmlContent(value))
+        )
+    }
 }
 

@@ -16,7 +16,7 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Country, Index, PreviousScheme, UserAnswers}
+import models.{Country, Index, PreviousScheme}
 import models.previousRegistrations.SchemeDetailsWithOptionalVatNumber
 import models.requests.AuthenticatedDataRequest
 import pages.Waypoints

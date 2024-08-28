@@ -36,7 +36,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
 import repositories.AuthenticatedUserAnswersRepository
-import viewmodels.checkAnswers.previousRegistrations.{PreviousSchemeNumberSummary, PreviousSchemeSummary}
+import viewmodels.checkAnswers.previousRegistrations.PreviousSchemeSummary
 import viewmodels.govuk.SummaryListFluency
 import views.html.previousRegistrations.CheckPreviousSchemeAnswersView
 

@@ -18,8 +18,8 @@ package controllers.euDetails
 
 import controllers.actions.AuthenticatedControllerComponents
 import models.Index
-import pages.{EmptyWaypoints, NonEmptyWaypoints, Waypoints}
-import pages.euDetails.{AddEuDetailsPage, CannotRegisterFixedEstablishmentOperationOnlyPage, CheckEuDetailsAnswersPage}
+import pages.{NonEmptyWaypoints, Waypoints}
+import pages.euDetails.{CannotRegisterFixedEstablishmentOperationOnlyPage, CheckEuDetailsAnswersPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.euDetails.EuDetailsQuery

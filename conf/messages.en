@@ -274,6 +274,8 @@ tradingName.title = What is your UK trading name?
 tradingName.heading = What is your UK trading name?
 tradingName.hint = You must not include ‘limited’, ‘ltd’, ‘limited liability partnership’, ‘LLP’, ‘public limited company’, or ‘plc’.
 tradingName.checkYourAnswersLabel = Other trading names
+tradingName.checkYourAnswersLabel.added = Trading names added
+tradingName.checkYourAnswersLabel.removed = Trading names removed
 tradingName.error.required = Enter your UK trading name
 tradingName.error.length = Trading name must be 100 characters or less
 tradingName.error.duplicate = You have entered this trading name already. Enter a different one.
@@ -305,7 +307,7 @@ deleteAllTradingNames.change.hidden = Remove all your alternative trading names 
 taxRegisteredInEu.title = Is your business registered for tax in EU countries?
 taxRegisteredInEu.heading = Is your business registered for tax in EU countries?
 taxRegisteredInEu.checkYourAnswersLabel = Registered for tax in EU countries
-taxRegisteredInEu.mini.checkYourAnswersLabel = VAT Registered
+taxRegisteredInEu.mini.checkYourAnswersLabel = Registered for tax in EU countries
 taxRegisteredInEu.error.required = Select yes if your business is registered for tax in EU countries
 taxRegisteredInEu.change.hidden = if your business is registered for tax in EU countries
 
@@ -393,6 +395,8 @@ addEuDetails.addAnother = Add tax details for another EU country?
 addEuDetails.addAnother.hint = You must tell us your tax details for all EU countries.
 
 euDetails.checkYourAnswersLabel = EU tax details added
+euDetails.checkYourAnswersLabel.removed = EU tax details removed
+euDetails.checkYourAnswersLabel.changed = EU tax details changed
 euDetails.change.hidden = EU tax registration details added
 euDetails.remove.hidden = tax details for {0}
 
@@ -422,7 +426,7 @@ businessContactDetails.title = Business contact details
 businessContactDetails.heading = Business contact details
 businessContactDetailsWithBta.p1 = We''ll use these if we need to send you information about your account.
 businessContactDetailsWithBta.p2 = We''ll only contact you by email or through your business tax account.
-businessContactDetails.fullName = Contact name or business department
+businessContactDetails.fullName = Contact name
 businessContactDetails.telephoneNumber = Telephone number
 businessContactDetails.emailAddress = Email address
 businessContactDetails.emailHint = We''ll send you a code to confirm your email address is correct.
@@ -506,6 +510,7 @@ previousIntermediaryNumber.error.invalid = Enter a valid intermediary identifica
 previousSchemeNumber.checkYourAnswersLabel = Registration number
 
 previousRegistrations.checkYourAnswersLabel = Countries registered in
+previousRegistrations.checkYourAnswersLabel.changed = Countries registered in changed
 previousRegistrations.change.hidden = countries registered in
 previousRegistrations.add.hidden = countries registered in
 
@@ -597,6 +602,8 @@ website.change.hidden = website address
 website.change.heading = What is your website address?
 
 websites.checkYourAnswersLabel = Trading websites
+websites.checkYourAnswersLabel.added = Trading websites added
+websites.checkYourAnswersLabel.removed = Trading websites removed
 websites.change.hidden = Trading websites
 
 addWebsite.name.singular = website address
@@ -685,6 +692,7 @@ cancelAmendRegistration.error.required = Select yes if you want to remove your a
 amendComplete.title = Registration details changed
 amendComplete.heading = Registration details changed
 amendComplete.info = You changed the following details:
+amendComplete.info.noChanges = You haven''t changed any details
 amendComplete.link.BTA = Manage your Import One Stop Shop returns in your account.
 amendComplete.link.yourAccount = Manage your Import One Stop Shop returns in your account.
 amendComplete.contact.text = We will contact you if we need to check any information.

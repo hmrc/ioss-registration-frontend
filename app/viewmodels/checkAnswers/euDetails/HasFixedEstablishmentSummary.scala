@@ -47,4 +47,19 @@ object HasFixedEstablishmentSummary {
           )
         )
     }
+
+  def amendedAnswersRow(
+           answers: UserAnswers,
+           countryIndex: Index
+         )(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(HasFixedEstablishmentPage(countryIndex)).map {
+      answer =>
+
+        val value = if (answer) "site.yes" else "site.no"
+
+        SummaryListRowViewModel(
+          key = "hasFixedEstablishment.checkYourAnswersLabel",
+          value = ValueViewModel(value),
+        )
+    }
 }

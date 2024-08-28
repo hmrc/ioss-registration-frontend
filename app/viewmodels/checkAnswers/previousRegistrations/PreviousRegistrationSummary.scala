@@ -16,7 +16,7 @@
 
 package viewmodels.checkAnswers.previousRegistrations
 
-import models.{Index, UserAnswers}
+import models.{Country, Index, UserAnswers}
 import models.domain.PreviousRegistration
 import pages.{AddItemPage, CheckAnswersPage, Waypoints}
 import pages.previousRegistrations._
@@ -86,6 +86,38 @@ object PreviousRegistrationSummary {
             Nil
           }
         )
+    }
+
+  def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(AllPreviousRegistrationsQuery).map {
+      previousRegistrations =>
+        val value = previousRegistrations.map {
+          details =>
+            HtmlFormat.escape(details.previousEuCountry.name)
+        }.mkString("<br/>")
+
+        SummaryListRowViewModel(
+          key = KeyViewModel("previousRegistrations.checkYourAnswersLabel").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(HtmlContent(value)),
+        )
+    }
+
+  def changedAnswersRow(changedAnswers: Seq[Country])(implicit messages: Messages): Option[SummaryListRow] =
+
+    if (changedAnswers.nonEmpty) {
+        val value = changedAnswers.map {
+          details =>
+            HtmlFormat.escape(details.name)
+        }.mkString("<br/>")
+
+      Some(
+        SummaryListRowViewModel(
+          key = KeyViewModel("previousRegistrations.checkYourAnswersLabel.changed").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(HtmlContent(value)),
+        )
+      )
+    } else {
+      None
     }
 
 }

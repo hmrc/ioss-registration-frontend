@@ -21,20 +21,15 @@ import controllers.GetCountry
 import controllers.actions.AuthenticatedControllerComponents
 import forms.previousRegistrations.CheckPreviousSchemeAnswersFormProvider
 import models.{Country, Index, PreviousScheme}
-import models.previousRegistrations.SchemeDetailsWithOptionalVatNumber
 import models.requests.AuthenticatedDataRequest
 import pages.{JourneyRecoveryPage, Waypoints}
-import pages.previousRegistrations.{CheckPreviousSchemeAnswersPage, PreviousSchemePage}
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import pages.previousRegistrations.CheckPreviousSchemeAnswersPage
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import play.twirl.api.HtmlFormat
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Actions, Card, CardTitle}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
-import viewmodels.checkAnswers.previousRegistrations.{PreviousIntermediaryNumberSummary, PreviousSchemeNumberSummary, PreviousSchemeSummary}
-import viewmodels.govuk.summarylist._
+import viewmodels.checkAnswers.previousRegistrations.PreviousSchemeSummary
 import views.html.previousRegistrations.CheckPreviousSchemeAnswersView
 
 import javax.inject.Inject

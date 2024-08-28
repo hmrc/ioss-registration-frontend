@@ -71,4 +71,37 @@ object WebsiteSummary {
           }
         )
     }
+
+  def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(AllWebsites).map {
+      websites =>
+
+        val value = websites.map {
+          website =>
+            HtmlFormat.escape(website.site)
+        }.mkString("<br/>")
+
+        SummaryListRowViewModel(
+          key = KeyViewModel("websites.checkYourAnswersLabel.added").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(HtmlContent(value))
+        )
+    }
+
+  def removedAnswersRow(removedWebsites: Seq[String])(implicit messages: Messages): Option[SummaryListRow] =
+
+    if (removedWebsites.nonEmpty) {
+        val value = removedWebsites.map {
+          website =>
+            HtmlFormat.escape(website)
+        }.mkString("<br/>")
+
+      Some(
+        SummaryListRowViewModel(
+          key = KeyViewModel("websites.checkYourAnswersLabel.removed").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(HtmlContent(value))
+        )
+      )
+    } else {
+      None
+    }
 }
