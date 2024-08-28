@@ -17,15 +17,20 @@
 package controllers.amend
 
 import base.SpecBase
+import config.Constants.maxSchemes
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.amend.{routes => amendRoutes}
 import controllers.routes
-import models.{Country, UserAnswers}
+import models.{Country, TradingName, UserAnswers, Website}
 import models.amend.RegistrationWrapper
+import models.domain.PreviousSchemeDetails
+import models.euDetails.EuOptionalDetails
 import models.external.ExternalEntryUrl
+import models.previousRegistrations.PreviousRegistrationDetails
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalacheck.Gen
 import org.scalatestplus.mockito.MockitoSugar
 import pages.BusinessContactDetailsPage
 import play.api.i18n.Messages
@@ -35,6 +40,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.AllWebsites
 import queries.euDetails.AllEuOptionalDetailsQuery
+import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.WebsiteSummary
@@ -107,6 +113,161 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "when there are amended answers" - {
+
+        "must show row for when trading name added" in {
+          val newTradingName = TradingName("NewTradingName")
+          val updatedAnswers = userAnswers
+            .set(AllTradingNames, List(newTradingName)).success.value
+
+          val application = applicationBuilder(userAnswers = Some(updatedAnswers))
+            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+            .build()
+
+          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+
+          running(application) {
+            val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+            val config = application.injector.instanceOf[FrontendAppConfig]
+            val result = route(application, request).value
+            val view = application.injector.instanceOf[AmendCompleteView]
+            implicit val msgs: Messages = messages(application)
+            val summaryList = SummaryListViewModel(rows =  getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+            contentAsString(result) mustEqual view(
+              vrn,
+              config.feedbackUrl(request),
+              None,
+              yourAccountUrl,
+              "Company name",
+              summaryList
+            )(request, messages(application)).toString
+
+            val expectedRow = TradingNameSummary.amendedAnswersRow(updatedAnswers).get
+
+            summaryList.rows must contain(expectedRow)
+          }
+        }
+
+        "must show row for when previous Registration added" in {
+          val previousRegistration: PreviousRegistrationDetails = PreviousRegistrationDetails(
+            previousEuCountry = arbitraryCountry.arbitrary.sample.value,
+            previousSchemesDetails = Gen.listOfN(maxSchemes, PreviousSchemeDetails(
+              previousScheme = arbitraryPreviousScheme.arbitrary.sample.value,
+              previousSchemeNumbers = arbitraryPreviousIossSchemeDetails.arbitrary.sample.value,
+              nonCompliantDetails = Some(arbitraryNonCompliantDetails.arbitrary.sample.value)
+            )).sample.value
+          )
+          val updatedAnswers = userAnswers
+            .set(AllPreviousRegistrationsQuery, List(previousRegistration)).success.value
+
+          val application = applicationBuilder(userAnswers = Some(updatedAnswers))
+            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+            .build()
+
+          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+
+          running(application) {
+            val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+            val config = application.injector.instanceOf[FrontendAppConfig]
+            val result = route(application, request).value
+            val view = application.injector.instanceOf[AmendCompleteView]
+            implicit val msgs: Messages = messages(application)
+            val summaryList = SummaryListViewModel(rows =  getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+            contentAsString(result) mustEqual view(
+              vrn,
+              config.feedbackUrl(request),
+              None,
+              yourAccountUrl,
+              "Company name",
+              summaryList
+            )(request, messages(application)).toString
+
+            val expectedRow = PreviousRegistrationSummary.amendedAnswersRow(updatedAnswers).get
+
+            summaryList.rows must contain(expectedRow)
+          }
+        }
+
+        "must show row for when Eu Registration added" in {
+          val newEuRegistration = EuOptionalDetails(
+            euCountry = arbitraryCountry.arbitrary.sample.value,
+            hasFixedEstablishment = Some(true),
+            registrationType = Some(arbitraryRegistrationType.arbitrary.sample.value),
+            euVatNumber = Some(arbitraryEuVatNumber.sample.value),
+            euTaxReference = Some(arbitraryEuTaxReference.sample.value),
+            fixedEstablishmentTradingName = Some(arbitraryFixedEstablishmentTradingNamePage.arbitrary.sample.value.toString),
+            fixedEstablishmentAddress = Some(arbitraryInternationalAddress.arbitrary.sample.value)
+          )
+          val updatedAnswers = userAnswers
+            .set(AllEuOptionalDetailsQuery, List(newEuRegistration)).success.value
+
+          val application = applicationBuilder(userAnswers = Some(updatedAnswers))
+            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+            .build()
+
+          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+
+          running(application) {
+            val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+            val config = application.injector.instanceOf[FrontendAppConfig]
+            val result = route(application, request).value
+            val view = application.injector.instanceOf[AmendCompleteView]
+            implicit val msgs: Messages = messages(application)
+            val summaryList = SummaryListViewModel(rows =  getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+            contentAsString(result) mustEqual view(
+              vrn,
+              config.feedbackUrl(request),
+              None,
+              yourAccountUrl,
+              "Company name",
+              summaryList
+            )(request, messages(application)).toString
+
+            val expectedRow = EuDetailsSummary.amendedAnswersRow(updatedAnswers).get
+
+            summaryList.rows must contain(expectedRow)
+          }
+        }
+
+
+        "must show row for when website added" in {
+          val newWebsite = Website("https://www.NewWebsite.co.uk")
+          val updatedAnswers = userAnswers
+            .set(AllWebsites, List(newWebsite)).success.value
+
+          val application = applicationBuilder(userAnswers = Some(updatedAnswers))
+            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+            .build()
+
+          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+
+          running(application) {
+            val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+            val config = application.injector.instanceOf[FrontendAppConfig]
+            val result = route(application, request).value
+            val view = application.injector.instanceOf[AmendCompleteView]
+            implicit val msgs: Messages = messages(application)
+            val summaryList = SummaryListViewModel(rows =  getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+            contentAsString(result) mustEqual view(
+              vrn,
+              config.feedbackUrl(request),
+              None,
+              yourAccountUrl,
+              "Company name",
+              summaryList
+            )(request, messages(application)).toString
+
+            val expectedRow = WebsiteSummary.amendedAnswersRow(updatedAnswers).get
+
+            summaryList.rows must contain(expectedRow)
+          }
         }
       }
     }

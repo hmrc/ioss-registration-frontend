@@ -218,14 +218,15 @@ class AmendCompleteController @Inject()(
     val registrationDetails = registrationWrapper.map(_.registration.schemeDetails.previousEURegistrationDetails).getOrElse(List.empty)
 
     val changedSchemeDetails = amendedDetails.flatMap { amendedCountry =>
-
       val matchingEuCountry = registrationDetails.filter(_.issuedBy == amendedCountry.previousEuCountry.code)
-      val existingSchemeDetails = matchingEuCountry.map(PreviousSchemeDetails.fromEtmpPreviousEuRegistrationDetails)
-      val newSchemes = amendedCountry.previousSchemesDetails.filterNot { scheme =>
-        existingSchemeDetails.exists(_.previousSchemeNumbers == scheme.previousSchemeNumbers)
+      val existingSchemeDetails = matchingEuCountry.map { registration =>
+        PreviousSchemeDetails.fromEtmpPreviousEuRegistrationDetails(registration).previousSchemeNumbers
       }
+      val newSchemes = amendedCountry.previousSchemesDetails.map(_.previousSchemeNumbers)
 
-      if (newSchemes.nonEmpty) {
+      val hasSchemeNumbersChanged = existingSchemeDetails.nonEmpty && newSchemes != existingSchemeDetails
+
+      if (hasSchemeNumbersChanged) {
         Some(amendedCountry.previousEuCountry)
       } else {
         None
