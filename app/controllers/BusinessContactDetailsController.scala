@@ -30,6 +30,7 @@ import services.{EmailVerificationService, SaveForLaterService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
+import utils.FutureSyntax.FutureOps
 import views.html.BusinessContactDetailsView
 
 import javax.inject.Inject
@@ -69,10 +70,10 @@ class BusinessContactDetailsController @Inject()(
 
         form.bindFromRequest().fold(
           formWithErrors =>
-            Future.successful(BadRequest(view(formWithErrors, waypoints))),
+            BadRequest(view(formWithErrors, waypoints)).toFuture,
 
           value => {
-            val continueUrl = waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url
+            val continueUrl = s"${config.loginContinueUrl}${waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url}"
 
             if (config.emailVerificationEnabled) {
               verifyEmailAndRedirect(waypoints, messages, continueUrl, value)
@@ -132,7 +133,7 @@ class BusinessContactDetailsController @Inject()(
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(BusinessContactDetailsPage, value))
                 _ <- cc.sessionRepository.set(updatedAnswers)
               } yield Redirect(s"${config.emailVerificationUrl}${validResponse.redirectUri}")
-            case _ => Future.successful(Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoints).url))
+            case _ => Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoints).url).toFuture
           }
     }
   }
