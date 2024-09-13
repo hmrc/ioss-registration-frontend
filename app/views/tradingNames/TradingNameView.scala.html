@@ -43,7 +43,6 @@
                     field = form("value"),
                     label = LabelViewModel(messages("tradingName.heading")).asPageHeading()
                 ).withWidth(Full)
-                        .withHint(HintViewModel("tradingName.hint"))
             )
 
             @button("site.continue", TradingNamePage(index).route(waypoints).url, waypoints)

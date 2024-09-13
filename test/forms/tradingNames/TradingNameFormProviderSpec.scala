@@ -74,15 +74,5 @@ class TradingNameFormProviderSpec extends StringFieldBehaviours {
       val result = form.bind(Map(fieldName -> invalidTradingName)).apply(fieldName)
       result.errors mustBe Seq(FormError(fieldName, invalidKey, Seq(commonTextPattern)))
     }
-
-    "must not bind Trading Name with reserved words" in {
-      forAll(tradingNameReservedWords) {
-        tradingNameReservedWords =>
-
-          val invalidTradingName = s"Business $tradingNameReservedWords"
-          val result = form.bind(Map(fieldName -> invalidTradingName)).apply(fieldName)
-          result.errors mustBe Seq(FormError(fieldName, invalidReserveWordKey))
-      }
-    }
   }
 }
