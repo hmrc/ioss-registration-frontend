@@ -16,7 +16,6 @@
 
 package forms.tradingNames
 
-import config.Constants.tradingNameReservedWords
 import forms.mappings.Mappings
 import forms.validation.Validation.commonTextPattern
 import models.Index
@@ -32,8 +31,7 @@ class TradingNameFormProvider @Inject() extends Mappings {
         .verifying(firstError(
           maxLength(100, "tradingName.error.length"),
           notADuplicate(thisIndex, existingAnswers, "tradingName.error.duplicate"),
-          regexp(commonTextPattern, "tradingName.error.invalid"),
-          notContainStrings(tradingNameReservedWords, "tradingName.error.usedReservedWord")
+          regexp(commonTextPattern, "tradingName.error.invalid")
         ))
     )
 }
