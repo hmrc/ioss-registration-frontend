@@ -55,7 +55,7 @@ class WebsiteController @Inject()(
     }
 
   def onSubmit(waypoints: Waypoints, index: Index): Action[AnyContent] =
-    (cc.authAndGetData(waypoints.registrationModificationMode) andThen cc.limitIndex(index, Constants.maxTradingNames)).async {
+    (cc.authAndGetData(waypoints.registrationModificationMode) andThen cc.limitIndex(index, Constants.maxWebsites)).async {
       implicit request =>
 
         val form = formProvider(index, request.userAnswers.get(AllWebsites).getOrElse(Seq.empty).map(_.site))
