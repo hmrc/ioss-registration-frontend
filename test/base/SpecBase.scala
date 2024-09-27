@@ -136,7 +136,7 @@ trait SpecBase
 
   val emailVerificationRequest: EmailVerificationRequest = EmailVerificationRequest(
     credId = userAnswersId,
-    continueUrl = "/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/bank-details",
+    continueUrl = "/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/bank-account-details",
     origin = "IOSS",
     deskproServiceName = Some("one-stop-shop-registration-frontend"),
     accessibilityStatementUrl = "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",

@@ -33,11 +33,11 @@ class EmailVerificationResponseSpec extends AnyFreeSpec with Matchers with SpecB
 
         val emailVerificationResponse: EmailVerificationResponse =
           EmailVerificationResponse(
-            "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-details"
+            "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-account-details"
           )
 
         val expectedJson = Json.obj(
-          "redirectUri" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-details"
+          "redirectUri" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-account-details"
         )
 
         Json.toJson(emailVerificationResponse) mustEqual expectedJson

@@ -87,11 +87,6 @@ Open a new tab and paste this url:
 
   ```
 
-Once you have pasted/entered the passcode into the input box on the email verification page and clicked continue and the email verification is successful,
-you will need to change the port in the url back to 10190 in order to redirect to the bank details page.
-
-<http://localhost:10190/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/bank-details>
-
 [//]: # ()
 [//]: # (This will generate a passcode to enter into the email verification page.)
 
