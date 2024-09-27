@@ -59,7 +59,7 @@ object BankDetailsSummary {
         ).flatten.mkString
 
         SummaryListRowViewModel(
-          key = "bankDetails.bic",
+          key = "bankDetails.checkYourAnswers.bic",
           value = ValueViewModel(HtmlContent(value)),
           actions = Seq(
             ActionItemViewModel("site.change", createBusinessDetailsChangeLinkUrl(waypoints, sourcePage))
