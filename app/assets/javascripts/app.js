@@ -107,6 +107,11 @@ document.addEventListener('DOMContentLoaded', function (event) {
     }
 });
 
+const submitButton = document.querySelector('#submit');
+
+if(submitButton) {
+    submitButton.addEventListener("click", showTheSpinner)
+}
 
 function showTheSpinner() {
 
