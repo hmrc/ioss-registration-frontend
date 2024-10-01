@@ -687,12 +687,13 @@ cancelAmendRegistration.warning = This will delete any changes that you have not
 cancelAmendRegistration.link = Cancel
 cancelAmendRegistration.button.continue = Continue
 cancelAmendRegistration.button.btr = Back
-cancelAmendRegistration.error.required = Select yes if you want to remove your amended changes from this scheme
+cancelAmendRegistration.error.required = Select yes if you want to remove the changes to your registration
 
 amendComplete.title = Registration details changed
-amendComplete.heading = Registration details changed
+amendComplete.heading = Registration details confirmed
+amendComplete.changes.heading = Registration details changed
 amendComplete.info = You changed the following details:
-amendComplete.info.noChanges = You haven''t changed any details
+amendComplete.info.noChanges = You have not changed any of your registration details.
 amendComplete.link.BTA = Manage your Import One Stop Shop returns in your account.
 amendComplete.link.yourAccount = Manage your Import One Stop Shop returns in your account.
 amendComplete.contact.text = We will contact you if we need to check any information.
