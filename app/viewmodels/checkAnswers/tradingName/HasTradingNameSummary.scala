@@ -37,7 +37,7 @@ object HasTradingNameSummary {
 
         val value = if (answer) "site.yes" else "site.no"
 
-        SummaryListRowViewModel(
+        val listRowViewModel = SummaryListRowViewModel(
           key = "hasTradingName.checkYourAnswersLabel",
           value = ValueViewModel(value),
           actions = if (isCurrentIossAccount) {
@@ -49,6 +49,12 @@ object HasTradingNameSummary {
             Nil
           }
         )
+
+        if (isCurrentIossAccount) {
+          listRowViewModel
+        } else {
+          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        }
     }
 
   def amendedRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
