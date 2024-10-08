@@ -69,7 +69,7 @@ object PreviousRegistrationSummary {
         val existingCountries = existingPreviousRegistrations.map(previousRegistration => previousRegistration.country)
         val sameListOfCountries: Boolean = currentAnswerCountries.sortBy(_.code) == existingCountries.sortBy(_.code)
 
-        SummaryListRowViewModel(
+        val listRowViewModel = SummaryListRowViewModel(
           key = "previousRegistrations.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
           actions = if (isCurrentIossAccount) {
@@ -86,6 +86,12 @@ object PreviousRegistrationSummary {
             Nil
           }
         )
+
+        if (isCurrentIossAccount) {
+          listRowViewModel
+        } else {
+          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        }
     }
 
   def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =

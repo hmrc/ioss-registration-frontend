@@ -34,7 +34,7 @@ class EmailVerificationRequestSpec extends AnyFreeSpec with Matchers with SpecBa
         val emailVerificationRequest: EmailVerificationRequest =
           EmailVerificationRequest(
             "12345-credId",
-            "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-details",
+            "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-account-details",
             "OSS",
             Some("one-stop-shop-registration-frontend"),
             "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",
@@ -48,7 +48,7 @@ class EmailVerificationRequestSpec extends AnyFreeSpec with Matchers with SpecBa
 
         val expectedJson = Json.obj(
           "credId" -> "12345-credId",
-          "continueUrl" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-details",
+          "continueUrl" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-account-details",
           "origin" -> "OSS",
           "deskproServiceName" -> "one-stop-shop-registration-frontend",
           "accessibilityStatementUrl" -> "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",
@@ -69,7 +69,7 @@ class EmailVerificationRequestSpec extends AnyFreeSpec with Matchers with SpecBa
         val emailVerificationRequest: EmailVerificationRequest =
           EmailVerificationRequest(
             "12345-credId",
-            "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-details",
+            "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-account-details",
             "OSS",
             None,
             "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",
@@ -80,7 +80,7 @@ class EmailVerificationRequestSpec extends AnyFreeSpec with Matchers with SpecBa
 
         val expectedJson = Json.obj(
           "credId" -> "12345-credId",
-          "continueUrl" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-details",
+          "continueUrl" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-account-details",
           "origin" -> "OSS",
           "accessibilityStatementUrl" -> "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",
           "lang" -> "en"

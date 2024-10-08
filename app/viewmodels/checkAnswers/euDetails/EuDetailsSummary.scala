@@ -77,7 +77,7 @@ object EuDetailsSummary {
             HtmlFormat.escape(details.euCountry.name)
         }.mkString("<br/>")
 
-        SummaryListRowViewModel(
+        val listRowViewModel = SummaryListRowViewModel(
           key = "euDetails.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
           actions = if (isCurrentIossAccount) {
@@ -89,6 +89,12 @@ object EuDetailsSummary {
             Nil
           }
         )
+
+        if (isCurrentIossAccount) {
+          listRowViewModel
+        } else {
+          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        }
     }
 
   def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =

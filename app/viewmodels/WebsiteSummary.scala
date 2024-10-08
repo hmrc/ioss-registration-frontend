@@ -58,7 +58,8 @@ object WebsiteSummary {
         }.mkString("<br/>")
 
         val addWebsitePageChangeUrl = AddWebsitePage().changeLink(waypoints, sourcePage).url
-        SummaryListRowViewModel(
+
+        val listRowViewModel = SummaryListRowViewModel(
           key = "websites.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
           actions = if (isCurrentIossAccount) {
@@ -70,6 +71,12 @@ object WebsiteSummary {
             Nil
           }
         )
+
+        if (isCurrentIossAccount) {
+          listRowViewModel
+        } else {
+          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        }
     }
 
   def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
