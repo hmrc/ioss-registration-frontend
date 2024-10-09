@@ -22,13 +22,13 @@ import controllers.actions._
 import logging.Logging
 import models.{Country, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
-import models.etmp.EtmpDisplayEuRegistrationDetails
+import models.etmp.{EtmpDisplayEuRegistrationDetails, EtmpDisplayRegistration}
 import models.euDetails.EuOptionalDetails
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.{BankDetailsPage, BusinessContactDetailsPage, JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.AllWebsites
+import queries.{AllWebsites, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import queries.euDetails.{AllEuDetailsQuery, AllEuOptionalDetailsQuery}
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
@@ -61,15 +61,18 @@ class AmendCompleteController @Inject()(
 
       implicit request => {
 
+        val iossNumber = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
+
         for {
           externalEntryUrl <- registrationConnector.getSavedExternalEntry()
         } yield {
           {
             for {
               organisationName <- getOrganisationName(request.userAnswers)
+              originalRegistration <- request.userAnswers.get(OriginalRegistrationQuery(iossNumber))
             } yield {
               val savedUrl = externalEntryUrl.fold(_ => None, _.url)
-              val list: SummaryList = detailsList
+              val list: SummaryList = detailsList(originalRegistration)
               Ok(
                 view(
                   request.vrn,
@@ -93,28 +96,28 @@ class AmendCompleteController @Inject()(
       case _ => None
     }
 
-  private def detailsList()(implicit request: AuthenticatedMandatoryIossRequest[AnyContent]) = {
+  private def detailsList(originalRegistration: EtmpDisplayRegistration)(implicit request: AuthenticatedMandatoryIossRequest[AnyContent]) = {
     SummaryListViewModel(
       rows = (
-        getHasTradingNameRows() ++
-          getTradingNameRows() ++
-          getHasPreviouslyRegistered() ++
-          getPreviouslyRegisteredRows() ++
-          getCountriesWithNewSchemes() ++
-          getHasRegisteredInEuRows() ++
-          getRegisteredInEuRows() ++
-          getChangedEuDetailsRows() ++
-          getWebsitesRows() ++
-          getBusinessContactDetailsRows() ++
-          getBankDetailsRows()
+        getHasTradingNameRows(originalRegistration) ++
+          getTradingNameRows(originalRegistration) ++
+          getHasPreviouslyRegistered(originalRegistration) ++
+          getPreviouslyRegisteredRows(originalRegistration) ++
+          getCountriesWithNewSchemes(originalRegistration) ++
+          getHasRegisteredInEuRows(originalRegistration) ++
+          getRegisteredInEuRows(originalRegistration) ++
+          getChangedEuDetailsRows(originalRegistration) ++
+          getWebsitesRows(originalRegistration) ++
+          getBusinessContactDetailsRows(originalRegistration) ++
+          getBankDetailsRows(originalRegistration)
         ).flatten
     )
   }
 
-  private def getHasTradingNameRows()
+  private def getHasTradingNameRows(originalRegistration: EtmpDisplayRegistration)
                                    (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = request.registrationWrapper.registration.tradingNames
+    val originalAnswers = originalRegistration.tradingNames
     val amendedAnswers = request.userAnswers.get(AllTradingNames).getOrElse(List.empty)
     val hasChangedToNo = amendedAnswers.isEmpty && originalAnswers.nonEmpty
     val hasChangedToYes = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || originalAnswers.isEmpty
@@ -129,10 +132,10 @@ class AmendCompleteController @Inject()(
     }
   }
 
-  private def getTradingNameRows()
+  private def getTradingNameRows(originalRegistration: EtmpDisplayRegistration)
                                 (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = request.registrationWrapper.registration.tradingNames.map(_.tradingName)
+    val originalAnswers = originalRegistration.tradingNames.map(_.tradingName)
     val amendedAnswers = request.userAnswers.get(AllTradingNames).map(_.map(_.name)).getOrElse(List.empty)
     val addedTradingName = amendedAnswers.diff(originalAnswers)
     val removedTradingNames = originalAnswers.diff(amendedAnswers)
@@ -157,10 +160,10 @@ class AmendCompleteController @Inject()(
     Seq(addedTradingNameRow, removedTradingNameRow).flatten
   }
 
-  private def getHasPreviouslyRegistered()
+  private def getHasPreviouslyRegistered(originalRegistration: EtmpDisplayRegistration)
                                         (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = request.registrationWrapper.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct
+    val originalAnswers = originalRegistration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct
     val amendedAnswers = request.userAnswers.get(AllPreviousRegistrationsQuery).map(_.map(_.previousEuCountry.code)).getOrElse(List.empty)
     val hasChangedToNo = amendedAnswers.diff(originalAnswers)
     val hasChangedToYes = originalAnswers.diff(amendedAnswers)
@@ -176,9 +179,10 @@ class AmendCompleteController @Inject()(
 
   }
 
-  private def getPreviouslyRegisteredRows()(implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getPreviouslyRegisteredRows(originalRegistration: EtmpDisplayRegistration)
+                                         (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = request.registrationWrapper.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct
+    val originalAnswers = originalRegistration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct
     val amendedAnswers = request.userAnswers.get(AllPreviousRegistrationsQuery).map(_.map(_.previousEuCountry.code)).getOrElse(List.empty)
 
     val newPreviouslyRegisteredCountry = amendedAnswers.filterNot { addedCountry =>
@@ -201,10 +205,11 @@ class AmendCompleteController @Inject()(
 
   }
 
-  private def getCountriesWithNewSchemes()(implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
+  private def getCountriesWithNewSchemes(originalRegistration: EtmpDisplayRegistration)
+                                        (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
     val amendedDetails = request.userAnswers.get(AllPreviousRegistrationsQuery).getOrElse(List.empty)
-    val registrationDetails = request.registrationWrapper.registration.schemeDetails.previousEURegistrationDetails
+    val registrationDetails = originalRegistration.schemeDetails.previousEURegistrationDetails
 
     val changedSchemeDetails = amendedDetails.flatMap { amendedCountry =>
       val matchingEuCountry = registrationDetails.filter(_.issuedBy == amendedCountry.previousEuCountry.code)
@@ -229,10 +234,10 @@ class AmendCompleteController @Inject()(
     }
   }
 
-  private def getHasRegisteredInEuRows()
+  private def getHasRegisteredInEuRows(originalRegistration: EtmpDisplayRegistration)
                                       (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = request.registrationWrapper.registration.schemeDetails.euRegistrationDetails.map(_.issuedBy)
+    val originalAnswers = originalRegistration.schemeDetails.euRegistrationDetails.map(_.issuedBy)
     val amendedAnswers = request.userAnswers.get(AllEuDetailsQuery).map(_.map(_.euCountry.code)).getOrElse(List.empty)
     val hasChangedToNo = amendedAnswers.isEmpty && originalAnswers.nonEmpty
     val hasChangedToYes = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || originalAnswers.isEmpty
@@ -247,10 +252,10 @@ class AmendCompleteController @Inject()(
     }
   }
 
-  private def getRegisteredInEuRows()
+  private def getRegisteredInEuRows(originalRegistration: EtmpDisplayRegistration)
                                    (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = request.registrationWrapper.registration.schemeDetails.euRegistrationDetails.map(_.issuedBy)
+    val originalAnswers = originalRegistration.schemeDetails.euRegistrationDetails.map(_.issuedBy)
 
     val amendedAnswers = request.userAnswers
       .get(AllEuDetailsQuery)
@@ -286,11 +291,11 @@ class AmendCompleteController @Inject()(
     Seq(addedEuDetailsRow, removedEuDetailsRow).flatten
   }
 
-  private def getChangedEuDetailsRows()
+  private def getChangedEuDetailsRows(originalRegistration: EtmpDisplayRegistration)
                                      (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
     val userEuDetails = request.userAnswers.get(AllEuOptionalDetailsQuery).getOrElse(List.empty)
-    val registrationEuDetails = request.registrationWrapper.registration.schemeDetails.euRegistrationDetails
+    val registrationEuDetails = originalRegistration.schemeDetails.euRegistrationDetails
 
     val changedEuDetailCountries: Seq[Country] = userEuDetails.flatMap { userDetail =>
       registrationEuDetails.find(_.issuedBy == userDetail.euCountry.code) match {
@@ -310,10 +315,10 @@ class AmendCompleteController @Inject()(
   }
 
 
-  private def getWebsitesRows()
+  private def getWebsitesRows(originalRegistration: EtmpDisplayRegistration)
                              (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = request.registrationWrapper.registration.schemeDetails.websites.map(_.websiteAddress)
+    val originalAnswers = originalRegistration.schemeDetails.websites.map(_.websiteAddress)
     val amendedUA = request.userAnswers.get(AllWebsites).map(_.map(_.site)).getOrElse(List.empty)
     val addedWebsites = amendedUA.diff(originalAnswers)
     val removedWebsites = originalAnswers.diff(amendedUA)
@@ -337,12 +342,12 @@ class AmendCompleteController @Inject()(
     Seq(addedWebsiteRow, removedWebsiteRow).flatten
   }
 
-  private def getBusinessContactDetailsRows()
+  private def getBusinessContactDetailsRows(originalRegistration: EtmpDisplayRegistration)
                                            (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalContactName = request.registrationWrapper.registration.schemeDetails.contactName
-    val originalTelephone = request.registrationWrapper.registration.schemeDetails.businessTelephoneNumber
-    val originalEmail = request.registrationWrapper.registration.schemeDetails.businessEmailId
+    val originalContactName = originalRegistration.schemeDetails.contactName
+    val originalTelephone = originalRegistration.schemeDetails.businessTelephoneNumber
+    val originalEmail = originalRegistration.schemeDetails.businessEmailId
     val amendedUA = request.userAnswers.get(BusinessContactDetailsPage)
 
     Seq(
@@ -366,10 +371,10 @@ class AmendCompleteController @Inject()(
     )
   }
 
-  private def getBankDetailsRows()
+  private def getBankDetailsRows(originalRegistration: EtmpDisplayRegistration)
                                 (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = request.registrationWrapper.registration.bankDetails
+    val originalAnswers = originalRegistration.bankDetails
     val amendedUA = request.userAnswers.get(BankDetailsPage)
 
     Seq(

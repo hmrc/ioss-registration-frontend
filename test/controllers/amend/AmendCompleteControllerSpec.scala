@@ -22,14 +22,14 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.amend.{routes => amendRoutes}
 import controllers.routes
-import models.{Country, TradingName, UserAnswers, Website}
 import models.amend.RegistrationWrapper
 import models.domain.PreviousSchemeDetails
 import models.euDetails.EuOptionalDetails
 import models.external.ExternalEntryUrl
 import models.previousRegistrations.PreviousRegistrationDetails
+import models.{Country, TradingName, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.MockitoSugar.when
 import org.scalacheck.Gen
 import org.scalatestplus.mockito.MockitoSugar
 import pages.BusinessContactDetailsPage
@@ -38,26 +38,25 @@ import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import queries.AllWebsites
 import queries.euDetails.AllEuOptionalDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
+import queries.{AllWebsites, OriginalRegistrationQuery}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.FutureSyntax.FutureOps
 import viewmodels.WebsiteSummary
-import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.amend.AmendCompleteView
-
-import scala.concurrent.Future
 
 class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
 
   private val mockRegistrationConnector = mock[RegistrationConnector]
 
-  private  val userAnswers = UserAnswers(
+  private val userAnswers = UserAnswers(
     userAnswersId,
     Json.obj(
       BusinessContactDetailsPage.toString -> Json.obj(
@@ -70,18 +69,21 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
     vatInfo = Some(vatCustomerInfo)
   )
 
+  private val originalRegistration = userAnswers.set(OriginalRegistrationQuery(iossNumber), registrationWrapper.registration).success.value
+
+
   "AmendComplete Controller" - {
 
     "when the scheme has started" - {
 
       "must return OK and the correct view for a GET" in {
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
+        val application = applicationBuilder(userAnswers = Some(originalRegistration))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
-        when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+        when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
         running(application) {
           val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
@@ -91,8 +93,8 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           implicit val msgs: Messages = messages(application)
           val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(userAnswers, Some(registrationWrapper)))
 
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual view(
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
             vrn,
             config.feedbackUrl(request),
             None,
@@ -111,24 +113,25 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
           val result = route(application, request).value
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe routes.JourneyRecoveryController.onPageLoad().url
         }
       }
 
       "when there are amended answers" - {
 
         "must show row for when trading name added" in {
+
           val newTradingName = TradingName("NewTradingName")
-          val updatedAnswers = userAnswers
+          val updatedAnswers = originalRegistration
             .set(AllTradingNames, List(newTradingName)).success.value
 
           val application = applicationBuilder(userAnswers = Some(updatedAnswers))
             .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
-          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
           running(application) {
             val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
@@ -136,8 +139,8 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             val result = route(application, request).value
             val view = application.injector.instanceOf[AmendCompleteView]
             implicit val msgs: Messages = messages(application)
-            val summaryList = SummaryListViewModel(rows =  getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
-            contentAsString(result) mustEqual view(
+            val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+            contentAsString(result) mustBe view(
               vrn,
               config.feedbackUrl(request),
               None,
@@ -153,6 +156,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         }
 
         "must show row for when previous Registration added" in {
+
           val previousRegistration: PreviousRegistrationDetails = PreviousRegistrationDetails(
             previousEuCountry = arbitraryCountry.arbitrary.sample.value,
             previousSchemesDetails = Gen.listOfN(maxSchemes, PreviousSchemeDetails(
@@ -161,15 +165,15 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               nonCompliantDetails = Some(arbitraryNonCompliantDetails.arbitrary.sample.value)
             )).sample.value
           )
-          val updatedAnswers = userAnswers
+          val updatedAnswers = originalRegistration
             .set(AllPreviousRegistrationsQuery, List(previousRegistration)).success.value
 
           val application = applicationBuilder(userAnswers = Some(updatedAnswers))
             .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
-          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
           running(application) {
             val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
@@ -177,8 +181,8 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             val result = route(application, request).value
             val view = application.injector.instanceOf[AmendCompleteView]
             implicit val msgs: Messages = messages(application)
-            val summaryList = SummaryListViewModel(rows =  getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
-            contentAsString(result) mustEqual view(
+            val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+            contentAsString(result) mustBe view(
               vrn,
               config.feedbackUrl(request),
               None,
@@ -194,6 +198,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         }
 
         "must show row for when Eu Registration added" in {
+
           val newEuRegistration = EuOptionalDetails(
             euCountry = arbitraryCountry.arbitrary.sample.value,
             hasFixedEstablishment = Some(true),
@@ -203,15 +208,15 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             fixedEstablishmentTradingName = Some(arbitraryFixedEstablishmentTradingNamePage.arbitrary.sample.value.toString),
             fixedEstablishmentAddress = Some(arbitraryInternationalAddress.arbitrary.sample.value)
           )
-          val updatedAnswers = userAnswers
+          val updatedAnswers = originalRegistration
             .set(AllEuOptionalDetailsQuery, List(newEuRegistration)).success.value
 
           val application = applicationBuilder(userAnswers = Some(updatedAnswers))
             .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
-          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
           running(application) {
             val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
@@ -219,8 +224,8 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             val result = route(application, request).value
             val view = application.injector.instanceOf[AmendCompleteView]
             implicit val msgs: Messages = messages(application)
-            val summaryList = SummaryListViewModel(rows =  getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
-            contentAsString(result) mustEqual view(
+            val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+            contentAsString(result) mustBe view(
               vrn,
               config.feedbackUrl(request),
               None,
@@ -235,18 +240,18 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           }
         }
 
-
         "must show row for when website added" in {
+
           val newWebsite = Website("https://www.NewWebsite.co.uk")
-          val updatedAnswers = userAnswers
+          val updatedAnswers = originalRegistration
             .set(AllWebsites, List(newWebsite)).success.value
 
           val application = applicationBuilder(userAnswers = Some(updatedAnswers))
             .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
-          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+          when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+          when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
           running(application) {
             val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
@@ -254,8 +259,8 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             val result = route(application, request).value
             val view = application.injector.instanceOf[AmendCompleteView]
             implicit val msgs: Messages = messages(application)
-            val summaryList = SummaryListViewModel(rows =  getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
-            contentAsString(result) mustEqual view(
+            val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+            contentAsString(result) mustBe view(
               vrn,
               config.feedbackUrl(request),
               None,
@@ -274,9 +279,9 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
   }
 
   private def getAmendedRegistrationSummaryList(
-                                                answers: UserAnswers,
-                                                registrationWrapper: Option[RegistrationWrapper]
-                                              )(implicit msgs: Messages): Seq[SummaryListRow] = {
+                                                 answers: UserAnswers,
+                                                 registrationWrapper: Option[RegistrationWrapper]
+                                               )(implicit msgs: Messages): Seq[SummaryListRow] = {
 
     val hasTradingNameSummaryRow = HasTradingNameSummary.amendedRow(answers)
     val tradingNameSummaryRow = TradingNameSummary.amendedAnswersRow(answers)

@@ -23,23 +23,25 @@ import pages.Waypoints
 import pages.amend.ChangeRegistrationPage
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.OriginalRegistrationQuery
 import repositories.AuthenticatedUserAnswersRepository
-import services.RegistrationService
+import services.{AccountService, RegistrationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class StartAmendJourneyController @Inject()(
                                              override val messagesApi: MessagesApi,
                                              cc: AuthenticatedControllerComponents,
                                              registrationConnector: RegistrationConnector,
                                              registrationService: RegistrationService,
+                                             accountService: AccountService,
                                              authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging {
   protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.authAndGetData(AmendingActiveRegistration) andThen cc.requireIoss()).async {
     implicit request =>
 
       (for {
@@ -50,7 +52,9 @@ class StartAmendJourneyController @Inject()(
           case Right(registrationWrapper) =>
             for {
               userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
+              originalAnswers <- Future.fromTry(userAnswers.set(OriginalRegistrationQuery(request.iossNumber), registrationWrapper.registration))
               _ <- authenticatedUserAnswersRepository.set(userAnswers)
+              _ <- authenticatedUserAnswersRepository.set(originalAnswers)
             } yield Redirect(ChangeRegistrationPage.route(waypoints).url)
           case Left(error) =>
             val exception = new Exception(error.body)
