@@ -24,7 +24,7 @@ import pages.Waypoints
 import pages.amend.ChangePreviousRegistrationPage
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PreviousRegistrationIossNumberQuery
+import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import repositories.AuthenticatedUserAnswersRepository
 import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -51,7 +51,9 @@ class StartAmendPreviousRegistrationJourneyController @Inject()(
             for {
               userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
               userAnswers <- Future.fromTry(userAnswers.set(PreviousRegistrationIossNumberQuery, iossNumber))
+              originalAnswers <- Future.fromTry(userAnswers.set(OriginalRegistrationQuery(iossNumber), registrationWrapper.registration))
               _ <- authenticatedUserAnswersRepository.set(userAnswers)
+              _ <- authenticatedUserAnswersRepository.set(originalAnswers)
             } yield Redirect(ChangePreviousRegistrationPage.route(waypoints).url)
           case Left(error) =>
             val exception = new Exception(error.body)
