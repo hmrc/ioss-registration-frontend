@@ -22,6 +22,7 @@ import models.responses.etmp.EtmpEnrolmentResponse
 import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.Enrolments
 
 class RegistrationAuditModelSpec extends SpecBase {
 
@@ -33,9 +34,9 @@ class RegistrationAuditModelSpec extends SpecBase {
 
     "must create correct json object" in {
 
-      val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers, None)
+      val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
 
-      implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, None, emptyUserAnswers, None)
+      implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
 
       val registrationAuditModel = RegistrationAuditModel.build(
         registrationAuditType = registrationAuditType,

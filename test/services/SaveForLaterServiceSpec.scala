@@ -17,7 +17,7 @@
 package services
 
 import base.SpecBase
-import connectors.{SaveForLaterConnector, SavedUserAnswers}
+import connectors.{SavedUserAnswers, SaveForLaterConnector}
 import controllers.routes
 import models.requests.{AuthenticatedDataRequest, SaveForLaterRequest}
 import models.responses.NotFound
@@ -32,6 +32,7 @@ import play.api.mvc.AnyContent
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import repositories.AuthenticatedUserAnswersRepository
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.Instant
@@ -42,8 +43,8 @@ class SaveForLaterServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   implicit private lazy val hc: HeaderCarrier = HeaderCarrier()
 
-  val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers, None)
-  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, None, emptyUserAnswers, None)
+  val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
+  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
 
   private val waypoints: Waypoints = EmptyWaypoints
 

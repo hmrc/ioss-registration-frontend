@@ -48,6 +48,7 @@ class IossRequiredActionImpl @Inject()(
                 request,
                 request.credentials,
                 request.vrn,
+                request.enrolments,
                 iossNumber,
                 registrationWrapper,
                 request.userAnswers

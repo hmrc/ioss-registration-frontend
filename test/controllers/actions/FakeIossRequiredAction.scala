@@ -22,6 +22,7 @@ import models.amend.RegistrationWrapper
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
+import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
 
 import java.time.{LocalDate, ZoneId}
@@ -29,7 +30,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case class FakeIossRequiredActionImpl(
                                        dataToReturn: Option[UserAnswers],
-                                       registrationWrapper: RegistrationWrapper
+                                       registrationWrapper: RegistrationWrapper,
+                                       maybeEnrolments: Option[Enrolments]
                                      )
   extends IossRequiredActionImpl(mock[RegistrationConnector])(ExecutionContext.Implicits.global) {
 
@@ -41,10 +43,12 @@ case class FakeIossRequiredActionImpl(
   }
 
   override protected def refine[A](request: AuthenticatedDataRequest[A]): Future[Either[Result, AuthenticatedMandatoryIossRequest[A]]] = {
+    println(s"?Here - ${maybeEnrolments}")
     Right(AuthenticatedMandatoryIossRequest(
       request,
       request.credentials,
       request.vrn,
+      maybeEnrolments.getOrElse(request.enrolments),
       request.iossNumber.getOrElse("IM9001234567"),
       registrationWrapper,
       data
@@ -53,10 +57,13 @@ case class FakeIossRequiredActionImpl(
 }
 
 class FakeIossRequiredAction(dataToReturn: Option[UserAnswers],
-                             registrationWrapper: RegistrationWrapper)
+                             registrationWrapper: RegistrationWrapper,
+                             enrolments: Option[Enrolments] = None
+                            )
   extends IossRequiredAction(
     mock[RegistrationConnector]
   )(ExecutionContext.Implicits.global) {
-  override def apply(): IossRequiredActionImpl = new FakeIossRequiredActionImpl(dataToReturn, registrationWrapper)
+  println(s"Passed enrolments were: ${enrolments}")
+  override def apply(): IossRequiredActionImpl = new FakeIossRequiredActionImpl(dataToReturn, registrationWrapper, enrolments)
 }
 

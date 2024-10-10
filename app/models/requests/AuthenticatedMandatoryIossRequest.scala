@@ -21,6 +21,7 @@ import models.amend.RegistrationWrapper
 import models.etmp.EtmpPreviousEuRegistrationDetails
 import play.api.mvc.WrappedRequest
 import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.domain.Vrn
 
 
@@ -28,6 +29,7 @@ case class AuthenticatedMandatoryIossRequest[A](
                                                  request: AuthenticatedDataRequest[A],
                                                  credentials: Credentials,
                                                  vrn: Vrn,
+                                                 enrolments: Enrolments,
                                                  iossNumber: String,
                                                  registrationWrapper: RegistrationWrapper,
                                                  userAnswers: UserAnswers
@@ -37,5 +39,16 @@ case class AuthenticatedMandatoryIossRequest[A](
 
   val previousEURegistrationDetails: Seq[EtmpPreviousEuRegistrationDetails] =
     registrationWrapper.registration.schemeDetails.previousEURegistrationDetails
+
+  lazy val hasMultipleIossEnrolments: Boolean = {
+    println(s"TEST: ${enrolments}")
+    enrolments.enrolments
+      .filter(_.key == "HMRC-IOSS-ORG")
+      .toSeq
+      .flatMap(_.identifiers
+        .filter(_.key == "IOSSNumber")
+        .map(_.value)
+      ).size > 1
+  }
 
 }

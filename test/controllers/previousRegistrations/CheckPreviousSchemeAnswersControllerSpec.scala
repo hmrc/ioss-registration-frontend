@@ -36,6 +36,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import queries.previousRegistration.AllPreviousSchemesForCountryWithOptionalVatNumberQuery
 import repositories.AuthenticatedUserAnswersRepository
+import uk.gov.hmrc.auth.core.Enrolments
 import viewmodels.checkAnswers.previousRegistrations.PreviousSchemeSummary
 import viewmodels.govuk.SummaryListFluency
 import views.html.previousRegistrations.CheckPreviousSchemeAnswersView
@@ -73,7 +74,7 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
       running(application) {
         implicit val msgs: Messages = messages(application)
         val request = FakeRequest(GET, checkPreviousSchemeAnswersRoute)
-        val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Some(iossNumber), baseUserAnswers, None)
+        val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), Some(iossNumber), baseUserAnswers, None)
 
         val result = route(application, request).value
 
@@ -137,7 +138,7 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
             FakeRequest(POST, checkPreviousSchemeAnswersRoute)
               .withFormUrlEncodedBody(("value", ""))
 
-          val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Some(iossNumber), baseUserAnswers, None)
+          val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), Some(iossNumber), baseUserAnswers, None)
 
           val boundForm = form.bind(Map("value" -> ""))
 

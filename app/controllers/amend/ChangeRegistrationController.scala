@@ -64,7 +64,13 @@ class ChangeRegistrationController @Inject()(
     cc.authAndRequireIoss(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations = false, waypoints = EmptyWaypoints).async {
       implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
-        accountService.getPreviousRegistrations().map { previousRegistrations =>
+        val futurePreviousRegistrations = if(request.hasMultipleIossEnrolments) {
+          accountService.getPreviousRegistrations()
+        } else {
+          Seq.empty.toFuture
+        }
+
+        futurePreviousRegistrations.map { previousRegistrations =>
 
           val selectedPreviousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
 

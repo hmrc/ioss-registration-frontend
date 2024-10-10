@@ -41,6 +41,7 @@ import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.FakeRequest
 import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.domain.Vrn
 
 import java.time.{Clock, Instant, LocalDate, ZoneId}
@@ -104,7 +105,8 @@ trait SpecBase
   protected def applicationBuilder(
                                     userAnswers: Option[UserAnswers] = None,
                                     clock: Option[Clock] = None,
-                                    registrationWrapper: Option[RegistrationWrapper] = None
+                                    registrationWrapper: Option[RegistrationWrapper] = None,
+                                    enrolments: Option[Enrolments] = None
                                   ): GuiceApplicationBuilder = {
 
     val clockToBind = clock.getOrElse(stubClockAtArbitraryDate)
@@ -120,7 +122,7 @@ trait SpecBase
         bind[CheckEmailVerificationFilterProvider].toInstance(new FakeCheckEmailVerificationFilter()),
         bind[SavedAnswersRetrievalActionProvider].toInstance(new FakeSavedAnswersRetrievalActionProvider(userAnswers, vrn)),
         bind[CheckBouncedEmailFilterProvider].toInstance(new FakeCheckBouncedEmailFilterProvider()),
-        bind[IossRequiredActionImpl].toInstance(new FakeIossRequiredAction(userAnswers, registrationWrapper.getOrElse(this.registrationWrapper))()),
+        bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(userAnswers, registrationWrapper.getOrElse(this.registrationWrapper), enrolments)),
         bind[CheckAmendPreviousRegistrationFilterProvider].toInstance(new FakeCheckAmendPreviousRegistrationFilterProvider()),
         bind[Clock].toInstance(clockToBind)
       )

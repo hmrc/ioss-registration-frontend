@@ -18,6 +18,7 @@ package controllers.amend
 
 import base.SpecBase
 import connectors.RegistrationConnector
+import controllers.actions.{FakeIossRequiredAction, IossRequiredActionImpl}
 import controllers.amend.{routes => amendRoutes}
 import models.amend.{PreviousRegistration, RegistrationWrapper}
 import models.etmp.EtmpExclusion
@@ -41,10 +42,11 @@ import queries.PreviousRegistrationIossNumberQuery
 import queries.euDetails.EuDetailsQuery
 import services._
 import testutils.RegistrationData.etmpDisplayRegistration
+import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
-import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviouslyRegisteredSummary, PreviousRegistrationSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.SummaryListFluency
@@ -104,6 +106,11 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
     ".onPageLoad" - {
 
+      val multipleEnrolments = Enrolments(Set(
+        Enrolment("HMRC-IOSS-ORG", Seq(EnrolmentIdentifier("IOSSNumber", "IM9001234567")), "Activated"),
+        Enrolment("HMRC-IOSS-ORG", Seq(EnrolmentIdentifier("IOSSNumber", "IM9001234565")), "Activated")
+      ))
+
       "must return OK and the correct view for a GET when no previous registrations exist" in {
 
         val isCurrentIossAccount: Boolean = true
@@ -140,7 +147,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
 
-        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
           .build()
@@ -174,7 +181,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         val answers = completeUserAnswersWithVatInfo.set(PreviousRegistrationIossNumberQuery, previousRegistration.iossNumber).success.value
 
-        val application = applicationBuilder(userAnswers = Some(answers), clock = Some(Clock.systemUTC()))
+        val application = applicationBuilder(userAnswers = Some(answers), clock = Some(Clock.systemUTC()), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
           .build()

@@ -37,6 +37,7 @@ import queries.etmp.EtmpEnrolmentResponseQuery
 import queries.euDetails.EuDetailsQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.{AuditService, RegistrationService, SaveForLaterService}
+import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
@@ -106,7 +107,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           val result = route(application, request).value
 
           implicit val dataRequest: AuthenticatedDataRequest[AnyContentAsEmpty.type] =
-            AuthenticatedDataRequest(request, testCredentials, vrn, None, completeUserAnswersWithVatInfo, None)
+            AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, completeUserAnswersWithVatInfo, None)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
             RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, Some(etmpEnrolmentResponse), SubmissionResult.Success
@@ -138,7 +139,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           val result = route(application, request).value
 
           implicit val dataRequest: AuthenticatedDataRequest[AnyContentAsEmpty.type] =
-            AuthenticatedDataRequest(request, testCredentials, vrn, None, completeUserAnswersWithVatInfo, None)
+            AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, completeUserAnswersWithVatInfo, None)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
             RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, None, SubmissionResult.Duplicate
@@ -169,7 +170,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
           val result = route(application, request).value
 
           implicit val dataRequest: AuthenticatedDataRequest[AnyContentAsEmpty.type] =
-            AuthenticatedDataRequest(request, testCredentials, vrn, None, completeUserAnswersWithVatInfo, None)
+            AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, completeUserAnswersWithVatInfo, None)
 
           val expectedAuditEvent = RegistrationAuditModel.build(
             RegistrationAuditType.CreateRegistration, completeUserAnswersWithVatInfo, None, SubmissionResult.Failure

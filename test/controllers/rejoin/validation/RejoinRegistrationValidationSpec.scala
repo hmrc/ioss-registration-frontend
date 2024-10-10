@@ -32,6 +32,7 @@ import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import services.core.{EuRegistrationsValidationService, InvalidActiveTrader, InvalidQuarantinedTrader}
 import testutils.RegistrationData.{etmpDisplayEuRegistrationDetails, etmpEuPreviousRegistrationDetails}
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,8 +45,8 @@ class RejoinRegistrationValidationSpec extends SpecBase with IdiomaticMockito wi
   private val rejoinWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, ""))
 
   private implicit val hc: HeaderCarrier = HeaderCarrier()
-  private val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers, None)
-  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, None, emptyUserAnswers, None)
+  private val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
+  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
 
   private val registrationWrapperWithRegistrations: RegistrationWrapper = {
     val registration = registrationWrapper.registration

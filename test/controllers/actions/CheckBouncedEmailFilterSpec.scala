@@ -37,6 +37,7 @@ import utils.FutureSyntax.FutureOps
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import play.api.inject.bind
+import uk.gov.hmrc.auth.core.Enrolments
 
 class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
 
@@ -54,6 +55,7 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
     FakeRequest(),
     testCredentials,
     vrn,
+    Enrolments(Set.empty),
     Some(iossNumber),
     completeUserAnswers,
     Some(registrationWrapper)
@@ -88,7 +90,7 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
               when(mockEmailVerificationService.isEmailVerified(
                 eqTo(testEmail), eqTo(userAnswersId))(any())) thenReturn NotVerified.toFuture
 
-              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
+              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, Enrolments(Set.empty), iossNumber, regWrapperWithUnusableEmail, userAnswers)
               val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
               val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 
@@ -121,7 +123,15 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
               when(mockEmailVerificationService.isEmailVerified(
                 eqTo(testEmail), eqTo(userAnswersId))(any())) thenReturn LockedTooManyLockedEmails.toFuture
 
-              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
+              val request = AuthenticatedMandatoryIossRequest(
+                authDataRequest,
+                testCredentials,
+                vrn,
+                Enrolments(Set.empty),
+                iossNumber,
+                regWrapperWithUnusableEmail,
+                userAnswers
+              )
               val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
               val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 
@@ -153,7 +163,15 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
               when(mockEmailVerificationService.isEmailVerified(
                 eqTo(testEmail), eqTo(userAnswersId))(any())) thenReturn LockedPasscodeForSingleEmail.toFuture
 
-              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
+              val request = AuthenticatedMandatoryIossRequest(
+                authDataRequest,
+                testCredentials,
+                vrn,
+                Enrolments(Set.empty),
+                iossNumber,
+                regWrapperWithUnusableEmail,
+                userAnswers
+              )
               val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
               val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 
@@ -185,7 +203,15 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
               when(mockEmailVerificationService.isEmailVerified(
                 eqTo(testEmail), eqTo(userAnswersId))(any())) thenReturn Verified.toFuture
 
-              val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, userAnswers)
+              val request = AuthenticatedMandatoryIossRequest(
+                authDataRequest,
+                testCredentials,
+                vrn,
+                Enrolments(Set.empty),
+                iossNumber,
+                regWrapperWithUnusableEmail,
+                userAnswers
+              )
               val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
               val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 
@@ -214,7 +240,15 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
           )).success.value
 
           running(app) {
-            val request = AuthenticatedMandatoryIossRequest(authDataRequest, testCredentials, vrn, iossNumber, regWrapperWithUnusableEmail, updatedUserAnswers)
+            val request = AuthenticatedMandatoryIossRequest(
+              authDataRequest,
+              testCredentials,
+              vrn,
+              Enrolments(Set.empty),
+              iossNumber,
+              regWrapperWithUnusableEmail,
+              updatedUserAnswers
+            )
             val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
             val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 
@@ -236,7 +270,7 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
 
         running(app) {
           val request = AuthenticatedMandatoryIossRequest(
-            authDataRequest, testCredentials, vrn, iossNumber, registrationWrapper, completeUserAnswersWithVatInfo)
+            authDataRequest, testCredentials, vrn, Enrolments(Set.empty), iossNumber, registrationWrapper, completeUserAnswersWithVatInfo)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
           val controller = new Harness(frontendAppConfig, mockEmailVerificationService)
 

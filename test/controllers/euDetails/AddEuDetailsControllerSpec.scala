@@ -33,6 +33,7 @@ import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.AuthenticatedUserAnswersRepository
+import uk.gov.hmrc.auth.core.Enrolments
 import utils.EuDetailsCompletionChecks.getAllIncompleteEuDetails
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.EuDetailsSummary
@@ -98,7 +99,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
         val list = EuDetailsSummary.countryAndVatNumberList(userAnswers, waypoints, AddEuDetailsPage())
 
         val authenticatedDataRequest: AuthenticatedDataRequest[AnyContent] =
-          AuthenticatedDataRequest(request, testCredentials, vrn, None, userAnswers, None)
+          AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, userAnswers, None)
 
         val incomplete = getAllIncompleteEuDetails()(authenticatedDataRequest)
 
@@ -126,7 +127,7 @@ class AddEuDetailsControllerSpec extends SpecBase with MockitoSugar {
         val list = EuDetailsSummary.countryAndVatNumberList(userAnswers, waypoints, AddEuDetailsPage())
 
         val authenticatedDataRequest: AuthenticatedDataRequest[AnyContent] =
-          AuthenticatedDataRequest(request, testCredentials, vrn, None, userAnswers, None)
+          AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, userAnswers, None)
 
         val incomplete = getAllIncompleteEuDetails()(authenticatedDataRequest)
 
