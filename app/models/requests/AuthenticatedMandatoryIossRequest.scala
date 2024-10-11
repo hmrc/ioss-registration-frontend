@@ -41,7 +41,6 @@ case class AuthenticatedMandatoryIossRequest[A](
     registrationWrapper.registration.schemeDetails.previousEURegistrationDetails
 
   lazy val hasMultipleIossEnrolments: Boolean = {
-    println(s"TEST: ${enrolments}")
     enrolments.enrolments
       .filter(_.key == "HMRC-IOSS-ORG")
       .toSeq

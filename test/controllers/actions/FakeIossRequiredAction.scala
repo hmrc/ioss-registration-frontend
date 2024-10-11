@@ -43,7 +43,6 @@ case class FakeIossRequiredActionImpl(
   }
 
   override protected def refine[A](request: AuthenticatedDataRequest[A]): Future[Either[Result, AuthenticatedMandatoryIossRequest[A]]] = {
-    println(s"?Here - ${maybeEnrolments}")
     Right(AuthenticatedMandatoryIossRequest(
       request,
       request.credentials,
@@ -63,7 +62,6 @@ class FakeIossRequiredAction(dataToReturn: Option[UserAnswers],
   extends IossRequiredAction(
     mock[RegistrationConnector]
   )(ExecutionContext.Implicits.global) {
-  println(s"Passed enrolments were: ${enrolments}")
   override def apply(): IossRequiredActionImpl = new FakeIossRequiredActionImpl(dataToReturn, registrationWrapper, enrolments)
 }
 
