@@ -29,6 +29,7 @@ import play.api.mvc.Results._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testutils.RegistrationData.etmpDisplayRegistration
+import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,6 +61,7 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
           request,
           testCredentials,
           vrn,
+          Enrolments(Set.empty),
           None,
           emptyUserAnswersWithVatInfo,
           None
@@ -79,6 +81,7 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
           request,
           testCredentials,
           vrn,
+          Enrolments(Set.empty),
           Some(iossNumber),
           emptyUserAnswersWithVatInfo,
           None
@@ -98,6 +101,7 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
           FakeRequest(GET, "/test/url?k=session-id"),
           testCredentials,
           vrn,
+          Enrolments(Set.empty),
           Some(iossNumber),
           emptyUserAnswersWithVatInfo,
           None
@@ -109,6 +113,7 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
           request,
           testCredentials,
           vrn,
+          Enrolments(Set.empty),
           iossNumber,
           registrationWrapper,
           emptyUserAnswersWithVatInfo

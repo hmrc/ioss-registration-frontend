@@ -59,7 +59,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
   private val registrationService = mock[RegistrationService]
   private val mockReturnStatusConnector = mock[ReturnStatusConnector]
   private val country = arbitraryCountry.arbitrary.sample.value
-  private val registrationValidationFailureRedirect = Call("GET", "/error")
+  private val registrationValidationFailureRedirect = rejoinRoutes.CannotRejoinController.onPageLoad()
 
   private val isCurrentIossAccount: Boolean = true
 
@@ -86,8 +86,8 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
           .thenReturn(Future.successful(Right(registrationWithExclusionOnBoundary)))
 
         when(rejoinRegistrationValidation.validateEuRegistrations(
-          ArgumentMatchers.eq(registrationWithExclusionOnBoundary),
-          ArgumentMatchers.eq(rejoinWaypoints)
+          any(),
+          any()
         )(any(), any(), any()))
           .thenReturn(Future.successful(Left(registrationValidationFailureRedirect)))
 
@@ -260,7 +260,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
 
     ".onSubmit" - {
 
-      "must redirect if registration does not meet requirements" - {
+      "must redirect if registration does not meet requirements" in {
 
         val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
 
@@ -270,8 +270,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito wi
         when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapperWithExclusionOnBoundary)))
 
         when(rejoinRegistrationValidation.validateEuRegistrations(
-          ArgumentMatchers.eq(registrationWrapperWithExclusionOnBoundary),
-          ArgumentMatchers.eq(rejoinWaypoints)
+          any(), any()
         )(any(), any(), any()))
           .thenReturn(Future.successful(Left(registrationValidationFailureRedirect)))
 

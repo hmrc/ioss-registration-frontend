@@ -17,7 +17,7 @@
 package controllers.actions
 
 import base.SpecBase
-import connectors.{SaveForLaterConnector, SavedUserAnswers}
+import connectors.{SavedUserAnswers, SaveForLaterConnector}
 import models.UserAnswers
 import models.requests.AuthenticatedOptionalDataRequest
 import org.mockito.ArgumentMatchers.any
@@ -29,6 +29,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
 import repositories.AuthenticatedUserAnswersRepository
+import uk.gov.hmrc.auth.core.Enrolments
 
 import java.time.{Clock, Instant, ZoneId}
 import scala.concurrent.Future
@@ -65,6 +66,7 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
             request = request,
             credentials = testCredentials,
             vrn = vrn,
+            enrolments = Enrolments(Set.empty),
             iossNumber = None,
             userAnswers = Some(answers))
         ).futureValue
@@ -93,6 +95,7 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
             request = request,
             credentials = testCredentials,
             vrn = vrn,
+            enrolments = Enrolments(Set.empty),
             iossNumber = None,
             userAnswers = Some(UserAnswers(userAnswersId))
           )
@@ -118,6 +121,7 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
           AuthenticatedOptionalDataRequest(request,
             credentials = testCredentials,
             vrn = vrn,
+            enrolments = Enrolments(Set.empty),
             iossNumber = None,
             userAnswers = Some(emptyAnswers))
         ).futureValue

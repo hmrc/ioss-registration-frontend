@@ -113,7 +113,6 @@ class RejoinRegistrationController @Inject()(
                                                        (successCall: => Future[Result])(implicit hc: HeaderCarrier,
                                                                                         request: AuthenticatedMandatoryIossRequest[AnyContent],
                                                                                         ec: ExecutionContext): Future[Result] = {
-    //Causes a bun fight if done outside this scope due to implicits fight
     implicit val authenticatedDataRequest: AuthenticatedDataRequest[AnyContent] = request.request
 
     rejoinRegistrationValidator.validateEuRegistrations(registrationWrapper, waypoints).flatMap {

@@ -21,12 +21,14 @@ import models.etmp.{EtmpPreviousEuRegistrationDetails, SchemeType}
 import models.{Country, UserAnswers}
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.domain.Vrn
 
 case class AuthenticatedOptionalDataRequest[A](
                                                 request: Request[A],
                                                 credentials: Credentials,
                                                 vrn: Vrn,
+                                                enrolments: Enrolments,
                                                 iossNumber: Option[String],
                                                 userAnswers: Option[UserAnswers]
                                               ) extends WrappedRequest[A](request) {
@@ -38,6 +40,7 @@ case class AuthenticatedDataRequest[A](
                                         request: Request[A],
                                         credentials: Credentials,
                                         vrn: Vrn,
+                                        enrolments: Enrolments,
                                         iossNumber: Option[String],
                                         userAnswers: UserAnswers,
                                         registrationWrapper: Option[RegistrationWrapper],

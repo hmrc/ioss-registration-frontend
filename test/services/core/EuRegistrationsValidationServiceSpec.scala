@@ -32,6 +32,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,8 +50,8 @@ class EuRegistrationsValidationServiceSpec
   private val previousRegistrationValidationService = new EuRegistrationsValidationService(mockCoreRegistrationValidationService)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  private val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, None, emptyUserAnswers, None)
-  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, None, emptyUserAnswers, None)
+  private val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
+  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
 
   private val quarantinedNETP = FixedEstablishmentQuarantinedNETP
   private val activeNETP = MatchType.FixedEstablishmentActiveNETP

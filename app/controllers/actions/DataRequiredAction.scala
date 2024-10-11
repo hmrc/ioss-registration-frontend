@@ -61,6 +61,7 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
             request = request.request,
             credentials = request.credentials,
             vrn = request.vrn,
+            enrolments = request.enrolments,
             iossNumber = request.iossNumber,
             userAnswers = data,
             registrationWrapper = maybeRegistrationWrapper))

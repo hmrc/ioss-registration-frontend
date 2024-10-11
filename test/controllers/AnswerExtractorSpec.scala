@@ -22,11 +22,12 @@ import models.requests.AuthenticatedDataRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.rejoin.RejoinRegistrationPage
 import pages.{EmptyWaypoints, NonEmptyWaypoints, QuestionPage, Waypoint, Waypoints}
-import play.api.libs.json.{JsPath, Json}
+import play.api.libs.json.{Json, JsPath}
 import play.api.mvc.Results.{Ok, Redirect}
 import play.api.mvc.{AnyContent, Call, Result}
 import play.api.test.FakeRequest
 import queries.Gettable
+import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.Future
@@ -45,7 +46,7 @@ class AnswerExtractorSpec extends SpecBase {
   }
 
   private def buildRequest(answers: UserAnswers): AuthenticatedDataRequest[AnyContent] =
-    AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, None, answers, None)
+    AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, answers, None)
 
   private class TestController extends AnswerExtractor {
 

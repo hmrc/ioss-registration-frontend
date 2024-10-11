@@ -37,6 +37,7 @@ extends AuthenticatedDataRetrievalAction(mockSessionRepository, mockMigrationSer
         request,
         request.credentials,
         vrn,
+        request.enrolments,
         request.iossNumber,
         dataToReturn
       )
