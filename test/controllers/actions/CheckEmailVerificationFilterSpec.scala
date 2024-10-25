@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
-import models.CheckMode
+import models.{BankDetails, CheckMode, NormalMode}
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -28,7 +28,7 @@ import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BankDetailsPage, BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
@@ -59,11 +59,19 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
   private val mockSaveForLaterService = mock[SaveForLaterService]
   private val validEmailAddressUserAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
   private val mockRegistrationConnector = mock[RegistrationConnector]
+  private val validBankDetails = completeUserAnswers.get(BankDetailsPage)
 
-  private val expectedWaypoints =
-    EmptyWaypoints.setNextWaypoint(
-      Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
-    )
+  private val expectedWaypoints = {
+    if (validBankDetails.isEmpty) {
+      EmptyWaypoints.setNextWaypoint(
+        Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
+      )
+    } else {
+      EmptyWaypoints.setNextWaypoint(
+        Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
+      )
+    }
+  }
 
   ".filter" - {
 
