@@ -260,7 +260,7 @@ class AmendCompleteController @Inject()(
     val amendedAnswers = request.userAnswers
       .get(AllEuDetailsQuery)
       .map(_.map(_.euCountry.code))
-      .getOrElse(List.empty)
+      .getOrElse(Seq.empty)
 
     val addedEuDetails = amendedAnswers.diff(originalAnswers)
     val removedEuDetails = originalAnswers.diff(amendedAnswers)
@@ -286,7 +286,6 @@ class AmendCompleteController @Inject()(
     }
 
     val removedEuDetailsRow = Some(EuDetailsSummary.removedAnswersRow(removedEuDetailsCountries))
-
 
     Seq(addedEuDetailsRow, removedEuDetailsRow).flatten
   }
@@ -404,13 +403,13 @@ class AmendCompleteController @Inject()(
 
     userDetails.fixedEstablishmentTradingName.exists(_ != registrationDetails.fixedEstablishmentTradingName) ||
       userDetails.fixedEstablishmentAddress.exists(address =>
-        !registrationDetails.fixedEstablishmentAddressLine1.equalsIgnoreCase(address.line1) ||
-          !registrationDetails.fixedEstablishmentAddressLine2.contains(address.line2.getOrElse("")) ||
-          !registrationDetails.townOrCity.equalsIgnoreCase(address.townOrCity) ||
-          !registrationDetails.regionOrState.contains(address.stateOrRegion.getOrElse("")) ||
-          !registrationDetails.postcode.contains(address.postCode.getOrElse(""))
+        !registrationDetails.fixedEstablishmentAddressLine1.equals(address.line1) ||
+          !registrationDetails.fixedEstablishmentAddressLine2.equals(address.line2) ||
+          !registrationDetails.townOrCity.equals(address.townOrCity) ||
+          !registrationDetails.regionOrState.equals(address.stateOrRegion) ||
+          !registrationDetails.postcode.equals(address.postCode)
       ) ||
-      vatNumberWithoutCountryCode.exists(_ != registrationVatNumber.getOrElse("")) ||
-      userDetails.euTaxReference.exists(_ != registrationDetails.taxIdentificationNumber.getOrElse(""))
+      !vatNumberWithoutCountryCode.equals(registrationVatNumber) ||
+      !userDetails.euTaxReference.equals(registrationDetails.taxIdentificationNumber)
   }
 }
