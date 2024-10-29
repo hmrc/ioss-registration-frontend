@@ -19,8 +19,13 @@ package controllers.actions
 import config.FrontendAppConfig
 import logging.Logging
 import models.requests.AuthenticatedIdentifierRequest
+import pages.EmptyWaypoints
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
+import services.oss.OssExclusionsService
+import uk.gov.hmrc.auth.core.EnrolmentIdentifier
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
@@ -28,30 +33,56 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckRegistrationFilterImpl(
                                    inAmend: Boolean,
-                                   frontendAppConfig: FrontendAppConfig
+                                   frontendAppConfig: FrontendAppConfig,
+                                   ossExclusionsService: OssExclusionsService
                                  )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedIdentifierRequest] with Logging {
   override protected def filter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] = {
-    (hasIossEnrolment(request), inAmend) match {
-      case (true, false) =>
-        Some(Redirect(controllers.routes.AlreadyRegisteredController.onPageLoad().url)).toFuture
-      case (false, true) =>
-        Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url)).toFuture
-      case _ =>
-        None.toFuture
+
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
+    hasQuarantinedOssEnrolment(request).map { isQuarantinedCode4 =>
+      (hasIossEnrolment(request), inAmend, isQuarantinedCode4) match {
+        case (_, _, true) =>
+          // TODO -> Replace with correct redirect when created.
+          Some(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(EmptyWaypoints)))
+        case (true, false, false) =>
+          Some(Redirect(controllers.routes.AlreadyRegisteredController.onPageLoad().url))
+        case (false, true, false) =>
+          Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url))
+        case _ =>
+          None
+      }
     }
   }
 
   private def hasIossEnrolment(request: AuthenticatedIdentifierRequest[_]): Boolean = {
     request.enrolments.enrolments.exists(_.key == frontendAppConfig.iossEnrolment)
   }
+
+  private def hasQuarantinedOssEnrolment(request: AuthenticatedIdentifierRequest[_])(implicit hc: HeaderCarrier): Future[Boolean] = {
+    getOssEnrolmentsForVrn(request) match {
+      case Some(enrolment) =>
+        ossExclusionsService.determineOssExclusionStatus(enrolment.value).map { result =>
+          result
+        }
+      case _ =>
+        false.toFuture
+    }
+  }
+
+  private def getOssEnrolmentsForVrn(request: AuthenticatedIdentifierRequest[_]): Option[EnrolmentIdentifier] = {
+    request.enrolments.enrolments.filter(_.key == frontendAppConfig.ossEnrolment).toSeq
+      .flatMap(_.identifiers.filter(_.key == "VRN").find(_.value.equals(request.vrn.vrn))).headOption
+  }
 }
 
 class CheckRegistrationFilterProvider @Inject()(
-                                                 frontendAppConfig: FrontendAppConfig
+                                                 frontendAppConfig: FrontendAppConfig,
+                                                 ossExclusionsService: OssExclusionsService
                                                )(implicit executionContext: ExecutionContext) {
 
   def apply(inAmend: Boolean): CheckRegistrationFilterImpl = {
-    new CheckRegistrationFilterImpl(inAmend, frontendAppConfig)
+    new CheckRegistrationFilterImpl(inAmend, frontendAppConfig, ossExclusionsService)
   }
 }

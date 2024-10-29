@@ -19,9 +19,10 @@ package connectors
 import logging.Logging
 import models.amend.RegistrationWrapper
 import models.etmp.amend.AmendRegistrationResponse
+import models.ossExclusions.OssExcludedTrader
 import models.responses._
 import models.responses.etmp.EtmpEnrolmentResponse
-import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, OK}
+import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
@@ -31,6 +32,7 @@ object RegistrationHttpParser extends Logging {
   type RegistrationResultResponse = Either[ErrorResponse, EtmpEnrolmentResponse]
   type DisplayRegistrationResponse = Either[ErrorResponse, RegistrationWrapper]
   type AmendRegistrationResultResponse = Either[ErrorResponse, AmendRegistrationResponse]
+  type OssDisplayRegistrationResponse = Either[ErrorResponse, OssExcludedTrader]
 
   implicit object RegistrationResponseReads extends HttpReads[RegistrationResultResponse] {
 
@@ -88,4 +90,26 @@ object RegistrationHttpParser extends Logging {
     }
   }
 
+  implicit object OssDisplayRegistrationResponseReads extends HttpReads[OssDisplayRegistrationResponse] {
+
+    override def read(method: String, url: String, response: HttpResponse): OssDisplayRegistrationResponse =
+      response.status match {
+        case OK => response.json.validate[OssExcludedTrader] match {
+          case JsSuccess(ossExcludedTrader, _) => Right(ossExcludedTrader)
+          case JsError(errors) =>
+            logger.error(s"Failed trying to parse OSS display registration response JSON with body ${response.body}" +
+              s"and status ${response.status} with errors: $errors")
+            Left(InvalidJson)
+        }
+
+        case NOT_FOUND =>
+          logger.warn("Oss Excluded Treader not found")
+          Left(NotFound)
+
+        case status =>
+          logger.error(s"Unknown error happened on OSS Excluded Trader $status with body ${response.body}")
+          Left(InternalServerError)
+      }
+  }
 }
+

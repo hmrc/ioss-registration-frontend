@@ -18,7 +18,6 @@ package controllers.amend
 
 import base.SpecBase
 import connectors.RegistrationConnector
-import controllers.actions.{FakeIossRequiredAction, IossRequiredActionImpl}
 import controllers.amend.{routes => amendRoutes}
 import models.amend.{PreviousRegistration, RegistrationWrapper}
 import models.etmp.EtmpExclusion
@@ -46,7 +45,7 @@ import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
-import viewmodels.checkAnswers.previousRegistrations.{PreviouslyRegisteredSummary, PreviousRegistrationSummary}
+import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.SummaryListFluency

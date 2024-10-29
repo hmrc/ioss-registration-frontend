@@ -18,7 +18,7 @@ package connectors
 
 import config.Service
 import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, ExternalEntryUrlResponseReads}
-import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, AmendRegistrationResultResponseReads, DisplayRegistrationResponse, DisplayRegistrationResponseReads, RegistrationResponseReads, RegistrationResultResponse}
+import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, AmendRegistrationResultResponseReads, DisplayRegistrationResponse, DisplayRegistrationResponseReads, OssDisplayRegistrationResponse, OssDisplayRegistrationResponseReads, RegistrationResponseReads, RegistrationResultResponse}
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import logging.Logging
 import models.enrolments.EACDEnrolments
@@ -26,6 +26,7 @@ import models.etmp.EtmpRegistrationRequest
 import models.etmp.amend.EtmpAmendRegistrationRequest
 import play.api.Configuration
 import play.api.libs.json.Json
+import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, StringContextOps}
 
@@ -58,4 +59,10 @@ class RegistrationConnector @Inject()(config: Configuration, httpClientV2: HttpC
 
   def getAccounts()(implicit hc: HeaderCarrier): Future[EACDEnrolments] =
     httpClientV2.get(url"$baseUrl/accounts").execute[EACDEnrolments]
+
+  def getOssRegistration(vrn: Vrn)(implicit hc: HeaderCarrier): Future[OssDisplayRegistrationResponse] = {
+    val baseUrl: Service = config.get[Service]("microservice.services.one-stop-shop-registration")
+
+    httpClientV2.get(url"$baseUrl/registration/$vrn").execute[OssDisplayRegistrationResponse]
+  }
 }
