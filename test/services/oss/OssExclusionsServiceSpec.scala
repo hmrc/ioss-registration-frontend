@@ -48,7 +48,7 @@ class OssExclusionsServiceSpec extends SpecBase {
 
         val ossExcludedTrader = arbOssExcludedTrader.copy(
           exclusionReason = ExclusionReason.FailsToComply,
-          effectiveDate = currentDate.minusMonths(2),
+          effectiveDate = currentDate.minusYears(2),
           quarantined = true
         )
 
