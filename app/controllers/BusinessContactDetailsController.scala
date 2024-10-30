@@ -23,7 +23,7 @@ import logging.Logging
 import models.BusinessContactDetails
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
-import pages.{BankDetailsPage, BusinessContactDetailsPage, Waypoints}
+import pages.{BankDetailsPage, BusinessContactDetailsPage, CheckYourAnswersPage, Waypoints}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.{EmailVerificationService, SaveForLaterService}
@@ -67,6 +67,7 @@ class BusinessContactDetailsController @Inject()(
       implicit request: AuthenticatedDataRequest[AnyContent] =>
 
         val messages = messagesApi.preferred(request)
+        val bankDetailsCompleted = request.userAnswers.get(BankDetailsPage).isDefined
 
         form.bindFromRequest().fold(
           formWithErrors =>
@@ -75,6 +76,8 @@ class BusinessContactDetailsController @Inject()(
           value => {
             val continueUrl = if (waypoints.inAmend) {
               s"${config.loginContinueUrl}${waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url}"
+            } else if (bankDetailsCompleted) {
+              s"${config.loginContinueUrl}${CheckYourAnswersPage.route(waypoints).url}"
             } else {
               s"${config.loginContinueUrl}${BankDetailsPage.route(waypoints).url}"
             }
