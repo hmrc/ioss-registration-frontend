@@ -29,26 +29,7 @@ class OssExcludedTraderSpec extends SpecBase with ScalaCheckPropertyChecks {
 
   "OssExcludedTrader" - {
 
-    "must serialise to an OssExcludedTrader" in {
-
-      val json = Json.obj(
-        "vrn" -> ossExcludedTrader.vrn,
-        "exclusionReason" -> ossExcludedTrader.exclusionReason,
-        "effectiveDate" -> ossExcludedTrader.effectiveDate,
-        "quarantined" -> ossExcludedTrader.quarantined
-      )
-
-      val expectedResult = OssExcludedTrader(
-        vrn = ossExcludedTrader.vrn,
-        exclusionReason = ossExcludedTrader.exclusionReason,
-        effectiveDate = ossExcludedTrader.effectiveDate,
-        quarantined = ossExcludedTrader.quarantined
-      )
-
-      Json.toJson(expectedResult) mustBe json
-    }
-
-    "must deserialise from an OssExcludedTrader" in {
+    "must deserialise to an OssExcludedTrader wth all optional fields present" in {
 
       val json = Json.obj(
         "vrn" -> ossExcludedTrader.vrn,
@@ -64,6 +45,22 @@ class OssExcludedTraderSpec extends SpecBase with ScalaCheckPropertyChecks {
         exclusionReason = ossExcludedTrader.exclusionReason,
         effectiveDate = ossExcludedTrader.effectiveDate,
         quarantined = ossExcludedTrader.quarantined
+      )
+
+      json.validate[OssExcludedTrader] mustBe JsSuccess(expectedResult)
+    }
+
+    "must deserialise to an OssExcludedTrader with all optional fields missing" in {
+
+      val json = Json.obj(
+        "vrn" -> ossExcludedTrader.vrn
+      )
+
+      val expectedResult = OssExcludedTrader(
+        vrn = ossExcludedTrader.vrn,
+        exclusionReason = None,
+        effectiveDate = None,
+        quarantined = None
       )
 
       json.validate[OssExcludedTrader] mustBe JsSuccess(expectedResult)

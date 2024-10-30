@@ -435,9 +435,9 @@ trait ModelGenerators extends EitherValues {
         quarantined <- arbitrary[Boolean]
       } yield OssExcludedTrader(
         vrn = vrn,
-        exclusionReason = exclusionReason,
-        effectiveDate = effectiveDate,
-        quarantined = quarantined
+        exclusionReason = Some(exclusionReason),
+        effectiveDate = Some(effectiveDate),
+        quarantined = Some(quarantined)
       )
     }
   }

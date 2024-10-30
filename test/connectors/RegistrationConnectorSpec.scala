@@ -369,9 +369,9 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
       val ossExcludedTrader: OssExcludedTrader = arbitraryOssExcludedTrader.arbitrary.sample.value
         .copy(
-          exclusionReason = ExclusionReason.FailsToComply,
-          effectiveDate = exclusionEffectiveDate,
-          quarantined = true
+          exclusionReason = Some(ExclusionReason.FailsToComply),
+          effectiveDate = Some(exclusionEffectiveDate),
+          quarantined = Some(true)
         )
 
       running(application) {
@@ -395,22 +395,6 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
         val result = connector.getOssRegistration(vrn).futureValue
 
         result mustBe Right(ossExcludedTrader)
-      }
-    }
-
-    "must return NotFound when an Oss Excluded Trader isn't found from matched vrn" in {
-
-      running(application) {
-
-        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
-
-        server.stubFor(get(urlEqualTo(ossUrl))
-          .willReturn(aResponse().withStatus(NOT_FOUND))
-        )
-
-        val result = connector.getOssRegistration(vrn).futureValue
-
-        result mustBe Left(NotFound)
       }
     }
 

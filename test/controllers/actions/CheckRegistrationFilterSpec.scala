@@ -44,8 +44,8 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
   private val mockOssExclusionsService: OssExclusionsService = mock[OssExclusionsService]
 
-  class Harness(inAmend: Boolean, config: FrontendAppConfig, ossExclusionsService: OssExclusionsService)
-    extends CheckRegistrationFilterImpl(inAmend, config, ossExclusionsService) {
+  class Harness(mode: RegistrationModificationMode, config: FrontendAppConfig, ossExclusionsService: OssExclusionsService)
+    extends CheckRegistrationFilterImpl(mode, config, ossExclusionsService) {
     def callFilter[A](request: AuthenticatedIdentifierRequest[A]): Future[Option[Result]] = filter(request)
   }
 
@@ -61,7 +61,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
-        val controller = new Harness(inAmend = false, config, mockOssExclusionsService)
+        val controller = new Harness(mode = NotModifyingExistingRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
 
@@ -69,7 +69,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       }
     }
 
-    "must return None when an existing IOSS enrolment is found and is inAmend" in {
+    "must return None when an existing IOSS enrolment is found and is AmendingActiveRegistration mode" in {
 
       val app = applicationBuilder(None)
         .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
@@ -79,7 +79,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
-        val controller = new Harness(inAmend = true, config, mockOssExclusionsService)
+        val controller = new Harness(mode = AmendingActiveRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
 
@@ -87,7 +87,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       }
     }
 
-    "must return None when in amend" in {
+    "must redirect to Already Registered Controller when an existing IOSS enrolment is found" in {
 
       val app = applicationBuilder(None)
         .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
@@ -97,25 +97,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
-        val controller = new Harness(inAmend = true, config, mockOssExclusionsService)
-
-        val result = controller.callFilter(request).futureValue
-
-        result mustBe None
-      }
-    }
-
-    "must redirect to correct location when an existing IOSS enrolment is found" in {
-
-      val app = applicationBuilder(None)
-        .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
-        .build()
-
-      running(app) {
-
-        val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
-        val controller = new Harness(inAmend = false, config, mockOssExclusionsService)
+        val controller = new Harness(mode = NotModifyingExistingRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
 
@@ -123,7 +105,8 @@ class CheckRegistrationFilterSpec extends SpecBase {
       }
     }
 
-    "must redirect to Not Registered Controller when a registration is not found" in {
+    "must redirect to Not Registered Controller when a registration is not found in AmendingActiveRegistration mode" in {
+
       val app = applicationBuilder(None)
         .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
         .build()
@@ -132,7 +115,43 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
-        val controller = new Harness(inAmend = true, config, mockOssExclusionsService)
+        val controller = new Harness(mode = AmendingActiveRegistration, config, mockOssExclusionsService)
+
+        val result = controller.callFilter(request).futureValue
+
+        result mustBe Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url))
+      }
+    }
+
+    "must redirect to Not Registered Controller when a registration is not found in RejoiningRegistration mode" in {
+
+      val app = applicationBuilder(None)
+        .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
+        .build()
+
+      running(app) {
+
+        val config = app.injector.instanceOf[FrontendAppConfig]
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val controller = new Harness(mode = RejoiningRegistration, config, mockOssExclusionsService)
+
+        val result = controller.callFilter(request).futureValue
+
+        result mustBe Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url))
+      }
+    }
+
+    "must redirect to Not Registered Controller when a registration is not found in Amend Previous Registration mode" in {
+
+      val app = applicationBuilder(None)
+        .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
+        .build()
+
+      running(app) {
+
+        val config = app.injector.instanceOf[FrontendAppConfig]
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val controller = new Harness(mode = AmendingPreviousRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
 
@@ -141,7 +160,8 @@ class CheckRegistrationFilterSpec extends SpecBase {
     }
 
     // TODO -> Change Redirect and test name when new redirect implemented
-    "must redirect to Scheme Quarantined Controller when an OSS registration is quarantined and Exclusion Reason: Fails to Comply" in {
+    "must redirect to Scheme Quarantined Controller when an OSS registration is quarantined and Exclusion Reason:" +
+      "Fails to Comply in NotModifyingExistingRegistration mode" in {
 
       when(mockOssExclusionsService.determineOssExclusionStatus(any())(any())) thenReturn true.toFuture
 
@@ -153,12 +173,56 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
         val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None)
-        val controller = new Harness(inAmend = false, config, mockOssExclusionsService)
+        val controller = new Harness(mode = NotModifyingExistingRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
 
         result mustBe Some(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad().url))
       }
     }
+
+    // TODO -> Change Redirect and test name when new redirect implemented
+    "must redirect to Scheme Quarantined Controller when an OSS registration is quarantined and Exclusion Reason:" +
+      "Fails to Comply in RejoiningRegistration mode" in {
+
+      when(mockOssExclusionsService.determineOssExclusionStatus(any())(any())) thenReturn true.toFuture
+
+      val app = applicationBuilder(None)
+        .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
+        .build()
+
+      running(app) {
+
+        val config = app.injector.instanceOf[FrontendAppConfig]
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None)
+        val controller = new Harness(mode = RejoiningRegistration, config, mockOssExclusionsService)
+
+        val result = controller.callFilter(request).futureValue
+
+        result mustBe Some(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad().url))
+      }
+    }
+
+    "must return None when an OSS registration is quarantined and Exclusion Reason:" +
+      "Fails to Comply in AmendingActiveRegistration mode" in {
+
+      when(mockOssExclusionsService.determineOssExclusionStatus(any())(any())) thenReturn true.toFuture
+
+      val app = applicationBuilder(None)
+        .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
+        .build()
+
+      running(app) {
+
+        val config = app.injector.instanceOf[FrontendAppConfig]
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None)
+        val controller = new Harness(mode = AmendingActiveRegistration, config, mockOssExclusionsService)
+
+        val result = controller.callFilter(request).futureValue
+
+        result mustBe None
+      }
+    }
   }
 }
+

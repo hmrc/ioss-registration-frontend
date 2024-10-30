@@ -32,7 +32,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckRegistrationFilterImpl(
-                                   inAmend: Boolean,
+                                   mode: RegistrationModificationMode,
                                    frontendAppConfig: FrontendAppConfig,
                                    ossExclusionsService: OssExclusionsService
                                  )(implicit val executionContext: ExecutionContext)
@@ -42,13 +42,13 @@ class CheckRegistrationFilterImpl(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     hasQuarantinedOssEnrolment(request).map { isQuarantinedCode4 =>
-      (hasIossEnrolment(request), inAmend, isQuarantinedCode4) match {
-        case (_, _, true) =>
+      (hasIossEnrolment(request), mode, isQuarantinedCode4) match {
+        case (_, NotModifyingExistingRegistration | RejoiningRegistration, true) =>
           // TODO -> Replace with correct redirect when created.
           Some(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(EmptyWaypoints)))
-        case (true, false, false) =>
+        case (true, NotModifyingExistingRegistration, false) =>
           Some(Redirect(controllers.routes.AlreadyRegisteredController.onPageLoad().url))
-        case (false, true, false) =>
+        case (false, _: ModifyingExistingRegistrationMode, false) =>
           Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url))
         case _ =>
           None
@@ -82,7 +82,7 @@ class CheckRegistrationFilterProvider @Inject()(
                                                  ossExclusionsService: OssExclusionsService
                                                )(implicit executionContext: ExecutionContext) {
 
-  def apply(inAmend: Boolean): CheckRegistrationFilterImpl = {
+  def apply(inAmend: RegistrationModificationMode): CheckRegistrationFilterImpl = {
     new CheckRegistrationFilterImpl(inAmend, frontendAppConfig, ossExclusionsService)
   }
 }

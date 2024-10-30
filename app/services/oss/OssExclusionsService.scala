@@ -19,7 +19,6 @@ package services.oss
 import connectors.RegistrationConnector
 import logging.Logging
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
-import models.responses.NotFound
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -36,26 +35,27 @@ case class OssExclusionsService @Inject()(
     val currentDate: LocalDate = LocalDate.now(clock)
     registrationConnector.getOssRegistration(Vrn(vrn)).map {
       case Right(ossExcludedTrader) =>
-        (ossExcludedTrader.quarantined && ossExcludedTrader.exclusionReason == ExclusionReason.FailsToComply) &&
-          !isQuarantinedAndAfterTwoYears(currentDate, ossExcludedTrader)
-
-      case Left(NotFound) =>
-        logger.error("No exclusions found for this VRN")
-        false
+        !isQuarantinedAndAfterTwoYears(currentDate, ossExcludedTrader) &&
+          ossExcludedTrader.quarantined.getOrElse(false) &&
+          ossExcludedTrader.exclusionReason.contains(ExclusionReason.FailsToComply)
 
       case Left(error) =>
-        val message: String = s"An error occurred whilst retrieving the OSS registration with error: $error"
-        logger.error(s"Unable to retrieve OSS registration with error: $error")
-        throw new Exception(message)
+        val exception = new Exception(s"An error occurred whilst retrieving the OSS Excluded Trader with error: $error")
+        logger.error(s"Unable to retrieve OSS Excluded Trader with error: ${exception.getMessage}", exception)
+        throw exception
     }
   }
 
   private def isQuarantinedAndAfterTwoYears(currentDate: LocalDate, ossExcludedTrader: OssExcludedTrader): Boolean = {
-    if (ossExcludedTrader.quarantined) {
-      val minimumDate = currentDate.minusYears(2)
-      ossExcludedTrader.effectiveDate.isBefore(minimumDate)
-    } else {
-      false
+    ossExcludedTrader.quarantined match {
+      case Some(true) =>
+        val minimumDate = currentDate.minusYears(2)
+        ossExcludedTrader.effectiveDate.getOrElse {
+          val exception = new IllegalStateException(s"Expected effective date")
+          logger.error(s"Unable to retrieve effective date: ${exception.getMessage}", exception)
+          throw exception
+        }.isBefore(minimumDate)
+      case _ => false
     }
   }
 }

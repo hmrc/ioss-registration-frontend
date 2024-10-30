@@ -19,10 +19,12 @@ package services.oss
 import base.SpecBase
 import connectors.RegistrationConnector
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
-import models.responses.{InternalServerError, NotFound}
+import models.responses.InternalServerError
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.reset
 import org.mockito.MockitoSugar.when
 import org.scalacheck.Gen
+import org.scalatest.{BeforeAndAfterEach, PrivateMethodTester}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
@@ -30,7 +32,7 @@ import utils.FutureSyntax.FutureOps
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class OssExclusionsServiceSpec extends SpecBase {
+class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with BeforeAndAfterEach {
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
 
@@ -40,6 +42,10 @@ class OssExclusionsServiceSpec extends SpecBase {
 
   private val arbOssExcludedTrader: OssExcludedTrader = arbitraryOssExcludedTrader.arbitrary.sample.value
 
+  override def beforeEach(): Unit = {
+    reset(mockRegistrationConnector)
+  }
+
   "OssExclusionsService" - {
 
     ".determineOssExclusionStatus" - {
@@ -47,9 +53,9 @@ class OssExclusionsServiceSpec extends SpecBase {
       "must return true when an OSS excluded trader is both quarantined and the exclusion reason is code 4 and the effective date is within 2 years" in {
 
         val ossExcludedTrader = arbOssExcludedTrader.copy(
-          exclusionReason = ExclusionReason.FailsToComply,
-          effectiveDate = currentDate.minusYears(2),
-          quarantined = true
+          exclusionReason = Some(ExclusionReason.FailsToComply),
+          effectiveDate = Some(currentDate.minusYears(2)),
+          quarantined = Some(true)
         )
 
         when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(ossExcludedTrader).toFuture
@@ -64,7 +70,7 @@ class OssExclusionsServiceSpec extends SpecBase {
       "must return false when an OSS excluded trader is quarantined and the exclusion reason is not code 4 and the effective date is within 2 years" in {
 
         val updatedOssExcludedTrader: OssExcludedTrader = arbOssExcludedTrader
-          .copy(exclusionReason = Gen.oneOf(ExclusionReason.values).retryUntil(_ != ExclusionReason.FailsToComply).sample.value)
+          .copy(exclusionReason = Some(Gen.oneOf(ExclusionReason.values).retryUntil(_ != ExclusionReason.FailsToComply).sample.value))
 
         when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
 
@@ -77,7 +83,7 @@ class OssExclusionsServiceSpec extends SpecBase {
 
       "must return false when an OSS excluded trader is not quarantined and the exclusion reason is code 4 and the effective date is within 2 years" in {
 
-        val updatedOssExcludedTrader: OssExcludedTrader = arbOssExcludedTrader.copy(quarantined = false)
+        val updatedOssExcludedTrader: OssExcludedTrader = arbOssExcludedTrader.copy(quarantined = Some(false))
 
         when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
 
@@ -92,9 +98,9 @@ class OssExclusionsServiceSpec extends SpecBase {
 
         val updatedOssExcludedTrader: OssExcludedTrader = arbOssExcludedTrader
           .copy(
-            quarantined = false,
-            exclusionReason = Gen.oneOf(ExclusionReason.values).retryUntil(_ != ExclusionReason.FailsToComply).sample.value,
-            effectiveDate = currentDate.minusYears(2).minusDays(1)
+            quarantined = Some(false),
+            exclusionReason = Some(Gen.oneOf(ExclusionReason.values).retryUntil(_ != ExclusionReason.FailsToComply).sample.value),
+            effectiveDate = Some(currentDate.minusYears(2).minusDays(1))
           )
 
         when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
@@ -106,20 +112,9 @@ class OssExclusionsServiceSpec extends SpecBase {
         result mustBe false
       }
 
-      "must return false when there is no exclusion returned for the VRN" in {
-
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Left(NotFound).toFuture
-
-        val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
-
-        val result = service.determineOssExclusionStatus(arbOssExcludedTrader.vrn.vrn).futureValue
-
-        result mustBe false
-      }
-
       "must throw an Exception when no registration details matching the vrn are retrieved" in {
 
-        val message: String = "An error occurred whilst retrieving the OSS registration with error: InternalServerError"
+        val message: String = "An error occurred whilst retrieving the OSS Excluded Trader with error: InternalServerError"
 
         when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Left(InternalServerError).toFuture
 
@@ -131,6 +126,75 @@ class OssExclusionsServiceSpec extends SpecBase {
           exp mustBe a[Exception]
           exp.getMessage mustBe message
         }
+      }
+    }
+
+    ".isQuarantinedAndAfterTwoYears" - {
+
+      "must throw an Illegal State Exception when no effective date is present" in {
+
+        val updatedOssExcludedTrader = arbOssExcludedTrader.copy(
+          exclusionReason = Some(ExclusionReason.FailsToComply),
+          effectiveDate = None,
+          quarantined = Some(true)
+        )
+
+        val message: String = "Expected effective date"
+
+        val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
+
+        val isQuarantinedAndAfterTwoYearsMethod = PrivateMethod[Boolean](Symbol("isQuarantinedAndAfterTwoYears"))
+
+        intercept[IllegalStateException] {
+          service invokePrivate isQuarantinedAndAfterTwoYearsMethod(currentDate, updatedOssExcludedTrader)
+        }.getMessage mustBe message
+      }
+
+      "must return false when OSS Excluded Trader is not quarantined" in {
+
+        val updatedOssExcludedTrader: OssExcludedTrader = arbOssExcludedTrader.copy(quarantined = Some(false))
+
+        val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
+
+        val isQuarantinedAndAfterTwoYearsMethod = PrivateMethod[Boolean](Symbol("isQuarantinedAndAfterTwoYears"))
+
+        val result = service invokePrivate isQuarantinedAndAfterTwoYearsMethod(currentDate, updatedOssExcludedTrader)
+
+        result mustBe false
+      }
+
+      "must return true when OSS Excluded Trader is quarantined and the effective date is after 2 years" in {
+
+        val ossExcludedTrader = arbOssExcludedTrader.copy(
+          exclusionReason = Some(ExclusionReason.FailsToComply),
+          effectiveDate = Some(currentDate.minusYears(2).minusDays(1)),
+          quarantined = Some(true)
+        )
+
+        val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
+
+        val isQuarantinedAndAfterTwoYearsMethod = PrivateMethod[Boolean](Symbol("isQuarantinedAndAfterTwoYears"))
+
+        val result = service invokePrivate isQuarantinedAndAfterTwoYearsMethod(currentDate, ossExcludedTrader)
+
+        result mustBe true
+      }
+
+      "must return false when OSS Excluded Trader is quarantined and the effective date is before 2 years" in {
+
+        val ossExcludedTrader = arbOssExcludedTrader.copy(
+          exclusionReason = Some(ExclusionReason.FailsToComply),
+          effectiveDate = Some(currentDate.minusYears(2)),
+          quarantined = Some(true)
+        )
+
+        val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
+
+        val isQuarantinedAndAfterTwoYearsMethod = PrivateMethod[Boolean](Symbol("isQuarantinedAndAfterTwoYears"))
+
+        val result = service invokePrivate isQuarantinedAndAfterTwoYearsMethod(currentDate, ossExcludedTrader)
+
+        result mustBe false
       }
     }
   }

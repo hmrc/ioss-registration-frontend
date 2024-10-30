@@ -22,7 +22,7 @@ import models.etmp.amend.AmendRegistrationResponse
 import models.ossExclusions.OssExcludedTrader
 import models.responses._
 import models.responses.etmp.EtmpEnrolmentResponse
-import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
+import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
@@ -101,10 +101,6 @@ object RegistrationHttpParser extends Logging {
               s"and status ${response.status} with errors: $errors")
             Left(InvalidJson)
         }
-
-        case NOT_FOUND =>
-          logger.warn("Oss Excluded Treader not found")
-          Left(NotFound)
 
         case status =>
           logger.error(s"Unknown error happened on OSS Excluded Trader $status with body ${response.body}")
