@@ -33,12 +33,16 @@ case class OssExclusionsService @Inject()(
 
   def determineOssExclusionStatus(vrn: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate: LocalDate = LocalDate.now(clock)
-    registrationConnector.getOssRegistration(Vrn(vrn)).map {
-      case Right(ossExcludedTrader) =>
-        !isQuarantinedAndAfterTwoYears(currentDate, ossExcludedTrader) &&
-          ossExcludedTrader.quarantined.getOrElse(false) &&
-          ossExcludedTrader.exclusionReason.contains(ExclusionReason.FailsToComply)
+    getOssExclusion(vrn).map { ossExclusion =>
+      !isQuarantinedAndAfterTwoYears(currentDate, ossExclusion) &&
+        ossExclusion.quarantined.getOrElse(false) &&
+        ossExclusion.exclusionReason.contains(ExclusionReason.FailsToComply)
+    }
+  }
 
+  def getOssExclusion(vrn: String)(implicit hc: HeaderCarrier): Future[OssExcludedTrader] = {
+    registrationConnector.getOssRegistration(Vrn(vrn)).map {
+      case Right(ossExcludedTrader) => ossExcludedTrader
       case Left(error) =>
         val exception = new Exception(s"An error occurred whilst retrieving the OSS Excluded Trader with error: $error")
         logger.error(s"Unable to retrieve OSS Excluded Trader with error: ${exception.getMessage}", exception)
@@ -51,7 +55,7 @@ case class OssExclusionsService @Inject()(
       case Some(true) =>
         val minimumDate = currentDate.minusYears(2)
         ossExcludedTrader.effectiveDate.getOrElse {
-          val exception = new IllegalStateException(s"Expected effective date")
+          val exception = new IllegalStateException("Expected effective date")
           logger.error(s"Unable to retrieve effective date: ${exception.getMessage}", exception)
           throw exception
         }.isBefore(minimumDate)

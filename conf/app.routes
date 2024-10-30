@@ -274,3 +274,5 @@ POST        /change-your-previous-registrations                           contro
 GET         /start-amend-previous-journey/                                controllers.amend.StartAmendPreviousRegistrationJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 GET         /amend-there-is-a-problem                                     controllers.amend.AmendJourneyRecoveryController.onPageLoad()
+
+GET         /cannot-register-quarantined-trader                           controllers.ossExclusions.CannotRegisterQuarantinedTraderController.onPageLoad()

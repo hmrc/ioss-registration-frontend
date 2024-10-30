@@ -111,6 +111,26 @@ class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with Be
 
         result mustBe false
       }
+    }
+
+    ".getOssExclusion" - {
+
+      "must return a Right(OssExcludedTrader) when OSS backend returns a successful valid payload" in {
+
+        val ossExcludedTrader: OssExcludedTrader = arbOssExcludedTrader.copy(
+          exclusionReason = Some(ExclusionReason.FailsToComply),
+          effectiveDate = Some(currentDate.minusYears(2)),
+          quarantined = Some(true)
+        )
+
+        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(ossExcludedTrader).toFuture
+
+        val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
+
+        val result = service.getOssExclusion(arbOssExcludedTrader.vrn.vrn).futureValue
+
+        result mustBe ossExcludedTrader
+      }
 
       "must throw an Exception when no registration details matching the vrn are retrieved" in {
 
@@ -120,7 +140,7 @@ class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with Be
 
         val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
 
-        val result = service.determineOssExclusionStatus(arbOssExcludedTrader.vrn.vrn)
+        val result = service.getOssExclusion(arbOssExcludedTrader.vrn.vrn)
 
         whenReady(result.failed) { exp =>
           exp mustBe a[Exception]

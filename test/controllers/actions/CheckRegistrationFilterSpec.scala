@@ -18,6 +18,8 @@ package controllers.actions
 
 import base.SpecBase
 import config.FrontendAppConfig
+import controllers.ossExclusions.{routes => ossExcludedRoutes}
+import controllers.routes
 import models.requests.AuthenticatedIdentifierRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -101,7 +103,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(controllers.routes.AlreadyRegisteredController.onPageLoad().url))
+        result mustBe Some(Redirect(routes.AlreadyRegisteredController.onPageLoad().url))
       }
     }
 
@@ -119,7 +121,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url))
+        result mustBe Some(Redirect(routes.NotRegisteredController.onPageLoad().url))
       }
     }
 
@@ -137,11 +139,11 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url))
+        result mustBe Some(Redirect(routes.NotRegisteredController.onPageLoad().url))
       }
     }
 
-    "must redirect to Not Registered Controller when a registration is not found in Amend Previous Registration mode" in {
+    "must redirect to Cannot Register Quarantined Trader Controller when a registration is not found in Amend Previous Registration mode" in {
 
       val app = applicationBuilder(None)
         .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
@@ -155,12 +157,11 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(controllers.routes.NotRegisteredController.onPageLoad().url))
+        result mustBe Some(Redirect(routes.NotRegisteredController.onPageLoad().url))
       }
     }
 
-    // TODO -> Change Redirect and test name when new redirect implemented
-    "must redirect to Scheme Quarantined Controller when an OSS registration is quarantined and Exclusion Reason:" +
+    "must redirect to Cannot Register Quarantined Trader Controller when an OSS registration is quarantined and Exclusion Reason:" +
       "Fails to Comply in NotModifyingExistingRegistration mode" in {
 
       when(mockOssExclusionsService.determineOssExclusionStatus(any())(any())) thenReturn true.toFuture
@@ -177,12 +178,11 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad().url))
+        result mustBe Some(Redirect(ossExcludedRoutes.CannotRegisterQuarantinedTraderController.onPageLoad().url))
       }
     }
 
-    // TODO -> Change Redirect and test name when new redirect implemented
-    "must redirect to Scheme Quarantined Controller when an OSS registration is quarantined and Exclusion Reason:" +
+    "must redirect to Cannot Register Quarantined Trader Controller when an OSS registration is quarantined and Exclusion Reason:" +
       "Fails to Comply in RejoiningRegistration mode" in {
 
       when(mockOssExclusionsService.determineOssExclusionStatus(any())(any())) thenReturn true.toFuture
@@ -199,7 +199,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad().url))
+        result mustBe Some(Redirect(ossExcludedRoutes.CannotRegisterQuarantinedTraderController.onPageLoad().url))
       }
     }
 

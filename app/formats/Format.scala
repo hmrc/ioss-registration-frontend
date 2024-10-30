@@ -34,4 +34,6 @@ object Format {
 
   val dateOfRegistrationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
+  val quarantinedOSSRegistrationFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
 }

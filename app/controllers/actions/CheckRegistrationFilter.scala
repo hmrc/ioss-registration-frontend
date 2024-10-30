@@ -19,7 +19,6 @@ package controllers.actions
 import config.FrontendAppConfig
 import logging.Logging
 import models.requests.AuthenticatedIdentifierRequest
-import pages.EmptyWaypoints
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import services.oss.OssExclusionsService
@@ -44,8 +43,7 @@ class CheckRegistrationFilterImpl(
     hasQuarantinedOssEnrolment(request).map { isQuarantinedCode4 =>
       (hasIossEnrolment(request), mode, isQuarantinedCode4) match {
         case (_, NotModifyingExistingRegistration | RejoiningRegistration, true) =>
-          // TODO -> Replace with correct redirect when created.
-          Some(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(EmptyWaypoints)))
+          Some(Redirect(controllers.ossExclusions.routes.CannotRegisterQuarantinedTraderController.onPageLoad()))
         case (true, NotModifyingExistingRegistration, false) =>
           Some(Redirect(controllers.routes.AlreadyRegisteredController.onPageLoad().url))
         case (false, _: ModifyingExistingRegistrationMode, false) =>
