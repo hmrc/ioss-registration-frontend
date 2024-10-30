@@ -73,7 +73,11 @@ class BusinessContactDetailsController @Inject()(
             BadRequest(view(formWithErrors, waypoints)).toFuture,
 
           value => {
-            val continueUrl = s"${config.loginContinueUrl}${waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url}"
+            val continueUrl = if (waypoints.inAmend) {
+              s"${config.loginContinueUrl}${waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url}"
+            } else {
+              s"${config.loginContinueUrl}${BankDetailsPage.route(waypoints).url}"
+            }
 
             if (config.emailVerificationEnabled) {
               verifyEmailAndRedirect(waypoints, messages, continueUrl, value)

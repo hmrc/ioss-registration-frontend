@@ -22,9 +22,9 @@ import controllers.routes
 import logging.Logging
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
-import models.{BusinessContactDetails, CheckMode}
+import models.{BusinessContactDetails, CheckMode, NormalMode}
 import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import services.{EmailVerificationService, SaveForLaterService}
@@ -61,7 +61,7 @@ class CheckEmailVerificationFilterImpl(
                   None.toFuture
                 }
               case Left(error) =>
-                val exception = new Exception(s"Error when getting registration during email verification check on an amend joruney ${error.body}")
+                val exception = new Exception(s"Error when getting registration during email verification check on an amend journey ${error.body}")
                 logger.error(exception.getMessage, exception)
                 throw exception
             }
@@ -98,11 +98,16 @@ class CheckEmailVerificationFilterImpl(
 
       case _ =>
         logger.info("CheckEmailVerificationFilter - Not Verified")
-        val waypoints =
+        val waypoint = if (waypoints.currentMode == NormalMode) {
+          EmptyWaypoints.setNextWaypoint(
+            Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
+          )
+        } else {
           EmptyWaypoints.setNextWaypoint(
             Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
           )
-        Some(Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoints).url)).toFuture
+        }
+        Some(Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoint).url)).toFuture
     }
   }
 }
