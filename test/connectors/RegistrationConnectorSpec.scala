@@ -22,6 +22,7 @@ import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.enrolments.EACDEnrolments
 import models.external.ExternalEntryUrl
+import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
 import models.responses._
 import models.responses.etmp.EtmpEnrolmentResponse
 import org.scalacheck.Arbitrary.arbitrary
@@ -34,6 +35,8 @@ import testutils.RegistrationData.{amendRegistrationResponse, etmpAmendRegistrat
 import testutils.WireMockHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
+
 
 class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
@@ -41,8 +44,10 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
   private def application: Application =
     applicationBuilder()
-      .configure("microservice.services.ioss-registration.port" -> server.port)
-      .build()
+      .configure(
+        "microservice.services.ioss-registration.port" -> server.port,
+        "microservice.services.one-stop-shop-registration.port" -> server.port,
+      ).build()
 
   ".getCustomerVatInfo" - {
 
@@ -187,8 +192,8 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
         val responseBody = Json.toJson(etmpEnrolmentResponse).toString()
 
         server.stubFor(post(urlEqualTo(url))
-            .willReturn(aResponse.withStatus(CREATED)
-              .withBody(responseBody)))
+          .willReturn(aResponse.withStatus(CREATED)
+            .withBody(responseBody)))
 
         val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
 
@@ -203,8 +208,8 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
       running(application) {
 
         server.stubFor(post(urlEqualTo(url))
-            .willReturn(aResponse.withStatus(CREATED)
-              .withBody(Json.toJson("test").toString())))
+          .willReturn(aResponse.withStatus(CREATED)
+            .withBody(Json.toJson("test").toString())))
 
         val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
 
@@ -219,7 +224,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
       running(application) {
 
         server.stubFor(post(urlEqualTo(url))
-            .willReturn(aResponse.withStatus(CONFLICT)))
+          .willReturn(aResponse.withStatus(CONFLICT)))
 
         val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
 
@@ -352,5 +357,61 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
       }
     }
 
+  }
+
+  ".getOssRegistration" - {
+
+    val ossUrl = s"/one-stop-shop-registration/registration/$vrn"
+
+    "must return OK with a valid OssExcludedTrader when OSS backend returns OK with a valid response body" in {
+
+      val exclusionEffectiveDate: LocalDate = LocalDate.now(stubClockAtArbitraryDate)
+
+      val ossExcludedTrader: OssExcludedTrader = arbitraryOssExcludedTrader.arbitrary.sample.value
+        .copy(
+          exclusionReason = Some(ExclusionReason.FailsToComply),
+          effectiveDate = Some(exclusionEffectiveDate),
+          quarantined = Some(true)
+        )
+
+      running(application) {
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val responseJson =
+          s"""{
+             | "vrn" : ${Json.toJson(ossExcludedTrader.vrn)},
+             | "excludedTrader": {
+             |    "exclusionReason" :${Json.toJson(ossExcludedTrader.exclusionReason)},
+             |    "effectiveDate" : ${Json.toJson(ossExcludedTrader.effectiveDate)},
+             |    "quarantined" : ${Json.toJson(ossExcludedTrader.quarantined)}
+             |    }
+             |}""".stripMargin
+
+        server.stubFor(get(urlEqualTo(ossUrl))
+          .willReturn(ok().withBody(responseJson))
+        )
+
+        val result = connector.getOssRegistration(vrn).futureValue
+
+        result mustBe Right(ossExcludedTrader)
+      }
+    }
+
+    "must return an Internal Server Error when OSS backend responds with Internal Server Error" in {
+
+      running(application) {
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        server.stubFor(get(urlEqualTo(ossUrl))
+          .willReturn(aResponse.withStatus(INTERNAL_SERVER_ERROR))
+        )
+
+        val result = connector.getOssRegistration(vrn).futureValue
+
+        result mustBe Left(InternalServerError)
+      }
+    }
   }
 }

@@ -25,6 +25,7 @@ import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
 import models.etmp._
 import models.etmp.amend.EtmpAmendRegistrationChangeLog
 import models.euDetails.{EuDetails, RegistrationType}
+import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
 import models.previousRegistrations.NonCompliantDetails
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN, option}
@@ -421,6 +422,22 @@ trait ModelGenerators extends EitherValues {
         iossNumber = iossNumber,
         startPeriod = startPeriod,
         endPeriod = endPeriod
+      )
+    }
+  }
+
+  implicit val arbitraryOssExcludedTrader: Arbitrary[OssExcludedTrader] = {
+    Arbitrary {
+      for {
+        vrn <- arbitraryVrn.arbitrary
+        exclusionReason <- Gen.oneOf(ExclusionReason.values)
+        effectiveDate <- arbitraryDate.arbitrary
+        quarantined <- arbitrary[Boolean]
+      } yield OssExcludedTrader(
+        vrn = vrn,
+        exclusionReason = Some(exclusionReason),
+        effectiveDate = Some(effectiveDate),
+        quarantined = Some(quarantined)
       )
     }
   }

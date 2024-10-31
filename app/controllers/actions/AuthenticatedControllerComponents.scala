@@ -73,7 +73,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
     val modifyingExistingRegistration = registrationModificationMode != NotModifyingExistingRegistration
     actionBuilder andThen
       identify andThen
-      checkRegistration(modifyingExistingRegistration) andThen
+      checkRegistration(registrationModificationMode) andThen
       checkPreviousRegistration(registrationModificationMode, restrictFromPreviousRegistrations) andThen
       getData andThen
       requireData(modifyingExistingRegistration) andThen
