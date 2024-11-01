@@ -56,7 +56,7 @@ class CheckEmailVerificationFilterImpl(
             registrationConnector.getRegistration()(hc).flatMap {
               case Right(registrationWrapper) =>
                 if (registrationWrapper.registration.schemeDetails.businessEmailId != contactDetails.emailAddress) {
-                  checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails)
+                  checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails, inAmend = true)
                 } else {
                   None.toFuture
                 }
@@ -66,7 +66,7 @@ class CheckEmailVerificationFilterImpl(
                 throw exception
             }
           } else {
-            checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails)
+            checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails, inAmend = false)
           }
         case None => None.toFuture
       }
@@ -78,7 +78,8 @@ class CheckEmailVerificationFilterImpl(
   private def checkVerificationStatusAndGetRedirect(
                                                      waypoints: Waypoints,
                                                      request: AuthenticatedDataRequest[_],
-                                                     contactDetails: BusinessContactDetails
+                                                     contactDetails: BusinessContactDetails,
+                                                     inAmend: Boolean
                                                    )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
     emailVerificationService.isEmailVerified(contactDetails.emailAddress, request.userId).flatMap {
       case Verified =>
@@ -98,13 +99,13 @@ class CheckEmailVerificationFilterImpl(
 
       case _ =>
         logger.info("CheckEmailVerificationFilter - Not Verified")
-        val waypoint = if (waypoints.currentMode == NormalMode) {
+        val waypoint = if (inAmend) {
           EmptyWaypoints.setNextWaypoint(
-            Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
+            Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
           )
         } else {
           EmptyWaypoints.setNextWaypoint(
-            Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
+            Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
           )
         }
         Some(Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoint).url)).toFuture

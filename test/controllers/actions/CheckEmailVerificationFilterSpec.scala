@@ -60,17 +60,15 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
   private val validEmailAddressUserAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
   private val mockRegistrationConnector = mock[RegistrationConnector]
 
-  private val expectedWaypoints = {
-    if (EmptyWaypoints.currentMode == NormalMode) {
+  private val expectedWaypoints =
       EmptyWaypoints.setNextWaypoint(
         Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
       )
-    } else {
-      EmptyWaypoints.setNextWaypoint(
-        Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
-      )
-    }
-  }
+
+  private val expectedAmendWaypoints =
+    EmptyWaypoints.setNextWaypoint(
+      Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
+    )
 
   ".filter" - {
 
@@ -188,7 +186,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val controller = new Harness(
             inAmend = true,
-            waypoints = expectedWaypoints,
+            waypoints = expectedAmendWaypoints,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -197,7 +195,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val result = controller.callFilter(request).futureValue
 
-          result mustBe Some(Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad(expectedWaypoints).url))
+          result mustBe Some(Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad(expectedAmendWaypoints).url))
         }
       }
 
