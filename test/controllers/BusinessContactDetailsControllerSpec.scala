@@ -289,6 +289,10 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
             val result = route(application, request).value
             val expectedAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
 
+            val anEmailVerificationRequest = emailVerificationRequest.copy(
+              continueUrl = s"${config.loginContinueUrl}${emailVerificationRequest.continueUrl}"
+            )
+
             status(result) mustBe SEE_OTHER
 
             redirectLocation(result).value mustBe config.emailVerificationUrl + emailVerificationResponse.redirectUri
@@ -297,6 +301,14 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
             verify(mockEmailVerificationService, times(1))
               .isEmailVerified(eqTo(emailVerificationRequest.email.value.address), eqTo(emailVerificationRequest.credId))(any())
+
+            verify(mockEmailVerificationService, times(1))
+              .createEmailVerificationRequest(
+                waypoints = eqTo(emptyWaypoints),
+                credId = eqTo(anEmailVerificationRequest.credId),
+                emailAddress = eqTo(anEmailVerificationRequest.email.value.address),
+                pageTitle = eqTo(anEmailVerificationRequest.pageTitle),
+                continueUrl = eqTo(anEmailVerificationRequest.continueUrl))(any())
           }
         }
 
@@ -341,6 +353,10 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
               .set(BusinessContactDetailsPage, contactDetails).success.value
               .set(BankDetailsPage, bankDetails).success.value
 
+            val anEmailVerificationRequest = emailVerificationRequest.copy(
+              continueUrl = s"${config.loginContinueUrl}/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/check-your-answers"
+            )
+
             status(result) mustBe SEE_OTHER
 
             redirectLocation(result).value mustBe config.emailVerificationUrl + emailVerificationResponse.redirectUri
@@ -349,6 +365,14 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
             verify(mockEmailVerificationService, times(1))
               .isEmailVerified(eqTo(emailVerificationRequest.email.value.address), eqTo(emailVerificationRequest.credId))(any())
+
+            verify(mockEmailVerificationService, times(1))
+              .createEmailVerificationRequest(
+                waypoints = eqTo(emptyWaypoints),
+                credId = eqTo(anEmailVerificationRequest.credId),
+                emailAddress = eqTo(anEmailVerificationRequest.email.value.address),
+                pageTitle = eqTo(anEmailVerificationRequest.pageTitle),
+                continueUrl = eqTo(anEmailVerificationRequest.continueUrl))(any())
           }
         }
 
