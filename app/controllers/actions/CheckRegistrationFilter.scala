@@ -59,7 +59,7 @@ class CheckRegistrationFilterImpl(
   }
 
   private def hasQuarantinedOssEnrolment(request: AuthenticatedIdentifierRequest[_])(implicit hc: HeaderCarrier): Future[Boolean] = {
-    getOssEnrolmentsForVrn(request) match {
+    getOssEnrolments(request) match {
       case Some(enrolment) =>
         ossExclusionsService.determineOssExclusionStatus(enrolment.value).map { result =>
           result
@@ -69,9 +69,9 @@ class CheckRegistrationFilterImpl(
     }
   }
 
-  private def getOssEnrolmentsForVrn(request: AuthenticatedIdentifierRequest[_]): Option[EnrolmentIdentifier] = {
+  private def getOssEnrolments(request: AuthenticatedIdentifierRequest[_]): Option[EnrolmentIdentifier] = {
     request.enrolments.enrolments.filter(_.key == frontendAppConfig.ossEnrolment).toSeq
-      .flatMap(_.identifiers.filter(_.key == "VRN").find(_.value.equals(request.vrn.vrn))).headOption
+      .flatMap(_.identifiers.filter(_.key == "VRN")).headOption
   }
 }
 
