@@ -75,11 +75,11 @@ class EmailVerificationService @Inject()(
             logger.info("Locked - too many email address verifications attempted")
             PasscodeAttemptsStatus.LockedTooManyLockedEmails
 
-          case (false, true, false) if verificationStatus.emails.exists(_.emailAddress == emailAddress) =>
+          case (false, true, false) if verificationStatus.emails.exists(_.emailAddress.equalsIgnoreCase(emailAddress)) =>
             logger.info("Locked - Too many verification attempts on this email address")
             PasscodeAttemptsStatus.LockedPasscodeForSingleEmail
 
-          case (false, _, true) if verificationStatus.emails.exists(_.emailAddress == emailAddress) =>
+          case (false, _, true) if verificationStatus.emails.exists(_.emailAddress.equalsIgnoreCase(emailAddress)) =>
             logger.info("Email address verified")
             PasscodeAttemptsStatus.Verified
 
