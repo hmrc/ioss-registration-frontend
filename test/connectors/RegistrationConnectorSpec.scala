@@ -398,6 +398,24 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
       }
     }
 
+    "must return InvalidJson when OSS backend returns invalid JSON" in {
+
+      running(application) {
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val responseJson = Json.obj("test" -> "test").toString()
+
+        server.stubFor(get(urlEqualTo(ossUrl))
+          .willReturn(ok().withBody(responseJson))
+        )
+
+        val result = connector.getOssRegistration(vrn).futureValue
+
+        result mustBe Left(InvalidJson)
+      }
+    }
+
     "must return an Internal Server Error when OSS backend responds with Internal Server Error" in {
 
       running(application) {
