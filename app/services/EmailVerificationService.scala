@@ -68,18 +68,23 @@ class EmailVerificationService @Inject()(
   def isEmailVerified(emailAddress: String, credId: String)(implicit hc: HeaderCarrier): Future[PasscodeAttemptsStatus] = {
     getStatus(credId).map {
       case Right(Some(verificationStatus)) =>
+        val currentEmailLocked = verificationStatus.emails
+          .exists(emailStatus => emailStatus.emailAddress.equalsIgnoreCase(emailAddress) && emailStatus.locked)
+        val currentEmailVerified = verificationStatus.emails
+          .exists(emailStatus => emailStatus.emailAddress.equalsIgnoreCase(emailAddress) && emailStatus.verified)
+
         (verificationStatus.emails.count(_.locked) >= Constants.emailVerificationMaxEmails,
-          verificationStatus.emails.exists(_.locked),
-          verificationStatus.emails.exists(_.verified)) match {
+          currentEmailLocked,
+          currentEmailVerified) match {
           case (true, true, false) =>
             logger.info("Locked - too many email address verifications attempted")
             PasscodeAttemptsStatus.LockedTooManyLockedEmails
 
-          case (false, true, false) if verificationStatus.emails.exists(_.emailAddress.equalsIgnoreCase(emailAddress)) =>
+          case (false, true, false) =>
             logger.info("Locked - Too many verification attempts on this email address")
             PasscodeAttemptsStatus.LockedPasscodeForSingleEmail
 
-          case (false, _, true) if verificationStatus.emails.exists(_.emailAddress.equalsIgnoreCase(emailAddress)) =>
+          case (false, _, true) =>
             logger.info("Email address verified")
             PasscodeAttemptsStatus.Verified
 
