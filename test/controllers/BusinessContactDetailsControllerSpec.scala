@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import forms.BusinessContactDetailsFormProvider
-import models.CheckMode
+import models.{BankDetails, CheckMode}
 import models.emailVerification.EmailVerificationResponse
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.responses.UnexpectedResponseStatus
@@ -31,7 +31,7 @@ import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BankDetailsPage, BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.http.Status.BAD_REQUEST
 import play.api.inject.bind
 import play.api.mvc.Results.Redirect
@@ -68,6 +68,12 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
   private val amendEmailVerificationResponse: EmailVerificationResponse = EmailVerificationResponse(
     redirectUri = controllers.amend.routes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url
+  )
+
+  private val bankDetails = BankDetails(
+    accountName = "Account name",
+    bic = Some(bic),
+    iban = iban
   )
 
   override def beforeEach(): Unit = {
@@ -232,6 +238,133 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
             verify(mockEmailVerificationService, times(1))
               .isEmailVerified(eqTo(anEmailVerificationRequest.email.value.address), eqTo(anEmailVerificationRequest.credId))(any())
+
+            verify(mockEmailVerificationService, times(1))
+              .createEmailVerificationRequest(
+                waypoints = eqTo(emptyWaypoints),
+                credId = eqTo(anEmailVerificationRequest.credId),
+                emailAddress = eqTo(anEmailVerificationRequest.email.value.address),
+                pageTitle = eqTo(anEmailVerificationRequest.pageTitle),
+                continueUrl = eqTo(anEmailVerificationRequest.continueUrl))(any())
+          }
+        }
+
+        "must save the answer and redirect to the Bank Details page if if bank details are not completed" in {
+
+          val emailVerificationResponse = EmailVerificationResponse(
+            redirectUri = routes.BankDetailsController.onPageLoad().url
+          )
+
+          val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+          when(mockSessionRepository.set(any())) thenReturn true.toFuture
+
+          when(mockEmailVerificationService.isEmailVerified(
+            emailAddress = any(),
+            credId = any())(any())) thenReturn NotVerified.toFuture
+
+          when(mockEmailVerificationService.createEmailVerificationRequest(
+            waypoints = any(),
+            credId = any(),
+            emailAddress = any(),
+            pageTitle = any(),
+            continueUrl = any())(any())) thenReturn Right(emailVerificationResponse).toFuture
+
+          val application =
+            applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+              .configure("features.email-verification-enabled" -> "true")
+              .configure("features.enrolments-enabled" -> "false")
+              .overrides(
+                bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
+                bind[EmailVerificationService].toInstance(mockEmailVerificationService)
+              )
+              .build()
+
+          running(application) {
+            val request =
+              FakeRequest(POST, businessContactDetailsRoute)
+                .withFormUrlEncodedBody(("fullName", "name"), ("telephoneNumber", "0111 2223334"), ("emailAddress", "email@example.com"))
+
+            val config = application.injector.instanceOf[FrontendAppConfig]
+            val result = route(application, request).value
+            val expectedAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
+
+            val anEmailVerificationRequest = emailVerificationRequest.copy(
+              continueUrl = s"${config.loginContinueUrl}${emailVerificationRequest.continueUrl}"
+            )
+
+            status(result) mustBe SEE_OTHER
+
+            redirectLocation(result).value mustBe config.emailVerificationUrl + emailVerificationResponse.redirectUri
+
+            verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+
+            verify(mockEmailVerificationService, times(1))
+              .isEmailVerified(eqTo(emailVerificationRequest.email.value.address), eqTo(emailVerificationRequest.credId))(any())
+
+            verify(mockEmailVerificationService, times(1))
+              .createEmailVerificationRequest(
+                waypoints = eqTo(emptyWaypoints),
+                credId = eqTo(anEmailVerificationRequest.credId),
+                emailAddress = eqTo(anEmailVerificationRequest.email.value.address),
+                pageTitle = eqTo(anEmailVerificationRequest.pageTitle),
+                continueUrl = eqTo(anEmailVerificationRequest.continueUrl))(any())
+          }
+        }
+
+        "must redirect to the CheckYourAnswersPage if bank details are completed" in {
+          val emailVerificationResponse = EmailVerificationResponse(
+            redirectUri = routes.CheckYourAnswersController.onPageLoad().url
+          )
+
+          val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+          when(mockSessionRepository.set(any())) thenReturn true.toFuture
+
+          when(mockEmailVerificationService.isEmailVerified(
+            emailAddress = any(),
+            credId = any())(any())) thenReturn NotVerified.toFuture
+
+          when(mockEmailVerificationService.createEmailVerificationRequest(
+            waypoints = any(),
+            credId = any(),
+            emailAddress = any(),
+            pageTitle = any(),
+            continueUrl = any())(any())) thenReturn Right(emailVerificationResponse).toFuture
+
+          val application =
+            applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo))
+              .configure("features.email-verification-enabled" -> "true")
+              .configure("features.enrolments-enabled" -> "false")
+              .overrides(
+                bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
+                bind[EmailVerificationService].toInstance(mockEmailVerificationService)
+              )
+              .build()
+
+          running(application) {
+            val request =
+              FakeRequest(POST, businessContactDetailsRoute)
+                .withFormUrlEncodedBody(("fullName", "name"), ("telephoneNumber", "0111 2223334"), ("emailAddress", "email@example.com"))
+
+            val config = application.injector.instanceOf[FrontendAppConfig]
+            val result = route(application, request).value
+            val expectedAnswers = completeUserAnswersWithVatInfo
+              .set(BusinessContactDetailsPage, contactDetails).success.value
+              .set(BankDetailsPage, bankDetails).success.value
+
+            val anEmailVerificationRequest = emailVerificationRequest.copy(
+              continueUrl = s"${config.loginContinueUrl}/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/check-your-answers"
+            )
+
+            status(result) mustBe SEE_OTHER
+
+            redirectLocation(result).value mustBe config.emailVerificationUrl + emailVerificationResponse.redirectUri
+
+            verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+
+            verify(mockEmailVerificationService, times(1))
+              .isEmailVerified(eqTo(emailVerificationRequest.email.value.address), eqTo(emailVerificationRequest.credId))(any())
 
             verify(mockEmailVerificationService, times(1))
               .createEmailVerificationRequest(

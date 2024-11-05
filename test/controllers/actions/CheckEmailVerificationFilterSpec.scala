@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
-import models.CheckMode
+import models.{CheckMode, NormalMode}
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -28,7 +28,7 @@ import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
@@ -61,6 +61,11 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
   private val mockRegistrationConnector = mock[RegistrationConnector]
 
   private val expectedWaypoints =
+      EmptyWaypoints.setNextWaypoint(
+        Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
+      )
+
+  private val expectedAmendWaypoints =
     EmptyWaypoints.setNextWaypoint(
       Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
     )
@@ -181,7 +186,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val controller = new Harness(
             inAmend = true,
-            waypoints = expectedWaypoints,
+            waypoints = expectedAmendWaypoints,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -190,7 +195,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
 
           val result = controller.callFilter(request).futureValue
 
-          result mustBe Some(Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad(expectedWaypoints).url))
+          result mustBe Some(Redirect(controllers.routes.BusinessContactDetailsController.onPageLoad(expectedAmendWaypoints).url))
         }
       }
 
