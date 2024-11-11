@@ -32,9 +32,8 @@ case class OssExclusionsService @Inject()(
                                          )(implicit ec: ExecutionContext) extends Logging {
 
   def determineOssExclusionStatus(vrn: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    val currentDate: LocalDate = LocalDate.now(clock)
     getOssExclusion(vrn).map { ossExclusion =>
-      !isQuarantinedAndAfterTwoYears(currentDate, ossExclusion) &&
+      !isAfterTwoYears(ossExclusion) &&
         ossExclusion.quarantined.getOrElse(false) &&
         ossExclusion.exclusionReason.contains(ExclusionReason.FailsToComply)
     }
@@ -50,16 +49,13 @@ case class OssExclusionsService @Inject()(
     }
   }
 
-  private def isQuarantinedAndAfterTwoYears(currentDate: LocalDate, ossExcludedTrader: OssExcludedTrader): Boolean = {
-    ossExcludedTrader.quarantined match {
-      case Some(true) =>
-        val minimumDate = currentDate.minusYears(2)
-        ossExcludedTrader.effectiveDate.getOrElse {
-          val exception = new IllegalStateException("Expected effective date")
-          logger.error(s"Unable to retrieve effective date: ${exception.getMessage}", exception)
-          throw exception
-        }.isBefore(minimumDate)
-      case _ => false
-    }
+  private def isAfterTwoYears(ossExcludedTrader: OssExcludedTrader): Boolean = {
+    val currentDate: LocalDate = LocalDate.now(clock)
+    val minimumDate = currentDate.minusYears(2)
+    ossExcludedTrader.effectiveDate.getOrElse {
+      val exception = new IllegalStateException("Expected effective date")
+      logger.error(s"Unable to retrieve effective date: ${exception.getMessage}", exception)
+      throw exception
+    }.isBefore(minimumDate)
   }
 }
