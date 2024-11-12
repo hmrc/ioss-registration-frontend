@@ -17,7 +17,7 @@ site.confirm = Confirm
 site.processing = We are processing your registration.
 site.warning = Warning
 
-site.back.BTA = Return to Business Tax Account
+site.back.BTA = Return to your business tax account
 
 date.day = Day
 date.month = Month
@@ -258,7 +258,7 @@ cannotRegisterNoNiProtocol.link = <a href="https://www.gov.uk/register-for-vat/s
 cannotRegisterNotNorwegianBasedBusiness.title = You cannot register for this service
 cannotRegisterNotNorwegianBasedBusiness.heading = You cannot register for this service
 cannotRegisterNotNorwegianBasedBusiness.p1 = To register as a Norwegian trader, your business trading address must be in Norway.
-cannotRegisterNotNorwegianBasedBusiness.link = <a href="/business-account" class="govuk-link">Return to Business Tax Account</a>
+cannotRegisterNotNorwegianBasedBusiness.link = <a href="/business-account" class="govuk-link">Return to your business tax account</a>
 
 cannotRegisterNonEstablishedTaxablePerson.title = You cannot use this service
 cannotRegisterNonEstablishedTaxablePerson.heading = You cannot use this service
