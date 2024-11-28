@@ -7,104 +7,143 @@ Backend: https://github.com/hmrc/ioss-registration
 
 Stub: https://github.com/hmrc/ioss-registration-stub
 
+Import One Stop Shop Registration Service
+------------
+
+The main function of this service is to allow traders to register to pay VAT on imports of low value goods to consumers
+in the EU, Northern Ireland or both. This will then provide them with an IOSS enrolment that will allow access to other
+IOSS services - Returns (ioss-returns-frontend) and Exclusions (ioss-exclusions-frontend).
+
+Once a trader has been registered, there are a few other functions that are available in the service:
+
+Amend - this allows the trader to amend details they used on their original registration to keep
+their information up to date.
+
+Rejoin - Once a trader has left the Import One Stop Shop service, if they would like to rejoin, they can access this
+option and all of their previous registration data will be offered to reuse and edit on the rejoin.
+
+Summary of APIs
+------------
+
+This service utilises various APIs from other platforms in order to obtain and store information required for the
+registration process.
+
+ETMP:
+- HMRC VAT registration details are retrieved
+- Submitted registration details are passed to ETMP for storing and later querying against
+
+Core:
+- EU VAT registrations are verified with Core to check for any exclusions
+
+Note: locally (and on staging) these connections are stubbed via ioss-registration-stub.
+
 Requirements
 ------------
 
 This service is written in [Scala](http://www.scala-lang.org/) and [Play](http://playframework.com/), so needs at least a [JRE] to run.
 
-Suggestion: Node v18.19.1 should be installed.
 
-## Run the application
+## Run the application locally via Service Manager
 
-To update from Nexus and start all services from the RELEASE version instead of snapshot
 ```
-sm --start IMPORT_ONE_STOP_SHOP_ALL
+sm2 --start IMPORT_ONE_STOP_SHOP_ALL
 ```
 
-### To run the application locally execute the following:
+### To run the application locally from the repository, execute the following:
 
 The service needs to run in testOnly mode in order to access the testOnly get-passcodes endpoint which will generate a passcode for email verification.
 ```
-sm --stop IOSS_REGISTRATION_FRONTEND
+sm2 --stop IOSS_REGISTRATION_FRONTEND
 ```
 and
 ```
 sbt run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes
 ```
 
+### Running correct version of mongo
+Mongo 6 with a replica set is required to run the service. Please refer to the MDTP Handbook for instructions on how to run this
+
+
 ### Using the application
-To log in using the Authority Wizard provide "continue url", "affinity group" and "enrolments" as follows:
 
-![image](https://github.com/hmrc/ioss-registration/assets/36073378/81b753d0-05e5-4f2c-b4ec-a3d834b4c299)
+Access the Authority Wizard to log in:
+http://localhost:9949/auth-login-stub/gg-sign-in
 
-![image](https://user-images.githubusercontent.com/48218839/145842926-c318cb10-70c3-4186-a839-b1928c8e2625.png)
+Enter the following details on this page and submit:
+- Redirect URL: http://localhost:10190/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop
+- Affinity Group: Organisation
+- Enrolments:
+- Enrolment Key: HMRC-MTD-VAT
+- Identifier Name: VRN
+- Identifier Value: 100000001
 
-The VRN can be any 9-digit number.
+### Registration journey
 
-To successfully register go through the journey providing the answers as follows:
-1.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/f56bd082-60c3-42e8-8036-5503b8ed844e)
+It is recommended to use VRN 100000001 for a straightforward registration journey, hence why this one is used as
+the "Identifier Value" above. Other scenarios can be found in ioss-registration-stub.
 
-2.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/7db67246-ffae-4591-b4e1-1205e6c5fb78)
+To enter the registration journey, you will need to complete the initial filter questions as follows:
+1. Is your business already registered for the Import One Stop Shop scheme in an EU country?
+- No
+2. Does your business sell goods imported from countries outside the EU and Northern Ireland to consumers in the EU 
+or Northern Ireland?
+- Yes
+3. Do any of these goods have a consignment value of £135 or less?
+- Yes
+4. Is your business registered for VAT in the UK?
+- Yes
+5. Is your business in Northern Ireland?
+- Yes
 
-3.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/ad366c1b-b922-4dcd-bda5-6678a51bc281)
+Continue through the journey, completing each question through to the final check-your-answers page and submit the
+registration.
 
-4.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/f73d60c6-912a-4b90-add2-fa5ac5aff5c1)
+Email verification:
+Use the test-only endpoint (http://localhost:10190/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/test-only/get-passcodes)
+in a separate tab to generate a passcode that can be entered into the email verification page, following adding
+an email to the /business-contact-details page
 
-5.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/27a2e705-17e8-4c6b-847a-215c3c7285b1)
 
-6.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/50b9ef63-26de-40c7-9e12-30af04c9a03e)
+Note: you can refer to the Registration.feature within ioss-registration-journey-tests if any examples of data
+to input are required.
 
-Or alternatively from step 5 above:
-5.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/1d5d89b1-e1c0-4507-8077-347ffd7018af)
+### Amend registration journey
 
-7.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/b8dc83d5-71f4-4a9d-b390-b262af02d13b)
+Access the Authority Wizard to log in:
+http://localhost:9949/auth-login-stub/gg-sign-in
 
-8.
-![image](https://github.com/hmrc/ioss-registration-frontend/assets/36073378/50b9ef63-26de-40c7-9e12-30af04c9a03e)
+Enter the following details on this page and submit:
+- Redirect URL: http://localhost:10190/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/start-amend-journey
+- Affinity Group: Organisation
+- Enrolments (there are two rows this time):
+- Enrolment Key: HMRC-MTD-VAT
+- Identifier Name: VRN
+- Identifier Value: 100000001
+- Enrolment Key: HMRC-IOSS-ORG
+- Identifier Name: IOSSNumber
+- Identifier Value: IM9001234567
 
-9.
+It is recommended to use VRN 100000001 and IOSS Number IM9001234567 for a regular amend journey, however alternatives 
+can be found in the ioss-registration-stub.
 
-After clicking continue on the Contact details page, you will see the email verification page.
+### Rejoin registration journey
 
-![image](https://user-images.githubusercontent.com/36073378/203574815-a6fdba3a-59aa-41a7-827f-58b5382af95c.png)
+Access the Authority Wizard to log in:
+http://localhost:9949/auth-login-stub/gg-sign-in
 
-This will generate a passcode to enter into the email verification page.
-![image](https://user-images.githubusercontent.com/36073378/203574977-a8298624-bc88-4090-8e8f-4b9d2be0abf4.png)
+Enter the following details on this page and submit:
+- Redirect URL: http://localhost:10190/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/start-rejoin-journey
+- Affinity Group: Organisation
+- Enrolments (there are two rows this time):
+- Enrolment Key: HMRC-MTD-VAT
+- Identifier Name: VRN
+- Identifier Value: 100000001
+- Enrolment Key: HMRC-IOSS-ORG
+- Identifier Name: IOSSNumber
+- Identifier Value: IM9019999998
 
-Open a new tab and paste this url:
-
-  ```
-
-  /pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/test-only/get-passcodes
-
-  ```
-
-[//]: # ()
-[//]: # (This will generate a passcode to enter into the email verification page.)
-
-[//]: # (![image]&#40;https://user-images.githubusercontent.com/36073378/203574977-a8298624-bc88-4090-8e8f-4b9d2be0abf4.png&#41;)
-
-[//]: # ()
-[//]: # (Once you have pasted/entered the passcode into the input box on the email verification page and clicked continue and the email verification is successful,)
-
-[//]: # (you will need to change the port in the url back to 10200 in order to redirect to the bank details page.)
-
-[//]: # (9.)
-
-[//]: # (![image]&#40;https://user-images.githubusercontent.com/36073378/203573868-4809d4c5-8728-4b2f-bcce-3d8ad8f0e2c3.png&#41;)
-
-[//]: # ()
-[//]: # (10.)
-
-[//]: # (![image]&#40;https://user-images.githubusercontent.com/36073378/203574605-b3a54885-bf3f-45e0-b58c-9c2d7b0cfa4d.png&#41;)
+It is recommended to use VRN 100000001 and IOSS Number IM9019999998 for a regular rejoin journey, however alternatives 
+can be found in the ioss-registration-stub.
 
 Unit and Integration Tests
 ------------
