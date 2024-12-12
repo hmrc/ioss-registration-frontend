@@ -35,7 +35,7 @@ object PreviouslyRegisteredSummary {
          )(implicit messages: Messages): Option[SummaryListRow] =
 
     answers.get(PreviouslyRegisteredPage).map {
-      otherOneStopRegistrations: Boolean =>
+      (otherOneStopRegistrations: Boolean) =>
         val value = if (otherOneStopRegistrations) "site.yes" else "site.no"
         val actions = if (lockEditing || !isCurrentIossAccount) {
           Nil
@@ -57,7 +57,7 @@ object PreviouslyRegisteredSummary {
   def amendedRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
 
     answers.get(PreviouslyRegisteredPage).map {
-      otherOneStopRegistrations: Boolean =>
+      (otherOneStopRegistrations: Boolean) =>
         val value = if (otherOneStopRegistrations) "site.yes" else "site.no"
 
         SummaryListRowViewModel(

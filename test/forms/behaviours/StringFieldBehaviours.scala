@@ -67,7 +67,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
 
     "not bind incorrect values" in {
       forAll(unsafeInputsWithMaxLength(maxLength)) {
-        invalidInput: String =>
+        (invalidInput: String) =>
           val result = form.bind(Map(fieldName -> invalidInput)).apply(fieldName)
           result.errors must contain(formatError)
       }
@@ -75,7 +75,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
 
     "bind correct values" in {
       forAll(commonFieldString(maxLength)) {
-        validInput: String =>
+        (validInput: String) =>
           val result = form.bind(Map(fieldName -> validInput)).apply(fieldName)
           result.errors mustBe empty
       }

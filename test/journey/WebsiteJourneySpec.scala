@@ -112,9 +112,9 @@ class WebsiteJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGener
     }
 
     "when there are multiple changes required" in {
-      val initialise = journeyOf {
+      val initialise = journeyOf(
         generateWebsites(4) :+ goTo(AddWebsitePage()): _*
-      }
+      )
 
       startingFrom(firstPage)
         .run(
@@ -131,11 +131,11 @@ class WebsiteJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelGener
 
     "when inAmend" - {
 
-      val initialise = journeyOf {
+      val initialise = journeyOf(
         setWebsites(5) :+
           setUserAnswerTo(BusinessContactDetailsPage, arbitrary[BusinessContactDetails].sample.value) :+
           goTo(ChangeRegistrationPage): _*
-      }
+      )
 
       "must be able to change existing answers" in {
 

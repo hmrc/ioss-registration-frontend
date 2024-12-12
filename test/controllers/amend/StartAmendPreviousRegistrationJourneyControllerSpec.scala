@@ -21,7 +21,7 @@ import connectors.RegistrationConnector
 import models.UserAnswers
 import models.responses.InternalServerError
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock

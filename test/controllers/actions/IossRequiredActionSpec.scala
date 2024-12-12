@@ -21,13 +21,13 @@ import connectors.RegistrationConnector
 import models.amend.RegistrationWrapper
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar._
+import org.mockito.Mockito.{reset, verifyNoInteractions, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.Result
-import play.api.mvc.Results._
+import play.api.mvc.Results.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
@@ -68,7 +68,7 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
         )).futureValue
 
         result mustBe Left(Unauthorized)
-        verifyZeroInteractions(mockRegistrationConnector)
+        verifyNoInteractions(mockRegistrationConnector)
       }
 
       "must return InternalServerError" in {

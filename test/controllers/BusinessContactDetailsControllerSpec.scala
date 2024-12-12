@@ -32,7 +32,6 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.{BankDetailsPage, BusinessContactDetailsPage, EmptyWaypoints, Waypoint, Waypoints}
-import play.api.http.Status.BAD_REQUEST
 import play.api.inject.bind
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest

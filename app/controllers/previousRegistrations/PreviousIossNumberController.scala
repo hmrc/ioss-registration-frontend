@@ -76,7 +76,7 @@ class PreviousIossNumberController @Inject()(
         getPreviousCountry(waypoints, countryIndex) { country =>
 
           getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>
-            getPreviousScheme(waypoints, countryIndex, schemeIndex) { previousScheme: PreviousScheme =>
+            getPreviousScheme(waypoints, countryIndex, schemeIndex) { (previousScheme: PreviousScheme) =>
               val form = formProvider(country, hasIntermediary)
 
               val isNotAmendingActiveRegistration = waypoints.registrationModificationMode != AmendingActiveRegistration

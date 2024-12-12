@@ -249,7 +249,7 @@ trait ModelGenerators extends EitherValues {
         "GB79ABBY09012603367219",
         "GB21SCBL60910417068859",
         "GB42CPBK08005470328725"
-      ).map(v => Iban(v).right.get)
+      ).map(v => Iban(v).getOrElse(throw new IllegalArgumentException(s"Invalid IBAN: $v")))
     }
 
   implicit val arbitrarySavedUserAnswers: Arbitrary[SavedUserAnswers] =

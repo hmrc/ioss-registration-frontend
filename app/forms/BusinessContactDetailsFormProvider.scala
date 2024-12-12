@@ -40,6 +40,6 @@ class BusinessContactDetailsFormProvider @Inject() extends Mappings {
          .verifying(firstError(
            maxLength(50, "businessContactDetails.error.emailAddress.length"),
            regexp(emailPattern, "businessContactDetails.error.emailAddress.invalid")))
-    )(BusinessContactDetails.apply)(BusinessContactDetails.unapply)
+    )(BusinessContactDetails.apply)(businessContactDetails => Some(Tuple.fromProductTyped(businessContactDetails)))
    )
  }

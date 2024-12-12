@@ -88,10 +88,10 @@ object TradingNameSummary {
   def removedAnswersRow(removedTradingNames: Seq[String])(implicit messages: Messages): Option[SummaryListRow] =
 
     if (removedTradingNames.nonEmpty) {
-        val value = removedTradingNames.map {
-          name =>
-            HtmlFormat.escape(name)
-        }.mkString("<br/>")
+      val value = removedTradingNames.map {
+        name =>
+          HtmlFormat.escape(name)
+      }.mkString("<br/>")
 
       Some(
         SummaryListRowViewModel(

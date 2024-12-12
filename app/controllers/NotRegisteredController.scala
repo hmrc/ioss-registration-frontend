@@ -28,9 +28,9 @@ class NotRegisteredController @Inject()(
                                          override val messagesApi: MessagesApi,
                                          cc: AuthenticatedControllerComponents,
                                          view: NotRegisteredView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                       ) extends FrontendBaseController with I18nSupport {
 
-    protected val controllerComponents: MessagesControllerComponents = cc
+  protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad: Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
