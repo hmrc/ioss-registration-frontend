@@ -21,8 +21,7 @@ import config.FrontendAppConfig
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.{BusinessContactDetails, CheckMode}
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}

@@ -156,7 +156,9 @@ class ValidateCoreRegistrationConnectorSpec extends SpecBase with WireMockHelper
 
         val result = connector.validateCoreRegistration(coreRegistrationRequest).futureValue
 
-        val errorResponse = result.left.get.asInstanceOf[EisError].eisErrorResponse
+        val errorResponse = result.swap.getOrElse(throw new IllegalArgumentException("Expected a Left, but got a Right"))
+          .asInstanceOf[EisError]
+          .eisErrorResponse
 
         val expectedResponse = EisError(
           EisErrorResponse(
@@ -228,7 +230,7 @@ class ValidateCoreRegistrationConnectorSpec extends SpecBase with WireMockHelper
         whenReady(connector.validateCoreRegistration(coreRegistrationRequest), Timeout(Span(timeout, Seconds))) {
           exp =>
             exp.isLeft mustBe true
-            exp.left.get mustBe a[EisError]
+            exp.left.getOrElse(throw new IllegalArgumentException("Expected a Left, but got a Right")) mustBe a[EisError]
         }
       }
     }

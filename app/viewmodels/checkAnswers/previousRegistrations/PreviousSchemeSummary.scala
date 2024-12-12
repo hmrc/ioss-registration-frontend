@@ -40,7 +40,7 @@ object PreviousSchemeSummary {
 
 
     previousSchemes.zipWithIndex.flatMap { case (scheme, schemeIndex) =>
-      request.userAnswers.get(PreviousSchemePage(countryIndex, Index(schemeIndex))).map { previousAnsweredScheme: PreviousScheme =>
+      request.userAnswers.get(PreviousSchemePage(countryIndex, Index(schemeIndex))).map { (previousAnsweredScheme: PreviousScheme) =>
         val isExistingScheme = existingSchemes.contains(previousAnsweredScheme)
         SummaryListViewModel(
           rows = Seq(

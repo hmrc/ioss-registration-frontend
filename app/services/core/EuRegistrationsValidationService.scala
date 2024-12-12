@@ -40,7 +40,7 @@ class EuRegistrationsValidationService @Inject()(coreRegistrationValidationServi
                                     ec: ExecutionContext): Future[Either[PreviousValidationInvalidResult, Boolean]] = {
     euRegistrationDetails.toList match {
       case ::(currentDetails, remaining) =>
-        lookupSingleEtmpDisplayEuRegistrationDetails(currentDetails, currentDetails.vatNumber).flatMap { maybeMatch: Option[Match] =>
+        lookupSingleEtmpDisplayEuRegistrationDetails(currentDetails, currentDetails.vatNumber).flatMap { (maybeMatch: Option[Match]) =>
           maybeMatch match {
             case Some(foundMatch) =>
               remapMatchToError(currentDetails.issuedBy, foundMatch) match {

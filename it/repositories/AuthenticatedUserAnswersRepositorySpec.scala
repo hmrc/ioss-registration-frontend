@@ -31,7 +31,7 @@ class AuthenticatedUserAnswersRepositorySpec
   private val userAnswers: UserAnswers = UserAnswers("id", Json.obj("foo" -> "bar"), None, Instant.ofEpochSecond(1))
 
   private val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
-  when(mockAppConfig.cacheTtl) thenReturn 1
+  when(mockAppConfig.cacheTtl) thenReturn 1L
 
   protected override val repository: AuthenticatedUserAnswersRepository = new AuthenticatedUserAnswersRepository(
     mongoComponent = mongoComponent,

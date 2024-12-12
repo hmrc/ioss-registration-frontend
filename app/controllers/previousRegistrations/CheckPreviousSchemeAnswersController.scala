@@ -48,7 +48,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
   def onPageLoad(waypoints: Waypoints, index: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
       getPreviousCountry(waypoints, index) {
-        country: Country =>
+        (country: Country) =>
           val existingSchemes: Seq[PreviousScheme] = getExistingSchemesForTheCountryInAmend(waypoints, country, request)
 
           request.userAnswers.get(AllPreviousSchemesForCountryWithOptionalVatNumberQuery(index)).map { previousSchemes =>

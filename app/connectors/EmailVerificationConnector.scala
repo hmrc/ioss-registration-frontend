@@ -17,12 +17,13 @@
 package connectors
 
 import config.Service
-import connectors.EmailVerificationHttpParser.{ReturnEmailVerificationReads, ReturnEmailVerificationResponse, ReturnVerificationStatus, ReturnVerificationStatusReads}
+import connectors.EmailVerificationHttpParser._
 import logging.Logging
 import models.emailVerification.EmailVerificationRequest
 import models.responses.UnexpectedResponseStatus
 import play.api.Configuration
 import play.api.libs.json.Json
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpException, StringContextOps}
 

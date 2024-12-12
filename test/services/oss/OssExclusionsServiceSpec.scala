@@ -21,8 +21,7 @@ import connectors.RegistrationConnector
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
 import models.responses.InternalServerError
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.reset
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.{reset, when}
 import org.scalacheck.Gen
 import org.scalatest.{BeforeAndAfterEach, PrivateMethodTester}
 import org.scalatestplus.mockito.MockitoSugar.mock

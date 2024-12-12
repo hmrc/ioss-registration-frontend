@@ -22,8 +22,7 @@ import forms.previousRegistrations.DeletePreviousSchemeFormProvider
 import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.{Country, Index, PreviousScheme}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalacheck.Arbitrary.arbitrary

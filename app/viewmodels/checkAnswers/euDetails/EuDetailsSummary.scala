@@ -31,15 +31,15 @@ import viewmodels.implicits._
 
 object EuDetailsSummary {
 
-    def addToListRows(answers: UserAnswers, waypoints: Waypoints): Seq[ListItemWrapper] = {
+  def addToListRows(answers: UserAnswers, waypoints: Waypoints): Seq[ListItemWrapper] = {
     answers.get(AllEuOptionalDetailsQuery).getOrElse(List.empty).zipWithIndex.map {
       case (details, index) =>
         ListItemWrapper(
           ListItem(
-          name = HtmlFormat.escape(details.euCountry.name).toString,
-          changeUrl = controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, Index(index)).url,
-          removeUrl = controllers.euDetails.routes.DeleteEuDetailsController.onPageLoad(waypoints, Index(index)).url
-        ),
+            name = HtmlFormat.escape(details.euCountry.name).toString,
+            changeUrl = controllers.euDetails.routes.CheckEuDetailsAnswersController.onPageLoad(waypoints, Index(index)).url,
+            removeUrl = controllers.euDetails.routes.DeleteEuDetailsController.onPageLoad(waypoints, Index(index)).url
+          ),
           removeButtonEnabled = true
         )
     }
@@ -116,10 +116,10 @@ object EuDetailsSummary {
 
     if (removedEuDetails.nonEmpty) {
 
-        val value = removedEuDetails.map {
-          details =>
-            HtmlFormat.escape(details.name)
-        }.mkString("<br/>")
+      val value = removedEuDetails.map {
+        details =>
+          HtmlFormat.escape(details.name)
+      }.mkString("<br/>")
 
       Some(
         SummaryListRowViewModel(

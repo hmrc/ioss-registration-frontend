@@ -37,7 +37,7 @@
 
     <ul class="govuk-list govuk-list--bullet">
         <li><a href="@continueUrl" id="continueToYourReturn" class="govuk-link">@messages("savedProgress.continue.registration")</a></li>
-        <li><a href="@controllers.auth.routes.AuthController.signOut.url" id="signOut" class="govuk-link">@messages("savedProgress.sign.out")</a></li>
+        <li><a href="@controllers.auth.routes.AuthController.signOut().url" id="signOut" class="govuk-link">@messages("savedProgress.sign.out")</a></li>
     </ul>
     <p class="govuk-body" id="signInGovernmentGateway">@Html(messages("savedProgress.sign.in", appConfig.loginUrl))
     </p>

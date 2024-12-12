@@ -36,6 +36,6 @@ class BankDetailsFormProvider @Inject() extends Mappings {
         )),
       "bic"  -> optional(bic("bankDetails.error.bic.required", "bankDetails.error.bic.invalid")),
       "iban" -> iban("bankDetails.error.iban.required", "bankDetails.error.iban.invalid", "bankDetails.error.iban.checksum")
-    )(BankDetails.apply)(BankDetails.unapply)
+    )(BankDetails.apply)(bankDetails => Some(Tuple.fromProductTyped(bankDetails)))
   )
 }

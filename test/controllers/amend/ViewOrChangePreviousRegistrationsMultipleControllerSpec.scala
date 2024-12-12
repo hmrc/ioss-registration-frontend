@@ -21,8 +21,7 @@ import connectors.RegistrationConnector
 import forms.amend.ViewOrChangePreviousRegistrationsMultipleFormProvider
 import models.UserAnswers
 import models.amend.PreviousRegistration
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Gen

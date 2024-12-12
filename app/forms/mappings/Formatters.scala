@@ -106,7 +106,6 @@ trait Formatters {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Bic] =
         baseFormatter
           .bind(key, data)
-          .right
           .map(_.toUpperCase)
           .flatMap {
             value =>
@@ -127,7 +126,6 @@ trait Formatters {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Iban] =
         baseFormatter
           .bind(key, data)
-          .right
           .map(_.toUpperCase)
           .flatMap {
             value =>

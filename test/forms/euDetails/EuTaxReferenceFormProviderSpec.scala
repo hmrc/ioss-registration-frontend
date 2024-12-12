@@ -60,7 +60,7 @@ class EuTaxReferenceFormProviderSpec extends StringFieldBehaviours {
 
     "not bind incorrect values" in {
       forAll(unsafeInputsWithMaxLength(maxLength)) {
-        invalidInput: String =>
+        (invalidInput: String) =>
           val result = form.bind(Map(fieldName -> invalidInput)).apply(fieldName)
           result.errors must contain(FormError(fieldName, formatKey, Seq(alphaNumericWithSpace)))
       }
@@ -68,7 +68,7 @@ class EuTaxReferenceFormProviderSpec extends StringFieldBehaviours {
 
     "bind correct values" in {
       forAll(alphaNumStringWithLength(minLength, maxLength - 1)) {
-        validInput: String =>
+        (validInput: String) =>
           val result = form.bind(Map(fieldName -> validInput)).apply(fieldName + " ")
           result.errors mustBe empty
       }

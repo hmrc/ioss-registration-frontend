@@ -18,7 +18,7 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Index, UserAnswers}
-import pages.{Page, QuestionPage, Waypoints}
+import pages.{Page, QuestionPage, Waypoints, RecoveryOps}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 

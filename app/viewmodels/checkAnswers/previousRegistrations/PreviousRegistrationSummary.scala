@@ -111,10 +111,10 @@ object PreviousRegistrationSummary {
   def changedAnswersRow(changedAnswers: Seq[Country])(implicit messages: Messages): Option[SummaryListRow] =
 
     if (changedAnswers.nonEmpty) {
-        val value = changedAnswers.map {
-          details =>
-            HtmlFormat.escape(details.name)
-        }.mkString("<br/>")
+      val value = changedAnswers.map {
+        details =>
+          HtmlFormat.escape(details.name)
+      }.mkString("<br/>")
 
       Some(
         SummaryListRowViewModel(

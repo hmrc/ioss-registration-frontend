@@ -30,8 +30,8 @@ GET         /iv/insufficient-evidence-sources                             contro
 GET         /iv/failed-matching                                           controllers.auth.IvReturnController.failedMatching(continueUrl: RedirectUrl)
 GET         /iv/failed-identity-verification                              controllers.auth.IvReturnController.failed(continueUrl: RedirectUrl)
 
-GET         /account/sign-out-survey                                      controllers.auth.AuthController.signOut
-GET         /account/sign-out                                             controllers.auth.AuthController.signOutNoSurvey
+GET         /account/sign-out-survey                                      controllers.auth.AuthController.signOut()
+GET         /account/sign-out                                             controllers.auth.AuthController.signOutNoSurvey()
 GET         /account/signed-out                                           controllers.auth.SignedOutController.onPageLoad
 GET         /account/login                                                controllers.auth.AuthController.redirectToLogin(redirectUrl: RedirectUrl)
 GET         /account/register                                             controllers.auth.AuthController.redirectToRegister(redirectUrl: RedirectUrl)

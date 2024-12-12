@@ -56,7 +56,7 @@ class AuthController @Inject()(
 
   private val redirectPolicy = OnlyRelative | AbsoluteWithHostnameFromAllowlist(frontendAppConfig.allowedRedirectUrls: _*)
 
-  def onSignIn(): Action[AnyContent] = (cc.authAndGetOptionalData andThen cc.retrieveSavedAnswers()).async {
+  def onSignIn(): Action[AnyContent] = (cc.authAndGetOptionalData() andThen cc.retrieveSavedAnswers()).async {
     implicit request =>
       val answers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId, lastUpdated = Instant.now(clock)))
       answers.get(SavedProgressPage).map {
@@ -85,7 +85,7 @@ class AuthController @Inject()(
     }
   }
 
-  def continueOnSignIn: Action[AnyContent] = (cc.authAndGetOptionalData andThen cc.retrieveSavedAnswers()) {
+  def continueOnSignIn: Action[AnyContent] = (cc.authAndGetOptionalData() andThen cc.retrieveSavedAnswers()) {
     implicit request =>
       val answers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId, lastUpdated = Instant.now(clock)))
       answers.get(SavedProgressPage).map {

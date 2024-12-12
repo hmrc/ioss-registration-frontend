@@ -56,7 +56,7 @@ class SavedProgressController @Inject()(
       eventualAnswers.failed.foreach(error => logger.error("Failed saving answers", error))
 
       eventualAnswers.flatMap {
-        updatedAnswers: UserAnswers =>
+        (updatedAnswers: UserAnswers) =>
           val s4LRequest = SaveForLaterRequest(updatedAnswers.data, request.vrn)
           (for {
             savedExternalEntry <- registrationConnector.getSavedExternalEntry()

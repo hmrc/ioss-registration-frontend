@@ -27,8 +27,7 @@ import models.previousRegistrations.PreviousRegistrationDetails
 import models.responses.etmp.EtmpEnrolmentResponse
 import models.{BankDetails, BusinessContactDetails, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.reset
-import org.mockito.MockitoSugar.{times, verify, when}
+import org.mockito.Mockito.{times, verify, when, reset}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock

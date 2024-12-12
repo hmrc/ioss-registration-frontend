@@ -23,13 +23,14 @@ import models.core.{Match, MatchType}
 import models.etmp.SchemeType.{IOSSWithIntermediary, IOSSWithoutIntermediary, OSSNonUnion, OSSUnion}
 import models.etmp.{EtmpDisplayEuRegistrationDetails, EtmpPreviousEuRegistrationDetails, SchemeType}
 import models.requests.AuthenticatedDataRequest
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
-import org.mockito.{ArgumentMatchers, IdiomaticMockito, Mockito}
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
+import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.Enrolments
@@ -40,7 +41,7 @@ import scala.concurrent.Future
 
 class EuRegistrationsValidationServiceSpec
   extends SpecBase
-    with IdiomaticMockito
+    with MockitoSugar
     with ScalaFutures
     with Matchers
     with BeforeAndAfterEach

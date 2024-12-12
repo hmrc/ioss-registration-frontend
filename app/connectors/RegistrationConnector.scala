@@ -18,7 +18,7 @@ package connectors
 
 import config.Service
 import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, ExternalEntryUrlResponseReads}
-import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, AmendRegistrationResultResponseReads, DisplayRegistrationResponse, DisplayRegistrationResponseReads, OssDisplayRegistrationResponse, OssDisplayRegistrationResponseReads, RegistrationResponseReads, RegistrationResultResponse}
+import connectors.RegistrationHttpParser._
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import logging.Logging
 import models.enrolments.EACDEnrolments
@@ -26,9 +26,11 @@ import models.etmp.EtmpRegistrationRequest
 import models.etmp.amend.EtmpAmendRegistrationRequest
 import play.api.Configuration
 import play.api.libs.json.Json
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, StringContextOps}
+import  uk.gov.hmrc.http.HttpReads.Implicits._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

@@ -97,10 +97,10 @@ object WebsiteSummary {
   def removedAnswersRow(removedWebsites: Seq[String])(implicit messages: Messages): Option[SummaryListRow] =
 
     if (removedWebsites.nonEmpty) {
-        val value = removedWebsites.map {
-          website =>
-            HtmlFormat.escape(website)
-        }.mkString("<br/>")
+      val value = removedWebsites.map {
+        website =>
+          HtmlFormat.escape(website)
+      }.mkString("<br/>")
 
       Some(
         SummaryListRowViewModel(

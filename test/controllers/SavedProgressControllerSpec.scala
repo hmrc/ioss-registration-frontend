@@ -21,8 +21,7 @@ import config.FrontendAppConfig
 import connectors.{RegistrationConnector, SaveForLaterConnector, SavedUserAnswers}
 import models.external.ExternalEntryUrl
 import models.responses.{ConflictFound, UnexpectedResponseStatus}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{EmptyWaypoints, SavedProgressPage, Waypoints}
@@ -64,7 +63,7 @@ class SavedProgressControllerSpec extends SpecBase {
         instantDate
       )
 
-      when(mockAppConfig.cacheTtl) thenReturn 1
+      when(mockAppConfig.cacheTtl) thenReturn 1L
       when(mockSaveForLaterConnector.submit(any())(any())) thenReturn Future.successful(Right(Some(savedAnswers)))
       when(mockUARepository.clear(any())) thenReturn Future.successful(true)
       when(mockUARepository.set(any())) thenReturn Future.successful(true)
@@ -112,7 +111,7 @@ class SavedProgressControllerSpec extends SpecBase {
       )
 
 
-      when(mockAppConfig.cacheTtl) thenReturn 1
+      when(mockAppConfig.cacheTtl) thenReturn 1L
       when(mockSaveForLaterConnector.submit(any())(any())) thenReturn Future.successful(Right(Some(savedAnswers)))
       when(mockUARepository.clear(any())) thenReturn Future.successful(true)
       when(mockUARepository.set(any())) thenReturn Future.successful(true)

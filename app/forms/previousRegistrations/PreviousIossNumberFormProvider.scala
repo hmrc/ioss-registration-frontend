@@ -43,6 +43,6 @@ class PreviousIossNumberFormProvider @Inject() extends Mappings with IossRegistr
             .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
             .verifying(validateIntermediaryIdentificationNumber(country.code, "previousIntermediaryNumber.error.invalid")))
         }
-      )(PreviousSchemeNumbers.apply)(PreviousSchemeNumbers.unapply)
+      )(PreviousSchemeNumbers.apply)(previousSchemeNumbers => Some(Tuple.fromProductTyped(previousSchemeNumbers)))
     )
 }

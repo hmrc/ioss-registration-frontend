@@ -39,8 +39,7 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
 
   class Harness(
                  repository: AuthenticatedUserAnswersRepository,
-                 saveForLaterConnector: SaveForLaterConnector,
-                 clock: Clock
+                 saveForLaterConnector: SaveForLaterConnector
                ) extends SavedAnswersRetrievalAction(repository, saveForLaterConnector) {
     def callRefine[A](request: AuthenticatedOptionalDataRequest[A]): Future[Either[Result, AuthenticatedOptionalDataRequest[A]]] = refine(request)
   }
@@ -51,14 +50,12 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
     "when there is answers in session with continueUrl set" - {
 
       "must use the answers saved in session" in {
-
-        val instant = Instant.now
-        val stubClock: Clock = Clock.fixed(instant, ZoneId.systemDefault)
+        
         val sessionRepository = mock[AuthenticatedUserAnswersRepository]
         val connector = mock[SaveForLaterConnector]
 
         val answers = UserAnswers(userAnswersId).set(SavedProgressPage, "/url").success.value
-        val action = new Harness(sessionRepository, connector, stubClock)
+        val action = new Harness(sessionRepository, connector)
         val request = FakeRequest(GET, "/test/url?k=session-id")
 
         val result = action.callRefine(
@@ -73,7 +70,7 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
 
         verifyNoInteractions(connector)
         verifyNoInteractions(sessionRepository)
-        result.value.userAnswers mustBe (Some(answers))
+        result.value.userAnswers mustBe Some(answers)
       }
     }
 
@@ -87,7 +84,7 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
 
         when(connector.get()(any())) thenReturn Future.successful(Right(Some(SavedUserAnswers(vrn, answers.data, None, instant))))
         when(sessionRepository.set(any())) thenReturn Future.successful(true)
-        val action = new Harness(sessionRepository, connector, stubClock)
+        val action = new Harness(sessionRepository, connector)
         val request = FakeRequest(GET, "/test/url?k=session-id")
 
         val result = action.callRefine(
@@ -108,13 +105,11 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
       "must use answers in request when no saved answers present" in {
         val sessionRepository = mock[AuthenticatedUserAnswersRepository]
         val connector = mock[SaveForLaterConnector]
-        val instant = Instant.now
-        val stubClock: Clock = Clock.fixed(instant, ZoneId.systemDefault)
         val emptyAnswers = UserAnswers(userAnswersId)
 
         when(connector.get()(any())) thenReturn Future.successful(Right(None))
         when(sessionRepository.set(any())) thenReturn Future.successful(true)
-        val action = new Harness(sessionRepository, connector, stubClock)
+        val action = new Harness(sessionRepository, connector)
         val request = FakeRequest(GET, "/test/url?k=session-id")
 
         val result = action.callRefine(
