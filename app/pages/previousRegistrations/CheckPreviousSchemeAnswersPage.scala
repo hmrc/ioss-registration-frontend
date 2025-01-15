@@ -18,7 +18,7 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.{CheckMode, Index, NormalMode, UserAnswers}
-import pages.{AddItemPage, Page, QuestionPage, Waypoint, Waypoints}
+import pages.{AddItemPage, Page, QuestionPage, RecoveryOps, Waypoint, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable

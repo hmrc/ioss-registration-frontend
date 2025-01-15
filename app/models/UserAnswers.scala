@@ -102,7 +102,7 @@ object UserAnswers {
       (__ \ "data").write[JsObject] and
       (__ \ "vatInfo").writeNullable[VatCustomerInfo] and
       (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
-    ) (unlift(UserAnswers.unapply))
+    ) (userAnswers => Tuple.fromProductTyped(userAnswers))
   }
 
   implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)

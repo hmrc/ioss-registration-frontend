@@ -22,18 +22,18 @@ import forms.euDetails.EuVatNumberFormProvider
 import models.core.{Match, MatchType}
 import models.euDetails.RegistrationType
 import models.{CheckMode, Country, CountryWithValidationDetails, Index, UserAnswers}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.IdiomaticMockito
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
-import pages.euDetails._
+import pages.euDetails.*
 import pages.rejoin.RejoinRegistrationPage
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoint, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import services.core.CoreRegistrationValidationService
 import utils.FutureSyntax.FutureOps
@@ -41,7 +41,7 @@ import views.html.euDetails.EuVatNumberView
 
 import scala.concurrent.Future
 
-class EuVatNumberControllerSpec extends SpecBase with IdiomaticMockito with TableDrivenPropertyChecks {
+class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDrivenPropertyChecks {
 
   private val emptyWaypoints: Waypoints = EmptyWaypoints
   private val countryIndex: Index = Index(0)

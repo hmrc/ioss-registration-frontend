@@ -24,8 +24,9 @@ import models.amend.RegistrationWrapper
 import models.requests.AuthenticatedDataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.mockito.{ArgumentMatchers, IdiomaticMockito}
+import org.mockito.ArgumentMatchers
 import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatestplus.mockito.MockitoSugar
 import pages.rejoin.RejoinRegistrationPage
 import pages.{EmptyWaypoints, Waypoint}
 import play.api.mvc.AnyContent
@@ -38,7 +39,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class RejoinRegistrationValidationSpec extends SpecBase with IdiomaticMockito with TableDrivenPropertyChecks {
+class RejoinRegistrationValidationSpec extends SpecBase with MockitoSugar with TableDrivenPropertyChecks {
 
   private val mockEuRegistrationsValidationService: EuRegistrationsValidationService = mock[EuRegistrationsValidationService]
   private val rejoinRegistrationValidation = new RejoinRegistrationValidation(mockEuRegistrationsValidationService)

@@ -20,24 +20,25 @@ import base.SpecBase
 import config.Constants.correctionsPeriodsLimit
 import connectors.{RegistrationConnector, ReturnStatusConnector}
 import controllers.rejoin.validation.RejoinRegistrationValidation
-import controllers.rejoin.{routes => rejoinRoutes}
+import controllers.rejoin.routes as rejoinRoutes
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
 import models.responses.InternalServerError
 import models.{CheckMode, CurrentReturns, Index, Return, SubmissionStatus, UserAnswers}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
-import org.mockito.{ArgumentMatchers, IdiomaticMockito}
-import pages._
+import org.mockito.Mockito.*
+import org.mockito.ArgumentMatchers
+import org.scalatestplus.mockito.MockitoSugar
+import pages.*
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.euDetails.EuDetailsQuery
-import services._
+import services.*
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
@@ -51,7 +52,7 @@ import views.html.rejoin.RejoinRegistrationView
 import java.time.{Clock, LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
-class RejoinRegistrationControllerSpec extends SpecBase with IdiomaticMockito with SummaryListFluency {
+class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with SummaryListFluency {
 
   private val rejoinWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
   private val rejoinRegistrationPage = RejoinRegistrationPage

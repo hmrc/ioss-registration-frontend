@@ -19,7 +19,7 @@ package pages.previousRegistrations
 import controllers.previousRegistrations.routes
 import models.{Country, Index, UserAnswers}
 import pages.euDetails.TaxRegisteredInEuPage
-import pages.{AddItemPage, Page, QuestionPage, Waypoints}
+import pages.{AddItemPage, Page, QuestionPage, RecoveryOps, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable

@@ -20,8 +20,7 @@ import base.SpecBase
 import controllers.routes
 import forms.previousRegistrations.PreviousIossSchemeFormProvider
 import models.{Country, Index, PreviousScheme, UserAnswers}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, Waypoints}

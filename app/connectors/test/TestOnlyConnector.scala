@@ -21,6 +21,7 @@ import connectors.test.TestOnlyExternalResponseHttpParser.{ExternalResponseReads
 import models.external.ExternalRequest
 import play.api.Configuration
 import play.api.libs.json.Json
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 

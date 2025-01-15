@@ -29,7 +29,7 @@ import models.external.ExternalEntryUrl
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.{Country, TradingName, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalatestplus.mockito.MockitoSugar
 import pages.BusinessContactDetailsPage

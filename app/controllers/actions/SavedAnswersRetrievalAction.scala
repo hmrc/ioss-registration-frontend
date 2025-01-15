@@ -56,7 +56,7 @@ class SavedAnswersRetrievalAction(repository: AuthenticatedUserAnswersRepository
         Future.successful(request.userAnswers)
       }
 
-    userAnswers.map { maybeUserAnswers: Option[UserAnswers] =>
+    userAnswers.map { (maybeUserAnswers: Option[UserAnswers]) =>
       AuthenticatedOptionalDataRequest(request.request, request.credentials, request.vrn, request.enrolments, request.iossNumber, maybeUserAnswers)
     }
   }

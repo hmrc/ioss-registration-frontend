@@ -30,7 +30,7 @@ object DeletePreviousSchemeSummary  {
 
   def row(answers: UserAnswers, countryIndex: Index, schemeIndex: Index)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PreviousSchemePage(countryIndex, schemeIndex)).map {
-      previousScheme: PreviousScheme =>
+      (previousScheme: PreviousScheme) =>
         val value = ValueViewModel(
           HtmlContent(
             HtmlFormat.escape(messages(s"previousScheme.$previousScheme"))

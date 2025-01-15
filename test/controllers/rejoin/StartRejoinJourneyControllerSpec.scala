@@ -25,16 +25,17 @@ import models.amend.RegistrationWrapper
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.when
-import org.mockito.{ArgumentMatchers, IdiomaticMockito, Mockito}
+import org.mockito.Mockito.when
+import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatestplus.mockito.MockitoSugar
 import pages.rejoin.{CannotRejoinRegistrationPage, RejoinRegistrationPage}
 import pages.{EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import services.RegistrationService
 import utils.FutureSyntax.FutureOps
@@ -42,7 +43,7 @@ import utils.FutureSyntax.FutureOps
 import java.time.{Clock, LocalDate}
 import scala.concurrent.Future
 
-class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach with TableDrivenPropertyChecks with IdiomaticMockito {
+class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach with TableDrivenPropertyChecks with MockitoSugar {
 
   private val waypoints: Waypoints = EmptyWaypoints
 

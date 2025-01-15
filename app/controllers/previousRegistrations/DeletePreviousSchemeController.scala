@@ -52,7 +52,7 @@ class DeletePreviousSchemeController @Inject()(
       implicit request: AuthenticatedDataRequest[AnyContent] =>
 
         getPreviousCountry(waypoints, countryIndex) {
-          country: Country =>
+          (country: Country) =>
             if (waypoints.inAmend && getCurrentSchemeFromAnswers(country, countryIndex, schemeIndex)) {
               Future.successful(Redirect(pages.CannotRemoveExistingPreviousRegistrationsPage.route(waypoints)))
             } else {
@@ -82,7 +82,7 @@ class DeletePreviousSchemeController @Inject()(
     }
 
   private def getCurrentSchemeFromAnswers(country: Country, countryIndex: Index, schemeIndex: Index)(implicit request: AuthenticatedDataRequest[AnyContent]) = {
-    request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex)).exists { previousScheme: PreviousScheme =>
+    request.userAnswers.get(PreviousSchemePage(countryIndex, schemeIndex)).exists { (previousScheme: PreviousScheme) =>
       val etmpSchemeType = PreviousScheme.toEmtpSchemaType(previousScheme)
       request.hasSchemeRegisteredInCountry(country, etmpSchemeType)
     }

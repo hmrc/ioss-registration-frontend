@@ -20,7 +20,6 @@ import models.{CheckMode, NormalMode, UserAnswers}
 import play.api.mvc.Call
 import queries.Gettable
 
-import scala.annotation.nowarn
 
 final case class PageAndWaypoints(page: Page, waypoints: Waypoints) {
 
@@ -75,13 +74,14 @@ trait Page {
 
   def route(waypoints: Waypoints): Call
 
-  @nowarn("msg=match may not be exhaustive")
   def changeLink(waypoints: Waypoints, sourcePage: WaypointPage): PageAndWaypoints = {
     sourcePage match {
       case p: CheckAnswersPage =>
         PageAndWaypoints(this, waypoints.setNextWaypoint(p.waypoint))
       case p: AddItemPage =>
         PageAndWaypoints(this, waypoints.setNextWaypoint(p.waypoint(CheckMode)))
+      case _ =>
+        PageAndWaypoints(this, waypoints)
     }
   }
 }

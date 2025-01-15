@@ -19,8 +19,7 @@ package controllers.euDetails
 import base.SpecBase
 import models.euDetails.RegistrationType
 import models.{Country, Index, UserAnswers}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.euDetails._

@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.rejoin
 
 import base.SpecBase
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import views.html.UnauthorisedView
+import play.api.test.Helpers.*
+import views.html.rejoin.CannotRejoinView
 
-class UnauthorisedControllerSpec extends SpecBase {
+class CannotRejoinControllerSpec extends SpecBase {
 
-  "Unauthorised Controller" - {
+  "Cannot Rejoin Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.UnauthorisedController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.CannotRejoinController.onPageLoad().url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[UnauthorisedView]
+        val view = application.injector.instanceOf[CannotRejoinView]
 
-        status(result) mustBe OK
-        contentAsString(result) mustBe view()(request, messages(application)).toString
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view()(request, messages(application)).toString
       }
     }
   }

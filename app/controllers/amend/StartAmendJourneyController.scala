@@ -25,7 +25,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.OriginalRegistrationQuery
 import repositories.AuthenticatedUserAnswersRepository
-import services.{AccountService, RegistrationService}
+import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
@@ -36,7 +36,6 @@ class StartAmendJourneyController @Inject()(
                                              cc: AuthenticatedControllerComponents,
                                              registrationConnector: RegistrationConnector,
                                              registrationService: RegistrationService,
-                                             accountService: AccountService,
                                              authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with Logging {
   protected def controllerComponents: MessagesControllerComponents = cc
