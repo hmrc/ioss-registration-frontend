@@ -124,7 +124,6 @@ trait EtmpPreviousEuRegistrations extends Logging {
       case PreviousScheme.OSSNU => SchemeType.OSSNonUnion
       case PreviousScheme.IOSSWI => SchemeType.IOSSWithIntermediary
       case PreviousScheme.IOSSWOI => SchemeType.IOSSWithoutIntermediary
-      case null => throw new Exception("Unknown scheme type, unable to convert")
     }
 }
 
