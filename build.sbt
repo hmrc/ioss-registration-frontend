@@ -44,8 +44,6 @@ lazy val root = (project in file("."))
     PlayKeys.playDefaultPort := 10190,
     scalacOptions ++= Seq(
       "-feature",
-      "-rootdir",
-      baseDirectory.value.getCanonicalPath,
       "-Wconf:msg=deprecation:w,msg=feature:w,msg=optimizer:w,src=target/.*:s"
     ),
     libraryDependencies ++= AppDependencies(),
@@ -71,11 +69,13 @@ lazy val root = (project in file("."))
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork := true,
+  unmanagedSourceDirectories += baseDirectory.value / "test-utils"
 )
 
 lazy val itSettings = Defaults.itSettings ++ Seq(
   unmanagedSourceDirectories := Seq(
     baseDirectory.value / "it",
+    baseDirectory.value / "test-utils"
   ),
   unmanagedResourceDirectories := Seq(
     baseDirectory.value / "it" / "resources"
