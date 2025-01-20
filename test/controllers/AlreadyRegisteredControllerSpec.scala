@@ -99,6 +99,28 @@ class AlreadyRegisteredControllerSpec extends SpecBase with MockitoSugar with Be
         }
       }
     }
+
+    "when the connector fails to return a registration" - {
+
+      "must redirect the user to the Problem With Account page" in {
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Left("Error"))
+        when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+
+        val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.AlreadyRegisteredController.onPageLoad().url)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.ProblemWithAccountController.onPageLoad().url
+        }
+      }
+    }
   }
 
 }

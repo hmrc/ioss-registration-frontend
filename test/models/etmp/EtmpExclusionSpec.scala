@@ -17,7 +17,7 @@
 package models.etmp
 
 import base.SpecBase
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 import java.time.LocalDate
 
@@ -49,6 +49,24 @@ class EtmpExclusionSpec extends SpecBase {
 
       Json.toJson(etmpExclusion) mustBe expectedJson
       expectedJson.validate[EtmpExclusion] mustBe JsSuccess(etmpExclusion)
+    }
+
+    "must handle missing fields during deserialization" in {
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[EtmpExclusion] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val expectedJson = Json.obj(
+        "exclusionReason" -> 12345,
+        "effectiveDate" -> effectiveDate,
+        "decisionDate" -> decisionDate,
+        "quarantine" -> quarantine
+      )
+
+      expectedJson.validate[EtmpExclusion] mustBe a[JsError]
     }
   }
 }

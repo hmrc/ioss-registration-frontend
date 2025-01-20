@@ -20,7 +20,7 @@ import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class TradingNameSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues {
 
@@ -39,6 +39,32 @@ class TradingNameSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
         Json.toJson(tradingName) mustBe expectedJson
         expectedJson.validate[TradingName] mustBe JsSuccess(tradingName)
       }
+    }
+
+    "must deserialize from JSON correctly" in {
+
+      val expectedJson = Json.obj(
+        "name" -> "The Scrumptious Cake Company"
+      )
+
+      val tradingName: TradingName = TradingName("The Scrumptious Cake Company")
+
+      expectedJson.validate[TradingName] mustBe JsSuccess(tradingName)
+    }
+
+    "must handle missing fields during deserialization" in {
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[TradingName] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val expectedJson = Json.obj(
+        "name" -> 12345
+      )
+
+      expectedJson.validate[TradingName] mustBe a[JsError]
     }
   }
 }

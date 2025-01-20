@@ -19,7 +19,7 @@ package models.iv
 import base.SpecBase
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, Json}
 
 class IdentityVerificationResponseSpec extends SpecBase with Matchers {
 
@@ -58,6 +58,20 @@ class IdentityVerificationResponseSpec extends SpecBase with Matchers {
       val unexpectedResponse = IdentityVerificationUnexpectedResponse(500)
 
       unexpectedResponse.status mustBe 500
+    }
+
+    "must handle missing fields during deserialization" in {
+
+      val json = Json.obj()
+
+      json.validate[IdentityVerificationProgress] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val json = Json.obj("result" -> 12345)
+
+      json.validate[IdentityVerificationProgress] mustBe a[JsError]
     }
   }
 }

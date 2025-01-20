@@ -20,7 +20,7 @@ import base.SpecBase
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.i18n.Messages
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.test.Helpers.running
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
@@ -46,6 +46,27 @@ class PreviousRegistrationSpec extends SpecBase with ScalaCheckPropertyChecks {
 
       Json.toJson(previousRegistration) mustBe expectedJson
       expectedJson.validate[PreviousRegistration] mustBe JsSuccess(previousRegistration)
+    }
+
+    "must handle missing fields during deserialization" in {
+
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[PreviousRegistration] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val previousRegistration: PreviousRegistration = previousRegistrations.head
+
+      val expectedJson = Json.obj(
+        "iossNumber" -> 12345,
+        "startPeriod" -> previousRegistration.startPeriod,
+        "endPeriod" -> previousRegistration.endPeriod
+      )
+
+      expectedJson.validate[PreviousRegistration] mustBe a[JsError]
+
     }
 
     "must populate Radio Items correctly" in {

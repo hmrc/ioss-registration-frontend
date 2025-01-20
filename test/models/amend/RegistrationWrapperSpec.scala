@@ -19,8 +19,8 @@ package models.amend
 import base.SpecBase
 import models.DesAddress
 import models.domain.VatCustomerInfo
-import models.etmp._
-import play.api.libs.json.{JsSuccess, Json}
+import models.etmp.*
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import testutils.RegistrationData.etmpDisplayRegistration
 
 class RegistrationWrapperSpec extends SpecBase {
@@ -61,6 +61,36 @@ class RegistrationWrapperSpec extends SpecBase {
 
       Json.toJson(registrationWrapper) mustBe expectedJson
       expectedJson.validate[RegistrationWrapper] mustBe JsSuccess(registrationWrapper)
+    }
+
+    "must handle missing fields during deserialization" in {
+
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[RegistrationWrapper] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val expectedJson = Json.obj(
+        "vatInfo" -> Json.obj(
+          "desAddress" -> vatInfo.desAddress,
+          "partOfVatGroup" -> vatInfo.partOfVatGroup,
+          "registrationDate" -> vatInfo.registrationDate,
+          "organisationName" -> vatInfo.organisationName,
+          "singleMarketIndicator" -> vatInfo.singleMarketIndicator,
+          "overseasIndicator" -> vatInfo.overseasIndicator
+        ),
+        "registration" -> Json.obj(
+          "tradingNames" -> 12345,
+          "schemeDetails" -> displaySchemeDetails,
+          "bankDetails" -> bankDetails,
+          "exclusions" -> exclusions,
+          "adminUse" -> adminUse
+        )
+      )
+
+      expectedJson.validate[RegistrationWrapper] mustBe a[JsError]
     }
   }
 }

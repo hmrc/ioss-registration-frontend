@@ -18,27 +18,106 @@ package models
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class BusinessContactDetailsSpec extends AnyFreeSpec with Matchers {
 
   "BusinessContactDetails" - {
 
-      "must exclude trailing and leading whitespace and double spaces" in {
+    "must exclude trailing and leading whitespace and double spaces" in {
 
-        val businessContactDetails = BusinessContactDetails(
-          fullName = "      full    name        ",
-          telephoneNumber = "012345678",
-          emailAddress = "a@b.c"
-        )
+      val businessContactDetails = BusinessContactDetails(
+        fullName = "      full    name        ",
+        telephoneNumber = "012345678",
+        emailAddress = "a@b.c"
+      )
 
-        val json = Json.obj(
-          "fullName"       -> "full name",
-          "telephoneNumber"       -> "012345678",
-          "emailAddress"  -> "a@b.c"
-        )
+      val json = Json.obj(
+        "fullName" -> "full name",
+        "telephoneNumber" -> "012345678",
+        "emailAddress" -> "a@b.c"
+      )
 
-        json.as[BusinessContactDetails] mustEqual businessContactDetails
-      }
+      json.as[BusinessContactDetails] mustEqual businessContactDetails
     }
+
+    "must serialize to JSON correctly" in {
+      val businessContactDetails = BusinessContactDetails(
+        fullName = "full name",
+        telephoneNumber = "012345678",
+        emailAddress = "a@b.c"
+      )
+
+      val json = Json.obj(
+        "fullName" -> "full name",
+        "telephoneNumber" -> "012345678",
+        "emailAddress" -> "a@b.c"
+      )
+
+      Json.toJson(businessContactDetails) mustEqual json
+    }
+
+    "must deserialize from JSON correctly" in {
+      val json = Json.obj(
+        "fullName" -> "full name",
+        "telephoneNumber" -> "012345678",
+        "emailAddress" -> "a@b.c"
+      )
+
+      val businessContactDetails = BusinessContactDetails(
+        fullName = "full name",
+        telephoneNumber = "012345678",
+        emailAddress = "a@b.c"
+      )
+
+      json.validate[BusinessContactDetails] mustBe JsSuccess(businessContactDetails)
+    }
+
+    "must handle empty or excessive spaces in fullName correctly" in {
+      val businessContactDetails = BusinessContactDetails(
+        fullName = "       John       Doe       ",
+        telephoneNumber = "012345678",
+        emailAddress = "a@b.c"
+      )
+
+      businessContactDetails.fullName mustEqual "John Doe"
+    }
+
+    "must handle empty strings in fullName correctly" in {
+      val businessContactDetails = BusinessContactDetails(
+        fullName = "",
+        telephoneNumber = "012345678",
+        emailAddress = "a@b.c"
+      )
+
+      businessContactDetails.fullName mustEqual ""
+    }
+
+    "must handle fullName with no spaces correctly" in {
+      val businessContactDetails = BusinessContactDetails(
+        fullName = "JohnDoe",
+        telephoneNumber = "012345678",
+        emailAddress = "a@b.c"
+      )
+
+      businessContactDetails.fullName mustEqual "JohnDoe"
+    }
+
+    "must handle missing fields during deserialization" in {
+      val json = Json.obj()
+
+      json.validate[BusinessContactDetails] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val json = Json.obj(
+        "fullName" -> 12345,
+        "telephoneNumber" -> "012345678",
+        "emailAddress" -> "a@b.c"
+      )
+
+      json.validate[BusinessContactDetails] mustBe a[JsError]
+    }
+  }
 }

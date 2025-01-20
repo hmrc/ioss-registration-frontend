@@ -18,7 +18,7 @@ package models.etmp
 
 import base.SpecBase
 import org.scalacheck.Arbitrary.arbitrary
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class EtmpTradingNameSpec extends SpecBase {
 
@@ -34,6 +34,30 @@ class EtmpTradingNameSpec extends SpecBase {
 
       Json.toJson(etmpTradingName) mustBe expectedJson
       expectedJson.validate[EtmpTradingName] mustBe JsSuccess(etmpTradingName)
+    }
+
+    "must deserialize from JSON correctly" in {
+      val expectedJson = Json.obj(
+        "tradingName" -> "Trading Name"
+      )
+
+      val expectedTradingName = EtmpTradingName("Trading Name")
+
+      expectedJson.validate[EtmpTradingName] mustBe JsSuccess(expectedTradingName)
+    }
+
+    "must handle missing fields during deserialization" in {
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[EtmpTradingName] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+      val expectedJson = Json.obj(
+        "tradingName" -> 12345
+      )
+
+      expectedJson.validate[EtmpTradingName] mustBe a[JsError]
     }
   }
 }

@@ -16,8 +16,9 @@
 
 package models
 
-import play.api.libs.json._
-import domain.ModelHelpers._
+import play.api.libs.json.*
+import domain.ModelHelpers.*
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
 case class BusinessContactDetails (
   fullName: String,
@@ -26,7 +27,14 @@ case class BusinessContactDetails (
 )
 
 object BusinessContactDetails {
-  implicit val format: OFormat[BusinessContactDetails] = Json.format[BusinessContactDetails]
+  implicit val reads: Reads[BusinessContactDetails] = (
+
+    (__ \ "fullName").read[String].map(normaliseSpaces) and
+      (__ \ "telephoneNumber").read[String] and
+      (__ \ "emailAddress").read[String]
+    )(BusinessContactDetails.apply _)
+
+  implicit val writes: Writes[BusinessContactDetails] = Json.writes[BusinessContactDetails]
 
   def apply(fullName: String, telephoneNumber: String, emailAddress: String): BusinessContactDetails =
     new BusinessContactDetails(normaliseSpaces(fullName), telephoneNumber, emailAddress)

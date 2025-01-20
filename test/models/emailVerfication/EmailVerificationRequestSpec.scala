@@ -20,7 +20,7 @@ import base.SpecBase
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 
 class EmailVerificationRequestSpec extends AnyFreeSpec with Matchers with SpecBase {
@@ -90,6 +90,75 @@ class EmailVerificationRequestSpec extends AnyFreeSpec with Matchers with SpecBa
         expectedJson.validate[EmailVerificationRequest] mustEqual JsSuccess(emailVerificationRequest)
       }
 
+
+      "must handle missing fields during deserialization" in {
+
+        val expectedJson = Json.obj()
+
+        expectedJson.validate[EmailVerificationRequest] mustBe a[JsError]
+      }
+
+      "must handle invalid data during deserialization" in {
+
+        val expectedJson = Json.obj(
+          "credId" -> 12345,
+          "continueUrl" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/bank-account-details",
+          "origin" -> "OSS",
+          "accessibilityStatementUrl" -> "/register-and-pay-vat-on-goods-sold-to-eu-from-northern-ireland",
+          "lang" -> "en"
+        )
+
+        expectedJson.validate[EmailVerificationRequest] mustBe a[JsError]
+      }
+    }
+  }
+
+  "verifyEmail" - {
+
+    "must serialize to JSON correctly" in {
+      val verifyEmail = VerifyEmail(
+        "email@example.com",
+        "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"
+      )
+
+      val expectedJson = Json.obj(
+        "address" -> "email@example.com",
+        "enterUrl" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"
+      )
+
+      Json.toJson(verifyEmail) mustBe expectedJson
+    }
+
+    "must deserialize from JSON correctly" in {
+
+      val expectedJson = Json.obj(
+        "address" -> "email@example.com",
+        "enterUrl" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"
+      )
+
+      val verifyEmail = VerifyEmail(
+        "email@example.com",
+        "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"
+      )
+
+      expectedJson.validate[VerifyEmail] mustBe JsSuccess(verifyEmail)
+    }
+
+    "must handle missing fields during deserialization" in {
+
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[VerifyEmail] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val expectedJson = Json.obj(
+        "address" -> 12345,
+        "enterUrl" -> "/pay-vat-on-goods-sold-to-eu/northern-ireland-register/business-contact-details"
+      )
+
+      expectedJson.validate[VerifyEmail] mustBe a[JsError]
     }
   }
 

@@ -18,13 +18,13 @@ package models.etmp
 
 import base.SpecBase
 import org.scalacheck.Arbitrary.arbitrary
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class EtmpWebsiteSpec extends SpecBase {
 
   "EtmpWebsite" - {
 
-    "must serialise/deserialise to and from EtmpWebsite" in {
+    "must serialise/ to JSON correctly" in {
 
       val website = arbitrary[EtmpWebsite].sample.value
 
@@ -33,7 +33,30 @@ class EtmpWebsiteSpec extends SpecBase {
       )
 
       Json.toJson(website) mustBe expectedJson
-      expectedJson.validate[EtmpWebsite] mustBe JsSuccess(website)
+    }
+
+    "must deserialize from JSON correctly" in {
+      val json = Json.obj(
+        "websiteAddress" -> "http://example.com"
+      )
+
+      val expectedWebsite = EtmpWebsite("http://example.com")
+
+      json.validate[EtmpWebsite] mustBe JsSuccess(expectedWebsite)
+    }
+
+    "must handle missing fields during deserialization" in {
+      val json = Json.obj()
+
+      json.validate[EtmpWebsite] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+      val json = Json.obj(
+        "websiteAddress" -> 12345
+      )
+
+      json.validate[EtmpWebsite] mustBe a[JsError]
     }
   }
 }

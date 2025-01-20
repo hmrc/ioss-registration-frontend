@@ -22,11 +22,62 @@ import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import repositories.UnauthenticatedUserAnswersRepository
+import play.api.test.Helpers.*
+import repositories.{AuthenticatedUserAnswersRepository, UnauthenticatedUserAnswersRepository}
 import utils.FutureSyntax.FutureOps
 
 class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
+
+  "keepAlive" - {
+
+    "when the user has answered some questions" - {
+
+      "must keep the answers alive and return OK" in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        when(mockSessionRepository.keepAlive(any())) thenReturn true.toFuture
+
+        val application =
+          applicationBuilder(Some(emptyUserAnswers))
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, routes.KeepAliveController.keepAlive.url)
+
+          val result = route(application, request).value
+
+          status(result) mustBe OK
+          verify(mockSessionRepository, times(1)).keepAlive(emptyUserAnswers.id)
+        }
+      }
+    }
+
+    "when the user has not answered any questions" - {
+
+      "must return OK" in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        when(mockSessionRepository.keepAlive(any())) thenReturn true.toFuture
+
+        val application =
+          applicationBuilder(None)
+            .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+            .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, routes.KeepAliveController.keepAlive.url)
+
+          val result = route(application, request).value
+
+          status(result) mustBe OK
+          verify(mockSessionRepository, never()).keepAlive(any())
+        }
+      }
+    }
+  }
 
   "keepAliveUnauthenticated" - {
 

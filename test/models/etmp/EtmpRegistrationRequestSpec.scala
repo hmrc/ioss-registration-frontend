@@ -29,7 +29,7 @@ import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -223,6 +223,25 @@ class EtmpRegistrationRequestSpec extends SpecBase {
           LocalDate.now(stubClockAtArbitraryDate)
         ) mustBe etmpRegistrationRequest
       }
+    }
+
+    "must handle missing fields during deserialization" in {
+
+      val json = Json.obj()
+
+      json.validate[EtmpRegistrationRequest] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val json = Json.obj(
+        "administration" -> 12345,
+        "customerIdentification" -> customerIdentification,
+        "tradingNames" -> tradingNames,
+        "schemeDetails" -> schemeDetails,
+        "bankDetails" -> bankDetails
+      )
+      json.validate[EtmpRegistrationRequest] mustBe a[JsError]
     }
   }
 }

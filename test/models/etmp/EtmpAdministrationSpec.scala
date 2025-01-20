@@ -19,7 +19,7 @@ package models.etmp
 import base.SpecBase
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class EtmpAdministrationSpec extends SpecBase with ScalaCheckPropertyChecks {
 
@@ -37,6 +37,27 @@ class EtmpAdministrationSpec extends SpecBase with ScalaCheckPropertyChecks {
       Json.toJson(etmpAdministration) mustBe expectedJson
       expectedJson.validate[EtmpAdministration] mustBe JsSuccess(etmpAdministration)
     }
+
+    "must handle missing fields during deserialization" in {
+
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[EtmpAdministration] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val etmpAdministration = arbitrary[EtmpAdministration].sample.value
+
+      val expectedJson = Json.obj(
+        "messageType" -> 12345,
+        "regimeID" -> s"${etmpAdministration.regimeID}"
+      )
+
+      expectedJson.validate[EtmpAdministration] mustBe a[JsError]
+    }
+
+
   }
 }
 

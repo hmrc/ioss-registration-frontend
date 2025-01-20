@@ -17,7 +17,7 @@
 package models.etmp
 
 import base.SpecBase
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import testutils.RegistrationData.etmpEuPreviousRegistrationDetails
 
 class EtmpPreviousEuRegistrationDetailsSpec extends SpecBase {
@@ -69,6 +69,25 @@ class EtmpPreviousEuRegistrationDetailsSpec extends SpecBase {
 
         Json.toJson(expectedResult) mustBe json
         json.validate[EtmpPreviousEuRegistrationDetails] mustBe JsSuccess(expectedResult)
+      }
+
+      "must handle missing fields during deserialization" in {
+
+        val json = Json.obj()
+
+        json.validate[EtmpPreviousEuRegistrationDetails] mustBe a[JsError]
+      }
+
+      "must handle invalid data during deserialization" in {
+
+        val json = Json.obj(
+          "issuedBy" -> issuingCountry,
+          "registrationNumber" -> 12345,
+          "schemeType" -> schemeType,
+          "intermediaryNumber" -> intermediaryNumber
+        )
+
+        json.validate[EtmpPreviousEuRegistrationDetails] mustBe a[JsError]
       }
     }
   }

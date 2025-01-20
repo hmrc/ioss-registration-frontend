@@ -20,7 +20,7 @@ import base.SpecBase
 import models.emailVerification.EmailVerificationResponse
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 
 class EmailVerificationResponseSpec extends AnyFreeSpec with Matchers with SpecBase {
@@ -44,6 +44,22 @@ class EmailVerificationResponseSpec extends AnyFreeSpec with Matchers with SpecB
         expectedJson.validate[EmailVerificationResponse] mustEqual JsSuccess(emailVerificationResponse)
       }
 
+    }
+
+    "must handle missing fields during deserialization" in {
+
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[EmailVerificationResponse] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val expectedJson = Json.obj(
+        "redirectUri" -> 12345
+      )
+
+      expectedJson.validate[EmailVerificationResponse] mustBe a[JsError]
     }
   }
 
