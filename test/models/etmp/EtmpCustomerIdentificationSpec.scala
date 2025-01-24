@@ -18,7 +18,7 @@ package models.etmp
 
 import base.SpecBase
 import org.scalacheck.Arbitrary.arbitrary
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class EtmpCustomerIdentificationSpec extends SpecBase {
 
@@ -34,6 +34,22 @@ class EtmpCustomerIdentificationSpec extends SpecBase {
 
       Json.toJson(etmpCustomerIdentification) mustBe expectedJson
       expectedJson.validate[EtmpCustomerIdentification] mustBe JsSuccess(etmpCustomerIdentification)
+    }
+
+    "must handle missing fields during deserialization" in {
+
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[EtmpCustomerIdentification] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val expectedJson = Json.obj(
+        "vrn" -> 123456789
+      )
+
+      expectedJson.validate[EtmpCustomerIdentification] mustBe a[JsError]
     }
   }
 }

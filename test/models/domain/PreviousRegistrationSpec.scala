@@ -17,10 +17,12 @@
 package models.domain
 
 import models.Country
-import models.PreviousScheme.{IOSSWI, IOSSWOI, OSSNU, OSSU}
+import models.PreviousScheme.{IOSSWI, IOSSWOI, OSSNU, OSSU, toEmtpSchemaType}
 import models.etmp.{EtmpPreviousEuRegistrationDetails, SchemeType}
+import models.previousRegistrations.NonCompliantDetails
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import play.api.libs.json.{JsError, Json}
 
 class PreviousRegistrationSpec extends AnyFreeSpec with Matchers {
 
@@ -62,6 +64,89 @@ class PreviousRegistrationSpec extends AnyFreeSpec with Matchers {
           List(PreviousSchemeDetails(IOSSWOI, PreviousSchemeNumbers("IT-reg-2", None), None))),
         remappedGermanResults
       )
+
+  }
+
+  "fromEtmpPreviousEuRegistrationDetailsByCountry handles empty and non-matching inputs" in {
+    val emptyDetails = Seq.empty[EtmpPreviousEuRegistrationDetails]
+    val nonMatchingDetails = Seq(
+      EtmpPreviousEuRegistrationDetails("FR", "FR-reg-1", toEmtpSchemaType(OSSU), None)
+    )
+
+    PreviousRegistration.fromEtmpPreviousEuRegistrationDetailsByCountry(germanCountry, emptyDetails) mustBe
+      PreviousRegistration(germanCountry, Seq.empty)
+
+    PreviousRegistration.fromEtmpPreviousEuRegistrationDetailsByCountry(germanCountry, nonMatchingDetails) mustBe
+      PreviousRegistration(germanCountry, Seq.empty)
+  }
+
+  "fromEtmpPreviousEuRegistrationDetails groups entries correctly" in {
+    val input = Seq(
+      EtmpPreviousEuRegistrationDetails("DE", "DE-reg-1", toEmtpSchemaType(OSSU), None),
+      EtmpPreviousEuRegistrationDetails("FR", "FR-reg-2", toEmtpSchemaType(OSSNU), None),
+      EtmpPreviousEuRegistrationDetails("DE", "DE-reg-3", toEmtpSchemaType(IOSSWI), None)
+    )
+
+    val result = PreviousRegistration.fromEtmpPreviousEuRegistrationDetails(input)
+
+    result must contain theSameElementsAs List(
+      PreviousRegistration(
+        Country.fromCountryCodeUnsafe("DE"),
+        List(
+          PreviousSchemeDetails(OSSU, PreviousSchemeNumbers("DEDE-reg-1", None), None),
+          PreviousSchemeDetails(IOSSWI, PreviousSchemeNumbers("DE-reg-3", None), None)
+        )
+      ),
+      PreviousRegistration(
+        Country.fromCountryCodeUnsafe("FR"),
+        List(PreviousSchemeDetails(OSSNU, PreviousSchemeNumbers("FR-reg-2", None), None))
+      )
+    )
+  }
+
+  "JSON serialization and deserialization should work for PreviousRegistration" in {
+    val registration = PreviousRegistration(
+      Country.fromCountryCodeUnsafe("DE"),
+      List(
+        PreviousSchemeDetails(
+          OSSU,
+          PreviousSchemeNumbers("DEDE-reg-1", Some("INT-123")),
+          Some(NonCompliantDetails(Some(1), Some(1)))
+        )
+      )
+    )
+
+    val json = Json.toJson(registration)
+    Json.fromJson[PreviousRegistration](json).get mustBe registration
+  }
+
+  "must handle missing fields during deserialization" in {
+    val json = Json.obj()
+
+    json.validate[PreviousRegistration] mustBe a[JsError]
+  }
+
+  "must handle invalid data during deserialization" in {
+
+    val json = Json.obj(
+      "country" -> Json.obj(
+        "code" -> 12345,
+        "name" ->"Germany"
+      ),
+      "previousSchemesDetails" -> Json.obj(
+        "previousScheme" -> "ossu",
+        "previousSchemeNumbers" -> Json.obj(
+          "previousSchemeNumber" -> "DEDE-reg-1",
+          "previousIntermediaryNumber" -> "INT-123"
+        ),
+      ),
+      "nonCompliantDetails" -> Json.obj(
+        "nonCompliantReturns" -> 1,
+        "nonCompliantPayments" -> 1
+      )
+    )
+
+    json.validate[PreviousRegistration] mustBe a[JsError]
 
   }
 }

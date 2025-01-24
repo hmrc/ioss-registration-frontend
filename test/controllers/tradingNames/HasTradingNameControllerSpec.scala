@@ -186,5 +186,40 @@ class HasTradingNameControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
+
+    "must fail with an exception when both organisationName and individualName are missing in VAT details" in {
+
+      val vatCustomerInfoWithMissingNames = vatCustomerInfo.copy(organisationName = None, individualName = None)
+      val userAnswers = basicUserAnswersWithVatInfo.copy(vatInfo = Some(vatCustomerInfoWithMissingNames))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, hasTradingNameRoute)
+
+        val result = route(application, request).value
+
+        whenReady(result.failed) { exception =>
+          exception mustBe a[IllegalStateException]
+          exception.getMessage mustBe "Both organisationName and individualName are both missing"
+        }
+      }
+    }
+
+    "must redirect to Journey Recovery when vatInfo is None" in {
+
+      val userAnswers = basicUserAnswersWithVatInfo.copy(vatInfo = None)
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, hasTradingNameRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
+      }
+    }
   }
 }

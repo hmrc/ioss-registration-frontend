@@ -19,12 +19,13 @@ package controllers
 import base.SpecBase
 import connectors.RegistrationConnector
 import models.external.ExternalEntryUrl
+import models.responses.{ErrorResponse, InternalServerError}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import utils.FutureSyntax.FutureOps
 import views.html.ErrorSubmittingRegistrationView
 
@@ -58,6 +59,28 @@ class ErrorSubmittingRegistrationControllerSpec extends SpecBase {
     "must return OK and the correct view for a GET when an external URL is not present" in {
 
       when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ErrorSubmittingRegistrationController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[ErrorSubmittingRegistrationView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(None)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when the external URL retrieval fails" in {
+
+      val errorResponse: ErrorResponse = InternalServerError
+
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Left(errorResponse).toFuture
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))

@@ -23,10 +23,10 @@ import models.ContinueRegistration.{Continue, Delete}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.SavedProgressPage
+import pages.{EmptyWaypoints, JourneyRecoveryPage, SavedProgressPage, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.ContinueRegistrationView
 
@@ -161,6 +161,48 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the index page if SavedProgressPage is missing" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, continueRegistrationRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.IndexController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery if the form value is valid but SavedProgressPage is missing" in {
+
+      val userAnswersRepository = mock[AuthenticatedUserAnswersRepository]
+      val saveForLaterConnector = mock[SaveForLaterConnector]
+      val waypoints: Waypoints = EmptyWaypoints
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[AuthenticatedUserAnswersRepository].toInstance(userAnswersRepository),
+            bind[SaveForLaterConnector].toInstance(saveForLaterConnector)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, continueRegistrationRoute)
+            .withFormUrlEncodedBody(("value", Continue.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
+        verifyNoInteractions(saveForLaterConnector)
+        verifyNoInteractions(userAnswersRepository)
       }
     }
   }

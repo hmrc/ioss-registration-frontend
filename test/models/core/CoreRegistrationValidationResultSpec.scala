@@ -19,7 +19,7 @@ package models.core
 import base.SpecBase
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 import java.time.LocalDate
 
@@ -109,6 +109,30 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
         expectedJson.validate[CoreRegistrationValidationResult] mustEqual JsSuccess(coreRegistrationValidationResult)
       }
 
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val expectedJson = Json.obj(
+        "searchId" -> 123456789,
+        "searchIdIntermediary" -> "IN4747493822",
+        "searchIdIssuedBy" -> "FR",
+        "traderFound" -> true,
+        "matches" -> Json.arr(
+          Json.obj(
+            "matchType" -> "006",
+            "traderId" -> "IM0987654321",
+            "intermediary" -> "444444444",
+            "memberState" -> "DE",
+            "exclusionStatusCode" -> 3,
+            "exclusionDecisionDate" -> s"${LocalDate.now()}",
+            "exclusionEffectiveDate" -> s"${LocalDate.now()}",
+            "nonCompliantReturns" -> 1,
+            "nonCompliantPayments" -> 2
+          ))
+      )
+
+      expectedJson.validate[CoreRegistrationValidationResult] mustBe a[JsError]
     }
   }
 

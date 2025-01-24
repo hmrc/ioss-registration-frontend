@@ -17,35 +17,116 @@
 package models.etmp
 
 import base.SpecBase
-import org.scalacheck.Arbitrary.arbitrary
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class TraderIdSpec extends SpecBase {
 
   "TraderId" - {
 
-    "must deserialise/serialise to and from VatNumberTraderId" in {
-
-      val vatNumberTraderId = arbitrary[VatNumberTraderId].sample.value
+    "must serialize and deserialize VatNumberTraderId correctly" in {
+      val vatNumberTraderId = VatNumberTraderId("DE123456789")
 
       val expectedJson = Json.obj(
-        "vatNumber" -> s"${vatNumberTraderId.vatNumber}"
+        "vatNumber" -> "DE123456789"
       )
 
-      Json.toJson(vatNumberTraderId) mustBe expectedJson
+      Json.toJson(vatNumberTraderId: TraderId) mustBe expectedJson
       expectedJson.validate[TraderId] mustBe JsSuccess(vatNumberTraderId)
     }
 
-    "must deserialise/serialise to and from TaxRefTraderID" in {
-
-      val taxRefTraderID = arbitrary[TaxRefTraderID].sample.value
+    "must serialize and deserialize TaxRefTraderID correctly" in {
+      val taxRefTraderID = TaxRefTraderID("123456789")
 
       val expectedJson = Json.obj(
-        "taxReferenceNumber" -> s"${taxRefTraderID.taxReferenceNumber}"
+        "taxReferenceNumber" -> "123456789"
+      )
+
+      Json.toJson(taxRefTraderID: TraderId) mustBe expectedJson
+      expectedJson.validate[TraderId] mustBe JsSuccess(taxRefTraderID)
+    }
+
+    "must handle missing fields during deserialization" in {
+      val expectedJson = Json.obj()
+
+      expectedJson.validate[TraderId] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+      val expectedJson = Json.obj(
+        "taxReferenceNumber" -> 1234567
+      )
+
+      expectedJson.validate[TraderId] mustBe a[JsError]
+    }
+  }
+
+  "VatNumberTraderId" - {
+
+    "must serialize to JSON correctly" in {
+      val vatNumberTraderId = VatNumberTraderId("DE123456789")
+
+      val expectedJson = Json.obj(
+        "vatNumber" -> "DE123456789"
+      )
+
+      Json.toJson(vatNumberTraderId) mustBe expectedJson
+    }
+
+    "must deserialize from JSON correctly" in {
+      val json = Json.obj(
+        "vatNumber" -> "DE123456789"
+      )
+
+      json.validate[VatNumberTraderId] mustBe JsSuccess(VatNumberTraderId("DE123456789"))
+    }
+
+    "must fail deserialization with invalid data" in {
+      val json = Json.obj(
+        "vatNumber" -> 123456789
+      )
+
+      json.validate[VatNumberTraderId] mustBe a[JsError]
+    }
+
+    "must handle missing fields during deserialization" in {
+      val json = Json.obj()
+
+      json.validate[VatNumberTraderId] mustBe a[JsError]
+    }
+  }
+
+  "TaxRefTraderID" - {
+
+    "must serialize to JSON correctly" in {
+      val taxRefTraderID = TaxRefTraderID("123456789")
+
+      val expectedJson = Json.obj(
+        "taxReferenceNumber" -> "123456789"
       )
 
       Json.toJson(taxRefTraderID) mustBe expectedJson
-      expectedJson.validate[TraderId] mustBe JsSuccess(taxRefTraderID)
+    }
+
+    "must deserialize from JSON correctly" in {
+      val json = Json.obj(
+        "taxReferenceNumber" -> "123456789"
+      )
+
+      json.validate[TaxRefTraderID] mustBe JsSuccess(TaxRefTraderID("123456789"))
+    }
+
+    "must fail deserialization with invalid data" in {
+      val json = Json.obj(
+        "taxReferenceNumber" -> 123456789
+      )
+
+      json.validate[TaxRefTraderID] mustBe a[JsError]
+    }
+
+    "must handle missing fields during deserialization" in {
+      val json = Json.obj()
+
+      json.validate[TaxRefTraderID] mustBe a[JsError]
     }
   }
 }

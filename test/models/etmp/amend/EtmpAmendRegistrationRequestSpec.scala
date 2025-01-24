@@ -20,7 +20,7 @@ import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
 import formats.Format.eisDateFormatter
 import models.domain.PreviousSchemeDetails
-import models.etmp._
+import models.etmp.*
 import models.euDetails.{EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
@@ -30,7 +30,7 @@ import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -93,6 +93,26 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
 
       Json.toJson(expectedResult) mustBe json
       json.validate[EtmpAmendRegistrationRequest] mustBe JsSuccess(expectedResult)
+    }
+
+    "must handle missing fields during deserialization" in {
+      val json = Json.obj()
+
+      json.validate[EtmpAmendRegistrationRequest] mustBe a[JsError]
+    }
+
+    "must handle invalid data during deserialization" in {
+
+      val json = Json.obj(
+        "administration" -> administration,
+        "changeLog" -> changeLog,
+        "customerIdentification" -> customerIdentification,
+        "tradingNames" -> 12345,
+        "schemeDetails" -> schemeDetails,
+        "bankDetails" -> bankDetails
+      )
+
+      json.validate[EtmpAmendRegistrationRequest] mustBe a[JsError]
     }
 
     ".buildEtmpAmendRegistrationRequest" - {
