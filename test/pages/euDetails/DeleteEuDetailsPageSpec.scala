@@ -18,7 +18,7 @@ package pages.euDetails
 
 import base.SpecBase
 import controllers.euDetails.routes as euRoutes
-import models.{CheckMode, Country, Index, NormalMode}
+import models.{CheckMode, Country, Index}
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 
 class DeleteEuDetailsPageSpec extends SpecBase {
