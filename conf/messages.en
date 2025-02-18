@@ -212,7 +212,7 @@ eligibleToRegister.p1 = You can log into the Government Gateway service to conti
 
 cannotRegisterNoNiOrNorwayBusiness.title = You cannot register
 cannotRegisterNoNiOrNorwayBusiness.heading = You cannot register
-cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a Northern Irish or Norwegian business.
+cannotRegisterNoNiOrNorwayBusiness.p1 = Only use this service if you are a Northern Ireland or Norwegian business.
 
 checkVatDetails.title = Confirm VAT details for your business
 checkVatDetails.heading = Confirm VAT details for your business
@@ -317,8 +317,8 @@ euCountry.checkYourAnswersLabel = Country of tax registration
 euCountry.error.required = Select an EU country where your business is registered for tax
 euCountry.error.duplicate = You selected this country already. Select a different one
 
-hasFixedEstablishment.title = Does your business have a fixed establishment in {0}
-hasFixedEstablishment.heading = Does your business have a fixed establishment in {0}
+hasFixedEstablishment.title = Does your business have a fixed establishment in {0}?
+hasFixedEstablishment.heading = Does your business have a fixed establishment in {0}?
 hasFixedEstablishment.error.required = Select yes if your business has a fixed establishment in {0}
 hasFixedEstablishment.change.hidden = your business has a fixed establishment in {0}
 hasFixedEstablishment.checkYourAnswersLabel = Has fixed establishment
@@ -326,8 +326,8 @@ hasFixedEstablishment.checkYourAnswersLabel = Has fixed establishment
 cannotRegisterFixedEstablishmentOperationOnly.title = You only need to tell us about countries where you have a fixed establishment
 cannotRegisterFixedEstablishmentOperationOnly.heading = You only need to tell us about countries where you have a fixed establishment
 
-registrationType.title = What sort of registration do you have in {0}
-registrationType.heading = What sort of registration do you have in {0}
+registrationType.title = What sort of registration do you have in {0}?
+registrationType.heading = What sort of registration do you have in {0}?
 registrationType.vatNumber = VAT number
 registrationType.taxId = Tax ID number
 registrationType.checkYourAnswersLabel = Tax registration type
@@ -342,21 +342,21 @@ euVatNumber.error.required = Enter your VAT registration number for {0}
 euVatNumber.error.invalid = Enter a registration number in the correct format
 euVatNumber.change.hidden = VAT registration number
 
-euTaxReference.title = What is your business tax identification number in {0}?
-euTaxReference.heading = What is your business tax identification number in {0}?
+euTaxReference.title = What is your business tax identification number for {0}?
+euTaxReference.heading = What is your business tax identification number for {0}?
 euTaxReference.checkYourAnswersLabel = Tax identification number
-euTaxReference.error.required = Enter your business''s tax identification number in {0}
+euTaxReference.error.required = Enter your business''s tax identification number for {0}
 euTaxReference.error.length = Tax identification number must be 20 characters or less
 euTaxReference.error.format = Tax identification number must only include letters, numbers and spaces
 euTaxReference.change.hidden = your tax identification number
 
-fixedEstablishmentTradingName.title = What is your trading name in {0}?
-fixedEstablishmentTradingName.heading = What is your trading name in {0}?
-fixedEstablishmentTradingName.checkYourAnswersLabel = Trading name
-fixedEstablishmentTradingName.error.required = Enter your trading name in {0}
-fixedEstablishmentTradingName.error.length = Trading name must be 40 characters or less
-fixedEstablishmentTradingName.error.invalid = Trading name must only include letters, numbers, hyphens, spaces and apostrophes
-fixedEstablishmentTradingName.change.hidden = trading name
+fixedEstablishmentTradingName.title = What is your business trading name in {0}?
+fixedEstablishmentTradingName.heading = What is your business trading name in {0}?
+fixedEstablishmentTradingName.checkYourAnswersLabel = Business trading name
+fixedEstablishmentTradingName.error.required = Enter your business trading name in {0}
+fixedEstablishmentTradingName.error.length = Business trading name must be 40 characters or less
+fixedEstablishmentTradingName.error.invalid = Business trading name must only include letters, numbers, hyphens, spaces and apostrophes
+fixedEstablishmentTradingName.change.hidden = business trading name
 
 fixedEstablishmentAddress.title = What is the fixed establishment address in {0}
 fixedEstablishmentAddress.heading = What is the fixed establishment address in {0}
@@ -520,9 +520,9 @@ checkPreviousSchemeAnswers.remove.hidden = Remove {0}
 checkPreviousSchemeAnswers.addAnother = Add another scheme registration from {0}?
 checkPreviousSchemeAnswers.maximumReached = You have added details for every scheme in {0}
 
-deletePreviousRegistration.title = Are you sure you want to remove the deregistration for {0}?
-deletePreviousRegistration.heading = Are you sure you want to remove the deregistration for {0}?
-deletePreviousRegistration.error.required = Select yes if you are sure you want to remove the deregistration
+deletePreviousRegistration.title = Are you sure you want to remove the registration for {0}?
+deletePreviousRegistration.heading = Are you sure you want to remove the registration for {0}?
+deletePreviousRegistration.error.required = Select yes if you are sure you want to remove the registration
 
 deletePreviousScheme.title = Remove this scheme for {0}?
 deletePreviousScheme.heading = Remove this scheme for {0}?
@@ -648,7 +648,7 @@ applicationComplete.registration.p2 = You can also pay any Import One Stop Shop 
 applicationComplete.registration.commencementDate = You can begin your {0} return on {1}. Include any sales from {2} onwards.
 applicationComplete.next = What happens next
 applicationComplete.manageAccount = <a class="govuk-link" href="/business-account">Manage your Import One Stop Shop returns in your account.</a>
-applicationComplete.checkInformation.contact = We'’ll contact you if we need to check any information.
+applicationComplete.checkInformation.contact = We'’ll email you if we need to check any information.
 applicationComplete.checkInformation.info = Read more information about <a class="govuk-link" href="https://www.gov.uk/guidance/completing-an-import-one-stop-shop-vat-return">how to complete an IOSS return.</a>
 applicationComplete.feedback.link.text = What did you think of this service?
 applicationComplete.feedback.30seconds = (takes 30 seconds)
