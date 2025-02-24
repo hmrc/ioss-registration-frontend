@@ -145,8 +145,8 @@ POST        /previous-ioss-number/:countryIndex/:schemeIndex              contro
 GET         /previous-scheme-answers/:index                               controllers.previousRegistrations.CheckPreviousSchemeAnswersController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 POST        /previous-scheme-answers/:index                               controllers.previousRegistrations.CheckPreviousSchemeAnswersController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
-GET         /remove-deregistration/:index                                 controllers.previousRegistrations.DeletePreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
-POST        /remove-deregistration/:index                                 controllers.previousRegistrations.DeletePreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+GET         /remove-registration/:index                                   controllers.previousRegistrations.DeletePreviousRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
+POST        /remove-registration/:index                                   controllers.previousRegistrations.DeletePreviousRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
 GET         /remove-previous-scheme/:countryIndex/:schemeIndex            controllers.previousRegistrations.DeletePreviousSchemeController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
 POST        /remove-previous-scheme/:countryIndex/:schemeIndex            controllers.previousRegistrations.DeletePreviousSchemeController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, countryIndex: Index, schemeIndex: Index)
