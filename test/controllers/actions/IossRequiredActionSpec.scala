@@ -17,12 +17,8 @@
 package controllers.actions
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import models.amend.RegistrationWrapper
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, verifyNoInteractions, when}
-import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.Result
 import play.api.mvc.Results.*
@@ -30,23 +26,16 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import testutils.RegistrationData.etmpDisplayRegistration
 import uk.gov.hmrc.auth.core.Enrolments
-import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
+class IossRequiredActionSpec extends SpecBase with MockitoSugar {
 
-  class Harness(connector: RegistrationConnector) extends IossRequiredActionImpl(connector) {
+  class Harness() extends IossRequiredActionImpl() {
 
     def callRefine[A](request: AuthenticatedDataRequest[A]):
     Future[Either[Result, AuthenticatedMandatoryIossRequest[A]]] = refine(request)
-  }
-
-  private val mockRegistrationConnector = mock[RegistrationConnector]
-
-  override def beforeEach(): Unit = {
-    reset(mockRegistrationConnector)
   }
 
   "Ioss Required Action" - {
@@ -55,7 +44,7 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
 
       "must return Unauthorized" in {
 
-        val action = new Harness(mockRegistrationConnector)
+        val action = new Harness()
         val request = FakeRequest(GET, "/test/url?k=session-id")
         val result = action.callRefine(AuthenticatedDataRequest(
           request,
@@ -68,14 +57,11 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
         )).futureValue
 
         result mustBe Left(Unauthorized)
-        verifyNoInteractions(mockRegistrationConnector)
       }
 
       "must return InternalServerError" in {
-        when(mockRegistrationConnector.getRegistration()(any())) thenReturn
-          Left(models.responses.InternalServerError).toFuture
 
-        val action = new Harness(mockRegistrationConnector)
+        val action = new Harness()
         val request = FakeRequest(GET, "/test/url?k=session-id")
         val result = action.callRefine(AuthenticatedDataRequest(
           request,
@@ -94,9 +80,7 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
 
         val registrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpDisplayRegistration)
 
-        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
-
-        val action = new Harness(mockRegistrationConnector)
+        val action = new Harness()
         val request = AuthenticatedDataRequest(
           FakeRequest(GET, "/test/url?k=session-id"),
           testCredentials,
@@ -104,7 +88,7 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar with BeforeAndAf
           Enrolments(Set.empty),
           Some(iossNumber),
           emptyUserAnswersWithVatInfo,
-          None
+          Some(registrationWrapper)
         )
 
         val result = action.callRefine(request).futureValue

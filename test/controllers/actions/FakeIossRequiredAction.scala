@@ -16,11 +16,9 @@
 
 package controllers.actions
 
-import connectors.RegistrationConnector
 import models.UserAnswers
 import models.amend.RegistrationWrapper
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
-import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
 import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
@@ -33,7 +31,7 @@ case class FakeIossRequiredActionImpl(
                                        registrationWrapper: RegistrationWrapper,
                                        maybeEnrolments: Option[Enrolments]
                                      )
-  extends IossRequiredActionImpl(mock[RegistrationConnector])(ExecutionContext.Implicits.global) {
+  extends IossRequiredActionImpl()(ExecutionContext.Implicits.global) {
 
   private val emptyUserAnswers: UserAnswers = UserAnswers("12345-credId", lastUpdated = LocalDate.now.atStartOfDay(ZoneId.systemDefault()).toInstant)
 
@@ -59,9 +57,7 @@ class FakeIossRequiredAction(dataToReturn: Option[UserAnswers],
                              registrationWrapper: RegistrationWrapper,
                              enrolments: Option[Enrolments] = None
                             )
-  extends IossRequiredAction(
-    mock[RegistrationConnector]
-  )(ExecutionContext.Implicits.global) {
+  extends IossRequiredAction()(ExecutionContext.Implicits.global) {
   override def apply(): IossRequiredActionImpl = new FakeIossRequiredActionImpl(dataToReturn, registrationWrapper, enrolments)
 }
 
