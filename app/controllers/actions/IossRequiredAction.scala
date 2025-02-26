@@ -16,21 +16,16 @@
 
 package controllers.actions
 
-import connectors.RegistrationConnector
 import logging.Logging
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import play.api.mvc.{ActionRefiner, Result}
 import play.api.mvc.Results._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class IossRequiredActionImpl @Inject()(
-                                        registrationConnector: RegistrationConnector
-                                      )(implicit val executionContext: ExecutionContext)
+class IossRequiredActionImpl @Inject()()(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest] with Logging {
   override protected def refine[A](request: AuthenticatedDataRequest[A]):
   Future[Either[Result, AuthenticatedMandatoryIossRequest[A]]] =
@@ -40,9 +35,8 @@ class IossRequiredActionImpl @Inject()(
         Left(Unauthorized).toFuture
 
       case Some(iossNumber) =>
-        implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request.request, request.request.session)
-        registrationConnector.getRegistration().map {
-          case Right(registrationWrapper) =>
+        request.registrationWrapper match {
+          case Some(registrationWrapper) =>
             Right(
               AuthenticatedMandatoryIossRequest(
                 request,
@@ -53,19 +47,17 @@ class IossRequiredActionImpl @Inject()(
                 registrationWrapper,
                 request.userAnswers
               )
-            )
-          case Left(error) =>
-            logger.error(s"Error getting registration when IOSS enrolment was present: ${error.body}")
-            Left(InternalServerError)
+            ).toFuture
+          case _ =>
+            logger.error(s"Error: there was no registration present")
+            Left(InternalServerError).toFuture
         }
     }
 }
 
-class IossRequiredAction @Inject()(
-                                    registrationConnector: RegistrationConnector
-                                  )(implicit executionContext: ExecutionContext) {
+class IossRequiredAction @Inject()()(implicit executionContext: ExecutionContext) {
 
   def apply(): IossRequiredActionImpl = {
-    new IossRequiredActionImpl(registrationConnector)
+    new IossRequiredActionImpl()
   }
 }
