@@ -26,7 +26,7 @@ import models.etmp.*
 import models.etmp.amend.EtmpAmendRegistrationChangeLog
 import models.euDetails.{EuDetails, RegistrationType}
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
-import models.ossRegistration.{OssAdminUse, OssContactDetails, OssRegistration, OssVatDetailSource, OssVatDetails}
+import models.ossRegistration.{OssAdminUse, OssContactDetails, OssEuTaxIdentifier, OssEuTaxIdentifierType, OssRegistration, OssTradeDetails, OssVatDetailSource, OssVatDetails, SalesChannels}
 import models.previousRegistrations.NonCompliantDetails
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN, option}
@@ -443,7 +443,7 @@ trait ModelGenerators extends EitherValues {
     }
   }
   
-  implicit val arbitraryRegistration: Arbitrary[OssRegistration] = {
+  implicit val arbitraryOssRegistration: Arbitrary[OssRegistration] = {
     Arbitrary {
       for {
         vrn <- arbitraryVrn.arbitrary
@@ -495,5 +495,31 @@ trait ModelGenerators extends EitherValues {
         arbitrary[InternationalAddress],
         arbitrary[DesAddress]
       )
+    }
+
+  implicit lazy val arbitrarySalesChannels: Arbitrary[SalesChannels] =
+    Arbitrary {
+      Gen.oneOf(SalesChannels.values)
+    }
+
+  implicit lazy val arbitraryFixedEstablishment: Arbitrary[OssTradeDetails] =
+    Arbitrary {
+      for {
+        tradingName <- arbitrary[String]
+        address <- arbitrary[InternationalAddress]
+      } yield OssTradeDetails(tradingName, address)
+    }
+
+  implicit val arbitraryEuTaxIdentifierType: Arbitrary[OssEuTaxIdentifierType] =
+    Arbitrary {
+      Gen.oneOf(OssEuTaxIdentifierType.values)
+    }
+
+  implicit val arbitraryEuTaxIdentifier: Arbitrary[OssEuTaxIdentifier] =
+    Arbitrary {
+      for {
+        identifierType <- arbitrary[OssEuTaxIdentifierType]
+        value <- arbitrary[Int].map(_.toString)
+      } yield OssEuTaxIdentifier(identifierType, value)
     }
 }

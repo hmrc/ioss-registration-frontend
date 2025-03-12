@@ -433,4 +433,25 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
       }
     }
   }
+
+  ".getOssRegistration" - {
+
+    val ossUrl = s"/one-stop-shop-registration/registration/$vrn"
+
+    "must return a oss registration when the server provides one" in {
+
+      running(application) {
+        val connector = application.injector.instanceOf[RegistrationConnector]
+        val ossRegistration = arbitrary[OssRegistration].sample.value
+
+        val responseBody = Json.toJson(ossRegistration).toString
+
+        server.stubFor(get(urlEqualTo(ossUrl)).willReturn(ok().withBody(responseBody)))
+
+        val result = connector.getOssRegistration(vrn).futureValue
+
+        result mustBe Right(ossRegistration)
+      }
+    }
+  }
 }
