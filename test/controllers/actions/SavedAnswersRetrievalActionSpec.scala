@@ -65,7 +65,10 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
             vrn = vrn,
             enrolments = Enrolments(Set.empty),
             iossNumber = None,
-            userAnswers = Some(answers))
+            userAnswers = Some(answers),
+            1,
+            None
+          )
         ).futureValue
 
         verifyNoInteractions(connector)
@@ -94,7 +97,9 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
             vrn = vrn,
             enrolments = Enrolments(Set.empty),
             iossNumber = None,
-            userAnswers = Some(UserAnswers(userAnswersId))
+            userAnswers = Some(UserAnswers(userAnswersId)),
+            1,
+            None
           )
         ).futureValue
 
@@ -118,7 +123,10 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
             vrn = vrn,
             enrolments = Enrolments(Set.empty),
             iossNumber = None,
-            userAnswers = Some(emptyAnswers))
+            userAnswers = Some(emptyAnswers),
+            1,
+            None
+          )
         ).futureValue
 
         verify(connector, times(1)).get()(any())

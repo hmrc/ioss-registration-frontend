@@ -20,7 +20,8 @@ import logging.Logging
 import models.amend.RegistrationWrapper
 import models.etmp.amend.AmendRegistrationResponse
 import models.ossExclusions.OssExcludedTrader
-import models.responses._
+import models.ossRegistration.OssRegistration
+import models.responses.*
 import models.responses.etmp.EtmpEnrolmentResponse
 import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsError, JsSuccess}
@@ -33,6 +34,7 @@ object RegistrationHttpParser extends Logging {
   type DisplayRegistrationResponse = Either[ErrorResponse, RegistrationWrapper]
   type AmendRegistrationResultResponse = Either[ErrorResponse, AmendRegistrationResponse]
   type OssDisplayRegistrationResponse = Either[ErrorResponse, OssExcludedTrader]
+  type OssRegistrationResponse = Either[ErrorResponse, OssRegistration]
 
   implicit object RegistrationResponseReads extends HttpReads[RegistrationResultResponse] {
 
@@ -104,6 +106,24 @@ object RegistrationHttpParser extends Logging {
 
         case status =>
           logger.error(s"Unknown error happened on OSS Excluded Trader $status with body ${response.body}")
+          Left(InternalServerError)
+      }
+  }
+  
+  implicit object OssRegistrationResponseReads extends HttpReads[OssRegistrationResponse] {
+
+    override def read(method: String, url: String, response: HttpResponse): OssRegistrationResponse =
+      response.status match {
+        case OK => response.json.validate[OssRegistration] match {
+          case JsSuccess(ossRegistration, _) => Right(ossRegistration)
+          case JsError(errors) =>
+            logger.error(s"Failed trying to parse display registration response JSON with body ${response.body}" +
+              s"and status ${response.status} with errors: $errors")
+            Left(InvalidJson)
+        }
+
+        case status =>
+          logger.error(s"Unknown error happened on display registration $status with body ${response.body}")
           Left(InternalServerError)
       }
   }

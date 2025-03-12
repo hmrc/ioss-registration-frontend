@@ -17,15 +17,16 @@
 package generators
 
 import connectors.SavedUserAnswers
-import models._
+import models.*
 import models.amend.PreviousRegistration
 import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.PreviousSchemeNumbers
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
-import models.etmp._
+import models.etmp.*
 import models.etmp.amend.EtmpAmendRegistrationChangeLog
 import models.euDetails.{EuDetails, RegistrationType}
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
+import models.ossRegistration.{OssAdminUse, OssContactDetails, OssRegistration, OssVatDetailSource, OssVatDetails}
 import models.previousRegistrations.NonCompliantDetails
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN, option}
@@ -441,4 +442,58 @@ trait ModelGenerators extends EitherValues {
       )
     }
   }
+  
+  implicit val arbitraryRegistration: Arbitrary[OssRegistration] = {
+    Arbitrary {
+      for {
+        vrn <- arbitraryVrn.arbitrary
+        name <- arbitrary[String]
+        vatDetails <- arbitrary[OssVatDetails]
+        contactDetails <- arbitrary[OssContactDetails]
+        bankDetails <- arbitrary[BankDetails]
+        commencementDate <- datesBetween(LocalDate.of(2021, 7, 1), LocalDate.now)
+        isOnlineMarketplace <- arbitrary[Boolean]
+        adminUse <- arbitrary[OssAdminUse]
+      } yield OssRegistration(vrn, name, Nil, vatDetails, Nil, contactDetails, Nil, commencementDate, Nil, bankDetails, isOnlineMarketplace, None, None, None, None, None, None, None, None, adminUse)
+    }
+  }
+
+  implicit lazy val arbitraryOssVatDetails: Arbitrary[OssVatDetails] =
+    Arbitrary {
+      for {
+        registrationDate <- arbitrary[Int].map(n => LocalDate.ofEpochDay(n))
+        address <- arbitrary[Address]
+        partOfVatGroup <- arbitrary[Boolean]
+        source <- arbitrary[OssVatDetailSource]
+      } yield OssVatDetails(registrationDate, address, partOfVatGroup, source)
+    }
+
+  implicit val arbitraryOssVatDetailSource: Arbitrary[OssVatDetailSource] =
+    Arbitrary(
+      Gen.oneOf(OssVatDetailSource.values)
+    )
+
+  implicit lazy val arbitraryOssBusinessContactDetails: Arbitrary[OssContactDetails] =
+    Arbitrary {
+      for {
+        fullName <- arbitrary[String]
+        telephoneNumber <- arbitrary[String]
+        emailAddress <- arbitrary[String]
+      } yield OssContactDetails(fullName, telephoneNumber, emailAddress)
+    }
+
+  implicit lazy val arbitraryAdminUse: Arbitrary[OssAdminUse] =
+    Arbitrary {
+      for {
+        changeDate <- arbitrary[LocalDateTime]
+      } yield OssAdminUse(Some(changeDate))
+    }
+
+  implicit val arbitraryAddress: Arbitrary[Address] =
+    Arbitrary {
+      Gen.oneOf(
+        arbitrary[InternationalAddress],
+        arbitrary[DesAddress]
+      )
+    }
 }

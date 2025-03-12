@@ -40,7 +40,7 @@ case class OssExclusionsService @Inject()(
   }
 
   def getOssExclusion(vrn: String)(implicit hc: HeaderCarrier): Future[OssExcludedTrader] = {
-    registrationConnector.getOssRegistration(Vrn(vrn)).map {
+    registrationConnector.getOssRegistrationExclusion(Vrn(vrn)).map {
       case Right(ossExcludedTrader) => ossExcludedTrader
       case Left(error) =>
         val exception = new Exception(s"An error occurred whilst retrieving the OSS Excluded Trader with error: $error")

@@ -57,7 +57,9 @@ class CheckBouncedEmailFilterSpec extends SpecBase with MockitoSugar {
     Enrolments(Set.empty),
     Some(iossNumber),
     completeUserAnswers,
-    Some(registrationWrapper)
+    Some(registrationWrapper),
+    1,
+    None
   )
 
   ".filter" - {

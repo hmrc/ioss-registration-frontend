@@ -17,18 +17,19 @@
 package connectors
 
 import base.SpecBase
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.enrolments.EACDEnrolments
 import models.external.ExternalEntryUrl
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
-import models.responses._
+import models.ossRegistration.OssRegistration
+import models.responses.*
 import models.responses.etmp.EtmpEnrolmentResponse
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import play.api.Application
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
 import testutils.RegistrationData.{amendRegistrationResponse, etmpAmendRegistrationRequest, etmpDisplayRegistration, etmpRegistrationRequest}
@@ -359,7 +360,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
   }
 
-  ".getOssRegistration" - {
+  ".getOssRegistrationExclusion" - {
 
     val ossUrl = s"/one-stop-shop-registration/registration/$vrn"
 
@@ -392,7 +393,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
           .willReturn(ok().withBody(responseJson))
         )
 
-        val result = connector.getOssRegistration(vrn).futureValue
+        val result = connector.getOssRegistrationExclusion(vrn).futureValue
 
         result mustBe Right(ossExcludedTrader)
       }
@@ -410,7 +411,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
           .willReturn(ok().withBody(responseJson))
         )
 
-        val result = connector.getOssRegistration(vrn).futureValue
+        val result = connector.getOssRegistrationExclusion(vrn).futureValue
 
         result mustBe Left(InvalidJson)
       }
@@ -426,7 +427,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
           .willReturn(aResponse.withStatus(INTERNAL_SERVER_ERROR))
         )
 
-        val result = connector.getOssRegistration(vrn).futureValue
+        val result = connector.getOssRegistrationExclusion(vrn).futureValue
 
         result mustBe Left(InternalServerError)
       }

@@ -57,7 +57,7 @@ class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with Be
           quarantined = Some(true)
         )
 
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(ossExcludedTrader).toFuture
+        when(mockRegistrationConnector.getOssRegistrationExclusion(any())(any())) thenReturn Right(ossExcludedTrader).toFuture
 
         val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
 
@@ -71,7 +71,7 @@ class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with Be
         val updatedOssExcludedTrader: OssExcludedTrader = arbOssExcludedTrader
           .copy(exclusionReason = Some(Gen.oneOf(ExclusionReason.values).retryUntil(_ != ExclusionReason.FailsToComply).sample.value))
 
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
+        when(mockRegistrationConnector.getOssRegistrationExclusion(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
 
         val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
 
@@ -84,7 +84,7 @@ class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with Be
 
         val updatedOssExcludedTrader: OssExcludedTrader = arbOssExcludedTrader.copy(quarantined = Some(false))
 
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
+        when(mockRegistrationConnector.getOssRegistrationExclusion(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
 
         val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
 
@@ -102,7 +102,7 @@ class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with Be
             effectiveDate = Some(currentDate.minusYears(2).minusDays(1))
           )
 
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
+        when(mockRegistrationConnector.getOssRegistrationExclusion(any())(any())) thenReturn Right(updatedOssExcludedTrader).toFuture
 
         val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
 
@@ -122,7 +122,7 @@ class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with Be
           quarantined = Some(true)
         )
 
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(ossExcludedTrader).toFuture
+        when(mockRegistrationConnector.getOssRegistrationExclusion(any())(any())) thenReturn Right(ossExcludedTrader).toFuture
 
         val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
 
@@ -135,7 +135,7 @@ class OssExclusionsServiceSpec extends SpecBase with PrivateMethodTester with Be
 
         val message: String = "An error occurred whilst retrieving the OSS Excluded Trader with error: InternalServerError"
 
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Left(InternalServerError).toFuture
+        when(mockRegistrationConnector.getOssRegistrationExclusion(any())(any())) thenReturn Left(InternalServerError).toFuture
 
         val service = OssExclusionsService(stubClockAtArbitraryDate, mockRegistrationConnector)
 

@@ -53,6 +53,8 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar {
           Enrolments(Set.empty),
           None,
           emptyUserAnswersWithVatInfo,
+          None,
+          1,
           None
         )).futureValue
 
@@ -70,6 +72,8 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar {
           Enrolments(Set.empty),
           Some(iossNumber),
           emptyUserAnswersWithVatInfo,
+          None,
+          1,
           None
         )).futureValue
 
@@ -88,7 +92,9 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar {
           Enrolments(Set.empty),
           Some(iossNumber),
           emptyUserAnswersWithVatInfo,
-          Some(registrationWrapper)
+          Some(registrationWrapper),
+          1,
+          None
         )
 
         val result = action.callRefine(request).futureValue

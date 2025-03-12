@@ -18,6 +18,7 @@ package models.requests
 
 import models.amend.RegistrationWrapper
 import models.etmp.{EtmpPreviousEuRegistrationDetails, SchemeType}
+import models.ossRegistration.OssRegistration
 import models.{Country, UserAnswers}
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
@@ -30,7 +31,9 @@ case class AuthenticatedOptionalDataRequest[A](
                                                 vrn: Vrn,
                                                 enrolments: Enrolments,
                                                 iossNumber: Option[String],
-                                                userAnswers: Option[UserAnswers]
+                                                userAnswers: Option[UserAnswers],
+                                                numberOfIossRegistrations: Int,
+                                                latestOssRegistration: Option[OssRegistration]
                                               ) extends WrappedRequest[A](request) {
 
   val userId: String = credentials.providerId
@@ -44,6 +47,8 @@ case class AuthenticatedDataRequest[A](
                                         iossNumber: Option[String],
                                         userAnswers: UserAnswers,
                                         registrationWrapper: Option[RegistrationWrapper],
+                                        numberOfIossRegistrations: Int,
+                                        latestOssRegistration: Option[OssRegistration]
                                       ) extends WrappedRequest[A](request) {
 
   val userId: String = credentials.providerId

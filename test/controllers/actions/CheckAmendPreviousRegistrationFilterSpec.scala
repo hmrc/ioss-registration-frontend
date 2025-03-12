@@ -45,7 +45,7 @@ class CheckAmendPreviousRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, 1, None)
         val controller = new Harness(registrationModificationMode = AmendingPreviousRegistration, restrictFromPreviousRegistrations = false, config)
 
         val result = controller.callFilter(request).futureValue
@@ -61,7 +61,7 @@ class CheckAmendPreviousRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, 1, None)
         val controller = new Harness(registrationModificationMode = AmendingPreviousRegistration, restrictFromPreviousRegistrations = true, config)
 
         Some(RedirectUrl(config.iossYourAccountUrl))
