@@ -18,18 +18,15 @@ package services.oss
 
 import base.SpecBase
 import connectors.RegistrationConnector
-import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
 import models.ossRegistration.OssRegistration
-import models.responses.{InternalServerError, RegistrationNotFound}
+import models.responses.RegistrationNotFound
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
-import org.scalacheck.Gen
 import org.scalatest.{BeforeAndAfterEach, PrivateMethodTester}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FutureSyntax.FutureOps
 
-import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class OssRegistrationServiceSpec extends SpecBase with PrivateMethodTester with BeforeAndAfterEach {
