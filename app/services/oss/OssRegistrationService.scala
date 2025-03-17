@@ -32,11 +32,7 @@ case class OssRegistrationService @Inject()(
   def getLatestOssRegistration(vrn: Vrn)(implicit hc: HeaderCarrier): Future[Option[OssRegistration]] = {
     registrationConnector.getOssRegistration(vrn).map {
       case Right(ossRegistration) => Some(ossRegistration)
-      case Left(error) =>
-        val exception = new Exception(s"An error occurred whilst retrieving the OSS Registration with error: $error")
-        logger.error(s"Unable to retrieve OSS Registration with error: ${exception.getMessage}", exception)
-        throw exception
+      case Left(_) => None
     }
   }
-  
 }

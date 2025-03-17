@@ -56,20 +56,15 @@ class OssRegistrationServiceSpec extends SpecBase with PrivateMethodTester with 
         result mustBe Some(arbOssRegistration)
       }
 
-      "must log an error and throw an exception when the connector returns a Left" in {
+      "must return None when the connector returns a Left" in {
 
         when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Left(RegistrationNotFound).toFuture
 
-        val exceptionMessage: String = s"An error occurred whilst retrieving the OSS Registration with error: $RegistrationNotFound"
-
         val service = OssRegistrationService(mockRegistrationConnector)
 
-        val result = service.getLatestOssRegistration(vrn)
+        val result = service.getLatestOssRegistration(vrn).futureValue
 
-        whenReady(result.failed) { exp =>
-          exp mustBe a[Exception]
-          exp.getMessage mustBe exceptionMessage
-        }
+        result mustBe None
       }
     }
   }
