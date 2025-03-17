@@ -32,14 +32,17 @@ case class OssExclusionsService @Inject()(
                                          )(implicit ec: ExecutionContext) extends Logging {
 
   def determineOssExclusionStatus(vrn: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    getOssExclusion(vrn).map { ossExclusion =>
-      !isAfterTwoYears(ossExclusion) &&
-        ossExclusion.quarantined.getOrElse(false) &&
-        ossExclusion.exclusionReason.contains(ExclusionReason.FailsToComply)
+    getOssExclusion(vrn).map {
+      case Some(ossExclusion) =>
+        !isAfterTwoYears(ossExclusion) &&
+          ossExclusion.quarantined.getOrElse(false) &&
+          ossExclusion.exclusionReason.contains(ExclusionReason.FailsToComply)
+      case _ =>
+        false
     }
   }
 
-  def getOssExclusion(vrn: String)(implicit hc: HeaderCarrier): Future[OssExcludedTrader] = {
+  def getOssExclusion(vrn: String)(implicit hc: HeaderCarrier): Future[Option[OssExcludedTrader]] = {
     registrationConnector.getOssRegistrationExclusion(Vrn(vrn)).map {
       case Right(ossExcludedTrader) => ossExcludedTrader
       case Left(error) =>

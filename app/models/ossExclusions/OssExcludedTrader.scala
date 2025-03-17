@@ -42,9 +42,20 @@ object OssExcludedTrader {
       )((vrn, exclusionReason, effectiveDate, quarantined) => OssExcludedTrader(vrn, exclusionReason, effectiveDate, quarantined))
   }
 
-  implicit val writes: OWrites[OssExcludedTrader] = Json.writes[OssExcludedTrader]
-
-  implicit val format: OFormat[OssExcludedTrader] = OFormat(reads, writes)
+  implicit val readsOpt: Reads[Option[OssExcludedTrader]] = {
+    (
+      (__ \ "vrn").read[Vrn] and
+        (__ \ "excludedTrader").readNullable[JsObject] and
+        (__ \ "excludedTrader" \ "exclusionReason").readNullable[ExclusionReason] and
+        (__ \ "excludedTrader" \ "effectiveDate").readNullable[String].map(_.map(d => LocalDate.parse(d, eisDateFormatter))) and
+        (__ \ "excludedTrader" \ "quarantined").readNullable[Boolean]
+      )(
+        (vrn, excludedTrader, exclusionReason, effectiveDate, quarantined) =>
+          excludedTrader.map { _ =>
+            OssExcludedTrader(vrn, exclusionReason, effectiveDate, quarantined)
+          }
+      )
+  }
 }
 
 

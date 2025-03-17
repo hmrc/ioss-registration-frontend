@@ -33,7 +33,7 @@ object RegistrationHttpParser extends Logging {
   type RegistrationResultResponse = Either[ErrorResponse, EtmpEnrolmentResponse]
   type DisplayRegistrationResponse = Either[ErrorResponse, RegistrationWrapper]
   type AmendRegistrationResultResponse = Either[ErrorResponse, AmendRegistrationResponse]
-  type OssDisplayRegistrationResponse = Either[ErrorResponse, OssExcludedTrader]
+  type OssDisplayRegistrationResponse = Either[ErrorResponse, Option[OssExcludedTrader]]
   type OssRegistrationResponse = Either[ErrorResponse, OssRegistration]
 
   implicit object RegistrationResponseReads extends HttpReads[RegistrationResultResponse] {
@@ -96,7 +96,7 @@ object RegistrationHttpParser extends Logging {
 
     override def read(method: String, url: String, response: HttpResponse): OssDisplayRegistrationResponse =
       response.status match {
-        case OK => response.json.validate[OssExcludedTrader] match {
+        case OK => response.json.validate[Option[OssExcludedTrader]] match {
           case JsSuccess(ossExcludedTrader, _) => Right(ossExcludedTrader)
           case JsError(errors) =>
             logger.error(s"Failed trying to parse OSS display registration response JSON with body ${response.body}" +

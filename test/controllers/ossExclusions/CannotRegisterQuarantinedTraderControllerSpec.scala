@@ -48,7 +48,7 @@ class CannotRegisterQuarantinedTraderControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
 
-      when(mockOssExclusionsService.getOssExclusion(any())(any())) thenReturn arbOssExcludedTrader.toFuture
+      when(mockOssExclusionsService.getOssExclusion(any())(any())) thenReturn Some(arbOssExcludedTrader).toFuture
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
         .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))
@@ -77,7 +77,7 @@ class CannotRegisterQuarantinedTraderControllerSpec extends SpecBase {
         effectiveDate = None
       )
 
-      when(mockOssExclusionsService.getOssExclusion(any())(any())) thenReturn arbOssExcludedTraderWithoutOptionalDate.toFuture
+      when(mockOssExclusionsService.getOssExclusion(any())(any())) thenReturn Some(arbOssExcludedTraderWithoutOptionalDate).toFuture
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
         .overrides(bind[OssExclusionsService].toInstance(mockOssExclusionsService))

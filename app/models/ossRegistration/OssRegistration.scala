@@ -18,7 +18,7 @@ package models.ossRegistration
 
 import models.BankDetails
 import models.ossExclusions.OssExcludedTrader
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.domain.Vrn
 
 import java.time.{Instant, LocalDate}
@@ -48,5 +48,5 @@ case class OssRegistration(
 
 object OssRegistration {
 
-  implicit val format: OFormat[OssRegistration] = Json.format[OssRegistration]
+  implicit val format: Reads[OssRegistration] = Json.reads[OssRegistration]
 }
