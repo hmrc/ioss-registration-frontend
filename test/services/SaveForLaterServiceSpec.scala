@@ -43,8 +43,8 @@ class SaveForLaterServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   implicit private lazy val hc: HeaderCarrier = HeaderCarrier()
 
-  val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
-  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None)
+  val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None, 1, None)
+  implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None, 1, None)
 
   private val waypoints: Waypoints = EmptyWaypoints
 

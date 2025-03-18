@@ -40,14 +40,20 @@ class CannotRegisterQuarantinedTraderController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (cc.actionBuilder andThen cc.identify).async {
     implicit request =>
-      ossExclusionsService.getOssExclusion(request.vrn.vrn).map { ossExcludedTrader =>
-        val excludeEndDate: String = ossExcludedTrader.effectiveDate.getOrElse {
+      ossExclusionsService.getOssExclusion(request.vrn.vrn).map {
+        case Some(ossExcludedTrader) =>
+          val excludeEndDate: String = ossExcludedTrader.effectiveDate.getOrElse {
+            val exception = new IllegalStateException("Expected effective date")
+            logger.error(s"Service was unable to retrieve effective date: ${exception.getMessage}", exception)
+            throw exception
+          }.plusYears(2).plusDays(1).format(quarantinedOSSRegistrationFormatter)
+
+          Ok(view(excludeEndDate))
+        
+        case _ =>
           val exception = new IllegalStateException("Expected effective date")
           logger.error(s"Service was unable to retrieve effective date: ${exception.getMessage}", exception)
           throw exception
-        }.plusYears(2).plusDays(1).format(quarantinedOSSRegistrationFormatter)
-
-        Ok(view(excludeEndDate))
       }
   }
 }

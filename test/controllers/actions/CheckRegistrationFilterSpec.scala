@@ -62,7 +62,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, 1, None)
         val controller = new Harness(mode = NotModifyingExistingRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
@@ -80,7 +80,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None, 1, None)
         val controller = new Harness(mode = AmendingActiveRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
@@ -98,7 +98,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(enrolment)), None, 1, None)
         val controller = new Harness(mode = NotModifyingExistingRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
@@ -116,7 +116,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, 1, None)
         val controller = new Harness(mode = AmendingActiveRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
@@ -134,7 +134,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, 1, None)
         val controller = new Harness(mode = RejoiningRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
@@ -152,7 +152,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, 1, None)
         val controller = new Harness(mode = AmendingPreviousRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
@@ -173,7 +173,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None, 1, None)
         val controller = new Harness(mode = NotModifyingExistingRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
@@ -194,7 +194,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None, 1, None)
         val controller = new Harness(mode = RejoiningRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue
@@ -215,7 +215,7 @@ class CheckRegistrationFilterSpec extends SpecBase {
       running(app) {
 
         val config = app.injector.instanceOf[FrontendAppConfig]
-        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None)
+        val request = AuthenticatedIdentifierRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set(ossEnrolment)), None, 1, None)
         val controller = new Harness(mode = AmendingActiveRegistration, config, mockOssExclusionsService)
 
         val result = controller.callFilter(request).futureValue

@@ -17,19 +17,20 @@
 package connectors
 
 import base.SpecBase
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.enrolments.EACDEnrolments
 import models.external.ExternalEntryUrl
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
-import models.responses._
+import models.ossRegistration.OssRegistration
+import models.responses.*
 import models.responses.etmp.EtmpEnrolmentResponse
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import play.api.Application
-import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.http.Status.*
+import play.api.libs.json.{Json, OWrites}
 import play.api.test.Helpers.running
 import testutils.RegistrationData.{amendRegistrationResponse, etmpAmendRegistrationRequest, etmpDisplayRegistration, etmpRegistrationRequest}
 import testutils.WireMockHelper
@@ -359,7 +360,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
 
   }
 
-  ".getOssRegistration" - {
+  ".getOssRegistrationExclusion" - {
 
     val ossUrl = s"/one-stop-shop-registration/registration/$vrn"
 
@@ -392,9 +393,9 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
           .willReturn(ok().withBody(responseJson))
         )
 
-        val result = connector.getOssRegistration(vrn).futureValue
+        val result = connector.getOssRegistrationExclusion(vrn).futureValue
 
-        result mustBe Right(ossExcludedTrader)
+        result mustBe Right(Some(ossExcludedTrader))
       }
     }
 
@@ -410,7 +411,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
           .willReturn(ok().withBody(responseJson))
         )
 
-        val result = connector.getOssRegistration(vrn).futureValue
+        val result = connector.getOssRegistrationExclusion(vrn).futureValue
 
         result mustBe Left(InvalidJson)
       }
@@ -426,9 +427,32 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
           .willReturn(aResponse.withStatus(INTERNAL_SERVER_ERROR))
         )
 
-        val result = connector.getOssRegistration(vrn).futureValue
+        val result = connector.getOssRegistrationExclusion(vrn).futureValue
 
         result mustBe Left(InternalServerError)
+      }
+    }
+  }
+
+  ".getOssRegistration" - {
+
+    implicit val ossExcludedTraderWrites: OWrites[OssExcludedTrader] = Json.writes[OssExcludedTrader]
+    implicit val ossRegistrationWrites: OWrites[OssRegistration] = Json.writes[OssRegistration]
+    val ossUrl = s"/one-stop-shop-registration/registration/$vrn"
+
+    "must return a oss registration when the server provides one" in {
+
+      running(application) {
+        val connector = application.injector.instanceOf[RegistrationConnector]
+        val ossRegistration = arbitrary[OssRegistration].sample.value
+
+        val responseBody = Json.toJson(ossRegistration).toString
+
+        server.stubFor(get(urlEqualTo(ossUrl)).willReturn(ok().withBody(responseBody)))
+
+        val result = connector.getOssRegistration(vrn).futureValue
+
+        result mustBe Right(ossRegistration)
       }
     }
   }

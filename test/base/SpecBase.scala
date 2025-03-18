@@ -16,16 +16,18 @@
 
 package base
 
-import controllers.actions._
+import controllers.actions.*
 import generators.Generators
 import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
+import models.ossRegistration.*
 import models.{BankDetails, Bic, BusinessContactDetails, CheckMode, Iban, Index, UserAnswers, Website}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{OptionValues, TryValues}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.RegisteredForIossInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
@@ -152,5 +154,29 @@ trait SpecBase
 
   protected def createCheckModeWayPoint(checkAnswersPage: CheckAnswersPage): NonEmptyWaypoints =
     EmptyWaypoints.setNextWaypoint(Waypoint(checkAnswersPage, CheckMode, checkAnswersPage.urlFragment))
+
+
+  val ossRegistration: Option[OssRegistration] = Some(OssRegistration(
+    vrn = vrn,
+    registeredCompanyName = "Test Company",
+    tradingNames = Seq("Trade1", "Trade2"),
+    vatDetails = mock[OssVatDetails],
+    euRegistrations = Seq(mock[OssEuTaxRegistration]),
+    contactDetails = mock[OssContactDetails],
+    websites = Seq("https://example.com"),
+    commencementDate = LocalDate.now(),
+    previousRegistrations = Seq(mock[OssPreviousRegistration]),
+    bankDetails = mock[BankDetails],
+    isOnlineMarketplace = false,
+    niPresence = None,
+    dateOfFirstSale = Some(LocalDate.now()),
+    submissionReceived = Some(Instant.now()),
+    lastUpdated = Some(Instant.now()),
+    excludedTrader = None,
+    transferringMsidEffectiveFromDate = None,
+    nonCompliantReturns = None,
+    nonCompliantPayments = None,
+    adminUse = mock[OssAdminUse]
+  ))
 
 }

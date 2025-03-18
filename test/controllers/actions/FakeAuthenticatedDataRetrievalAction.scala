@@ -39,7 +39,9 @@ extends AuthenticatedDataRetrievalAction(mockSessionRepository, mockMigrationSer
         vrn,
         request.enrolments,
         request.iossNumber,
-        dataToReturn
+        dataToReturn,
+        request.numberOfIossRegistrations,
+        request.latestOssRegistration
       )
     ).toFuture
 }

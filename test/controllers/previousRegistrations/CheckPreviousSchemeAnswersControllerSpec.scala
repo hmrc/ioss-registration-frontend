@@ -73,7 +73,7 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
       running(application) {
         implicit val msgs: Messages = messages(application)
         val request = FakeRequest(GET, checkPreviousSchemeAnswersRoute)
-        val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), Some(iossNumber), baseUserAnswers, None)
+        val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), Some(iossNumber), baseUserAnswers, None, 1, None)
 
         val result = route(application, request).value
 
@@ -137,7 +137,7 @@ class CheckPreviousSchemeAnswersControllerSpec extends SpecBase with SummaryList
             FakeRequest(POST, checkPreviousSchemeAnswersRoute)
               .withFormUrlEncodedBody(("value", ""))
 
-          val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), Some(iossNumber), baseUserAnswers, None)
+          val authDataRequest = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), Some(iossNumber), baseUserAnswers, None, 1, None)
 
           val boundForm = form.bind(Map("value" -> ""))
 

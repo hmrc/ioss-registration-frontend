@@ -3,7 +3,7 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVersion = "9.9.0"
+  private val bootstrapVersion = "9.11.0"
   private val hmrcMongoVersion = "2.5.0"
 
   val compile = Seq(
@@ -13,7 +13,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "bootstrap-frontend-play-30"             % bootstrapVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"                     % hmrcMongoVersion,
     "uk.gov.hmrc"       %% "domain-play-30"                         % "10.0.0",
-    "org.typelevel"     %% "cats-core"                              % "2.12.0"
+    "org.typelevel"     %% "cats-core"                              % "2.13.0"
   )
 
   val test = Seq(
@@ -22,7 +22,7 @@ object AppDependencies {
     "org.scalatestplus"       %% "scalacheck-1-15"         % "3.2.11.0",
     "org.scalacheck"          %% "scalacheck"              % "1.18.1",
     "org.pegdown"             %  "pegdown"                 % "1.6.0",
-    "org.jsoup"               %  "jsoup"                   % "1.18.3",
+    "org.jsoup"               %  "jsoup"                   % "1.19.1",
   ).map(_ % "test, it")
 
   def apply(): Seq[ModuleID] = compile ++ test

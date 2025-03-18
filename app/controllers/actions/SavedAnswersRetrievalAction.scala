@@ -57,7 +57,16 @@ class SavedAnswersRetrievalAction(repository: AuthenticatedUserAnswersRepository
       }
 
     userAnswers.map { (maybeUserAnswers: Option[UserAnswers]) =>
-      AuthenticatedOptionalDataRequest(request.request, request.credentials, request.vrn, request.enrolments, request.iossNumber, maybeUserAnswers)
+      AuthenticatedOptionalDataRequest(
+        request.request,
+        request.credentials,
+        request.vrn,
+        request.enrolments,
+        request.iossNumber,
+        maybeUserAnswers,
+        request.numberOfIossRegistrations,
+        request.latestOssRegistration
+      )
     }
   }
 }

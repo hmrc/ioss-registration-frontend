@@ -64,7 +64,9 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
             enrolments = request.enrolments,
             iossNumber = request.iossNumber,
             userAnswers = data,
-            registrationWrapper = maybeRegistrationWrapper))
+            registrationWrapper = maybeRegistrationWrapper,
+            numberOfIossRegistrations = request.numberOfIossRegistrations,
+            latestOssRegistration =  request.latestOssRegistration))
         )
     }
   }

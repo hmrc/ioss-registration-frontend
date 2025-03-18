@@ -18,16 +18,17 @@ package controllers.actions
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import controllers.auth.{routes => authRoutes}
+import controllers.auth.routes as authRoutes
 import controllers.routes
 import logging.Logging
 import models.requests.{AuthenticatedIdentifierRequest, SessionRequest}
-import play.api.mvc.Results._
-import play.api.mvc._
+import play.api.mvc.Results.*
+import play.api.mvc.*
+import services.oss.OssRegistrationService
 import services.{AccountService, UrlBuilderService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.retrieve.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
@@ -42,7 +43,8 @@ class AuthenticatedIdentifierAction @Inject()(
                                                override val authConnector: AuthConnector,
                                                config: FrontendAppConfig,
                                                urlBuilderService: UrlBuilderService,
-                                               accountService: AccountService
+                                               accountService: AccountService,
+                                               ossRegistrationService: OssRegistrationService
                                              )
                                              (implicit val executionContext: ExecutionContext)
   extends ActionRefiner[Request, AuthenticatedIdentifierRequest]
@@ -72,9 +74,11 @@ class AuthenticatedIdentifierAction @Inject()(
       case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
           case (Some(vrn), futureMaybeIossNumber) =>
-            futureMaybeIossNumber.map { maybeIossNumber =>
-              Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber))
-            }
+            for {
+              (numberOfIossRegistrations, maybeIossNumber) <- futureMaybeIossNumber
+              latestOssRegistration <- ossRegistrationService.getLatestOssRegistration(vrn)
+            } yield Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber, numberOfIossRegistrations, latestOssRegistration))
+            
           case _ => throw InsufficientEnrolments()
         }
 
@@ -82,9 +86,10 @@ class AuthenticatedIdentifierAction @Inject()(
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
           case (Some(vrn), futureMaybeIossNumber) =>
             if (confidence >= ConfidenceLevel.L250) {
-              futureMaybeIossNumber.map { maybeIossNumber =>
-                Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber))
-              }
+              for {
+                (numberOfIossRegistrations, maybeIossNumber) <- futureMaybeIossNumber
+                latestOssRegistration <- ossRegistrationService.getLatestOssRegistration(vrn)
+              } yield Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber, numberOfIossRegistrations, latestOssRegistration))
             } else {
               throw InsufficientConfidenceLevel()
             }
@@ -147,12 +152,12 @@ class AuthenticatedIdentifierAction @Inject()(
           enrolment.identifiers.find(_.key == "VATRegNo").map(e => Vrn(e.value))
       }
 
-  private def findIossNumberFromEnrolments(enrolments: Enrolments)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  private def findIossNumberFromEnrolments(enrolments: Enrolments)(implicit hc: HeaderCarrier): Future[(Int, Option[String])] = {
     enrolments.enrolments.filter(_.key == config.iossEnrolment).toSeq.flatMap(_.identifiers.filter(_.key == "IOSSNumber").map(_.value)) match {
-      case firstEnrolment :: Nil => Some(firstEnrolment).toFuture
+      case firstEnrolment :: Nil => (1, Some(firstEnrolment)).toFuture
       case enrolments if enrolments.nonEmpty =>
-        accountService.getLatestAccount()
-      case _ => None.toFuture
+        accountService.getLatestAccount().map{ x => (enrolments.size, x)}
+      case _ => (0, None).toFuture
     }
   }
 
