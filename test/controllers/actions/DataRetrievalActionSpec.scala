@@ -170,5 +170,64 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
         }
       }
     }
+
+    "when latestOssRegistration is provided" - {
+
+      "must include latestOssRegistration in the request" in {
+
+        val answers = UserAnswers(userAnswersId, Json.obj("foo" -> "bar"))
+        val latestOssRegistration = ossRegistration
+
+        val sessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val migrationService = mock[DataMigrationService]
+
+        when(sessionRepository.get(any())) thenReturn Future.successful(Some(answers))
+
+        val action = new AuthenticatedHarness(sessionRepository, migrationService)
+        val request = FakeRequest(GET, "/test/url")
+
+        val result = action.callRefine(AuthenticatedIdentifierRequest(
+          request,
+          testCredentials,
+          vrn,
+          Enrolments(Set.empty),
+          Some(iossNumber),
+          1,
+          latestOssRegistration
+        )).futureValue
+
+        verify(migrationService, never()).migrate(any(), any())
+        result.value.latestOssRegistration mustBe latestOssRegistration
+      }
+    }
+
+    "when latestOssRegistration is not provided" - {
+
+      "must keep latestOssRegistration as None" in {
+
+        val answers = UserAnswers(userAnswersId, Json.obj("foo" -> "bar"))
+
+        val sessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val migrationService = mock[DataMigrationService]
+
+        when(sessionRepository.get(any())) thenReturn Future.successful(Some(answers))
+
+        val action = new AuthenticatedHarness(sessionRepository, migrationService)
+        val request = FakeRequest(GET, "/test/url")
+
+        val result = action.callRefine(AuthenticatedIdentifierRequest(
+          request,
+          testCredentials,
+          vrn,
+          Enrolments(Set.empty),
+          Some(iossNumber),
+          1,
+          None // No latestOssRegistration provided
+        )).futureValue
+
+        verify(migrationService, never()).migrate(any(), any())
+        result.value.latestOssRegistration mustBe None
+      }
+    }
   }
 }

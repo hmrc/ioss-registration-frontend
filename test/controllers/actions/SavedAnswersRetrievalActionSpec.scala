@@ -134,6 +134,69 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
       }
     }
 
+    "when latestOssRegistration is provided" - {
+
+      "must include latestOssRegistration in the transformed request" in {
+
+        val sessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val connector = mock[SaveForLaterConnector]
+
+        val latestOssRegistration = ossRegistration
+        val answers = UserAnswers(userAnswersId).set(SavedProgressPage, "/url").success.value
+        val action = new Harness(sessionRepository, connector)
+        val request = FakeRequest(GET, "/test/url?k=session-id")
+
+        val result = action.callRefine(
+          AuthenticatedOptionalDataRequest(
+            request = request,
+            credentials = testCredentials,
+            vrn = vrn,
+            enrolments = Enrolments(Set.empty),
+            iossNumber = None,
+            userAnswers = Some(answers),
+            1,
+            latestOssRegistration
+          )
+        ).futureValue
+
+        verifyNoInteractions(connector)
+        verifyNoInteractions(sessionRepository)
+        result.value.userAnswers mustBe Some(answers)
+        result.value.latestOssRegistration mustBe latestOssRegistration
+      }
+    }
+
+    "when latestOssRegistration is not provided" - {
+
+      "must keep latestOssRegistration as None in the transformed request" in {
+
+        val sessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val connector = mock[SaveForLaterConnector]
+
+        val answers = UserAnswers(userAnswersId).set(SavedProgressPage, "/url").success.value
+        val action = new Harness(sessionRepository, connector)
+        val request = FakeRequest(GET, "/test/url?k=session-id")
+
+        val result = action.callRefine(
+          AuthenticatedOptionalDataRequest(
+            request = request,
+            credentials = testCredentials,
+            vrn = vrn,
+            enrolments = Enrolments(Set.empty),
+            iossNumber = None,
+            userAnswers = Some(answers),
+            1,
+            None // No latestOssRegistration provided
+          )
+        ).futureValue
+
+        verifyNoInteractions(connector)
+        verifyNoInteractions(sessionRepository)
+        result.value.userAnswers mustBe Some(answers)
+        result.value.latestOssRegistration mustBe None
+      }
+    }
+
   }
 
 }
