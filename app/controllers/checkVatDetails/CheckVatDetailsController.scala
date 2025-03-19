@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.checkVatDetails.CheckVatDetailsFormProvider
 import models.{CheckVatDetails, Index, TradingName}
 import pages.checkVatDetails.CheckVatDetailsPage
-import pages.tradingNames.TradingNamePage
+import pages.tradingNames.{HasTradingNamePage, TradingNamePage}
 import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -32,7 +32,7 @@ import views.html.checkVatDetails.CheckVatDetailsView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Try, Success}
+import scala.util.{Success, Try}
 
 class CheckVatDetailsController @Inject()(
                                            override val messagesApi: MessagesApi,
@@ -78,7 +78,7 @@ class CheckVatDetailsController @Inject()(
                 case Some(ossReg) if ossReg.tradingNames.nonEmpty =>
                   ossReg.tradingNames.zipWithIndex.foldLeft(Try(request.userAnswers)) {
                     case (acc, (name, index)) => acc.flatMap(_.set(TradingNamePage(Index(index)), TradingName(name)))
-                  }
+                  }.flatMap(_.set(HasTradingNamePage, true))
                 case _ =>
                   Success(request.userAnswers)
               }

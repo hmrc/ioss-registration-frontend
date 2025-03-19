@@ -289,6 +289,12 @@ addTradingName.heading.singular = You have added one UK trading name
 addTradingName.heading.plural = You have added {0} UK trading names
 addTradingName.heading.ossRegistration.singular = You have added one UK trading name from your One Stop Shop registration
 addTradingName.heading.ossRegistration.plural = You have added {0} UK trading names from your One Stop Shop registration
+addTradingName.heading.ossAndIossRegistration.singular = You have added one UK trading name from your One Stop Shop and Import One Stop Shop registration
+addTradingName.heading.ossAndIoss.plural = You have added {0} UK trading names from your One Stop Shop and Import One Stop Shop registration
+addTradingName.heading.iossRegistration.singular = You have added one UK trading name from your Import One Stop Shop registration
+addTradingName.heading.iossRegistration.plural = You have added {0} UK trading names from your Import One Stop Shop registration
+addTradingName.heading.iossRegistrations.singular = You have added one UK trading name from your Import One Stop Shop registrations
+addTradingName.heading.iossRegistrations.plural = You have added {0} UK trading names from your Import One Stop Shop registrations
 addTradingName.maximumReached = You have added the maximum number of trading names.
 addTradingName.error.required = Select yes if you want to add another UK trading name
 addTradingName.change.hidden = {0}
@@ -297,6 +303,9 @@ addTradingName.addAnother = Add another trading name?
 addTradingName.addAnother.hint = You can add up to 10 trading names.
 addTradingName.p1 = We added the trading names you entered when you registered for the One Stop Shop service. Check they are still correct.
 addTradingName.ossWarning = Any changes you make here will also update the trading names in your One Stop Shop registration.
+addTradingName.ossAndIossWarning = Any changes you make here will also update the trading names in your One Stop Shop and previous Import One Stop Shop registrations.
+addTradingName.oneIossWarning = Any changes you make here will also update the trading names in your previous Import One Stop Shop registration.
+addTradingName.IossWarning = Any changes you make here will also update the trading names in all of your Import One Stop Shop registrations.
 
 deleteTradingName.title = Are you sure you want to remove {0}?
 deleteTradingName.heading = Are you sure you want to remove {0}?
@@ -452,6 +461,9 @@ businessContactDetails.change.telephoneNumber.hidden = your telephone number
 businessContactDetails.change.emailAddress.hidden = your email address
 businessContactDetails.button.sendCode = Send code and continue
 businessContactDetails.OssWarning = Any changes you make here will also update the contact details in your One Stop Shop registration.
+businessContactDetails.OssAndIossWarning = Any changes you make here will also update the contact details in your One Stop Shop and previous Import One Stop Shop registrations.
+businessContactDetails.oneIossWarning = Any changes you make here will also update the contact details in your previous Import One Stop Shop registration.
+businessContactDetails.IossWarning = Any changes you make here will also update the contact details in all of your Import One Stop Shop registrations.
 
 previouslyRegistered.title = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
 previouslyRegistered.heading = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
@@ -592,6 +604,9 @@ bankDetails.change.accountName.hidden = the name on this bank account
 bankDetails.change.bic.hidden = your BIC or SWIFT code
 bankDetails.change.iban.hidden = your IBAN
 bankDetails.ossWarning = Any changes you make here will also update the bank details in your One Stop Shop registration.
+bankDetails.ossAndIossWarning = Any changes you make here will also update the bank details in your One Stop Shop and previous Import One Stop Shop registrations.
+bankDetails.oneIossWarning = Any changes you make here will also update the bank details in your previous Import One Stop Shop registration.
+bankDetails.iossWarning = Any changes you make here will also update the contact details in all of your Import One Stop Shop registrations.
 
 error.missing_answers = Some of your information is missing. You must complete this before you can submit your changes.
 error.missing_answers_header = Some information is missing.
@@ -652,6 +667,9 @@ applicationComplete.heading = You are registered for the Import One Stop Shop sc
 applicationComplete.reference = Your IOSS number is <br><span class="govuk-!-font-weight-bold">{0}</span>
 applicationComplete.registration.text = We''ve received your registration for <span class="govuk-!-font-weight-bold">{0}</span>
 applicationComplete.registration.updatedOssText = We''ve also updated your One Stop Shop registration.
+applicationComplete.registration.updatedOssAndIossText = We''ve also updated your One Stop Shop and previous Import One Stop Shop registrations.
+applicationComplete.registration.updatedOneIossText = We''ve also updated your previous Import One Stop Shop registration.
+applicationComplete.registration.updatedIossText = We''ve also updated your previous Import One Stop Shop registrations.
 applicationComplete.registration.p1 = You can now use this service to fill out monthly returns for goods sold to consumers in the EU and Northern Ireland.
 applicationComplete.registration.p2 = You can also pay any Import One Stop Shop VAT that you owe.
 applicationComplete.registration.commencementDate = You can begin your {0} return on {1}. Include any sales from {2} onwards.

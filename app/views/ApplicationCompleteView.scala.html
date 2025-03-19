@@ -42,8 +42,18 @@
         <p class="govuk-body">@Html(messages("applicationComplete.registration.text", organisationName))</p>
 
         @if(ossRegistration.nonEmpty) {
-            <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
+            @if(numberOfIossRegistrations > 0) {
+                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssAndIossText")</p>
+            } else {
+                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
+            }
+        } else if(numberOfIossRegistrations == 1) {
+            <p class="govuk-body">@messages("applicationComplete.registration.updatedOneIossText")</p>
+        } else if(numberOfIossRegistrations > 1) {
+            <p class="govuk-body">@messages("applicationComplete.registration.updatedIossText")</p>
         }
+
+
 
         <p class="govuk-body">@messages("applicationComplete.registration.p1")</p>
 

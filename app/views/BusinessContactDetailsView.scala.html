@@ -38,7 +38,7 @@
       }
 
       <h1 class="govuk-heading-l govuk-!-margin-bottom-3">@messages("businessContactDetails.heading")</h1>
-      @if(ossRegistration.nonEmpty) {
+      @if(ossRegistration.nonEmpty && numberOfIossRegistrations < 1) {
         <p class="govuk-body govuk-!-margin-bottom-4">@messages("businessContactDetails.OssDetails")</p>
       }
       <p class="govuk-body govuk-!-margin-bottom-4">@messages("businessContactDetailsWithBta.p1")</p>
@@ -75,10 +75,33 @@
       )
 
       @if(ossRegistration.nonEmpty) {
+        @if(numberOfIossRegistrations > 0) {
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    @messages("businessContactDetails.OssAndIossWarning")
+                </strong>
+            </div>
+        } else {
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    @messages("businessContactDetails.OssWarning")
+                </strong>
+            </div>
+        }
+      } else if(numberOfIossRegistrations == 1) {
         <div class="govuk-warning-text">
             <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
             <strong class="govuk-warning-text__text">
-                @messages("businessContactDetails.OssWarning")
+                @messages("businessContactDetails.OneIossWarning")
+            </strong>
+        </div>
+      } else if(numberOfIossRegistrations > 1) {
+        <div class="govuk-warning-text">
+            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+            <strong class="govuk-warning-text__text">
+                @messages("businessContactDetails.IossWarning")
             </strong>
         </div>
       }

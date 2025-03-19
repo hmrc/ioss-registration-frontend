@@ -74,12 +74,35 @@
         )
 
         @if(ossRegistration.nonEmpty) {
-        <div class="govuk-warning-text">
-            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-            <strong class="govuk-warning-text__text">
-                @messages("bankDetails.ossWarning")
-            </strong>
-        </div>
+            @if(numberOfIossRegistrations > 0) {
+                <div class="govuk-warning-text">
+                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                    <strong class="govuk-warning-text__text">
+                        @messages("bankDetails.ossAndIossWarning")
+                    </strong>
+                </div>
+            } else {
+                <div class="govuk-warning-text">
+                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                    <strong class="govuk-warning-text__text">
+                        @messages("bankDetails.ossWarning")
+                    </strong>
+                </div>
+            }
+        } else if(numberOfIossRegistrations == 1) {
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    @messages("bankDetails.oneIossWarning")
+                </strong>
+            </div>
+        } else if(numberOfIossRegistrations > 1) {
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    @messages("bankDetails.iossWarning")
+                </strong>
+            </div>
         }
 
         @button("site.continue", BankDetailsPage.route(waypoints).url, waypoints)

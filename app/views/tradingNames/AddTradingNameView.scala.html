@@ -49,9 +49,26 @@
 
 @headingText = @{
     if(ossRegistration.exists(_.tradingNames.nonEmpty)) {
+        if(numberOfIossRegistrations > 0) {
+            tradingNames.size match {
+                case 1 => messages("addTradingName.heading.ossAndIossRegistration.singular")
+                case i => messages("addTradingName.heading.ossAndIossRegistration.plural", i)
+            }
+        } else {
+            tradingNames.size match {
+                case 1 => messages("addTradingName.heading.ossRegistration.singular")
+                case i => messages("addTradingName.heading.ossRegistration.plural", i)
+            }
+        }
+    } else if(numberOfIossRegistrations == 1) {
         tradingNames.size match {
-            case 1 => messages("addTradingName.heading.ossRegistration.singular")
-            case i => messages("addTradingName.heading.ossRegistration.plural", i)
+            case 1 => messages("addTradingName.heading.iossRegistration.singular")
+            case i => messages("addTradingName.heading.iossRegistration.plural", i)
+        }
+    } else if(numberOfIossRegistrations > 1) {
+        tradingNames.size match {
+            case 1 => messages("addTradingName.heading.iossRegistrations.singular")
+            case i => messages("addTradingName.heading.iossRegistrations.plural", i)
         }
     } else {
         tradingNames.size match {
@@ -92,10 +109,33 @@
         }
 
         @if(ossRegistration.exists(_.tradingNames.nonEmpty)) {
+            @if(numberOfIossRegistrations > 0) {
+                <div class="govuk-warning-text">
+                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                    <strong class="govuk-warning-text__text">
+                        @messages("addTradingName.ossAndIossWarning")
+                    </strong>
+                </div>
+            } else {
+                <div class="govuk-warning-text">
+                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                    <strong class="govuk-warning-text__text">
+                        @messages("addTradingName.ossWarning")
+                    </strong>
+                </div>
+            }
+        } else if(numberOfIossRegistrations == 1) {
             <div class="govuk-warning-text">
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
                 <strong class="govuk-warning-text__text">
-                    @messages("addTradingName.ossWarning")
+                    @messages("addTradingName.oneIossWarning")
+                </strong>
+            </div>
+        } else if(numberOfIossRegistrations > 1) {
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    @messages("addTradingName.IossWarning")
                 </strong>
             </div>
         }
