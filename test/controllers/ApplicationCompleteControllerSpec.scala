@@ -22,7 +22,7 @@ import formats.Format.{dateFormatter, dateMonthYearFormatter}
 import models.UserAnswers
 import models.responses.etmp.EtmpEnrolmentResponse
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.etmp.EtmpEnrolmentResponseQuery
 import views.html.ApplicationCompleteView
 
@@ -61,7 +61,9 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateMonthYearFormatter),
           returnStartDate.format(dateFormatter),
           includedSalesDate.format(dateFormatter),
-          config.feedbackUrl(request)
+          config.feedbackUrl(request),
+          None,
+          1
         )(request, messages(application)).toString
       }
     }

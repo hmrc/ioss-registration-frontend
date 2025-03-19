@@ -54,12 +54,25 @@ class BusinessContactDetailsController @Inject()(
     cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false) {
       implicit request =>
 
-        val preparedForm = request.userAnswers.get(BusinessContactDetailsPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
-        }
+        val ossRegistration = request.latestOssRegistration
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
 
-        Ok(view(preparedForm, waypoints))
+        val preparedForm = ossRegistration match {
+          case Some(ossReg) =>
+            form.fill(BusinessContactDetails(
+              fullName = ossReg.contactDetails.fullName,
+              telephoneNumber = ossReg.contactDetails.telephoneNumber,
+              emailAddress = ossReg.contactDetails.emailAddress
+            ))
+          case None =>
+            val prePopulatedData = request.userAnswers.get(BusinessContactDetailsPage) match {
+              case None => form
+              case Some(value) => form.fill(value)
+              }
+            prePopulatedData
+        }
+        
+        Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =
@@ -68,10 +81,12 @@ class BusinessContactDetailsController @Inject()(
 
         val messages = messagesApi.preferred(request)
         val bankDetailsCompleted = request.userAnswers.get(BankDetailsPage).isDefined
+        val ossRegistration = request.latestOssRegistration
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         form.bindFromRequest().fold(
           formWithErrors =>
-            BadRequest(view(formWithErrors, waypoints)).toFuture,
+            BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations)).toFuture,
 
           value => {
             val continueUrl = if (waypoints.inAmend) {

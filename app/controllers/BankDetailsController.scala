@@ -16,8 +16,9 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.BankDetailsFormProvider
+import models.BankDetails
 import pages.{BankDetailsPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -42,21 +43,38 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
     cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false, waypoints = waypoints) {
       implicit request =>
 
-        val preparedForm = request.userAnswers.get(BankDetailsPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
-        }
+        val ossRegistration = request.latestOssRegistration
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
 
-        Ok(view(preparedForm, waypoints))
+        val preparedForm = ossRegistration match {
+          case Some(ossReg) =>
+            form.fill(BankDetails(
+              accountName = ossReg.bankDetails.accountName,
+              bic = ossReg.bankDetails.bic,
+              iban = ossReg.bankDetails.iban
+            ))
+          case None =>
+            val prePopulatedData = request.userAnswers.get(BankDetailsPage) match {
+              case None => form
+              case Some(value) => form.fill(value)
+            }
+            prePopulatedData
+        }
+        
+
+        Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =
     cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false).async {
       implicit request =>
 
+        val ossRegistration = request.latestOssRegistration
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
+
         form.bindFromRequest().fold(
           formWithErrors => {
-            Future.successful(BadRequest(view(formWithErrors, waypoints)))
+            Future.successful(BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations)))
           },
           value => {
             for {

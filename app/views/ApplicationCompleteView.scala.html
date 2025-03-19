@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import models.ossRegistration.OssRegistration
+
 @this(
         layout: templates.Layout,
         govukButton: GovukButton
@@ -25,7 +27,9 @@
         formattedCommencementDate: String,
         returnStartDate: String,
         includedSalesDate: String,
-        feedbackUrl: String
+        feedbackUrl: String,
+        ossRegistration: Option[OssRegistration],
+        numberOfIossRegistrations: Int
 )(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("applicationComplete.title")), showBackLink = false) {
@@ -36,6 +40,10 @@
         </div>
 
         <p class="govuk-body">@Html(messages("applicationComplete.registration.text", organisationName))</p>
+
+        @if(ossRegistration.nonEmpty) {
+            <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
+        }
 
         <p class="govuk-body">@messages("applicationComplete.registration.p1")</p>
 

@@ -17,6 +17,7 @@
 @import components.ButtonGroup
 @import pages.BusinessContactDetailsPage
 @import viewmodels.InputWidth._
+@import models.ossRegistration.OssRegistration
 
 @this(
         layout: templates.Layout,
@@ -26,7 +27,7 @@
         button: ButtonGroup
 )
 
-@(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, ossRegistration: Option[OssRegistration], numberOfIossRegistrations: Int)(implicit request: Request[_], messages: Messages)
 
   @layout(pageTitle = title(form, messages("businessContactDetails.title"))) {
 
@@ -37,6 +38,9 @@
       }
 
       <h1 class="govuk-heading-l govuk-!-margin-bottom-3">@messages("businessContactDetails.heading")</h1>
+      @if(ossRegistration.nonEmpty) {
+        <p class="govuk-body govuk-!-margin-bottom-4">@messages("businessContactDetails.OssDetails")</p>
+      }
       <p class="govuk-body govuk-!-margin-bottom-4">@messages("businessContactDetailsWithBta.p1")</p>
       <p class="govuk-body govuk-!-margin-bottom-6">@messages("businessContactDetailsWithBta.p2")</p>
 
@@ -70,6 +74,14 @@
         .asEmail()
       )
 
+      @if(ossRegistration.nonEmpty) {
+        <div class="govuk-warning-text">
+            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+            <strong class="govuk-warning-text__text">
+                @messages("businessContactDetails.OssWarning")
+            </strong>
+        </div>
+      }
       <p class="govuk-body">@messages("businessContactDetails.emailHint")</p>
 
       @button("businessContactDetails.button.sendCode", BusinessContactDetailsPage.route(waypoints).url, waypoints)

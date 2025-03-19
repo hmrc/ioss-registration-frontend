@@ -17,6 +17,7 @@
 @import components.ButtonGroup
 @import pages.BankDetailsPage
 @import viewmodels.InputWidth._
+@import models.ossRegistration.OssRegistration
 
 @this(
     layout: templates.Layout,
@@ -26,7 +27,7 @@
     button: ButtonGroup
 )
 
-@(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, ossRegistration: Option[OssRegistration], numberOfIossRegistrations: Int)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("bankDetails.title"))) {
 
@@ -37,6 +38,10 @@
         }
 
         <h1 class="govuk-heading-l govuk-!-margin-bottom-6">@messages("bankDetails.heading")</h1>
+
+        @if(ossRegistration.nonEmpty) {
+            <p class="govuk-hint govuk-!-margin-bottom-6">@messages("bankDetails.previousOSS")</p>
+        }
 
         <p class="govuk-hint govuk-!-margin-bottom-6">@messages("bankDetails.hint")</p>
 
@@ -67,6 +72,15 @@
             .withWidth(Fixed30)
             .withHint(HintViewModel(messages("bankDetails.iban.hint")))
         )
+
+        @if(ossRegistration.nonEmpty) {
+        <div class="govuk-warning-text">
+            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+            <strong class="govuk-warning-text__text">
+                @messages("bankDetails.ossWarning")
+            </strong>
+        </div>
+        }
 
         @button("site.continue", BankDetailsPage.route(waypoints).url, waypoints)
     }
