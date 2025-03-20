@@ -45,7 +45,9 @@ class IossRequiredActionImpl @Inject()()(implicit val executionContext: Executio
                 request.enrolments,
                 iossNumber,
                 registrationWrapper,
-                request.userAnswers
+                request.userAnswers,
+                numberOfIossRegistrations = request.numberOfIossRegistrations,
+                latestOssRegistration =  request.latestOssRegistration
               )
             ).toFuture
           case _ =>

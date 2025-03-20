@@ -79,29 +79,22 @@
             <div class="govuk-warning-text">
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
                 <strong class="govuk-warning-text__text">
-                    @messages("businessContactDetails.OssAndIossWarning")
+                    @messages("businessContactDetails.ossAndIossWarning")
                 </strong>
             </div>
         } else {
             <div class="govuk-warning-text">
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
                 <strong class="govuk-warning-text__text">
-                    @messages("businessContactDetails.OssWarning")
+                    @messages("businessContactDetails.ossWarning")
                 </strong>
             </div>
         }
-      } else if(numberOfIossRegistrations == 1) {
-        <div class="govuk-warning-text">
-            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-            <strong class="govuk-warning-text__text">
-                @messages("businessContactDetails.OneIossWarning")
-            </strong>
-        </div>
       } else if(numberOfIossRegistrations > 1) {
         <div class="govuk-warning-text">
             <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
             <strong class="govuk-warning-text__text">
-                @messages("businessContactDetails.IossWarning")
+                @messages("businessContactDetails.iossWarning")
             </strong>
         </div>
       }

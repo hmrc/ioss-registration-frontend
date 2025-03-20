@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.domain.Vrn
 @import java.time.LocalDate
 @import formats.Format
+@import models.ossRegistration.OssRegistration
 
 @this(
         layout: templates.Layout,
@@ -32,7 +33,9 @@
         newIossReference: String,
         commencementDate : LocalDate,
         returnStartDate : LocalDate,
-        includedSalesDate : LocalDate
+        includedSalesDate : LocalDate,
+        ossRegistration: Option[OssRegistration],
+        numberOfIossRegistrations: Int
 )(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("rejoinComplete.title")), showBackLink = false) {
@@ -46,6 +49,18 @@
         <p class="govuk-body">
             @Html(messages("rejoinComplete.organisationName", organisationName))
         </p>
+
+        @if(ossRegistration.nonEmpty) {
+            @if(numberOfIossRegistrations > 0) {
+                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssAndIossText")</p>
+            } else {
+                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
+            }
+        } else if(numberOfIossRegistrations == 1) {
+            <p class="govuk-body">@messages("applicationComplete.registration.updatedOneIossText")</p>
+        } else if(numberOfIossRegistrations > 1) {
+            <p class="govuk-body">@messages("applicationComplete.registration.updatedIossText")</p>
+        }
 
         <p class="govuk-body">
             @messages("rejoinComplete.para1")

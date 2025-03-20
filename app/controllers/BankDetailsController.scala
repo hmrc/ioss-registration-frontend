@@ -46,21 +46,21 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
         val ossRegistration = request.latestOssRegistration
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
-        val preparedForm = ossRegistration match {
-          case Some(ossReg) =>
-            form.fill(BankDetails(
-              accountName = ossReg.bankDetails.accountName,
-              bic = ossReg.bankDetails.bic,
-              iban = ossReg.bankDetails.iban
-            ))
+        val preparedForm = request.userAnswers.get(BankDetailsPage) match {
+          case Some(value) =>
+            form.fill(value)
           case None =>
-            val prePopulatedData = request.userAnswers.get(BankDetailsPage) match {
-              case None => form
-              case Some(value) => form.fill(value)
+            ossRegistration match {
+              case Some(ossReg) =>
+                form.fill(BankDetails(
+                  accountName = ossReg.bankDetails.accountName,
+                  bic = ossReg.bankDetails.bic,
+                  iban = ossReg.bankDetails.iban
+                ))
+              case None =>
+                form
             }
-            prePopulatedData
         }
-        
 
         Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
     }

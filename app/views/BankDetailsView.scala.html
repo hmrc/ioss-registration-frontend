@@ -39,7 +39,7 @@
 
         <h1 class="govuk-heading-l govuk-!-margin-bottom-6">@messages("bankDetails.heading")</h1>
 
-        @if(ossRegistration.nonEmpty) {
+        @if(ossRegistration.nonEmpty && numberOfIossRegistrations < 1) {
             <p class="govuk-hint govuk-!-margin-bottom-6">@messages("bankDetails.previousOSS")</p>
         }
 
@@ -89,13 +89,6 @@
                     </strong>
                 </div>
             }
-        } else if(numberOfIossRegistrations == 1) {
-            <div class="govuk-warning-text">
-                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-                <strong class="govuk-warning-text__text">
-                    @messages("bankDetails.oneIossWarning")
-                </strong>
-            </div>
         } else if(numberOfIossRegistrations > 1) {
             <div class="govuk-warning-text">
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>

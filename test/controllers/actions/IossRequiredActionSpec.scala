@@ -106,7 +106,9 @@ class IossRequiredActionSpec extends SpecBase with MockitoSugar {
           Enrolments(Set.empty),
           iossNumber,
           registrationWrapper,
-          emptyUserAnswersWithVatInfo
+          emptyUserAnswersWithVatInfo,
+          1,
+          None
         )
 
         result mustBe Right(expectResult)

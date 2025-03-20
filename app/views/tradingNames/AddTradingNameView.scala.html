@@ -60,11 +60,6 @@
                 case i => messages("addTradingName.heading.ossRegistration.plural", i)
             }
         }
-    } else if(numberOfIossRegistrations == 1) {
-        tradingNames.size match {
-            case 1 => messages("addTradingName.heading.iossRegistration.singular")
-            case i => messages("addTradingName.heading.iossRegistration.plural", i)
-        }
     } else if(numberOfIossRegistrations > 1) {
         tradingNames.size match {
             case 1 => messages("addTradingName.heading.iossRegistrations.singular")
@@ -124,13 +119,6 @@
                     </strong>
                 </div>
             }
-        } else if(numberOfIossRegistrations == 1) {
-            <div class="govuk-warning-text">
-                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-                <strong class="govuk-warning-text__text">
-                    @messages("addTradingName.oneIossWarning")
-                </strong>
-            </div>
         } else if(numberOfIossRegistrations > 1) {
             <div class="govuk-warning-text">
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>

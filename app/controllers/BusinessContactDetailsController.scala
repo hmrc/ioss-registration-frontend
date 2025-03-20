@@ -17,7 +17,7 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions._
+import controllers.actions.*
 import forms.BusinessContactDetailsFormProvider
 import logging.Logging
 import models.BusinessContactDetails
@@ -57,21 +57,22 @@ class BusinessContactDetailsController @Inject()(
         val ossRegistration = request.latestOssRegistration
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
-        val preparedForm = ossRegistration match {
-          case Some(ossReg) =>
-            form.fill(BusinessContactDetails(
-              fullName = ossReg.contactDetails.fullName,
-              telephoneNumber = ossReg.contactDetails.telephoneNumber,
-              emailAddress = ossReg.contactDetails.emailAddress
-            ))
+        val preparedForm = request.userAnswers.get(BusinessContactDetailsPage) match {
+          case Some(value) =>
+            form.fill(value)
           case None =>
-            val prePopulatedData = request.userAnswers.get(BusinessContactDetailsPage) match {
-              case None => form
-              case Some(value) => form.fill(value)
-              }
-            prePopulatedData
+            ossRegistration match {
+              case Some(ossReg) =>
+                form.fill(BusinessContactDetails(
+                  fullName = ossReg.contactDetails.fullName,
+                  telephoneNumber = ossReg.contactDetails.telephoneNumber,
+                  emailAddress = ossReg.contactDetails.emailAddress
+                ))
+              case None =>
+                form
+            }
         }
-        
+
         Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
     }
 
