@@ -83,7 +83,7 @@
 
         <h1 class="govuk-heading-l">@headingText</h1>
 
-        @if(ossRegistration.exists(_.tradingNames.nonEmpty)) {
+        @if(ossRegistration.exists(_.tradingNames.nonEmpty) && numberOfIossRegistrations < 1) {
             <p class="govuk-hint govuk-!-margin-bottom-6">@messages("addTradingName.p1")</p>
         }
 
