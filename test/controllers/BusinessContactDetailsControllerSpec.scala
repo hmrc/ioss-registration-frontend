@@ -97,7 +97,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(form, emptyWaypoints, None, 1, false)(request, messages(application)).toString
+          contentAsString(result) mustBe view(form, emptyWaypoints, None, 1)(request, messages(application)).toString
         }
       }
 
@@ -114,7 +114,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(form.fill(contactDetails), emptyWaypoints, None, 1, false)(request, messages(application)).toString
+          contentAsString(result) mustBe view(form.fill(contactDetails), emptyWaypoints, None, 1)(request, messages(application)).toString
         }
       }
 
@@ -134,7 +134,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(form, amendPreviousWaypoints, None, 1, false)(request, messages(application)).toString
+          contentAsString(result) mustBe view(form, amendPreviousWaypoints, None, 1)(request, messages(application)).toString
         }
       }
     }
@@ -583,7 +583,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustBe BAD_REQUEST
-          contentAsString(result) mustBe view(boundForm, emptyWaypoints, None, 1, false)(request, messages(application)).toString
+          contentAsString(result) mustBe view(boundForm, emptyWaypoints, None, 1)(request, messages(application)).toString
         }
       }
 

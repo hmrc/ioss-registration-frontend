@@ -17,18 +17,26 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions._
+import controllers.actions.*
 import formats.Format.{dateFormatter, dateMonthYearFormatter}
-import models.UserAnswers
-import pages.{EmptyWaypoints, JourneyRecoveryPage}
+import models.{TradingName, UserAnswers}
+import models.ossRegistration.OssRegistration
+import models.requests.AuthenticatedDataRequest
+import pages.{BankDetailsPage, BusinessContactDetailsPage, EmptyWaypoints, JourneyRecoveryPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.etmp.EtmpEnrolmentResponseQuery
+import queries.tradingNames.AllTradingNames
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
+import viewmodels.govuk.all.SummaryListViewModel
 import views.html.ApplicationCompleteView
 
 import java.time.{Clock, LocalDate}
 import javax.inject.Inject
+import scala.util.{Failure, Success}
 
 
 class ApplicationCompleteController @Inject()(
@@ -56,6 +64,7 @@ class ApplicationCompleteController @Inject()(
         val commencementDate = LocalDate.now(clock)
         val returnStartDate = commencementDate.withDayOfMonth(commencementDate.lengthOfMonth()).plusDays(1)
         val includedSalesDate = commencementDate.withDayOfMonth(1)
+        val list: SummaryList = detailsList(ossRegistration)
 
         Ok(view(
           iossReferenceNumber,
@@ -65,7 +74,8 @@ class ApplicationCompleteController @Inject()(
           includedSalesDate.format(dateFormatter),
           frontendAppConfig.feedbackUrl,
           ossRegistration,
-          numberOfIossRegistrations
+          numberOfIossRegistrations,
+          list
         ))
       }).getOrElse(Redirect(JourneyRecoveryPage.route(EmptyWaypoints)))
   }
@@ -76,4 +86,122 @@ class ApplicationCompleteController @Inject()(
       case Some(vatInfo) if vatInfo.individualName.isDefined => vatInfo.individualName
       case _ => None
     }
+
+  private def detailsList(ossRegistration: Option[OssRegistration])(implicit request: AuthenticatedDataRequest[AnyContent]) = {
+    ossRegistration match {
+      case Some(registration) =>
+        SummaryListViewModel(
+          rows = (
+            getHasTradingNameRows(registration) ++
+              getTradingNameRows(registration) ++
+              getBusinessContactDetailsRows(registration) ++
+              getBankDetailsRows(registration)
+            ).flatten
+        )
+      case None =>
+        SummaryListViewModel(rows = Seq.empty)
+    }
+  }
+
+  private def getHasTradingNameRows(ossRegistration: OssRegistration)
+                                   (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
+
+    val originalAnswers = ossRegistration.tradingNames
+    val amendedAnswers = request.userAnswers.get(AllTradingNames).getOrElse(List.empty)
+    val hasChangedToNo = amendedAnswers.isEmpty && originalAnswers.nonEmpty
+    val hasChangedToYes = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || originalAnswers.isEmpty
+    val notAmended = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || amendedAnswers.isEmpty && originalAnswers.isEmpty
+
+    if (notAmended) {
+      Seq.empty
+    } else if (hasChangedToNo || hasChangedToYes) {
+      Seq(HasTradingNameSummary.amendedRow(request.userAnswers))
+    } else {
+      Seq.empty
+    }
+  }
+
+  private def getTradingNameRows(ossRegistration: OssRegistration)
+                                (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
+
+    val originalAnswers = ossRegistration.tradingNames
+    val amendedAnswers = request.userAnswers.get(AllTradingNames).map(_.map(_.name)).getOrElse(List.empty)
+    val addedTradingName = amendedAnswers.diff(originalAnswers)
+    val removedTradingNames = originalAnswers.diff(amendedAnswers)
+
+    val changedTradingName: List[TradingName] = amendedAnswers.zip(originalAnswers).collect {
+      case (amended, original) if amended != original => TradingName(amended)
+    } ++ amendedAnswers.drop(originalAnswers.size).map(tradingName => TradingName(tradingName))
+
+    val addedTradingNameRow = if (addedTradingName.nonEmpty) {
+      request.userAnswers.set(AllTradingNames, changedTradingName) match {
+        case Success(amendedUserAnswer: UserAnswers) =>
+          Some(TradingNameSummary.amendedAnswersRow(amendedUserAnswer))
+        case Failure(_) =>
+          None
+      }
+    } else {
+      None
+    }
+
+    val removedTradingNameRow = Some(TradingNameSummary.removedAnswersRow(removedTradingNames))
+
+    Seq(addedTradingNameRow, removedTradingNameRow).flatten
+  }
+
+  private def getBusinessContactDetailsRows(ossRegistration: OssRegistration)
+                                           (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
+
+    val originalContactName = ossRegistration.contactDetails.fullName
+    val originalTelephone = ossRegistration.contactDetails.telephoneNumber
+    val originalEmail = ossRegistration.contactDetails.emailAddress
+    val amendedUA = request.userAnswers.get(BusinessContactDetailsPage)
+
+    Seq(
+      if (!amendedUA.map(_.fullName).contains(originalContactName)) {
+        BusinessContactDetailsSummary.amendedRowContactName(request.userAnswers)
+      } else {
+        None
+      },
+
+      if (!amendedUA.map(_.telephoneNumber).contains(originalTelephone)) {
+        BusinessContactDetailsSummary.amendedRowTelephoneNumber(request.userAnswers)
+      } else {
+        None
+      },
+
+      if (!amendedUA.map(_.emailAddress).contains(originalEmail)) {
+        BusinessContactDetailsSummary.amendedRowEmailAddress(request.userAnswers)
+      } else {
+        None
+      }
+    )
+  }
+
+  private def getBankDetailsRows(ossRegistration: OssRegistration)
+                                (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
+
+    val originalAnswers = ossRegistration.bankDetails
+    val amendedUA = request.userAnswers.get(BankDetailsPage)
+
+    Seq(
+      if (!amendedUA.map(_.accountName).contains(originalAnswers.accountName)) {
+        BankDetailsSummary.amendedRowAccountName(request.userAnswers)
+      } else {
+        None
+      },
+
+      if (!amendedUA.map(_.bic).contains(originalAnswers.bic)) {
+        BankDetailsSummary.amendedRowBIC(request.userAnswers)
+      } else {
+        None
+      },
+
+      if (!amendedUA.map(_.iban).contains(originalAnswers.iban)) {
+        BankDetailsSummary.amendedRowIBAN(request.userAnswers)
+      } else {
+        None
+      }
+    )
+  }
 }

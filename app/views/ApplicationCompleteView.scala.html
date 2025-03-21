@@ -29,7 +29,8 @@
         includedSalesDate: String,
         feedbackUrl: String,
         ossRegistration: Option[OssRegistration],
-        numberOfIossRegistrations: Int
+        numberOfIossRegistrations: Int,
+        list: SummaryList,
 )(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("applicationComplete.title")), showBackLink = false) {
@@ -41,7 +42,7 @@
 
         <p class="govuk-body">@Html(messages("applicationComplete.registration.text", organisationName))</p>
 
-        @if(ossRegistration.nonEmpty) {
+        @if(ossRegistration.nonEmpty && list.rows.nonEmpty) {
             <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
         }
 

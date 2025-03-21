@@ -17,7 +17,6 @@
 package controllers
 
 import config.FrontendAppConfig
-import connectors.RegistrationConnector
 import controllers.actions.*
 import forms.BusinessContactDetailsFormProvider
 import logging.Logging
@@ -34,7 +33,6 @@ import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import views.html.BusinessContactDetailsView
 
-import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,9 +43,7 @@ class BusinessContactDetailsController @Inject()(
                                                   saveForLaterService: SaveForLaterService,
                                                   formProvider: BusinessContactDetailsFormProvider,
                                                   config: FrontendAppConfig,
-                                                  view: BusinessContactDetailsView,
-                                                  clock: Clock,
-                                                  registrationConnector: RegistrationConnector
+                                                  view: BusinessContactDetailsView
                                                 )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport with Logging {
 
@@ -55,7 +51,7 @@ class BusinessContactDetailsController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
-    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false).async {
+    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false) {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration
@@ -77,9 +73,7 @@ class BusinessContactDetailsController @Inject()(
             }
         }
 
-        getCanRejoin.map { canRejoin =>
-          Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations, canRejoin))
-        }
+        Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =
@@ -92,11 +86,8 @@ class BusinessContactDetailsController @Inject()(
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         form.bindFromRequest().fold(
-          formWithErrors => {
-            getCanRejoin.map { canRejoin =>
-              BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations, canRejoin))
-            }
-          },
+          formWithErrors =>
+            BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations)).toFuture,
 
           value => {
             val continueUrl = if (waypoints.inAmend) {
@@ -167,15 +158,6 @@ class BusinessContactDetailsController @Inject()(
               } yield Redirect(s"${config.emailVerificationUrl}${validResponse.redirectUri}")
             case _ => Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoints).url).toFuture
           }
-    }
-  }
-
-  private def getCanRejoin(implicit hc: HeaderCarrier): Future[Boolean] = {
-    val date = LocalDate.now(clock)
-
-    registrationConnector.getRegistration().map {
-      case Right(registrationWrapper) => registrationWrapper.registration.canRejoinRegistration(date)
-      case Left(_) => false
     }
   }
 }
