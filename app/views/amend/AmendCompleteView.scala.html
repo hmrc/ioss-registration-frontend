@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.domain.Vrn
+@import models.ossRegistration.OssRegistration
 
 @this(
         layout: templates.Layout,
@@ -28,7 +29,9 @@
         externalUrl: Option[String] = None,
         yourAccountUrl: String,
         organisationName: String,
-        list: SummaryList
+        list: SummaryList,
+        ossRegistration: Option[OssRegistration],
+        numberOfIossRegistrations: Int
 )(implicit request: Request[_], messages: Messages)
 
   @layout(pageTitle = titleNoForm(messages("amendComplete.title")), showBackLink = false) {
@@ -52,6 +55,18 @@
           list.rows
         ).withCssClass("govuk-body govuk-!-margin-bottom-7")
       )
+
+      @if(list.rows.nonEmpty) {
+        @if(ossRegistration.nonEmpty) {
+            @if(numberOfIossRegistrations > 0) {
+                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssAndIossText")</p>
+            } else {
+                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
+            }
+        } else if(numberOfIossRegistrations > 1) {
+            <p class="govuk-body">@messages("applicationComplete.registration.updatedIossText")</p>
+        }
+      }
 
       @externalUrl match {
         case Some(url) => {

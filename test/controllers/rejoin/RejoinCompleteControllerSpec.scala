@@ -91,7 +91,9 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
           "IM900100000002",
           commencementDate,
           returnStartDate,
-          includedSalesDate
+          includedSalesDate,
+          None,
+          1
         )(request, messages(application)).toString
       }
     }

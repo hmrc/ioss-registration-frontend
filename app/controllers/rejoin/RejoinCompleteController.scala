@@ -51,6 +51,8 @@ class RejoinCompleteController @Inject()(
         val commencementDate = LocalDate.now(clock)
         val returnStartDate: LocalDate = commencementDate.withDayOfMonth(commencementDate.lengthOfMonth()).plusDays(1)
         val includedSalesDate = commencementDate.withDayOfMonth(1)
+        val ossRegistration = request.latestOssRegistration
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         Ok(
           view(
@@ -62,7 +64,9 @@ class RejoinCompleteController @Inject()(
             newIossReference = newIossReference,
             commencementDate = commencementDate,
             returnStartDate = returnStartDate,
-            includedSalesDate = includedSalesDate
+            includedSalesDate = includedSalesDate,
+            ossRegistration = ossRegistration,
+            numberOfIossRegistrations = numberOfIossRegistrations
           )
         )
       }

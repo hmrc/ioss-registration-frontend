@@ -17,7 +17,7 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions._
+import controllers.actions.*
 import forms.BusinessContactDetailsFormProvider
 import logging.Logging
 import models.BusinessContactDetails
@@ -54,12 +54,26 @@ class BusinessContactDetailsController @Inject()(
     cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false) {
       implicit request =>
 
+        val ossRegistration = request.latestOssRegistration
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
+
         val preparedForm = request.userAnswers.get(BusinessContactDetailsPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
+          case Some(value) =>
+            form.fill(value)
+          case None =>
+            ossRegistration match {
+              case Some(ossReg) =>
+                form.fill(BusinessContactDetails(
+                  fullName = ossReg.contactDetails.fullName,
+                  telephoneNumber = ossReg.contactDetails.telephoneNumber,
+                  emailAddress = ossReg.contactDetails.emailAddress
+                ))
+              case None =>
+                form
+            }
         }
 
-        Ok(view(preparedForm, waypoints))
+        Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =
@@ -68,10 +82,12 @@ class BusinessContactDetailsController @Inject()(
 
         val messages = messagesApi.preferred(request)
         val bankDetailsCompleted = request.userAnswers.get(BankDetailsPage).isDefined
+        val ossRegistration = request.latestOssRegistration
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         form.bindFromRequest().fold(
           formWithErrors =>
-            BadRequest(view(formWithErrors, waypoints)).toFuture,
+            BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations)).toFuture,
 
           value => {
             val continueUrl = if (waypoints.inAmend) {

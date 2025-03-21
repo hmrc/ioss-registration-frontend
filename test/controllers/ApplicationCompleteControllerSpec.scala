@@ -22,8 +22,10 @@ import formats.Format.{dateFormatter, dateMonthYearFormatter}
 import models.UserAnswers
 import models.responses.etmp.EtmpEnrolmentResponse
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.etmp.EtmpEnrolmentResponseQuery
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
+import viewmodels.govuk.all.SummaryListViewModel
 import views.html.ApplicationCompleteView
 
 import java.time.LocalDate
@@ -49,6 +51,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
         val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
 
         val config = application.injector.instanceOf[FrontendAppConfig]
+        val expectedList: SummaryList = SummaryListViewModel(rows = Seq.empty)
 
         val result = route(application, request).value
 
@@ -61,7 +64,10 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateMonthYearFormatter),
           returnStartDate.format(dateFormatter),
           includedSalesDate.format(dateFormatter),
-          config.feedbackUrl(request)
+          config.feedbackUrl(request),
+          None,
+          1,
+          expectedList
         )(request, messages(application)).toString
       }
     }

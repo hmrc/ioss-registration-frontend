@@ -20,7 +20,7 @@ import base.SpecBase
 import config.Constants.maxSchemes
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
-import controllers.amend.{routes => amendRoutes}
+import controllers.amend.routes as amendRoutes
 import controllers.routes
 import models.amend.RegistrationWrapper
 import models.domain.PreviousSchemeDetails
@@ -37,7 +37,7 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.euDetails.AllEuOptionalDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
@@ -100,7 +100,9 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             None,
             yourAccountUrl,
             "Company name",
-            summaryList
+            summaryList,
+            None,
+            1
           )(request, messages(application)).toString
         }
       }
@@ -146,7 +148,9 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               None,
               yourAccountUrl,
               "Company name",
-              summaryList
+              summaryList,
+              None,
+              1
             )(request, messages(application)).toString
 
             val expectedRow = TradingNameSummary.amendedAnswersRow(updatedAnswers).get
@@ -188,7 +192,9 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               None,
               yourAccountUrl,
               "Company name",
-              summaryList
+              summaryList,
+              None,
+              1
             )(request, messages(application)).toString
 
             val expectedRow = PreviousRegistrationSummary.amendedAnswersRow(updatedAnswers).get
@@ -231,7 +237,9 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               None,
               yourAccountUrl,
               "Company name",
-              summaryList
+              summaryList,
+              None,
+              1
             )(request, messages(application)).toString
 
             val expectedRow = EuDetailsSummary.amendedAnswersRow(updatedAnswers).get
@@ -266,7 +274,9 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               None,
               yourAccountUrl,
               "Company name",
-              summaryList
+              summaryList,
+              None,
+              1
             )(request, messages(application)).toString
 
             val expectedRow = WebsiteSummary.amendedAnswersRow(updatedAnswers).get
