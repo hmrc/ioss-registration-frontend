@@ -27,7 +27,7 @@
     button: ButtonGroup
 )
 
-@(form: Form[_], waypoints: Waypoints, ossRegistration: Option[OssRegistration], numberOfIossRegistrations: Int)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, ossRegistration: Option[OssRegistration], numberOfIossRegistrations: Int, canRejoin: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("bankDetails.title"))) {
 
@@ -94,6 +94,13 @@
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
                 <strong class="govuk-warning-text__text">
                     @messages("bankDetails.iossWarning")
+                </strong>
+            </div>
+        } else if(numberOfIossRegistrations == 1 && canRejoin) {
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    @messages("bankDetails.oneIossWarning")
                 </strong>
             </div>
         }

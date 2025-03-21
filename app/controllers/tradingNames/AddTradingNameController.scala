@@ -17,8 +17,9 @@
 package controllers.tradingNames
 
 import config.Constants.maxTradingNames
+import connectors.RegistrationConnector
 import controllers.AnswerExtractor
-import controllers.actions._
+import controllers.actions.*
 import forms.tradingNames.AddTradingNameFormProvider
 import pages.Waypoints
 import pages.tradingNames.AddTradingNamePage
@@ -26,13 +27,14 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.tradingNames.DeriveNumberOfTradingNames
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
-import utils.FutureSyntax.FutureOps
 import utils.ItemsHelper.getDerivedItems
 import viewmodels.checkAnswers.tradingName.TradingNameSummary
 import views.html.tradingNames.AddTradingNameView
 
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +42,9 @@ class AddTradingNameController @Inject()(
                                           override val messagesApi: MessagesApi,
                                           cc: AuthenticatedControllerComponents,
                                           formProvider: AddTradingNameFormProvider,
-                                          view: AddTradingNameView
+                                          view: AddTradingNameView,
+                                          clock: Clock,
+                                          registrationConnector: RegistrationConnector
                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with AnswerExtractor {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -57,7 +61,9 @@ class AddTradingNameController @Inject()(
           val ossRegistration = request.latestOssRegistration
           val numberOfIossRegistrations = request.numberOfIossRegistrations
 
-          Ok(view(form, waypoints, tradingNamesSummary, canAddTradingNames, ossRegistration, numberOfIossRegistrations)).toFuture
+          getCanRejoin.map { canRejoin =>
+            Ok(view(form, waypoints, tradingNamesSummary, canAddTradingNames, ossRegistration, numberOfIossRegistrations, canRejoin))
+          }
       }
   }
 
@@ -72,8 +78,11 @@ class AddTradingNameController @Inject()(
           val numberOfIossRegistrations = request.numberOfIossRegistrations
 
           form.bindFromRequest().fold(
-            formWithErrors =>
-              BadRequest(view(formWithErrors, waypoints, tradingNamesSummary, canAddTradingNames, ossRegistration, numberOfIossRegistrations)).toFuture,
+            formWithErrors => {
+              getCanRejoin.map { canRejoin =>
+                BadRequest(view(formWithErrors, waypoints, tradingNamesSummary, canAddTradingNames, ossRegistration, numberOfIossRegistrations, canRejoin))
+              }
+            },
 
             value =>
               for {
@@ -82,5 +91,14 @@ class AddTradingNameController @Inject()(
               } yield Redirect(AddTradingNamePage().navigate(waypoints, request.userAnswers, updatedAnswers).route)
           )
       }
+  }
+
+  private def getCanRejoin(implicit hc: HeaderCarrier): Future[Boolean] = {
+    val date = LocalDate.now(clock)
+
+    registrationConnector.getRegistration().map {
+      case Right(registrationWrapper) => registrationWrapper.registration.canRejoinRegistration(date)
+      case Left(_) => false
+    }
   }
 }

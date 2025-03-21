@@ -16,53 +16,62 @@
 
 package controllers
 
+import connectors.RegistrationConnector
 import controllers.actions.*
 import forms.BankDetailsFormProvider
+import logging.Logging
 import models.BankDetails
+import models.amend.RegistrationWrapper
 import pages.{BankDetailsPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.BankDetailsView
 
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
                                       cc: AuthenticatedControllerComponents,
                                       formProvider: BankDetailsFormProvider,
-                                      view: BankDetailsView)(implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport {
+                                      view: BankDetailsView,
+                                      clock: Clock,
+                                      registrationConnector: RegistrationConnector)(implicit ec: ExecutionContext)
+  extends FrontendBaseController with I18nSupport with Logging {
 
   private val form = formProvider()
 
   override protected def controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
-    cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false, waypoints = waypoints) {
+    cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false, waypoints = waypoints).async {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
-        val preparedForm = request.userAnswers.get(BankDetailsPage) match {
-          case Some(value) =>
-            form.fill(value)
-          case None =>
-            ossRegistration match {
-              case Some(ossReg) =>
-                form.fill(BankDetails(
-                  accountName = ossReg.bankDetails.accountName,
-                  bic = ossReg.bankDetails.bic,
-                  iban = ossReg.bankDetails.iban
-                ))
+            val preparedForm = request.userAnswers.get(BankDetailsPage) match {
+              case Some(value) =>
+                form.fill(value)
               case None =>
-                form
+                ossRegistration match {
+                  case Some(ossReg) =>
+                    form.fill(BankDetails(
+                      accountName = ossReg.bankDetails.accountName,
+                      bic = ossReg.bankDetails.bic,
+                      iban = ossReg.bankDetails.iban
+                    ))
+                  case None =>
+                    form
+                }
             }
-        }
 
-        Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
+        getCanRejoin.map { canRejoin =>
+          Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations, canRejoin))
+        }
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =
@@ -74,7 +83,9 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
 
         form.bindFromRequest().fold(
           formWithErrors => {
-            Future.successful(BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations)))
+            getCanRejoin.map { canRejoin =>
+              BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations, canRejoin))
+            }
           },
           value => {
             for {
@@ -84,4 +95,13 @@ class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
           }
         )
     }
+
+  private def getCanRejoin(implicit hc: HeaderCarrier): Future[Boolean] = {
+    val date = LocalDate.now(clock)
+
+    registrationConnector.getRegistration().map {
+      case Right(registrationWrapper) => registrationWrapper.registration.canRejoinRegistration(date)
+      case Left(_) => false
+    }
+  }
 }

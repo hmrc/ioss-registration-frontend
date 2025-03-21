@@ -37,7 +37,8 @@
     tradingNames: Seq[ListItemWrapper],
     canAddTradingNames: Boolean,
     ossRegistration: Option[OssRegistration],
-    numberOfIossRegistrations: Int
+    numberOfIossRegistrations: Int,
+    canRejoin: Boolean
 )(implicit request: Request[_], messages: Messages)
 
 @titleText = @{
@@ -65,7 +66,12 @@
             case 1 => messages("addTradingName.heading.iossRegistrations.singular")
             case i => messages("addTradingName.heading.iossRegistrations.plural", i)
         }
-    } else {
+    } else if(numberOfIossRegistrations == 1 && canRejoin) {
+        tradingNames.size match {
+        case 1 => messages("addTradingName.heading.iossRegistration.singular")
+        case i => messages("addTradingName.heading.iossRegistration.plural", i)
+        }
+    }else {
         tradingNames.size match {
             case 1 => messages("addTradingName.heading.singular")
             case i => messages("addTradingName.heading.plural", i)
@@ -124,6 +130,13 @@
                 <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
                 <strong class="govuk-warning-text__text">
                     @messages("addTradingName.IossWarning")
+                </strong>
+            </div>
+        } else if(numberOfIossRegistrations == 1 && canRejoin) {
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    @messages("addTradingName.oneIossWarning")
                 </strong>
             </div>
         }

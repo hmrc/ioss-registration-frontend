@@ -59,7 +59,7 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, waypoints, None, 1)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, waypoints, None, 1, false)(request, messages(application)).toString
       }
     }
 
@@ -75,7 +75,7 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(bankDetails), waypoints, None, 1)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(bankDetails), waypoints, None, 1, false)(request, messages(application)).toString
       }
     }
 
@@ -123,7 +123,7 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, waypoints, None, 1)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, waypoints, None, 1, false)(request, messages(application)).toString
       }
     }
 
