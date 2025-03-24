@@ -20,19 +20,26 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import models.UserAnswers
+import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.external.ExternalEntryUrl
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.BusinessContactDetailsPage
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.OriginalRegistrationQuery
 import queries.rejoin.NewIossReferenceQuery
+import queries.tradingNames.AllTradingNames
 import services.core.CoreRegistrationValidationService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
+import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
+import viewmodels.govuk.all.SummaryListViewModel
 import views.html.rejoin.RejoinCompleteView
 
 import java.time.LocalDate
@@ -79,6 +86,8 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         val config = application.injector.instanceOf[FrontendAppConfig]
         val result = route(application, request).value
         val view = application.injector.instanceOf[RejoinCompleteView]
+        implicit val msgs: Messages = messages(application)
+        val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(userAnswers, Some(registrationWrapper)))
 
         status(result) mustEqual OK
 
@@ -93,7 +102,8 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
           returnStartDate,
           includedSalesDate,
           None,
-          1
+          1,
+          summaryList
         )(request, messages(application)).toString
       }
     }
@@ -186,4 +196,41 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
       }
     }
   }
+
+  private def getAmendedRegistrationSummaryList(
+                                               answers: UserAnswers,
+                                               registrationWrapper: Option[RegistrationWrapper]
+                                               )(implicit msgs: Messages): Seq[SummaryListRow] = {
+    val hasTradingNameSummaryRow = HasTradingNameSummary.amendedRow(answers)
+    val tradingNameSummaryRow = TradingNameSummary.amendedAnswersRow(answers)
+    val removedTradingNameRow = TradingNameSummary.removedAnswersRow(getRemovedTradingNames(answers, registrationWrapper))
+    val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.amendedRowContactName(answers)
+    val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.amendedRowTelephoneNumber(answers)
+    val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.amendedRowEmailAddress(answers)
+    val bankDetailsAccountNameSummaryRow = BankDetailsSummary.amendedRowAccountName(answers)
+    val bankDetailsBicSummaryRow = BankDetailsSummary.amendedRowBIC(answers)
+    val bankDetailsIbanSummaryRow = BankDetailsSummary.amendedRowIBAN(answers)
+
+    Seq(
+      hasTradingNameSummaryRow,
+      tradingNameSummaryRow,
+      removedTradingNameRow,
+      businessContactDetailsContactNameSummaryRow,
+      businessContactDetailsTelephoneSummaryRow,
+      businessContactDetailsEmailSummaryRow,
+      bankDetailsAccountNameSummaryRow,
+      bankDetailsBicSummaryRow,
+      bankDetailsIbanSummaryRow
+    ).flatten
+  }
+
+  private def getRemovedTradingNames(answers: UserAnswers, registrationWrapper: Option[RegistrationWrapper]): Seq[String] = {
+
+    val amendedAnswers = answers.get(AllTradingNames).getOrElse(List.empty)
+    val originalAnswers = registrationWrapper.map(_.registration.tradingNames.map(_.tradingName)).getOrElse(List.empty)
+
+    originalAnswers.diff(amendedAnswers)
+
+  }
+
 }

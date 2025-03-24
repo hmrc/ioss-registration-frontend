@@ -35,7 +35,8 @@
         returnStartDate : LocalDate,
         includedSalesDate : LocalDate,
         ossRegistration: Option[OssRegistration],
-        numberOfIossRegistrations: Int
+        numberOfIossRegistrations: Int,
+        list: SummaryList,
 )(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("rejoinComplete.title")), showBackLink = false) {
@@ -50,16 +51,18 @@
             @Html(messages("rejoinComplete.organisationName", organisationName))
         </p>
 
-        @if(ossRegistration.nonEmpty) {
-            @if(numberOfIossRegistrations > 0) {
-                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssAndIossText")</p>
-            } else {
-                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
+        @if(list.rows.nonEmpty) {
+            @if(ossRegistration.nonEmpty) {
+                @if(numberOfIossRegistrations > 0) {
+                    <p class="govuk-body">@messages("applicationComplete.registration.updatedOssAndIossText")</p>
+                } else {
+                    <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
+                }
+            } else if(numberOfIossRegistrations == 1) {
+                <p class="govuk-body">@messages("applicationComplete.registration.updatedOneIossText")</p>
+            } else if(numberOfIossRegistrations > 1) {
+                <p class="govuk-body">@messages("applicationComplete.registration.updatedIossText")</p>
             }
-        } else if(numberOfIossRegistrations == 1) {
-            <p class="govuk-body">@messages("applicationComplete.registration.updatedOneIossText")</p>
-        } else if(numberOfIossRegistrations > 1) {
-            <p class="govuk-body">@messages("applicationComplete.registration.updatedIossText")</p>
         }
 
         <p class="govuk-body">
