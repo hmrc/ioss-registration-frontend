@@ -29,10 +29,12 @@ import views.html.BankDetailsView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class BankDetailsController @Inject()(override val messagesApi: MessagesApi,
-                                      cc: AuthenticatedControllerComponents,
-                                      formProvider: BankDetailsFormProvider,
-                                      view: BankDetailsView)(implicit ec: ExecutionContext)
+class BankDetailsController @Inject()(
+                                       override val messagesApi: MessagesApi,
+                                       cc: AuthenticatedControllerComponents,
+                                       formProvider: BankDetailsFormProvider,
+                                       view: BankDetailsView
+                                     )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
   private val form = formProvider()

@@ -19,15 +19,16 @@ package controllers
 import base.SpecBase
 import forms.BankDetailsFormProvider
 import models.{BankDetails, Bic, Iban}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BankDetailsPage, EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
+import uk.gov.hmrc.auth.core.Enrolments
 import views.html.BankDetailsView
 
 import scala.concurrent.Future
@@ -59,7 +60,7 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, waypoints, None, 1)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, waypoints, None, 0)(request, messages(application)).toString
       }
     }
 
@@ -123,7 +124,7 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, waypoints, None, 1)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, waypoints, None, 0)(request, messages(application)).toString
       }
     }
 
@@ -154,6 +155,84 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must return OK and the correct view for a GET when Oss Registration" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = ossRegistration).build()
+
+      running(application) {
+        val request = FakeRequest(GET, bankDetailsRoute)
+
+        val view = application.injector.instanceOf[BankDetailsView]
+
+        val expectedBankDetails = BankDetails(
+          accountName = "OSS Account Name",
+          bic = Bic("OSSBIC123"),
+          iban = Iban("GB33BUKB20201555555555").value
+        )
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form.fill(expectedBankDetails), waypoints, ossRegistration, 0)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when Oss Registration and Ioss registrations" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = ossRegistration, numberOfIossRegistrations = 1).build()
+
+      running(application) {
+        val request = FakeRequest(GET, bankDetailsRoute)
+
+        val view = application.injector.instanceOf[BankDetailsView]
+
+        val expectedBankDetails = BankDetails(
+          accountName = "OSS Account Name",
+          bic = Bic("OSSBIC123"),
+          iban = Iban("GB33BUKB20201555555555").value
+        )
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form.fill(expectedBankDetails), waypoints, ossRegistration, 1)(request, messages(application)).toString
+
+      }
+    }
+
+    "must return OK and the correct view for a GET 1 previous Ioss registrations" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = None, numberOfIossRegistrations = 1).build()
+
+      running(application) {
+        val request = FakeRequest(GET, bankDetailsRoute)
+
+        val view = application.injector.instanceOf[BankDetailsView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, waypoints, None, 1)(request, messages(application)).toString
+
+      }
+    }
+
+    "must return OK and the correct view for a GET more than 1 Ioss registrations" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = None, numberOfIossRegistrations = 2).build()
+
+      running(application) {
+        val request = FakeRequest(GET, bankDetailsRoute)
+
+        val view = application.injector.instanceOf[BankDetailsView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, waypoints, None, 2)(request, messages(application)).toString
       }
     }
   }

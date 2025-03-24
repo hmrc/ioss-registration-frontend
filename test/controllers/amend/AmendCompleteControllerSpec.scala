@@ -285,6 +285,148 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           }
         }
       }
+
+      "must return OK and the correct view for a GET when there is an oss registration" in {
+
+        val newTradingName = TradingName("NewTradingName")
+        val updatedAnswers = originalRegistration
+          .set(AllTradingNames, List(newTradingName)).success.value
+
+        val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+
+        running(application) {
+          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val config = application.injector.instanceOf[FrontendAppConfig]
+          val result = route(application, request).value
+          val view = application.injector.instanceOf[AmendCompleteView]
+          implicit val msgs: Messages = messages(application)
+          val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+
+          status(result) mustEqual OK
+
+          contentAsString(result) mustBe view(
+            vrn,
+            config.feedbackUrl(request),
+            None,
+            yourAccountUrl,
+            "Company name",
+            summaryList,
+            ossRegistration,
+            0
+          )(request, messages(application)).toString
+
+        }
+      }
+
+      "must return OK and the correct view for a GET when there is an Oss Registration and 1 ioss registration" in {
+
+        val newTradingName = TradingName("NewTradingName")
+        val updatedAnswers = originalRegistration
+          .set(AllTradingNames, List(newTradingName)).success.value
+
+        val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+
+        running(application) {
+          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val config = application.injector.instanceOf[FrontendAppConfig]
+          val result = route(application, request).value
+          val view = application.injector.instanceOf[AmendCompleteView]
+          implicit val msgs: Messages = messages(application)
+          val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
+            vrn,
+            config.feedbackUrl(request),
+            None,
+            yourAccountUrl,
+            "Company name",
+            summaryList,
+            ossRegistration,
+            1
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct view for a GET when there is 1 previous ioss Registration" in {
+
+        val newTradingName = TradingName("NewTradingName")
+        val updatedAnswers = originalRegistration
+          .set(AllTradingNames, List(newTradingName)).success.value
+
+        val application = applicationBuilder(userAnswers = Some(updatedAnswers), numberOfIossRegistrations = 1)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+
+        running(application) {
+          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val config = application.injector.instanceOf[FrontendAppConfig]
+          val result = route(application, request).value
+          val view = application.injector.instanceOf[AmendCompleteView]
+          implicit val msgs: Messages = messages(application)
+          val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
+            vrn,
+            config.feedbackUrl(request),
+            None,
+            yourAccountUrl,
+            "Company name",
+            summaryList,
+            None,
+            1
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct view for a GET when there is more than 1 ioss Registration" in {
+
+        val newTradingName = TradingName("NewTradingName")
+        val updatedAnswers = originalRegistration
+          .set(AllTradingNames, List(newTradingName)).success.value
+
+        val application = applicationBuilder(userAnswers = Some(updatedAnswers), numberOfIossRegistrations = 2)
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .build()
+
+        when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+
+        running(application) {
+          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val config = application.injector.instanceOf[FrontendAppConfig]
+          val result = route(application, request).value
+          val view = application.injector.instanceOf[AmendCompleteView]
+          implicit val msgs: Messages = messages(application)
+          val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
+            vrn,
+            config.feedbackUrl(request),
+            None,
+            yourAccountUrl,
+            "Company name",
+            summaryList,
+            None,
+            2
+          )(request, messages(application)).toString
+        }
+      }
     }
   }
 

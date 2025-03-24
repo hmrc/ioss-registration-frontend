@@ -19,7 +19,7 @@ package controllers.rejoin
 import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
-import models.UserAnswers
+import models.{TradingName, UserAnswers}
 import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.external.ExternalEntryUrl
@@ -36,7 +36,7 @@ import queries.OriginalRegistrationQuery
 import queries.rejoin.NewIossReferenceQuery
 import queries.tradingNames.AllTradingNames
 import services.core.CoreRegistrationValidationService
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
@@ -102,7 +102,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
           returnStartDate,
           includedSalesDate,
           None,
-          1,
+          0,
           summaryList
         )(request, messages(application)).toString
       }
@@ -195,7 +195,177 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         exception.getMessage mustEqual "OrganisationName has not been set in answers"
       }
     }
+
+    "return OK and the correct view when onPageLoad when there is an Oss Registration" in {
+
+      val newTradingName = TradingName("NewTradingName")
+      val updatedAnswers = originalRegistration
+        .set(AllTradingNames, List(newTradingName)).success.value
+
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration)
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+        .build()
+
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
+      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+
+      running(application) {
+        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val config = application.injector.instanceOf[FrontendAppConfig]
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[RejoinCompleteView]
+        implicit val msgs: Messages = messages(application)
+        val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+
+        status(result) mustEqual OK
+
+        contentAsString(result) mustEqual view(
+          vrn,
+          config.feedbackUrl(request),
+          None,
+          yourAccountUrl,
+          "Company name",
+          "IM900100000002",
+          commencementDate,
+          returnStartDate,
+          includedSalesDate,
+          ossRegistration,
+          0,
+          summaryList
+        )(request, messages(application)).toString
+      }
+    }
+
+    "return OK and the correct view when onPageLoad when there is an Oss Registration and 1 Ioss registration" in {
+
+      val newTradingName = TradingName("NewTradingName")
+      val updatedAnswers = originalRegistration
+        .set(AllTradingNames, List(newTradingName)).success.value
+
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1)
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+        .build()
+
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
+      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+
+      running(application) {
+        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val config = application.injector.instanceOf[FrontendAppConfig]
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[RejoinCompleteView]
+        implicit val msgs: Messages = messages(application)
+        val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+
+        status(result) mustEqual OK
+
+        contentAsString(result) mustEqual view(
+          vrn,
+          config.feedbackUrl(request),
+          None,
+          yourAccountUrl,
+          "Company name",
+          "IM900100000002",
+          commencementDate,
+          returnStartDate,
+          includedSalesDate,
+          ossRegistration,
+          1,
+          summaryList
+        )(request, messages(application)).toString
+      }
+    }
+
+    "return OK and the correct view when onPageLoad when there is 1 previous Ioss Registration" in {
+
+      val newTradingName = TradingName("NewTradingName")
+      val updatedAnswers = originalRegistration
+        .set(AllTradingNames, List(newTradingName)).success.value
+
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers), numberOfIossRegistrations = 1)
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+        .build()
+
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
+      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+
+      running(application) {
+        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val config = application.injector.instanceOf[FrontendAppConfig]
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[RejoinCompleteView]
+        implicit val msgs: Messages = messages(application)
+        val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+
+        status(result) mustEqual OK
+
+        contentAsString(result) mustEqual view(
+          vrn,
+          config.feedbackUrl(request),
+          None,
+          yourAccountUrl,
+          "Company name",
+          "IM900100000002",
+          commencementDate,
+          returnStartDate,
+          includedSalesDate,
+          None,
+          1,
+          summaryList
+        )(request, messages(application)).toString
+      }
+    }
+
+    "return OK and the correct view when onPageLoad when there is more than 1 Ioss Registration" in {
+
+      val newTradingName = TradingName("NewTradingName")
+      val updatedAnswers = originalRegistration
+        .set(AllTradingNames, List(newTradingName)).success.value
+
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers), numberOfIossRegistrations = 2)
+        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
+        .build()
+
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
+      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+
+      running(application) {
+        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val config = application.injector.instanceOf[FrontendAppConfig]
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[RejoinCompleteView]
+        implicit val msgs: Messages = messages(application)
+        val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
+
+        status(result) mustEqual OK
+
+        contentAsString(result) mustEqual view(
+          vrn,
+          config.feedbackUrl(request),
+          None,
+          yourAccountUrl,
+          "Company name",
+          "IM900100000002",
+          commencementDate,
+          returnStartDate,
+          includedSalesDate,
+          None,
+          2,
+          summaryList
+        )(request, messages(application)).toString
+      }
+    }
   }
+
+
 
   private def getAmendedRegistrationSummaryList(
                                                answers: UserAnswers,

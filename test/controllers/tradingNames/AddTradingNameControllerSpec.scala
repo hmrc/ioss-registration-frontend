@@ -186,5 +186,77 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
+
+    "must return OK and the correct view for a GET when Oss Registration" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers), ossRegistration = ossRegistration).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, ossRegistration, 0)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when Oss Registration and Ioss registrations" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, ossRegistration, 1)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET 1 previous Ioss registrations" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers), numberOfIossRegistrations = 1).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, None, 1)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET more than 1 Ioss registrations" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers), numberOfIossRegistrations = 2).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, None, 2)(request, messages(application)).toString
+      }
+    }
   }
 }

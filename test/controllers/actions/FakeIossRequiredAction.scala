@@ -18,6 +18,7 @@ package controllers.actions
 
 import models.UserAnswers
 import models.amend.RegistrationWrapper
+import models.ossRegistration.OssRegistration
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import play.api.mvc.Result
 import uk.gov.hmrc.auth.core.Enrolments
@@ -29,7 +30,9 @@ import scala.concurrent.{ExecutionContext, Future}
 case class FakeIossRequiredActionImpl(
                                        dataToReturn: Option[UserAnswers],
                                        registrationWrapper: RegistrationWrapper,
-                                       maybeEnrolments: Option[Enrolments]
+                                       maybeEnrolments: Option[Enrolments],
+                                       ossRegistration: Option[OssRegistration],
+                                       numberOfIossRegistrations: Int
                                      )
   extends IossRequiredActionImpl()(ExecutionContext.Implicits.global) {
 
@@ -49,17 +52,21 @@ case class FakeIossRequiredActionImpl(
       request.iossNumber.getOrElse("IM9001234567"),
       registrationWrapper,
       data,
-      1,
-      None
+      numberOfIossRegistrations,
+      ossRegistration
     )).toFuture
   }
 }
 
-class FakeIossRequiredAction(dataToReturn: Option[UserAnswers],
-                             registrationWrapper: RegistrationWrapper,
-                             enrolments: Option[Enrolments] = None
+class FakeIossRequiredAction(
+                              dataToReturn: Option[UserAnswers],
+                              registrationWrapper: RegistrationWrapper,
+                              enrolments: Option[Enrolments] = None,
+                              ossRegistration: Option[OssRegistration],
+                              numberOfIossRegistrations: Int
                             )
   extends IossRequiredAction()(ExecutionContext.Implicits.global) {
-  override def apply(): IossRequiredActionImpl = new FakeIossRequiredActionImpl(dataToReturn, registrationWrapper, enrolments)
+  override def apply(): IossRequiredActionImpl =
+    FakeIossRequiredActionImpl(dataToReturn, registrationWrapper, enrolments, ossRegistration, numberOfIossRegistrations)
 }
 
