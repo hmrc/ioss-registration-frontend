@@ -20,13 +20,13 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import forms.BusinessContactDetailsFormProvider
-import models.{BankDetails, CheckMode}
+import models.{BankDetails, BusinessContactDetails, CheckMode}
 import models.emailVerification.EmailVerificationResponse
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.responses.UnexpectedResponseStatus
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
@@ -35,7 +35,7 @@ import pages.{BankDetailsPage, BusinessContactDetailsPage, EmptyWaypoints, Waypo
 import play.api.inject.bind
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import services.{EmailVerificationService, SaveForLaterService}
 import utils.FutureSyntax.FutureOps
@@ -97,7 +97,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(form, emptyWaypoints)(request, messages(application)).toString
+          contentAsString(result) mustBe view(form, emptyWaypoints, None, 1)(request, messages(application)).toString
         }
       }
 
@@ -114,7 +114,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(form.fill(contactDetails), emptyWaypoints)(request, messages(application)).toString
+          contentAsString(result) mustBe view(form.fill(contactDetails), emptyWaypoints, None, 1)(request, messages(application)).toString
         }
       }
 
@@ -134,7 +134,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(form, amendPreviousWaypoints)(request, messages(application)).toString
+          contentAsString(result) mustBe view(form, amendPreviousWaypoints, None, 1)(request, messages(application)).toString
         }
       }
     }
@@ -583,7 +583,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           val result = route(application, request).value
 
           status(result) mustBe BAD_REQUEST
-          contentAsString(result) mustBe view(boundForm, emptyWaypoints)(request, messages(application)).toString
+          contentAsString(result) mustBe view(boundForm, emptyWaypoints, None, 1)(request, messages(application)).toString
         }
       }
 
@@ -776,6 +776,86 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
             eqTo(emailVerificationRequest.email.get.address),
             eqTo(emailVerificationRequest.pageTitle),
             eqTo(emailVerificationRequest.continueUrl))(any())
+      }
+    }
+
+    "must return OK and the correct view for a GET when Oss Registration is present" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = ossRegistration)
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, businessContactDetailsRoute)
+
+        val view = application.injector.instanceOf[BusinessContactDetailsView]
+
+        val expectedContactDetails = BusinessContactDetails(
+          fullName = "Rory Beans",
+          telephoneNumber = "01234567890",
+          emailAddress = "roryBeans@beans.com"
+        )
+
+        val result = route(application, request).value
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form.fill(expectedContactDetails), emptyWaypoints, ossRegistration, 0)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when Oss Registration and Ioss registrations are present" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = ossRegistration, numberOfIossRegistrations = 1)
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, businessContactDetailsRoute)
+
+        val view = application.injector.instanceOf[BusinessContactDetailsView]
+
+        val expectedContactDetails = BusinessContactDetails(
+          fullName = "Rory Beans",
+          telephoneNumber = "01234567890",
+          emailAddress = "roryBeans@beans.com"
+        )
+
+        val result = route(application, request).value
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form.fill(expectedContactDetails), emptyWaypoints, ossRegistration, 1)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when 1 previous Ioss registrations is present" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), numberOfIossRegistrations = 1)
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, businessContactDetailsRoute)
+
+        val view = application.injector.instanceOf[BusinessContactDetailsView]
+
+        val result = route(application, request).value
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, emptyWaypoints, None, 1)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when more than 1 Ioss registrations are present" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), numberOfIossRegistrations = 2)
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, businessContactDetailsRoute)
+
+        val view = application.injector.instanceOf[BusinessContactDetailsView]
+
+        val result = route(application, request).value
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, emptyWaypoints, None, 2)(request, messages(application)).toString
       }
     }
   }

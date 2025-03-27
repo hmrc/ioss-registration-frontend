@@ -108,14 +108,16 @@ trait SpecBase
                                     userAnswers: Option[UserAnswers] = None,
                                     clock: Option[Clock] = None,
                                     registrationWrapper: Option[RegistrationWrapper] = None,
-                                    enrolments: Option[Enrolments] = None
+                                    enrolments: Option[Enrolments] = None,
+                                    ossRegistration: Option[OssRegistration] = None,
+                                    numberOfIossRegistrations: Int = 0
                                   ): GuiceApplicationBuilder = {
 
     val clockToBind = clock.getOrElse(stubClockAtArbitraryDate)
 
     new GuiceApplicationBuilder()
       .overrides(
-        bind[AuthenticatedIdentifierAction].to[FakeAuthenticatedIdentifierAction],
+        bind[AuthenticatedIdentifierAction].toInstance(new FakeAuthenticatedIdentifierAction(ossRegistration, numberOfIossRegistrations)),
         bind[AuthenticatedDataRetrievalAction].toInstance(new FakeAuthenticatedDataRetrievalAction(userAnswers, vrn)),
         bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers)),
         bind[AuthenticatedDataRequiredActionImpl].toInstance(FakeAuthenticatedDataRequiredAction(userAnswers)),
@@ -124,7 +126,9 @@ trait SpecBase
         bind[CheckEmailVerificationFilterProvider].toInstance(new FakeCheckEmailVerificationFilter()),
         bind[SavedAnswersRetrievalActionProvider].toInstance(new FakeSavedAnswersRetrievalActionProvider(userAnswers, vrn)),
         bind[CheckBouncedEmailFilterProvider].toInstance(new FakeCheckBouncedEmailFilterProvider()),
-        bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(userAnswers, registrationWrapper.getOrElse(this.registrationWrapper), enrolments)),
+        bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(
+          userAnswers, registrationWrapper.getOrElse(this.registrationWrapper), enrolments, ossRegistration, numberOfIossRegistrations
+        )),
         bind[CheckAmendPreviousRegistrationFilterProvider].toInstance(new FakeCheckAmendPreviousRegistrationFilterProvider()),
         bind[Clock].toInstance(clockToBind)
       )
@@ -156,17 +160,29 @@ trait SpecBase
     EmptyWaypoints.setNextWaypoint(Waypoint(checkAnswersPage, CheckMode, checkAnswersPage.urlFragment))
 
 
+  private val ossBankDetails = BankDetails(
+    accountName = "OSS Account Name",
+    bic = Bic("OSSBIC123"),
+    iban = Iban("GB33BUKB20201555555555").value
+  )
+  
+  private val ossContactDetail = OssContactDetails(
+    fullName = "Rory Beans",
+    telephoneNumber = "01234567890",
+    emailAddress = "roryBeans@beans.com"
+  )
+  
   val ossRegistration: Option[OssRegistration] = Some(OssRegistration(
     vrn = vrn,
     registeredCompanyName = "Test Company",
     tradingNames = Seq("Trade1", "Trade2"),
     vatDetails = mock[OssVatDetails],
     euRegistrations = Seq(mock[OssEuTaxRegistration]),
-    contactDetails = mock[OssContactDetails],
+    contactDetails = ossContactDetail,
     websites = Seq("https://example.com"),
     commencementDate = LocalDate.now(),
     previousRegistrations = Seq(mock[OssPreviousRegistration]),
-    bankDetails = mock[BankDetails],
+    bankDetails = ossBankDetails,
     isOnlineMarketplace = false,
     niPresence = None,
     dateOfFirstSale = Some(LocalDate.now()),

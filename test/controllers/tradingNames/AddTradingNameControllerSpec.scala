@@ -19,7 +19,7 @@ package controllers.tradingNames
 import base.SpecBase
 import forms.tradingNames.AddTradingNameFormProvider
 import models.{Index, TradingName, UserAnswers}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.tradingNames.{AddTradingNamePage, TradingNamePage}
@@ -27,7 +27,7 @@ import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.tradingName.TradingNameSummary
@@ -61,7 +61,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
         val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, None, 1)(request, messages(application)).toString
       }
     }
 
@@ -83,7 +83,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form.fill(true), waypoints, list, canAddTradingNames = false)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form.fill(true), waypoints, list, canAddTradingNames = false, None, 1)(request, messages(application)).toString
       }
     }
 
@@ -104,7 +104,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true)(request, messages(application)).toString
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, None, 1)(request, messages(application)).toString
       }
     }
 
@@ -153,7 +153,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustBe BAD_REQUEST
-        contentAsString(result) mustBe view(boundForm, waypoints, list, canAddTradingNames = true)(request, messages(application)).toString
+        contentAsString(result) mustBe view(boundForm, waypoints, list, canAddTradingNames = true, None, 1)(request, messages(application)).toString
       }
     }
 
@@ -184,6 +184,78 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
+      }
+    }
+
+    "must return OK and the correct view for a GET when Oss Registration is present" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers), ossRegistration = ossRegistration).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, ossRegistration, 0)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when Oss Registration and Ioss registrations are present" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, ossRegistration, 1)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when 1 previous Ioss registrations is present" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers), numberOfIossRegistrations = 1).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, None, 1)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when more than 1 Ioss registrations are present" in {
+
+      val application = applicationBuilder(userAnswers = Some(answers), numberOfIossRegistrations = 2).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addTradingNameRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AddTradingNameView]
+
+        val list = TradingNameSummary.addToListRows(answers, waypoints, AddTradingNamePage())
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe view(form, waypoints, list, canAddTradingNames = true, None, 2)(request, messages(application)).toString
       }
     }
   }

@@ -17,6 +17,7 @@
 package controllers.actions
 
 import config.FrontendAppConfig
+import models.ossRegistration.OssRegistration
 import models.requests.AuthenticatedIdentifierRequest
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.{Request, Result}
@@ -29,7 +30,7 @@ import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeAuthenticatedIdentifierAction extends AuthenticatedIdentifierAction(
+class FakeAuthenticatedIdentifierAction(ossRegistration: Option[OssRegistration], numberOfIossRegistrations: Int) extends AuthenticatedIdentifierAction(
   mock[AuthConnector],
   mock[FrontendAppConfig],
   mock[UrlBuilderService],
@@ -44,7 +45,7 @@ class FakeAuthenticatedIdentifierAction extends AuthenticatedIdentifierAction(
       Vrn("123456789"),
       Enrolments(Set.empty),
       Some("IM9001234567"),
-      1,
-      None
+      numberOfIossRegistrations,
+      ossRegistration
     )).toFuture
 }
