@@ -187,7 +187,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return OK and the correct view for a GET when Oss Registration" in {
+    "must return OK and the correct view for a GET when Oss Registration is present" in {
 
       val application = applicationBuilder(userAnswers = Some(answers), ossRegistration = ossRegistration).build()
 
@@ -205,7 +205,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return OK and the correct view for a GET when Oss Registration and Ioss registrations" in {
+    "must return OK and the correct view for a GET when Oss Registration and Ioss registrations are present" in {
 
       val application = applicationBuilder(userAnswers = Some(answers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1).build()
 
@@ -223,7 +223,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return OK and the correct view for a GET 1 previous Ioss registrations" in {
+    "must return OK and the correct view for a GET when 1 previous Ioss registrations is present" in {
 
       val application = applicationBuilder(userAnswers = Some(answers), numberOfIossRegistrations = 1).build()
 
@@ -241,7 +241,7 @@ class AddTradingNameControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return OK and the correct view for a GET more than 1 Ioss registrations" in {
+    "must return OK and the correct view for a GET when more than 1 Ioss registrations are present" in {
 
       val application = applicationBuilder(userAnswers = Some(answers), numberOfIossRegistrations = 2).build()
 

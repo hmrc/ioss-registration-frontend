@@ -72,7 +72,6 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
           None,
-          0,
           expectedList
         )(request, messages(application)).toString
       }
@@ -106,7 +105,6 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
           ossRegistration,
-          0,
           expectedList
         )(request, messages(application)).toString
       }

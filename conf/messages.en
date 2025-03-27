@@ -285,6 +285,14 @@ tradingName.change.hidden = your UK trading name
 
 addTradingName.title.singular = You have added one UK trading name
 addTradingName.title.plural = You have added {0} UK trading names
+addTradingName.title.ossRegistration.singular = You have one UK trading name from your One Stop Shop registration
+addTradingName.title.ossRegistration.plural = You have {0} UK trading names from your One Stop Shop registration
+addTradingName.title.ossAndIossRegistration.singular = You have one UK trading name from your One Stop Shop and Import One Stop Shop registrations
+addTradingName.title.ossAndIossRegistration.plural = You have {0} UK trading names from your One Stop Shop and Import One Stop Shop registrations
+addTradingName.title.iossRegistration.singular = You have one UK trading name from your Import One Stop Shop registration
+addTradingName.title.iossRegistration.plural = You have {0} UK trading names from your Import One Stop Shop registration
+addTradingName.title.iossRegistrations.singular = You have one UK trading name from your Import One Stop Shop registrations
+addTradingName.title.iossRegistrations.plural = You have {0} UK trading names from your Import One Stop Shop registrations
 addTradingName.heading.singular = You have added one UK trading name
 addTradingName.heading.plural = You have added {0} UK trading names
 addTradingName.heading.ossRegistration.singular = You have one UK trading name from your One Stop Shop registration

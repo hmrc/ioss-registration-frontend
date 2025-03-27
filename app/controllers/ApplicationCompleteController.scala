@@ -59,7 +59,6 @@ class ApplicationCompleteController @Inject()(
 
         val iossReferenceNumber = etmpEnrolmentResponse.iossReference
         val ossRegistration = request.latestOssRegistration
-        val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         val commencementDate = LocalDate.now(clock)
         val returnStartDate = commencementDate.withDayOfMonth(commencementDate.lengthOfMonth()).plusDays(1)
@@ -74,7 +73,6 @@ class ApplicationCompleteController @Inject()(
           includedSalesDate.format(dateFormatter),
           frontendAppConfig.feedbackUrl,
           ossRegistration,
-          numberOfIossRegistrations,
           list
         ))
       }).getOrElse(Redirect(JourneyRecoveryPage.route(EmptyWaypoints)))

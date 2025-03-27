@@ -41,9 +41,33 @@
 )(implicit request: Request[_], messages: Messages)
 
 @titleText = @{
-    tradingNames.size match {
-        case 1 => messages("addTradingName.title.singular")
-        case i => messages("addTradingName.title.plural", i)
+    if(ossRegistration.exists(_.tradingNames.nonEmpty)) {
+        if(numberOfIossRegistrations > 0) {
+            tradingNames.size match {
+                case 1 => messages("addTradingName.title.ossAndIossRegistration.singular")
+                case i => messages("addTradingName.title.ossAndIossRegistration.plural", i)
+            }
+        } else {
+            tradingNames.size match {
+                case 1 => messages("addTradingName.title.ossRegistration.singular")
+                case i => messages("addTradingName.title.ossRegistration.plural", i)
+            }
+        }
+    } else if(numberOfIossRegistrations > 1) {
+        tradingNames.size match {
+            case 1 => messages("addTradingName.title.iossRegistrations.singular")
+            case i => messages("addTradingName.title.iossRegistrations.plural", i)
+        }
+    } else if(numberOfIossRegistrations == 1 && waypoints.inRejoin) {
+        tradingNames.size match {
+            case 1 => messages("addTradingName.title.iossRegistration.singular")
+            case i => messages("addTradingName.title.iossRegistration.plural", i)
+        }
+    }else {
+        tradingNames.size match {
+            case 1 => messages("addTradingName.title.singular")
+            case i => messages("addTradingName.title.plural", i)
+        }
     }
 }
 
