@@ -37,7 +37,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("BE", "Belgium"), Seq("BE0123456789", "BE1123456789")),
     (Country("BG", "Bulgaria"), Seq("BG123456789", "BG1234567890")),
     (Country("HR", "Croatia"), Seq("HR12345678901")),
-    (Country("CY", "Republic of Cyprus"), Seq("CY12345678L")),
+    (Country("CY", "Cyprus"), Seq("CY12345678L")),
     (Country("CZ", "Czech Republic"), Seq("CZ12345678", "CZ123456789", "CZ1234567890")),
     (Country("DK", "Denmark"), Seq("DK12345678")),
     (Country("EE", "Estonia"), Seq("EE123456789")),
@@ -67,7 +67,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("BE", "Belgium"), Seq("2123456789", "112345678", "11234567890", "112345678A")),
     (Country("BG", "Bulgaria"), Seq("12345678", "12345678900", "123AAA789A")),
     (Country("HR", "Croatia"), Seq("1234567890", "123456789010", "123456789AA")),
-    (Country("CY", "Republic of Cyprus"), Seq("123456781", "1234567L", "1234567LL", "123456789L")),
+    (Country("CY", "Cyprus"), Seq("123456781", "1234567L", "1234567LL", "123456789L")),
     (Country("CZ", "Czech Republic"), Seq("1234567", "123AAA789", "12345678900")),
     (Country("DK", "Denmark"), Seq("1234567", "123456789", "123456AA")),
     (Country("EE", "Estonia"), Seq("12345678", "1234567890", "1234567AA")),
@@ -97,7 +97,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("BE", "Belgium"), Seq(PreviousScheme.OSSU), Seq("EU234567891")),
     (Country("BG", "Bulgaria"), Seq(PreviousScheme.IOSSWI, PreviousScheme.OSSU), Seq("EU345678912")),
     (Country("HR", "Croatia"), Seq(PreviousScheme.IOSSWOI,  PreviousScheme.OSSNU), Seq("HR12345678901")),
-    (Country("CY", "Republic of Cyprus"), Seq.empty, Seq.empty),
+    (Country("CY", "Cyprus"), Seq.empty, Seq.empty),
     (Country("DK", "Denmark"), Seq.empty, Seq("DK12345678", "EU234567891"))
   )
 
@@ -106,7 +106,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("BE", "Belgium"), Seq(PreviousScheme.OSSU), Seq("BE1234567891")),
     (Country("BG", "Bulgaria"), Seq(PreviousScheme.IOSSWI, PreviousScheme.OSSU), Seq("BG1234567890")),
     (Country("HR", "Croatia"), Seq(PreviousScheme.IOSSWOI, PreviousScheme.OSSNU), Seq("EU123567901")),
-    (Country("CY", "Republic of Cyprus"), Seq(PreviousScheme.OSSU, PreviousScheme.OSSNU), Seq("CY12345678L", "EU234567891"))
+    (Country("CY", "Cyprus"), Seq(PreviousScheme.OSSU, PreviousScheme.OSSNU), Seq("CY12345678L", "EU234567891"))
   )
 
   private val countriesAndLowerCaseOSSSchemes: Seq[(Country, Seq[String])] = Seq(
@@ -114,7 +114,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("BE", "Belgium"), Seq("be1234567891")),
     (Country("BG", "Bulgaria"), Seq("bg1234567890")),
     (Country("HR", "Croatia"), Seq("eu123567901")),
-    (Country("CY", "Republic of Cyprus"), Seq("cy12345678L", "eu234567891"))
+    (Country("CY", "Cyprus"), Seq("cy12345678L", "eu234567891"))
   )
 
   private val countriesAndOSSSchemesWithSpaces: Seq[(Country, Seq[String])] = Seq(
@@ -122,7 +122,7 @@ class PreviousOssNumberFormProviderSpec extends StringFieldBehaviours {
     (Country("BE", "Belgium"), Seq(" be1234 567891  ")),
     (Country("BG", "Bulgaria"), Seq("b g 123 45 6789 0")),
     (Country("HR", "Croatia"), Seq("eu 123 5679 01 ")),
-    (Country("CY", "Republic of Cyprus"), Seq(" cy12345678L ", "eu 234567891"))
+    (Country("CY", "Cyprus"), Seq(" cy12345678L ", "eu 234567891"))
   )
 
 

@@ -28,7 +28,7 @@ object IossRegistrationNumberValidation {
     IossRegistrationNumberValidation(Country("BE", "Belgium"), belgiumIossNumberRegex, "This will start with IM056 followed by 7 numbers"),
     IossRegistrationNumberValidation(Country("BG", "Bulgaria"), bulgariaIossNumberRegex, "This will start with IM100 followed by 7 numbers"),
     IossRegistrationNumberValidation(Country("HR", "Croatia"), croatiaIossNumberRegex, "This will start with IM191 followed by 7 numbers"),
-    IossRegistrationNumberValidation(Country("CY", "Republic of Cyprus"), cyprusIossNumberRegex, "This will start with IM196 followed by 7 numbers"),
+    IossRegistrationNumberValidation(Country("CY", "Cyprus"), cyprusIossNumberRegex, "This will start with IM196 followed by 7 numbers"),
     IossRegistrationNumberValidation(Country("CZ", "Czech Republic"), czechRepublicIossNumberRegex, "This will start with IM203 followed by 7 numbers"),
     IossRegistrationNumberValidation(Country("DK", "Denmark"), denmarkIossNumberRegex, "This will start with IM208 followed by 7 numbers"),
     IossRegistrationNumberValidation(Country("EE", "Estonia"), estoniaIossNumberRegex, "This will start with IM233 followed by 7 numbers"),
