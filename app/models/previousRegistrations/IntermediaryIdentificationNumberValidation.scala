@@ -32,7 +32,7 @@ object IntermediaryIdentificationNumberValidation {
       bulgariaIntermediaryIdentificationRegex, "This will start with IN100 followed by 7 numbers"),
     IntermediaryIdentificationNumberValidation(Country("HR", "Croatia"),
       croatiaIntermediaryIdentificationRegex, "This will start with IN191 followed by 7 numbers"),
-    IntermediaryIdentificationNumberValidation(Country("CY", "Republic of Cyprus"),
+    IntermediaryIdentificationNumberValidation(Country("CY", "Cyprus"),
       cyprusIntermediaryIdentificationRegex, "This will start with IN196 followed by 7 numbers"),
     IntermediaryIdentificationNumberValidation(Country("CZ", "Czech Republic"),
       czechRepublicIntermediaryIdentificationRegex, "This will start with IN203 followed by 7 numbers"),
