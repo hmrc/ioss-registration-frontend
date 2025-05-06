@@ -76,7 +76,7 @@ class AuthenticatedIdentifierAction @Inject()(
           case (Some(vrn), futureMaybeIossNumber) =>
             for {
               (numberOfIossRegistrations, maybeIossNumber) <- futureMaybeIossNumber
-              latestOssRegistration <- ossRegistrationService.getLatestOssRegistration(vrn)
+              latestOssRegistration <- ossRegistrationService.getLatestOssRegistration(enrolments, vrn)
             } yield Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber, numberOfIossRegistrations, latestOssRegistration))
             
           case _ => throw InsufficientEnrolments()
@@ -88,7 +88,7 @@ class AuthenticatedIdentifierAction @Inject()(
             if (confidence >= ConfidenceLevel.L250) {
               for {
                 (numberOfIossRegistrations, maybeIossNumber) <- futureMaybeIossNumber
-                latestOssRegistration <- ossRegistrationService.getLatestOssRegistration(vrn)
+                latestOssRegistration <- ossRegistrationService.getLatestOssRegistration(enrolments, vrn)
               } yield Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber, numberOfIossRegistrations, latestOssRegistration))
             } else {
               throw InsufficientConfidenceLevel()

@@ -16,23 +16,32 @@
 
 package services.oss
 
+import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import logging.Logging
 import models.ossRegistration.OssRegistration
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.domain.Vrn
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-case class OssRegistrationService @Inject()(
-                                           registrationConnector: RegistrationConnector
+class OssRegistrationService @Inject()(
+                                           registrationConnector: RegistrationConnector,
+                                           config: FrontendAppConfig
                                          )(implicit ec: ExecutionContext) extends Logging {
 
-  def getLatestOssRegistration(vrn: Vrn)(implicit hc: HeaderCarrier): Future[Option[OssRegistration]] = {
-    registrationConnector.getOssRegistration(vrn).map {
-      case Right(ossRegistration) => Some(ossRegistration)
-      case Left(_) => None
+  def getLatestOssRegistration(enrolments: Enrolments, vrn: Vrn)(implicit hc: HeaderCarrier): Future[Option[OssRegistration]] = {
+    val hasOssEnrolment = enrolments.enrolments.exists(_.key == config.ossEnrolment)
+    if(hasOssEnrolment) {
+      registrationConnector.getOssRegistration(vrn).map {
+        case Right(ossRegistration) => Some(ossRegistration)
+        case Left(_) => None
+      }
+    } else {
+      None.toFuture
     }
   }
 }

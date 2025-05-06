@@ -82,7 +82,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ vatEnrolment ~ Some(Organisation) ~ ConfidenceLevel.L250).toFuture
 
-          when(mockOssRegistrationService.getLatestOssRegistration(any())(any())) thenReturn ossRegistration.toFuture
+          when(mockOssRegistrationService.getLatestOssRegistration(any(), any())(any())) thenReturn ossRegistration.toFuture
 
           val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
           val controller = new Harness(action, actionBuilder)
@@ -107,7 +107,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ vatDecEnrolment ~ Some(Organisation) ~ ConfidenceLevel.L250).toFuture
 
-          when(mockOssRegistrationService.getLatestOssRegistration(any())(any())) thenReturn ossRegistration.toFuture
+          when(mockOssRegistrationService.getLatestOssRegistration(any(), any())(any())) thenReturn ossRegistration.toFuture
 
           val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
           val controller = new Harness(action, actionBuilder)
@@ -132,7 +132,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ vatEnrolment ~ Some(Individual) ~ ConfidenceLevel.L250).toFuture
 
-          when(mockOssRegistrationService.getLatestOssRegistration(any())(any())) thenReturn ossRegistration.toFuture
+          when(mockOssRegistrationService.getLatestOssRegistration(any(), any())(any())) thenReturn ossRegistration.toFuture
 
           val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
           val controller = new Harness(action, actionBuilder)
