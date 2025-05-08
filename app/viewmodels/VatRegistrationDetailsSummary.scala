@@ -47,18 +47,6 @@ object VatRegistrationDetailsSummary {
         }
     }
 
-  def rowPartOfVatUkGroup(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.vatInfo.map {
-      answer =>
-
-        val value = if (answer.partOfVatGroup) "site.yes" else "site.no"
-
-        SummaryListRowViewModel(
-          key = "vatRegistrationDetails.checkYourAnswers.partOfVatGroup",
-          value = ValueViewModel(value)
-        )
-    }
-
   def rowUkVatRegistrationDate(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.vatInfo.map {
       answer =>
