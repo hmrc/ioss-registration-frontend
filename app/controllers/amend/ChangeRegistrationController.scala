@@ -94,7 +94,6 @@ class ChangeRegistrationController @Inject()(
             rows = Seq(
               VatRegistrationDetailsSummary.rowBusinessName(request.userAnswers),
               VatRegistrationDetailsSummary.rowIndividualName(request.userAnswers),
-              VatRegistrationDetailsSummary.rowPartOfVatUkGroup(request.userAnswers),
               VatRegistrationDetailsSummary.rowUkVatRegistrationDate(request.userAnswers),
               VatRegistrationDetailsSummary.rowBusinessAddress(request.userAnswers)
             ).flatten

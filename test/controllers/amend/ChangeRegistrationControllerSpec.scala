@@ -341,7 +341,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
   private def getChangeRegistrationVatRegistrationDetailsSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
     Seq(
       VatRegistrationDetailsSummary.rowBusinessName(answers),
-      VatRegistrationDetailsSummary.rowPartOfVatUkGroup(answers),
       VatRegistrationDetailsSummary.rowUkVatRegistrationDate(answers),
       VatRegistrationDetailsSummary.rowBusinessAddress(answers)
     ).flatten

@@ -221,7 +221,6 @@ checkVatDetails.question = Do you want to register this business for the Import 
 checkVatDetails.vrn = UK VAT registration number
 checkVatDetails.organisationName = Business name
 checkVatDetails.individualName = Name
-checkVatDetails.partOfVatGroup = Part of a UK VAT group
 checkVatDetails.address = Principal place of business address
 checkVatDetails.yes = Yes
 checkVatDetails.detailsIncorrect = Yes, but some of my VAT details are incorrect
@@ -230,7 +229,6 @@ checkVatDetails.wrongAccount = No, I want to register a different business
 vatRegistrationDetails.checkYourAnswers.heading = VAT registration details
 vatRegistrationDetails.checkYourAnswers.organisationName = Business name
 vatRegistrationDetails.checkYourAnswers.individualName = Name
-vatRegistrationDetails.checkYourAnswers.partOfVatGroup = Part of a VAT group
 vatRegistrationDetails.checkYourAnswers.vatRegistrationDate = UK VAT registration date
 vatRegistrationDetails.checkYourAnswers.businessAddress = Business address
 vatRegistrationDetails.checkYourAnswers.manageVatBTA = <a class="govuk-link" href="/business-account">Manage your UK VAT registration in your BTA account</a>
