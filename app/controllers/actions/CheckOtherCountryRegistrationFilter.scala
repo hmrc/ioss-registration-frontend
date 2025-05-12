@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import formats.Format
 import logging.Logging
 import models.core.{Match, MatchType}
 import models.requests.AuthenticatedDataRequest
@@ -25,6 +26,8 @@ import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import java.time.LocalDate
+import scala.util.Try
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,8 +43,10 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    def getEffectiveDate(activeMatch: Match) = {
-      activeMatch.exclusionEffectiveDate match {
+    def getEffectiveDate(activeMatch: Match): LocalDate = {
+      activeMatch.exclusionEffectiveDate.flatMap { dateString =>
+        Try(LocalDate.parse(dateString, Format.eisDateFormatter)).toOption
+      } match {
         case Some(date) => date
         case _ =>
           val e = new IllegalStateException(s"MatchType ${activeMatch.matchType} didn't include an expected exclusion effective date")
@@ -55,13 +60,18 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
         if isActiveNotInAmend(activeMatch) =>
         Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(activeMatch.memberState)))
 
-      case Some(activeMatch)
-        if isQuarantinedNotInAmend(activeMatch) =>
-        Some(Redirect(
-          controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
-            activeMatch.memberState,
-            getEffectiveDate(activeMatch))
-        ))
+      case Some(activeMatch) if isQuarantinedNotInAmend(activeMatch) =>
+        val effectiveDate = getEffectiveDate(activeMatch)
+        val quarantineCutOffDate = LocalDate.now.minusYears(2)
+        if (effectiveDate.isAfter(quarantineCutOffDate)) {
+          Some(Redirect(
+            controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
+              activeMatch.memberState,
+              effectiveDate.toString)
+          ))
+        } else {
+          None
+        }
 
       case _ =>
         None
