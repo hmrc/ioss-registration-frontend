@@ -21,11 +21,13 @@ import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
 import services.core.CoreRegistrationValidationService
 
+import java.time.Clock
 import scala.concurrent.{ExecutionContext, Future}
 
 class FakeCheckOtherCountryRegistrationFilterImpl() extends CheckOtherCountryRegistrationFilterImpl(
   registrationModificationMode = NotModifyingExistingRegistration,
-  mock[CoreRegistrationValidationService]
+  mock[CoreRegistrationValidationService],
+  mock[Clock]
 )(ExecutionContext.Implicits.global) {
 
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
@@ -35,7 +37,8 @@ class FakeCheckOtherCountryRegistrationFilterImpl() extends CheckOtherCountryReg
 }
 
 class FakeCheckOtherCountryRegistrationFilter() extends CheckOtherCountryRegistrationFilter(
-  mock[CoreRegistrationValidationService]
+  mock[CoreRegistrationValidationService],
+  mock[Clock]
 )(ExecutionContext.Implicits.global) {
   override def apply(registrationModificationMode: RegistrationModificationMode): CheckOtherCountryRegistrationFilterImpl =
     new FakeCheckOtherCountryRegistrationFilterImpl
