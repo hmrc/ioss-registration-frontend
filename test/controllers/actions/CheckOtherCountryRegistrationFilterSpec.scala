@@ -57,7 +57,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
   }
 
   class Harness(registrationModificationMode: RegistrationModificationMode, service: CoreRegistrationValidationService) extends
-    CheckOtherCountryRegistrationFilterImpl(registrationModificationMode, service) {
+    CheckOtherCountryRegistrationFilterImpl(registrationModificationMode, service, stubClockAtArbitraryDate) {
     def callFilter(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = filter(request)
   }
 
@@ -185,7 +185,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
               running(app) {
 
-                val oldDate = LocalDate.now.minusYears(2).minusDays(1)
+                val oldDate = LocalDate.now(stubClockAtArbitraryDate).minusYears(2).minusDays(1)
                 val expectedMatch = genericMatch.copy(
                   matchType = MatchType.OtherMSNETPQuarantinedNETP,
                   exclusionEffectiveDate = Some(oldDate.toString)
@@ -262,7 +262,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
               running(app) {
 
-                val oldDate = LocalDate.now.minusYears(2).minusDays(1)
+                val oldDate = LocalDate.now(stubClockAtArbitraryDate).minusYears(2).minusDays(1)
                 val expectedMatch = genericMatch.copy(
                   matchType = MatchType.FixedEstablishmentQuarantinedNETP,
                   exclusionEffectiveDate = Some(oldDate.toString)
@@ -340,7 +340,7 @@ class CheckOtherCountryRegistrationFilterSpec extends SpecBase with MockitoSugar
 
               running(app) {
 
-                val oldDate = LocalDate.now.minusYears(2).minusDays(1)
+                val oldDate = LocalDate.now(stubClockAtArbitraryDate).minusYears(2).minusDays(1)
                 val expectedMatch = genericMatch.copy(
                   matchType = MatchType.TransferringMSID,
                   exclusionEffectiveDate = Some(oldDate.toString),

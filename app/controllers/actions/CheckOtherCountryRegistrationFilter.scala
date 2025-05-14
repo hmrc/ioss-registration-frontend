@@ -26,14 +26,15 @@ import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import scala.util.Try
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckOtherCountryRegistrationFilterImpl @Inject()(
                                                          registrationModificationMode: RegistrationModificationMode,
-                                                         service: CoreRegistrationValidationService
+                                                         service: CoreRegistrationValidationService,
+                                                         clock: Clock
                                                        )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
 
@@ -62,7 +63,7 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
 
       case Some(activeMatch) if isQuarantinedNotInAmend(activeMatch) =>
         val effectiveDate = getEffectiveDate(activeMatch)
-        val quarantineCutOffDate = LocalDate.now.minusYears(2)
+        val quarantineCutOffDate = LocalDate.now(clock).minusYears(2)
         if (effectiveDate.isAfter(quarantineCutOffDate)) {
           Some(Redirect(
             controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
@@ -93,9 +94,10 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
 }
 
 class CheckOtherCountryRegistrationFilter @Inject()(
-                                                     service: CoreRegistrationValidationService
+                                                     service: CoreRegistrationValidationService,
+                                                     clock: Clock
                                                    )(implicit val executionContext: ExecutionContext) {
   def apply(registrationModificationMode: RegistrationModificationMode): CheckOtherCountryRegistrationFilterImpl = {
-    new CheckOtherCountryRegistrationFilterImpl(registrationModificationMode, service)
+    new CheckOtherCountryRegistrationFilterImpl(registrationModificationMode, service, clock)
   }
 }
