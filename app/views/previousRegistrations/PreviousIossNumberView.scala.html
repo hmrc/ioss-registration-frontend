@@ -64,18 +64,6 @@
 
         )
 
-        @if(hasIntermediary) {
-
-            @govukInput(
-                InputViewModel(
-                    field = form("previousIntermediaryNumber"),
-                    label = LabelViewModel(messages("previousIossNumber.intermediaryNumber", country.name)).withCssClass("govuk-label--m")
-                )
-                .withWidth(Full)
-                .withHint(HintViewModel(messages("previousIossNumber.intermediaryNumber.hint", intermediaryHintText)))
-            )
-        }
-
         @button("site.continue", PreviousIossNumberPage(countryIndex, schemeIndex).route(waypoints).url, waypoints)
     }
 }
