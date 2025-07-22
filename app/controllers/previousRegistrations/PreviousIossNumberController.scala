@@ -23,7 +23,7 @@ import forms.previousRegistrations.PreviousIossNumberFormProvider
 import logging.Logging
 import models.core.MatchType
 import models.domain.PreviousSchemeNumbers
-import models.previousRegistrations.{IntermediaryIdentificationNumberValidation, IossRegistrationNumberValidation, NonCompliantDetails}
+import models.previousRegistrations.{IossRegistrationNumberValidation, NonCompliantDetails}
 import models.requests.AuthenticatedDataRequest
 import models.{Country, Index, PreviousScheme, UserAnswers}
 import pages.previousRegistrations.{PreviousIossNumberPage, PreviousIossSchemePage}
@@ -57,7 +57,7 @@ class PreviousIossNumberController @Inject()(
 
           getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>
 
-            val form = formProvider(country, hasIntermediary)
+            val form = formProvider(country)
 
             val preparedForm = request.userAnswers.get(PreviousIossNumberPage(countryIndex, schemeIndex)) match {
               case None => form
@@ -65,7 +65,7 @@ class PreviousIossNumberController @Inject()(
             }
 
             Future.successful(Ok(view(
-              preparedForm, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country))))
+              preparedForm, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country))))
           }
         }
     }
@@ -77,14 +77,13 @@ class PreviousIossNumberController @Inject()(
 
           getHasIntermediary(waypoints, countryIndex, schemeIndex) { hasIntermediary =>
             getPreviousScheme(waypoints, countryIndex, schemeIndex) { (previousScheme: PreviousScheme) =>
-              val form = formProvider(country, hasIntermediary)
+              val form = formProvider(country)
 
               val isNotAmendingActiveRegistration = waypoints.registrationModificationMode != AmendingActiveRegistration
-
               form.bindFromRequest().fold(
                 formWithErrors =>
                   Future.successful(BadRequest(view(
-                    formWithErrors, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country), getIntermediaryHintText(country)))),
+                    formWithErrors, waypoints, countryIndex, schemeIndex, country, hasIntermediary, getIossHintText(country)))),
 
                 previousSchemeNumbers =>
                   coreRegistrationValidationService.searchScheme(
@@ -163,11 +162,4 @@ class PreviousIossNumberController @Inject()(
       case countryWithIossValidation => countryWithIossValidation.messageInput
     }
   }
-
-  private def getIntermediaryHintText(country: Country): String = {
-    IntermediaryIdentificationNumberValidation.euCountriesWithIntermediaryValidationRules.filter(_.country == country).head match {
-      case countryWithIntermediaryValidation => countryWithIntermediaryValidation.messageInput
-    }
-  }
-
 }

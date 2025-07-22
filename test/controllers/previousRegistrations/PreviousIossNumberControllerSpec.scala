@@ -69,9 +69,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
   private def previousIossNumberSubmitRoute(waypoints: Waypoints) =
     controllers.previousRegistrations.routes.PreviousIossNumberController.onSubmit(waypoints, index, index).url
 
-  private val hasIntermediary: Boolean = false
-
-  private val form = formProvider(country, hasIntermediary)
+  private val form = formProvider(country)
 
   private val ossHintText = "This will start with IM040 followed by 7 numbers"
 
@@ -98,7 +96,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(form, waypoints, index, index, country,
-            hasIntermediary = false, ossHintText, "")(request, messages(application)).toString
+            hasIntermediary = false, ossHintText)(request, messages(application)).toString
 
           verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
@@ -130,7 +128,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           status(result) mustEqual OK
           contentAsString(result) mustEqual
             view(form.fill(
-              PreviousSchemeNumbers("answer", None)), waypoints, index, index, country, hasIntermediary = false, ossHintText, ""
+              PreviousSchemeNumbers("answer", None)), waypoints, index, index, country, hasIntermediary = false, ossHintText
             )(request, messages(application)).toString
 
           verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
@@ -449,7 +447,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
           status(result) mustEqual BAD_REQUEST
           contentAsString(result) mustEqual
-            view(boundForm, waypoints, index, index, country, hasIntermediary = false, ossHintText, "")(request, messages(application)).toString
+            view(boundForm, waypoints, index, index, country, hasIntermediary = false, ossHintText)(request, messages(application)).toString
 
           verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
