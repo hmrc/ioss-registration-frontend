@@ -52,12 +52,7 @@
         @govukInput(
             InputViewModel(
                 field = form("previousSchemeNumber"),
-                label =
-                    if(hasIntermediary) {
-                        LabelViewModel(messages("previousIossNumber.iossNumber", country.name)).withCssClass("govuk-label--m")
-                    } else {
-                        LabelViewModel(messages("previousIossNumber.heading", country.name)).asPageHeading()
-                    }
+                label = LabelViewModel("IOSS number").withCssClass("govuk-visually-hidden")
             )
             .withWidth(Full)
             .withHint(HintViewModel(messages("previousIossNumber.iossNumber.hint", iossHintText)))
