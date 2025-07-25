@@ -47,6 +47,8 @@
 
             <input type="hidden" name="previousScheme" id="previousScheme" value="@PreviousScheme.IOSSWI"/>
         } else {
+            <h1 class="govuk-heading-l">@messages("previousIossNumber.heading", country.name)</h1>
+
             <input type="hidden" name="previousScheme" id="previousScheme" value="@PreviousScheme.IOSSWOI"/>
         }
         @govukInput(
