@@ -20,29 +20,19 @@ import forms.mappings.{IntermediaryIdentificationNumberConstraints, IossRegistra
 import models.Country
 import models.domain.PreviousSchemeNumbers
 import play.api.data.Form
-import play.api.data.Forms.{mapping, optional}
-import uk.gov.voa.play.form.ConditionalMappings.mandatory
+import play.api.data.Forms.mapping
 
 import javax.inject.Inject
 
 class PreviousIossNumberFormProvider @Inject() extends Mappings with IossRegistrationNumberConstraints
   with IntermediaryIdentificationNumberConstraints{
 
-  def apply(country: Country, hasIntermediary: Boolean): Form[PreviousSchemeNumbers] =
+  def apply(country: Country): Form[PreviousSchemeNumbers] =
     Form(
       mapping(
         "previousSchemeNumber" -> text("previousIossNumber.error.schemeNumber.required")
           .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
-          .verifying(validateIossRegistrationNumber(country.code, "previousIossNumber.error.invalid")),
-        if (hasIntermediary) {
-          "previousIntermediaryNumber" -> mandatory(text("previousIossNumber.error.intermediaryNumber.required")
-            .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
-            .verifying(validateIntermediaryIdentificationNumber(country.code, "previousIntermediaryNumber.error.invalid")))
-        } else {
-          "previousIntermediaryNumber" -> optional(text("previousIossNumber.error.intermediaryNumber.required")
-            .transform[String](_.trim.replaceAll("\\s", "").toUpperCase, value => value)
-            .verifying(validateIntermediaryIdentificationNumber(country.code, "previousIntermediaryNumber.error.invalid")))
-        }
-      )(PreviousSchemeNumbers.apply)(previousSchemeNumbers => Some(Tuple.fromProductTyped(previousSchemeNumbers)))
+          .verifying(validateIossRegistrationNumber(country.code, "previousIossNumber.error.invalid"))
+      )(schemeNumber => PreviousSchemeNumbers(schemeNumber, None))(previousSchemeNumbers => Some(previousSchemeNumbers.previousSchemeNumber))
     )
 }

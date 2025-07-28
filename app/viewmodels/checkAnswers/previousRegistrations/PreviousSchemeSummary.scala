@@ -44,8 +44,7 @@ object PreviousSchemeSummary {
         val isExistingScheme = existingSchemes.contains(previousAnsweredScheme)
         SummaryListViewModel(
           rows = Seq(
-            PreviousSchemeNumberSummary.row(request.userAnswers, countryIndex, Index(schemeIndex), scheme.previousScheme),
-            PreviousIntermediaryNumberSummary.row(request.userAnswers, countryIndex, Index(schemeIndex))
+            PreviousSchemeNumberSummary.row(request.userAnswers, countryIndex, Index(schemeIndex), scheme.previousScheme)
           ).flatten
         ).withCard(
           card = Card(

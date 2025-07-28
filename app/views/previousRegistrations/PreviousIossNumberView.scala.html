@@ -26,7 +26,7 @@
     button: ButtonGroup
 )
 
-@(form: Form[_], waypoints: Waypoints, countryIndex: Index, schemeIndex: Index, country: Country, hasIntermediary: Boolean, iossHintText: String, intermediaryHintText: String)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], waypoints: Waypoints, countryIndex: Index, schemeIndex: Index, country: Country, hasIntermediary: Boolean, iossHintText: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle =
     if(hasIntermediary) {
@@ -47,34 +47,19 @@
 
             <input type="hidden" name="previousScheme" id="previousScheme" value="@PreviousScheme.IOSSWI"/>
         } else {
+            <h1 class="govuk-heading-l">@messages("previousIossNumber.heading", country.name)</h1>
+
             <input type="hidden" name="previousScheme" id="previousScheme" value="@PreviousScheme.IOSSWOI"/>
         }
         @govukInput(
             InputViewModel(
                 field = form("previousSchemeNumber"),
-                label =
-                    if(hasIntermediary) {
-                        LabelViewModel(messages("previousIossNumber.iossNumber", country.name)).withCssClass("govuk-label--m")
-                    } else {
-                        LabelViewModel(messages("previousIossNumber.heading", country.name)).asPageHeading()
-                    }
+                label = LabelViewModel("IOSS number").withCssClass("govuk-visually-hidden")
             )
             .withWidth(Full)
             .withHint(HintViewModel(messages("previousIossNumber.iossNumber.hint", iossHintText)))
 
         )
-
-        @if(hasIntermediary) {
-
-            @govukInput(
-                InputViewModel(
-                    field = form("previousIntermediaryNumber"),
-                    label = LabelViewModel(messages("previousIossNumber.intermediaryNumber", country.name)).withCssClass("govuk-label--m")
-                )
-                .withWidth(Full)
-                .withHint(HintViewModel(messages("previousIossNumber.intermediaryNumber.hint", intermediaryHintText)))
-            )
-        }
 
         @button("site.continue", PreviousIossNumberPage(countryIndex, schemeIndex).route(waypoints).url, waypoints)
     }
