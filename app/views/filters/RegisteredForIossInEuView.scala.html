@@ -27,7 +27,7 @@
 
 @(form: Form[_], waypoints: Waypoints)(implicit request: Request[_], messages: Messages)
 
-    @layout(pageTitle = title(form, messages("registeredForIossInEu.title"))) {
+    @layout(pageTitle = title(form, messages("registeredForIossInEu.title")), showBackLink = false) {
 
         @formHelper(action = routes.RegisteredForIossInEuController.onSubmit(waypoints), Symbol("autoComplete") -> "off") {
 
