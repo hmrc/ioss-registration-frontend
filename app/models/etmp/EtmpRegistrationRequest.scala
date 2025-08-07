@@ -134,9 +134,13 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
           case Nil =>
             None
           case nonCompliantDetailsList =>
-            Some(nonCompliantDetailsList.maxBy(
-              nonCompliantDetails => nonCompliantDetails.nonCompliantReturns.getOrElse(0) +
-                nonCompliantDetails.nonCompliantPayments.getOrElse(0)
+
+            val nonCompliantReturns = nonCompliantDetailsList.map(_.nonCompliantReturns).maxBy(_.getOrElse(0))
+            val nonCompliantPayments = nonCompliantDetailsList.map(_.nonCompliantPayments).maxBy(_.getOrElse(0))
+
+            Some(NonCompliantDetails(
+              nonCompliantReturns = nonCompliantReturns,
+              nonCompliantPayments = nonCompliantPayments
             ))
         }
     }

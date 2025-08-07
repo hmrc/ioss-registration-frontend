@@ -104,7 +104,7 @@ class PreviousIossNumberController @Inject()(
 
                     case Some(activeMatch) if activeMatch.matchType == MatchType.TransferringMSID =>
                       saveAndRedirect(countryIndex, schemeIndex, previousSchemeNumbers,
-                        Some(NonCompliantDetails(activeMatch.nonCompliantPayments, activeMatch.nonCompliantReturns)),
+                        Some(NonCompliantDetails(activeMatch.nonCompliantReturns, activeMatch.nonCompliantPayments)),
                         waypoints
                       )
 
