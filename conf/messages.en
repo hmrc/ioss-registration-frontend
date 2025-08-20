@@ -56,10 +56,10 @@ checkYourAnswers.info.p2 = After registering, do not click the Back button or re
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
-journeyRecovery.continue.guidance = [Add content to explain how to proceed.]
+journeyRecovery.continue.guidance = We have saved your answers and you can continue your registration.
 journeyRecovery.startAgain.title = Sorry, there is a problem with the service
 journeyRecovery.startAgain.heading = Sorry, there is a problem with the service
-journeyRecovery.startAgain.guidance = [Add content to explain why the user needs to start again.]
+journeyRecovery.startAgain.guidance = We have saved your answers and you can restart your registration.
 
 signedOut.title = For your security, we signed you out
 signedOut.heading = For your security, we signed you out
