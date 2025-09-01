@@ -46,7 +46,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
   def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDate): EtmpRegistrationRequest =
     EtmpRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
-      customerIdentification = EtmpCustomerIdentification(EtmpIdType.VRN, vrn.vrn),
+      customerIdentification = EtmpCustomerIdentification(vrn),
       tradingNames = getTradingNames(answers),
       schemeDetails = getSchemeDetails(answers, commencementDate),
       bankDetails = getBankDetails(answers)
