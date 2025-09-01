@@ -280,7 +280,7 @@ trait ModelGenerators extends EitherValues {
     Arbitrary {
       for {
         vrn <- arbitraryVrn.arbitrary
-      } yield EtmpCustomerIdentification(vrn)
+      } yield EtmpCustomerIdentification(EtmpIdType.VRN, vrn.vrn)
     }
 
   implicit lazy val arbitraryVatNumberTraderId: Arbitrary[VatNumberTraderId] =

@@ -29,7 +29,8 @@ class EtmpCustomerIdentificationSpec extends SpecBase {
       val etmpCustomerIdentification = arbitrary[EtmpCustomerIdentification].sample.value
 
       val expectedJson = Json.obj(
-        "vrn" -> s"${etmpCustomerIdentification.vrn.vrn}"
+        "idType" -> s"${etmpCustomerIdentification.idType}",
+        "idValue" -> s"${etmpCustomerIdentification.idValue}"
       )
 
       Json.toJson(etmpCustomerIdentification) mustBe expectedJson
