@@ -20,13 +20,13 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
 import logging.Logging
-import models.{BusinessContactDetails, CheckMode, NormalMode}
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
-import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import models.{BusinessContactDetails, CheckMode, NormalMode}
 import pages.amend.ChangeRegistrationPage
-import play.api.mvc.{ActionFilter, Result}
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionFilter, Result}
 import services.{EmailVerificationService, SaveForLaterService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
