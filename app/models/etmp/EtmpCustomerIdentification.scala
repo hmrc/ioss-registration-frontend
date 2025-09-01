@@ -19,14 +19,7 @@ package models.etmp
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Vrn
 
-case class EtmpCustomerIdentificationLegacy(vrn: Vrn)
-
-object EtmpCustomerIdentificationLegacy {
-
-  implicit val format: OFormat[EtmpCustomerIdentificationLegacy] = Json.format[EtmpCustomerIdentificationLegacy]
-}
-
-case class EtmpCustomerIdentification(idType: EtmpIdType, idValue: String)
+case class EtmpCustomerIdentification(vrn: Vrn)
 
 object EtmpCustomerIdentification {
 
