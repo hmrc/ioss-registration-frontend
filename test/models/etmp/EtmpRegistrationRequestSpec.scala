@@ -212,7 +212,7 @@ class EtmpRegistrationRequestSpec extends SpecBase {
 
         val etmpRegistrationRequest: EtmpRegistrationRequest = EtmpRegistrationRequest(
           administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
-          customerIdentification = EtmpCustomerIdentification(vrn),
+          customerIdentification = EtmpCustomerIdentification(EtmpIdType.VRN, vrn.vrn),
           tradingNames = convertToEtmpTradingNames,
           schemeDetails = etmpSchemeDetails,
           bankDetails = convertToEtmpBankDetails
