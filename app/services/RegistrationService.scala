@@ -16,6 +16,7 @@
 
 package services
 
+import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import connectors.RegistrationHttpParser.{AmendRegistrationResultResponse, RegistrationResultResponse}
 import logging.Logging
@@ -23,7 +24,7 @@ import models.Country.euCountries
 import models.amend.RegistrationWrapper
 import models.domain.PreviousSchemeDetails
 import models.etmp.EtmpRegistrationRequest.buildEtmpRegistrationRequest
-import models.etmp._
+import models.etmp.*
 import models.etmp.amend.EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest
 import models.euDetails.{EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
@@ -48,12 +49,13 @@ import scala.util.Try
 
 class RegistrationService @Inject()(
                                      clock: Clock,
-                                     registrationConnector: RegistrationConnector
+                                     registrationConnector: RegistrationConnector,
+                                     appConfig: FrontendAppConfig
                                    ) extends EtmpEuRegistrations with EtmpPreviousEuRegistrations with Logging {
 
   def createRegistration(answers: UserAnswers, vrn: Vrn)(implicit hc: HeaderCarrier): Future[RegistrationResultResponse] = {
     val commencementDate = LocalDate.now(clock)
-    registrationConnector.createRegistration(buildEtmpRegistrationRequest(answers, vrn, commencementDate))
+    registrationConnector.createRegistration(buildEtmpRegistrationRequest(answers, vrn, commencementDate, appConfig))
   }
 
   def amendRegistration(
@@ -75,7 +77,8 @@ class RegistrationService @Inject()(
         vrn = vrn,
         iossNumber = iossNumber,
         commencementDate = newCommencementDate,
-        rejoin = rejoin
+        rejoin = rejoin,
+        appConfig = appConfig
       ))
   }
 

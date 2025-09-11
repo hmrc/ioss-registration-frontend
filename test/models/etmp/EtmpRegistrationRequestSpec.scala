@@ -18,18 +18,21 @@ package models.etmp
 
 import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
+import config.FrontendAppConfig
 import formats.Format.eisDateFormatter
 import models.domain.PreviousSchemeDetails
 import models.euDetails.{EuDetails, RegistrationType}
 import models.previousRegistrations.{NonCompliantDetails, PreviousRegistrationDetails}
 import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
+import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
+import org.scalatestplus.mockito.MockitoSugar
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json.{JsError, Json, JsSuccess}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -38,7 +41,9 @@ import testutils.RegistrationData.etmpRegistrationRequest
 
 import java.time.LocalDate
 
-class EtmpRegistrationRequestSpec extends SpecBase {
+class EtmpRegistrationRequestSpec extends SpecBase with MockitoSugar {
+
+  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   private val administration = etmpRegistrationRequest.administration
   private val customerIdentification = etmpRegistrationRequest.customerIdentification
@@ -137,6 +142,8 @@ class EtmpRegistrationRequestSpec extends SpecBase {
         .set(BankDetailsPage, bankDetails).success.value
 
       "must convert userAnswers to an EtmpRegistrationRequest" in {
+        
+        when(mockFrontendAppConfig.release91Enabled) thenReturn true
 
         val convertToEtmpTradingNames: List[EtmpTradingName] =
           for {
@@ -212,15 +219,16 @@ class EtmpRegistrationRequestSpec extends SpecBase {
 
         val etmpRegistrationRequest: EtmpRegistrationRequest = EtmpRegistrationRequest(
           administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
-          customerIdentification = EtmpCustomerIdentification(EtmpIdType.VRN, vrn.vrn),
+          customerIdentification = EtmpCustomerIdentificationNew(EtmpIdType.VRN, vrn.vrn),
           tradingNames = convertToEtmpTradingNames,
           schemeDetails = etmpSchemeDetails,
           bankDetails = convertToEtmpBankDetails
         )
 
         EtmpRegistrationRequest.buildEtmpRegistrationRequest(userAnswers,
-          vrn,
-          LocalDate.now(stubClockAtArbitraryDate)
+          vrn = vrn,
+          commencementDate = LocalDate.now(stubClockAtArbitraryDate),
+          appConfig = mockFrontendAppConfig
         ) mustBe etmpRegistrationRequest
       }
     }

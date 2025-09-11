@@ -16,7 +16,8 @@
 
 package models.etmp.amend
 
-import models.etmp._
+import config.FrontendAppConfig
+import models.etmp.*
 import models.etmp.EtmpRegistrationRequest.buildEtmpRegistrationRequest
 import models.UserAnswers
 import play.api.libs.json.{Json, OFormat}
@@ -43,8 +44,10 @@ object EtmpAmendRegistrationRequest {
                                          vrn: Vrn,
                                          iossNumber: String,
                                          commencementDate: LocalDate,
-                                         rejoin : Boolean): EtmpAmendRegistrationRequest = {
-    val etmpRegistrationRequest = buildEtmpRegistrationRequest(answers, vrn, commencementDate)
+                                         rejoin : Boolean,
+                                         appConfig: FrontendAppConfig
+                                       ): EtmpAmendRegistrationRequest = {
+    val etmpRegistrationRequest = buildEtmpRegistrationRequest(answers, vrn, commencementDate, appConfig)
 
     EtmpAmendRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),

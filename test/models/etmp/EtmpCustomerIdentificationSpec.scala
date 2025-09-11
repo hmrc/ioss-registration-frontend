@@ -24,17 +24,35 @@ class EtmpCustomerIdentificationSpec extends SpecBase {
 
   "EtmpCustomerIdentification" - {
 
-    "must serialise/deserialise to and from EtmpCustomerIdentification" in {
+    "for the new model" - {
 
-      val etmpCustomerIdentification = arbitrary[EtmpCustomerIdentification].sample.value
+      "must serialise/deserialise to and from EtmpCustomerIdentificationNew" in {
 
-      val expectedJson = Json.obj(
-        "idType" -> s"${etmpCustomerIdentification.idType}",
-        "idValue" -> s"${etmpCustomerIdentification.idValue}"
-      )
+        val etmpCustomerIdentification = arbitrary[EtmpCustomerIdentificationNew].sample.value
 
-      Json.toJson(etmpCustomerIdentification) mustBe expectedJson
-      expectedJson.validate[EtmpCustomerIdentification] mustBe JsSuccess(etmpCustomerIdentification)
+        val expectedJson = Json.obj(
+          "idType" -> s"${etmpCustomerIdentification.idType}",
+          "idValue" -> s"${etmpCustomerIdentification.idValue}"
+        )
+
+        Json.toJson(etmpCustomerIdentification) mustBe expectedJson
+        expectedJson.validate[EtmpCustomerIdentification] mustBe JsSuccess(etmpCustomerIdentification)
+      }
+    }
+
+    "for the legacy model" - {
+
+      "must serialise/deserialise to and from EtmpCustomerIdentificationNew" in {
+
+        val etmpCustomerIdentification = arbitrary[EtmpCustomerIdentificationLegacy].sample.value
+
+        val expectedJson = Json.obj(
+          "vrn" -> s"${etmpCustomerIdentification.vrn}",
+        )
+
+        Json.toJson(etmpCustomerIdentification) mustBe expectedJson
+        expectedJson.validate[EtmpCustomerIdentification] mustBe JsSuccess(etmpCustomerIdentification)
+      }
     }
 
     "must handle missing fields during deserialization" in {
