@@ -143,7 +143,7 @@ class EtmpRegistrationRequestSpec extends SpecBase with MockitoSugar {
 
       "must convert userAnswers to an EtmpRegistrationRequest" in {
         
-        when(mockFrontendAppConfig.release91Enabled) thenReturn true
+        when(mockFrontendAppConfig.release9Enabled) thenReturn true
 
         val convertToEtmpTradingNames: List[EtmpTradingName] =
           for {

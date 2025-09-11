@@ -54,11 +54,9 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
     )
 
   private def getCustomerIdentification(vrn: Vrn, appConfig: FrontendAppConfig): EtmpCustomerIdentification = {
-    if(appConfig.release91Enabled) {
-      println("Yes")
+    if(appConfig.release9Enabled) {
       EtmpCustomerIdentificationNew(EtmpIdType.VRN, vrn.vrn)
     } else {
-      println("no")
       EtmpCustomerIdentificationLegacy(vrn)
     }
   
