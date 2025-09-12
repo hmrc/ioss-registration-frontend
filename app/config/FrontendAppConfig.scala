@@ -86,6 +86,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val coreValidationService: Service = configuration.get[Service]("microservice.services.core-validation")
 
+  val release9Enabled: Boolean = configuration.get[Boolean]("features.release9")
+
   val iossEnrolment: String = configuration.get[String]("ioss-enrolment")
 
   val ossEnrolment: String = configuration.get[String]("oss-enrolment")

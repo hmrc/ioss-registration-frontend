@@ -18,6 +18,7 @@ package models.etmp.amend
 
 import base.SpecBase
 import config.Constants.{maxSchemes, maxTradingNames, maxWebsites}
+import config.FrontendAppConfig
 import formats.Format.eisDateFormatter
 import models.domain.PreviousSchemeDetails
 import models.etmp.*
@@ -26,11 +27,12 @@ import models.previousRegistrations.PreviousRegistrationDetails
 import models.{BankDetails, Bic, BusinessContactDetails, CountryWithValidationDetails, Iban, PreviousScheme, TradingName, UserAnswers, Website}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
+import org.scalatestplus.mockito.MockitoSugar
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.tradingNames.HasTradingNamePage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json.{JsError, Json, JsSuccess}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -39,7 +41,7 @@ import testutils.RegistrationData.{etmpAmendRegistrationRequest, etmpDisplayRegi
 
 import java.time.LocalDate
 
-class EtmpAmendRegistrationRequestSpec extends SpecBase {
+class EtmpAmendRegistrationRequestSpec extends SpecBase with MockitoSugar {
 
   private val administration = etmpAmendRegistrationRequest.administration
   private val customerIdentification = etmpAmendRegistrationRequest.customerIdentification
@@ -238,12 +240,14 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase {
           bankDetails = convertToEtmpBankDetails
         )
 
-        EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest(userAnswers,
-          etmpDisplayRegistration,
-          vrn,
-          iossNumber,
-          LocalDate.now(stubClockAtArbitraryDate),
-          rejoin = false
+        EtmpAmendRegistrationRequest.buildEtmpAmendRegistrationRequest(
+          answers = userAnswers,
+          registration = etmpDisplayRegistration,
+          vrn = vrn,
+          iossNumber = iossNumber,
+          commencementDate = LocalDate.now(stubClockAtArbitraryDate),
+          rejoin = false,
+          appConfig = mock[FrontendAppConfig]
         ) mustBe etmpAmendRegistrationRequest
       }
     }

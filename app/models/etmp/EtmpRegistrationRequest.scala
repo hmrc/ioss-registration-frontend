@@ -16,6 +16,7 @@
 
 package models.etmp
 
+import config.FrontendAppConfig
 import formats.Format.eisDateFormatter
 import logging.Logging
 import models.previousRegistrations.NonCompliantDetails
@@ -43,15 +44,23 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
 
   implicit val format: OFormat[EtmpRegistrationRequest] = Json.format[EtmpRegistrationRequest]
 
-  def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDate): EtmpRegistrationRequest =
+  def buildEtmpRegistrationRequest(answers: UserAnswers, vrn: Vrn, commencementDate: LocalDate, appConfig: FrontendAppConfig): EtmpRegistrationRequest =
     EtmpRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
-      customerIdentification = EtmpCustomerIdentification(EtmpIdType.VRN, vrn.vrn),
+      customerIdentification = getCustomerIdentification(vrn, appConfig),
       tradingNames = getTradingNames(answers),
       schemeDetails = getSchemeDetails(answers, commencementDate),
       bankDetails = getBankDetails(answers)
     )
 
+  private def getCustomerIdentification(vrn: Vrn, appConfig: FrontendAppConfig): EtmpCustomerIdentification = {
+    if(appConfig.release9Enabled) {
+      EtmpCustomerIdentificationNew(EtmpIdType.VRN, vrn.vrn)
+    } else {
+      EtmpCustomerIdentificationLegacy(vrn)
+    }
+  
+  }
   private def getSchemeDetails(answers: UserAnswers, commencementDate: LocalDate): EtmpSchemeDetails = {
 
     val nonCompliantDetailsAnswers = getNonCompliantDetails(answers)

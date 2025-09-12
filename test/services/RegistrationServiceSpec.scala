@@ -17,17 +17,18 @@
 package services
 
 import base.SpecBase
+import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import models.Country.euCountries
 import models.amend.RegistrationWrapper
 import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
-import models.etmp._
+import models.etmp.*
 import models.euDetails.{EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.responses.etmp.EtmpEnrolmentResponse
 import models.{BankDetails, BusinessContactDetails, InternationalAddress, PreviousScheme, TradingName, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify, when, reset}
+import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -51,7 +52,8 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
   private implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
-  private val registrationService = new RegistrationService(stubClockAtArbitraryDate, mockRegistrationConnector)
+  private val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
+  private val registrationService = new RegistrationService(stubClockAtArbitraryDate, mockRegistrationConnector, mockAppConfig)
   private val etmpRegistration = etmpDisplayRegistration
 
 
