@@ -48,42 +48,4 @@
             )
         }
 
-        @govukPagination(
-          Pagination(
-            items = Some(
-              Seq(
-                PaginationItem(
-                  href = "google.com",
-                  number = Some("1"),
-                  current = Some(false)
-                ),
-                PaginationItem(
-                  href = "google.com",
-                  number = Some("2"),
-                  current = Some(true)
-                ),
-                PaginationItem(
-                  href = "google.com",
-                  number = Some("3"),
-                  current = Some(false)
-                ),
-                PaginationItem(
-                  href = "google.com",
-                  number = Some("4"),
-                  current = Some(false)
-                ),
-                PaginationItem(
-                  href = "google.com",
-                  number = Some("5"),
-                  current = Some(false)
-                )
-              )
-            ),
-            previous = Some(PaginationLink(
-              href = "#2",
-              text = Some("test..."),
-              labelText = Some("labelTest")
-            ))
-          )
-        )
     }
