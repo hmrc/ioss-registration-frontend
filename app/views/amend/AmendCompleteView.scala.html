@@ -20,7 +20,8 @@
 @this(
         layout: templates.Layout,
         govukButton: GovukButton,
-        govukSummaryList: GovukSummaryList,
+        govukSummaryList: GovukSummaryList
+        
 )
 
 @(
@@ -31,7 +32,8 @@
         organisationName: String,
         list: SummaryList,
         ossRegistration: Option[OssRegistration],
-        numberOfIossRegistrations: Int
+        numberOfIossRegistrations: Int,
+        userResearchUrl: String
 )(implicit request: Request[_], messages: Messages)
 
   @layout(pageTitle = titleNoForm(messages("amendComplete.title")), showBackLink = false) {
@@ -82,6 +84,13 @@
       }
 
       <p class="govuk-body">@messages("amendComplete.contact.text")</p>
+        
+        <div>
+            <h2 class="govuk-heading-m">@messages("userResearch.heading")</h2>
+            <p class="govuk-body">
+                <a href="@userResearchUrl" class="govuk-link" target="_blank">@messages("userResearch.link.text")</a>
+            </p>
+        </div>
 
       <p class="govuk-body">
         <a href="@feedbackLink" class="govuk-link">@messages("applicationComplete.feedback.link.text")</a>
