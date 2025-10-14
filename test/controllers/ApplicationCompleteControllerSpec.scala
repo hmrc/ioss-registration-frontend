@@ -50,7 +50,9 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .configure("urls.userResearch1" -> "https://test-url.com")
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
@@ -72,7 +74,8 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
           None,
-          expectedList
+          expectedList,
+          "https://test-url.com"
         )(request, messages(application)).toString
       }
     }
@@ -83,7 +86,9 @@ class ApplicationCompleteControllerSpec extends SpecBase {
       val updatedAnswers = userAnswers
         .set(AllTradingNames, List(newTradingName)).success.value
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration).build()
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration)
+        .configure("urls.userResearch1" -> "https://test-url.com")
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
@@ -105,7 +110,8 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
           ossRegistration,
-          expectedList
+          expectedList,
+          "https://test-url.com"
         )(request, messages(application)).toString
       }
     }

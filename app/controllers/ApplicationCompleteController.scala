@@ -52,6 +52,8 @@ class ApplicationCompleteController @Inject()(
   def onPageLoad: Action[AnyContent] =  (cc.actionBuilder andThen cc.identify andThen cc.getData andThen cc.requireData(isInAmendMode = false)) {
     implicit request =>
 
+      val userResearchUrl = frontendAppConfig.userResearchUrl1
+
       (for {
         etmpEnrolmentResponse <- request.userAnswers.get(EtmpEnrolmentResponseQuery)
         organisationName <- getOrganisationName(request.userAnswers)
@@ -73,7 +75,8 @@ class ApplicationCompleteController @Inject()(
           includedSalesDate.format(dateFormatter),
           frontendAppConfig.feedbackUrl,
           ossRegistration,
-          list
+          list,
+          userResearchUrl
         ))
       }).getOrElse(Redirect(JourneyRecoveryPage.route(EmptyWaypoints)))
   }
