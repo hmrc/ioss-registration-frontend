@@ -79,7 +79,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
       "must return OK and the correct view for a GET" in {
 
         val application = applicationBuilder(userAnswers = Some(originalRegistration))
-          .configure("urls.userResearch2" -> "https://test-url.com")
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -103,8 +102,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             "Company name",
             summaryList,
             None,
-            1,
-            "https://test-url.com"
+            1
           )(request, messages(application)).toString
         }
       }
@@ -131,7 +129,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             .set(AllTradingNames, List(newTradingName)).success.value
 
           val application = applicationBuilder(userAnswers = Some(updatedAnswers))
-            .configure("urls.userResearch2" -> "https://test-url.com")
             .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
@@ -153,8 +150,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1,
-              "https://test-url.com"
+              1
             )(request, messages(application)).toString
 
             val expectedRow = TradingNameSummary.amendedAnswersRow(updatedAnswers).get
@@ -177,7 +173,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             .set(AllPreviousRegistrationsQuery, List(previousRegistration)).success.value
 
           val application = applicationBuilder(userAnswers = Some(updatedAnswers))
-            .configure("urls.userResearch2" -> "https://test-url.com")
             .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
@@ -199,8 +194,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1,
-              "https://test-url.com"
+              1
             )(request, messages(application)).toString
 
             val expectedRow = PreviousRegistrationSummary.amendedAnswersRow(updatedAnswers).get
@@ -224,7 +218,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             .set(AllEuOptionalDetailsQuery, List(newEuRegistration)).success.value
 
           val application = applicationBuilder(userAnswers = Some(updatedAnswers))
-            .configure("urls.userResearch2" -> "https://test-url.com")
             .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
@@ -246,8 +239,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1,
-              "https://test-url.com"
+              1
             )(request, messages(application)).toString
 
             val expectedRow = EuDetailsSummary.amendedAnswersRow(updatedAnswers).get
@@ -263,7 +255,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             .set(AllWebsites, List(newWebsite)).success.value
 
           val application = applicationBuilder(userAnswers = Some(updatedAnswers))
-            .configure("urls.userResearch2" -> "https://test-url.com")
             .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
@@ -285,8 +276,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1,
-              "https://test-url.com"
+              1
             )(request, messages(application)).toString
 
             val expectedRow = WebsiteSummary.amendedAnswersRow(updatedAnswers).get
@@ -303,7 +293,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           .set(AllTradingNames, List(newTradingName)).success.value
 
         val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration)
-          .configure("urls.userResearch2" -> "https://test-url.com")
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -328,8 +317,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             "Company name",
             summaryList,
             ossRegistration,
-            0,
-            "https://test-url.com"
+            0
           )(request, messages(application)).toString
 
         }
@@ -342,7 +330,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           .set(AllTradingNames, List(newTradingName)).success.value
 
         val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1)
-          .configure("urls.userResearch2" -> "https://test-url.com")
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -366,8 +353,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             "Company name",
             summaryList,
             ossRegistration,
-            1,
-            "https://test-url.com"
+            1
           )(request, messages(application)).toString
         }
       }
@@ -379,7 +365,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           .set(AllTradingNames, List(newTradingName)).success.value
 
         val application = applicationBuilder(userAnswers = Some(updatedAnswers), numberOfIossRegistrations = 1)
-          .configure("urls.userResearch2" -> "https://test-url.com")
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -403,8 +388,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             "Company name",
             summaryList,
             None,
-            1,
-            "https://test-url.com"
+            1
           )(request, messages(application)).toString
         }
       }
@@ -416,7 +400,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           .set(AllTradingNames, List(newTradingName)).success.value
 
         val application = applicationBuilder(userAnswers = Some(updatedAnswers), numberOfIossRegistrations = 2)
-          .configure("urls.userResearch2" -> "https://test-url.com")
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -440,8 +423,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             "Company name",
             summaryList,
             None,
-            2,
-            "https://test-url.com"
+            2
           )(request, messages(application)).toString
         }
       }

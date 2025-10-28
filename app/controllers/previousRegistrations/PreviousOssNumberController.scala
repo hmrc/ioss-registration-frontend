@@ -17,7 +17,7 @@
 package controllers.previousRegistrations
 
 import controllers.GetCountry
-import controllers.actions._
+import controllers.actions.*
 import forms.previousRegistrations.PreviousOssNumberFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.{PreviousSchemeHintText, SchemeDetailsWithOptionalVatNumber}
@@ -34,6 +34,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.previousRegistrations.PreviousOssNumberView
 
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,6 +43,7 @@ class PreviousOssNumberController @Inject()(
                                              cc: AuthenticatedControllerComponents,
                                              coreRegistrationValidationService: CoreRegistrationValidationService,
                                              formProvider: PreviousOssNumberFormProvider,
+                                             clock: Clock,
                                              view: PreviousOssNumberView
                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
@@ -162,7 +164,7 @@ class PreviousOssNumberController @Inject()(
         intermediaryNumber = None,
         countryCode = country.code
       ).flatMap {
-        case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.matchType.isQuarantinedTrader =>
+        case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.isQuarantinedTrader(clock) =>
           Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(waypoints)))
 
         case _ =>

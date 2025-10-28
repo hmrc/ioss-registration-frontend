@@ -31,6 +31,7 @@ import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import views.html.euDetails.EuTaxReferenceView
 
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +40,8 @@ class EuTaxReferenceController @Inject()(
                                           cc: AuthenticatedControllerComponents,
                                           formProvider: EuTaxReferenceFormProvider,
                                           view: EuTaxReferenceView,
-                                          coreRegistrationValidationService: CoreRegistrationValidationService
+                                          coreRegistrationValidationService: CoreRegistrationValidationService,
+                                          clock: Clock
                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -77,10 +79,10 @@ class EuTaxReferenceController @Inject()(
 
               coreRegistrationValidationService.searchEuTaxId(euTaxReference, country.code).flatMap {
 
-                case Some(activeMatch) if activeMatch.matchType.isActiveTrader && isNotAmendingRegistration =>
+                case Some(activeMatch) if activeMatch.isActiveTrader && isNotAmendingRegistration =>
                   Future.successful(Redirect(controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(waypoints, country.code)))
 
-                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && isNotAmendingRegistration =>
+                case Some(activeMatch) if activeMatch.isQuarantinedTrader(clock) && isNotAmendingRegistration =>
                   Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
 
                 case _ => for {

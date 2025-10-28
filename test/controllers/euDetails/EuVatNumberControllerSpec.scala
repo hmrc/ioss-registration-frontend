@@ -19,7 +19,7 @@ package controllers.euDetails
 import base.SpecBase
 import connectors.RegistrationConnector
 import forms.euDetails.EuVatNumberFormProvider
-import models.core.{Match, MatchType}
+import models.core.{Match, TraderId}
 import models.euDetails.RegistrationType
 import models.{CheckMode, Country, CountryWithValidationDetails, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
@@ -71,8 +71,7 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
   private val rejoinWaypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
 
   private val genericMatch = Match(
-    MatchType.FixedEstablishmentActiveNETP,
-    "33333333",
+    TraderId("IM9001234566"),
     None,
     "DE",
     None,
@@ -206,171 +205,6 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
       }
     }
 
-    "must redirect to FixedEstablishmentVRNAlreadyRegisteredController page when not in Amend and matchType=TraderIdActiveNETP" in {
-      forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
-        val application =
-          applicationBuilder(userAnswers = Some(answers))
-            .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-              bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-            ).build()
-
-        running(application) {
-
-          val expectedResponse = genericMatch.copy(matchType = MatchType.TraderIdActiveNETP)
-
-          when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
-            Future.successful(Option(expectedResponse))
-
-          val request =
-            FakeRequest(POST, euVatNumberSubmitRoute(nonAmendsWaypoints))
-              .withFormUrlEncodedBody(("value", euVatNumber))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual
-            controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(nonAmendsWaypoints, country.code).url
-        }
-      }
-    }
-
-    "must redirect to FixedEstablishmentVRNAlreadyRegisteredController page when not in Amend and matchType=OtherMSNETPActiveNETP" in {
-      forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
-
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
-        val application =
-          applicationBuilder(userAnswers = Some(answers))
-            .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-              bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-            ).build()
-
-        running(application) {
-
-          val expectedResponse = genericMatch.copy(matchType = MatchType.OtherMSNETPActiveNETP)
-
-          when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
-            Future.successful(Option(expectedResponse))
-
-          val request =
-            FakeRequest(POST, euVatNumberSubmitRoute(nonAmendsWaypoints))
-              .withFormUrlEncodedBody(("value", euVatNumber))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual
-            controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(nonAmendsWaypoints, country.code).url
-        }
-      }
-    }
-
-    "must redirect to ExcludedVRNController page when not in Amend and the vat number is excluded for match FixedEstablishmentQuarantinedNETP " in {
-      forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
-
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
-        val application = applicationBuilder(userAnswers = Some(answers))
-          .overrides(
-            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-          ).build()
-
-        running(application) {
-
-          val expectedResponse = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP)
-
-          when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
-            Future.successful(Option(expectedResponse))
-
-          val request = FakeRequest(POST, euVatNumberSubmitRoute(nonAmendsWaypoints))
-            .withFormUrlEncodedBody(("value", euVatNumber))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.euDetails.routes.ExcludedVRNController.onPageLoad().url
-        }
-      }
-    }
-
-    "must redirect to ExcludedVRNController page when not in Amend and the vat number is excluded for match TraderIdQuarantinedNETP " in {
-      forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
-
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
-        val application = applicationBuilder(userAnswers = Some(answers))
-          .overrides(
-            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-          ).build()
-
-        running(application) {
-
-          val expectedResponse = genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)
-
-          when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
-            Future.successful(Option(expectedResponse))
-
-          val request = FakeRequest(POST, euVatNumberSubmitRoute(nonAmendsWaypoints))
-            .withFormUrlEncodedBody(("value", euVatNumber))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.euDetails.routes.ExcludedVRNController.onPageLoad().url
-        }
-      }
-    }
-
-    "must redirect to ExcludedVRNController page when not in Amend and the vat number is excluded for match OtherMSNETPQuarantinedNETP " in {
-      forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
-
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
-        val application = applicationBuilder(userAnswers = Some(answers))
-          .overrides(
-            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-          ).build()
-
-        running(application) {
-
-          val expectedResponse = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP)
-
-          when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
-            Future.successful(Option(expectedResponse))
-
-          val request = FakeRequest(POST, euVatNumberSubmitRoute(nonAmendsWaypoints))
-            .withFormUrlEncodedBody(("value", euVatNumber))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.euDetails.routes.ExcludedVRNController.onPageLoad().url
-        }
-      }
-    }
-
     "must redirect to the next page when there is no active trader when not in amend" in {
       forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
         val mockRegistrationConnector = mock[RegistrationConnector]
@@ -387,7 +221,7 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
 
         running(application) {
 
-          val expectedResponse = genericMatch.copy(matchType = MatchType.TransferringMSID)
+          val expectedResponse = genericMatch.copy(exclusionStatusCode = Some(6))
 
           when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
             Future.successful(Option(expectedResponse))
@@ -420,7 +254,7 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
 
         running(application) {
 
-          val expectedResponse = genericMatch.copy(matchType = MatchType.TransferringMSID)
+          val expectedResponse = genericMatch.copy(exclusionStatusCode = Some(6))
 
           when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
             Future.successful(Option(expectedResponse))
@@ -540,7 +374,7 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
         ).build()
 
       running(application) {
-        val expectedResponse = genericMatch.copy(matchType = MatchType.FixedEstablishmentQuarantinedNETP)
+        val expectedResponse = genericMatch.copy(exclusionStatusCode = Some(4))
 
         when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
@@ -560,63 +394,5 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
       }
     }
 
-    "must not redirect to ExcludedVRNController page when the vat number is excluded for match TraderIdQuarantinedNETP" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
-      val application = applicationBuilder(userAnswers = Some(answers))
-        .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-        ).build()
-
-      running(application) {
-
-        val expectedResponse = genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)
-
-        when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
-          Future.successful(Option(expectedResponse))
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
-        val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
-          .withFormUrlEncodedBody(("value", euVatNumber))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
-
-        verify(mockRegistrationConnector).getRegistration()(any())
-      }
-    }
-
-    "must not redirect to ExcludedVRNController page when the vat number is excluded for match OtherMSNETPQuarantinedNETP" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
-      val application = applicationBuilder(userAnswers = Some(answers))
-        .overrides(
-          bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-        ).build()
-
-      running(application) {
-        val expectedResponse = genericMatch.copy(matchType = MatchType.OtherMSNETPQuarantinedNETP)
-
-        when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
-          Future.successful(Option(expectedResponse))
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
-        val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
-          .withFormUrlEncodedBody(("value", euVatNumber))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
-
-        verify(mockRegistrationConnector).getRegistration()(any())
-      }
-    }
   }
 }

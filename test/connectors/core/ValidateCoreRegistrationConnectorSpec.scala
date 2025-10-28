@@ -18,7 +18,7 @@ package connectors.core
 
 import base.SpecBase
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, ok, post, urlEqualTo}
-import models.core.{CoreRegistrationRequest, CoreRegistrationValidationResult, Match, MatchType, SourceType}
+import models.core.{CoreRegistrationRequest, CoreRegistrationValidationResult, Match, SourceType, TraderId}
 import models.responses.{EisError, EisErrorResponse, UnexpectedResponseStatus}
 import org.scalacheck.Gen
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -54,8 +54,7 @@ class ValidateCoreRegistrationConnectorSpec extends SpecBase with WireMockHelper
       traderFound = true,
       matches = Seq(
         Match(
-          matchType = MatchType.FixedEstablishmentQuarantinedNETP,
-          traderId = "444444444",
+          traderId = TraderId("444444444"),
           intermediary = Some("IN4819283759"),
           memberState = "DE",
           exclusionStatusCode = Some(3),
