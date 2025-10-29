@@ -92,7 +92,4 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val ossEnrolment: String = configuration.get[String]("oss-enrolment")
 
-  lazy val userResearchUrl1: String = configuration.get[String]("urls.userResearch1")
-  lazy val userResearchUrl2: String = configuration.get[String]("urls.userResearch2")
-
 }

@@ -61,8 +61,6 @@ class AmendCompleteController @Inject()(
 
       implicit request => {
 
-        val userResearchUrl = frontendAppConfig.userResearchUrl2
-
         val iossNumber = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
         val ossRegistration = request.latestOssRegistration
         val numberOfIossRegistrations = request.numberOfIossRegistrations
@@ -86,8 +84,7 @@ class AmendCompleteController @Inject()(
                   organisationName,
                   list,
                   ossRegistration,
-                  numberOfIossRegistrations,
-                  userResearchUrl
+                  numberOfIossRegistrations
                 )
               )
             }

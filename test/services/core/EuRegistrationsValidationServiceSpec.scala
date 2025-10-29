@@ -18,8 +18,7 @@ package services.core
 
 import base.SpecBase
 import models.PreviousScheme.{IOSSWI, IOSSWOI, OSSNU, OSSU}
-import models.core.MatchType.{FixedEstablishmentQuarantinedNETP, TransferringMSID}
-import models.core.{Match, MatchType}
+import models.core.{Match, TraderId}
 import models.etmp.SchemeType.{IOSSWithIntermediary, IOSSWithoutIntermediary, OSSNonUnion, OSSUnion}
 import models.etmp.{EtmpDisplayEuRegistrationDetails, EtmpPreviousEuRegistrationDetails, SchemeType}
 import models.requests.AuthenticatedDataRequest
@@ -48,14 +47,11 @@ class EuRegistrationsValidationServiceSpec
     with TableDrivenPropertyChecks {
 
   private val mockCoreRegistrationValidationService: CoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-  private val previousRegistrationValidationService = new EuRegistrationsValidationService(mockCoreRegistrationValidationService)
+  private val previousRegistrationValidationService = new EuRegistrationsValidationService(mockCoreRegistrationValidationService, stubClockAtArbitraryDate)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   private val request = AuthenticatedDataRequest(FakeRequest("GET", "/"), testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None, 1, None)
   implicit val dataRequest: AuthenticatedDataRequest[AnyContent] = AuthenticatedDataRequest(request, testCredentials, vrn, Enrolments(Set.empty), None, emptyUserAnswers, None, 1, None)
-
-  private val quarantinedNETP = FixedEstablishmentQuarantinedNETP
-  private val activeNETP = MatchType.FixedEstablishmentActiveNETP
 
   override protected def beforeEach(): Unit =
     reset(mockCoreRegistrationValidationService)
@@ -72,7 +68,7 @@ class EuRegistrationsValidationServiceSpec
         createEtmpDisplayEuRegistrationDetails(countryCode, Some(vrn), None)
       )
 
-      val foundMatch = createMatch(activeNETP)
+      val foundMatch = createMatch()
       when(mockCoreRegistrationValidationService.searchEuVrn(
         euVrn = ArgumentMatchers.eq(vrn),
         countryCode = ArgumentMatchers.eq(countryCode)
@@ -106,7 +102,7 @@ class EuRegistrationsValidationServiceSpec
         euVrn = ArgumentMatchers.eq(vrn),
         countryCode = ArgumentMatchers.eq(countryCode)
       )(any(), any()))
-        .thenReturn(Future.successful(Some(createMatch(FixedEstablishmentQuarantinedNETP))))
+        .thenReturn(Future.successful(Some(createMatch(exclusionStatusCode = Some(4)))))
 
       previousRegistrationValidationService.validateEuRegistrationDetails(details).futureValue mustBe
         Left(InvalidQuarantinedTrader)
@@ -119,7 +115,7 @@ class EuRegistrationsValidationServiceSpec
         createEtmpDisplayEuRegistrationDetails(countryCode, None, Some(euTaxReference)),
       )
 
-      val foundMatch = createMatch(activeNETP)
+      val foundMatch = createMatch()
       when(mockCoreRegistrationValidationService.searchEuTaxId(
         euTaxReference = ArgumentMatchers.eq(euTaxReference),
         countryCode = ArgumentMatchers.eq(countryCode))(any(), any())
@@ -141,7 +137,7 @@ class EuRegistrationsValidationServiceSpec
         euTaxReference = ArgumentMatchers.eq(euTaxReference),
         countryCode = ArgumentMatchers.eq(countryCode))(any(), any())
       )
-        .thenReturn(Future.successful(Some(createMatch(quarantinedNETP))))
+        .thenReturn(Future.successful(Some(createMatch(exclusionStatusCode = Some(4)))))
 
       previousRegistrationValidationService.validateEuRegistrationDetails(details).futureValue mustBe
         Left(InvalidQuarantinedTrader)
@@ -166,13 +162,13 @@ class EuRegistrationsValidationServiceSpec
         euTaxReference = ArgumentMatchers.eq(euTaxReference1),
         countryCode = ArgumentMatchers.eq(countryCode1))(any(), any())
       )
-        .thenReturn(Future.successful(Some(createMatch(TransferringMSID))))
+        .thenReturn(Future.successful(Some(createMatch(exclusionStatusCode = Some(6)))))
 
       when(mockCoreRegistrationValidationService.searchEuVrn(
         euVrn = ArgumentMatchers.eq(vrn1),
         countryCode = ArgumentMatchers.eq(countryCode2)
       )(any(), any()))
-        .thenReturn(Future.successful(Some(createMatch(quarantinedNETP))))
+        .thenReturn(Future.successful(Some(createMatch(exclusionStatusCode = Some(4)))))
 
       when(mockCoreRegistrationValidationService.searchEuVrn(
         euVrn = ArgumentMatchers.eq(vrn2),
@@ -184,7 +180,7 @@ class EuRegistrationsValidationServiceSpec
         euTaxReference = ArgumentMatchers.eq(euTaxReference2),
         countryCode = ArgumentMatchers.eq(countryCode2))(any(), any())
       )
-        .thenReturn(Future.successful(Some(createMatch(activeNETP))))
+        .thenReturn(Future.successful(Some(createMatch())))
 
 
       previousRegistrationValidationService.validateEuRegistrationDetails(details).futureValue mustBe
@@ -196,7 +192,7 @@ class EuRegistrationsValidationServiceSpec
       val options = Table(
         "validation response",
         None,
-        Some(createMatch(TransferringMSID))
+        Some(createMatch(exclusionStatusCode = Some(6)))
       )
 
       forAll(options) { result =>
@@ -221,7 +217,7 @@ class EuRegistrationsValidationServiceSpec
       val options = Table(
         "validation response",
         None,
-        Some(createMatch(TransferringMSID))
+        Some(createMatch(exclusionStatusCode = Some(6)))
       )
 
       forAll(options) { result =>
@@ -243,12 +239,11 @@ class EuRegistrationsValidationServiceSpec
     }
   }
 
-  def createMatch(matchType: MatchType): Match = Match(
-    matchType = matchType,
-    traderId = "",
+  def createMatch(exclusionStatusCode: Option[Int] = None): Match = Match(
+    traderId = TraderId("IM9001234566"),
     intermediary = None,
     memberState = "",
-    exclusionStatusCode = None,
+    exclusionStatusCode = exclusionStatusCode,
     exclusionDecisionDate = None,
     exclusionEffectiveDate = None,
     nonCompliantReturns = None,
@@ -315,7 +310,7 @@ class EuRegistrationsValidationServiceSpec
           ArgumentMatchers.eq(maybeIntermediaryNumber),
           ArgumentMatchers.eq(countryCode)
         )(any(), any()))
-          .thenReturn(Future.successful(Some(createMatch(activeNETP))))
+          .thenReturn(Future.successful(Some(createMatch())))
 
         previousRegistrationValidationService.validatePreviousEuRegistrationDetails(
           List(createEtmpPreviousEuRegistrationDetails(countryCode, registrationNumber, ossSchemaType, maybeIntermediaryNumber))
@@ -342,7 +337,7 @@ class EuRegistrationsValidationServiceSpec
           ArgumentMatchers.eq(maybeIntermediaryNumber),
           ArgumentMatchers.eq(countryCode)
         )(any(), any()))
-          .thenReturn(Future.successful(Some(createMatch(quarantinedNETP))))
+          .thenReturn(Future.successful(Some(createMatch(exclusionStatusCode = Some(4)))))
 
         previousRegistrationValidationService.validatePreviousEuRegistrationDetails(
           List(createEtmpPreviousEuRegistrationDetails(countryCode, registrationNumber, ossSchemaType, maybeIntermediaryNumber))
@@ -357,7 +352,7 @@ class EuRegistrationsValidationServiceSpec
 
       when(
         mockCoreRegistrationValidationService.searchScheme(registrationNumber, IOSSWI, maybeIntermediaryNumber, countryCode)
-      ).thenReturn(Future.successful(Some(createMatch(FixedEstablishmentQuarantinedNETP))))
+      ).thenReturn(Future.successful(Some(createMatch(exclusionStatusCode = Some(4)))))
 
       previousRegistrationValidationService.validatePreviousEuRegistrationDetails(
         List(createEtmpPreviousEuRegistrationDetails(countryCode, registrationNumber, IOSSWithIntermediary, maybeIntermediaryNumber))
@@ -369,7 +364,7 @@ class EuRegistrationsValidationServiceSpec
       val maybeIntermediaryNumber = Some("inumber1")
       val countryCode = "IE"
 
-      val foundMatch = createMatch(activeNETP)
+      val foundMatch = createMatch()
       when(
         mockCoreRegistrationValidationService.searchScheme(registrationNumber, IOSSWI, maybeIntermediaryNumber, countryCode)
       ).thenReturn(Future.successful(Some(foundMatch)))
@@ -395,15 +390,15 @@ class EuRegistrationsValidationServiceSpec
 
       when(
         mockCoreRegistrationValidationService.searchScheme("reg1", OSSNU, Some(intermediaryNumber1), countryCode1)
-      ).thenReturn(Future.successful(Some(createMatch(activeNETP))))
+      ).thenReturn(Future.successful(Some(createMatch())))
 
       when(
         mockCoreRegistrationValidationService.searchScheme("reg2", OSSU, Some(intermediaryNumber2), countryCode2)
-      ).thenReturn(Future.successful(Some(createMatch(quarantinedNETP))))
+      ).thenReturn(Future.successful(Some(createMatch(exclusionStatusCode = Some(4)))))
 
       when(
         mockCoreRegistrationValidationService.searchScheme("reg3", IOSSWI, Some(intermediaryNumber3), countryCode1)
-      ).thenReturn(Future.successful(Some(createMatch(TransferringMSID))))
+      ).thenReturn(Future.successful(Some(createMatch(exclusionStatusCode = Some(6)))))
 
 
       previousRegistrationValidationService.validatePreviousEuRegistrationDetails(details).futureValue mustBe Left(InvalidQuarantinedTrader)

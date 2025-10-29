@@ -20,7 +20,7 @@ import base.SpecBase
 import connectors.RegistrationConnector
 import controllers.routes
 import forms.previousRegistrations.PreviousIossNumberFormProvider
-import models.core.{Match, MatchType}
+import models.core.{Match, TraderId}
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.NonCompliantDetails
 import models.{Country, Index, PreviousScheme}
@@ -213,8 +213,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
     "Deal with core validation responses" - {
       val genericMatch = Match(
-        MatchType.TraderIdActiveNETP,
-        "IM0987654321",
+        TraderId("IM0987654321"),
         None,
         "DE",
         None,
@@ -312,7 +311,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
             when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
-              Future.successful(Some(genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)))
+              Future.successful(Some(genericMatch.copy(exclusionStatusCode = Some(4))))
 
             val request =
               FakeRequest(POST, previousIossNumberSubmitRoute(nonAmendModeWaypoints))
@@ -337,7 +336,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
         when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
-          Future.successful(Some(genericMatch.copy(matchType = MatchType.TraderIdQuarantinedNETP)))
+          Future.successful(Some(genericMatch.copy(exclusionStatusCode = Some(4))))
         when(mockRegistrationConnector.getRegistration()(any()))
           .thenReturn(Future.successful(Right(registrationWrapper)))
 
@@ -373,7 +372,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           .set(PreviousIossSchemePage(index, index), false).success.value
 
         val previousIossSchemeNumber: String = "IM0401234567"
-        val transferringMsidMatch = genericMatch.copy(matchType = MatchType.TransferringMSID, nonCompliantReturns = Some(1), nonCompliantPayments = Some(1))
+        val transferringMsidMatch = genericMatch.copy(exclusionStatusCode = Some(6), nonCompliantReturns = Some(1), nonCompliantPayments = Some(1))
 
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]

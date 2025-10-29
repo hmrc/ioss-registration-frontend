@@ -23,6 +23,7 @@ import models.etmp.{EtmpDisplayEuRegistrationDetails, EtmpPreviousEuRegistration
 import models.requests.AuthenticatedDataRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,7 +33,10 @@ case class InvalidActiveTrader(countryCode: String, memberState: String) extends
 
 case object InvalidQuarantinedTrader extends PreviousValidationInvalidResult
 
-class EuRegistrationsValidationService @Inject()(coreRegistrationValidationService: CoreRegistrationValidationService) {
+class EuRegistrationsValidationService @Inject()(
+                                                  coreRegistrationValidationService: CoreRegistrationValidationService,
+                                                  clock: Clock
+                                                ) {
 
   def validateEuRegistrationDetails(euRegistrationDetails: Seq[EtmpDisplayEuRegistrationDetails])
                                    (implicit hc: HeaderCarrier,
@@ -57,10 +61,10 @@ class EuRegistrationsValidationService @Inject()(coreRegistrationValidationServi
   }
 
   private def remapMatchToError(countryCode: String, foundMatch: Match, isOss: Boolean = false): Option[PreviousValidationInvalidResult] = {
-    if (foundMatch.matchType.isActiveTrader && !isOss) {
+    if (foundMatch.isActiveTrader && !isOss) {
       Some(InvalidActiveTrader(countryCode = countryCode, memberState = foundMatch.memberState))
     }
-    else if (foundMatch.matchType.isQuarantinedTrader) {
+    else if (foundMatch.isQuarantinedTrader(clock)) {
       Some(InvalidQuarantinedTrader)
     } else {
       None

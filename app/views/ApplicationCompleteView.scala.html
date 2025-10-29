@@ -30,7 +30,6 @@
         feedbackUrl: String,
         ossRegistration: Option[OssRegistration],
         list: SummaryList,
-        userResearchUrl: String
 )(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("applicationComplete.title")), showBackLink = false) {
@@ -59,13 +58,6 @@
         <p class="govuk-body">@messages("applicationComplete.checkInformation.contact")</p>
 
         <p class="govuk-body">@Html(messages("applicationComplete.checkInformation.info"))</p>
-
-        <div>
-         <h2 class="govuk-heading-m">@messages("userResearch.heading")</h2>
-            <p class="govuk-body">
-                <a href="@userResearchUrl" class="govuk-link" target="_blank">@messages("userResearch.link.text")</a>
-            </p>
-        </div>
 
         <p class="govuk-body">
             <a href="@feedbackUrl" class="govuk-link">@messages("applicationComplete.feedback.link.text")</a>

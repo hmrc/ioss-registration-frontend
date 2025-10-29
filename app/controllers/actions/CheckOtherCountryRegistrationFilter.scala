@@ -18,7 +18,7 @@ package controllers.actions
 
 import formats.Format
 import logging.Logging
-import models.core.{Match, MatchType}
+import models.core.{Match, TraderId}
 import models.requests.AuthenticatedDataRequest
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
@@ -50,46 +50,29 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
       } match {
         case Some(date) => date
         case _ =>
-          val e = new IllegalStateException(s"MatchType ${activeMatch.matchType} didn't include an expected exclusion effective date")
+          val e = new IllegalStateException(s"Exclusion status code ${activeMatch.exclusionStatusCode} didn't include an expected exclusion effective date")
           logger.error(s"Must have an Exclusion Effective Date ${e.getMessage}", e)
           throw e
       }
     }
 
     service.searchUkVrn(request.vrn)(hc, request).map {
+      case _ if registrationModificationMode == AmendingActiveRegistration =>
+        None
       case Some(activeMatch)
-        if isActiveNotInAmend(activeMatch) =>
+        if activeMatch.isActiveTrader =>
         Some(Redirect(controllers.filters.routes.AlreadyRegisteredOtherCountryController.onPageLoad(activeMatch.memberState)))
 
-      case Some(activeMatch) if isQuarantinedNotInAmend(activeMatch) =>
-        val effectiveDate = getEffectiveDate(activeMatch)
-        val quarantineCutOffDate = LocalDate.now(clock).minusYears(2)
-        if (effectiveDate.isAfter(quarantineCutOffDate)) {
-          Some(Redirect(
-            controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
-              activeMatch.memberState,
-              effectiveDate.toString)
-          ))
-        } else {
-          None
-        }
+      case Some(activeMatch) if activeMatch.isQuarantinedTrader(clock) =>
+        Some(Redirect(
+          controllers.filters.routes.OtherCountryExcludedAndQuarantinedController.onPageLoad(
+            activeMatch.memberState,
+            activeMatch.getEffectiveDate)
+        ))
 
       case _ =>
         None
     }
-  }
-
-  private def isQuarantinedNotInAmend(activeMatch: Match) = {
-    registrationModificationMode != AmendingActiveRegistration &&
-      (activeMatch.exclusionStatusCode.contains(exclusionStatusCode) ||
-        activeMatch.matchType == MatchType.OtherMSNETPQuarantinedNETP ||
-        activeMatch.matchType == MatchType.FixedEstablishmentQuarantinedNETP)
-  }
-
-  private def isActiveNotInAmend(activeMatch: Match) = {
-    registrationModificationMode != AmendingActiveRegistration &&
-      (activeMatch.matchType == MatchType.OtherMSNETPActiveNETP ||
-        activeMatch.matchType == MatchType.FixedEstablishmentActiveNETP)
   }
 }
 

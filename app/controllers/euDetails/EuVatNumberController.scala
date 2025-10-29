@@ -31,6 +31,7 @@ import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import views.html.euDetails.EuVatNumberView
 
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +40,8 @@ class EuVatNumberController @Inject()(
                                        cc: AuthenticatedControllerComponents,
                                        formProvider: EuVatNumberFormProvider,
                                        view: EuVatNumberView,
-                                       coreRegistrationValidationService: CoreRegistrationValidationService
+                                       coreRegistrationValidationService: CoreRegistrationValidationService,
+                                       clock: Clock
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with GetCountry {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -85,7 +87,7 @@ class EuVatNumberController @Inject()(
             euVrn =>
               coreRegistrationValidationService.searchEuVrn(euVrn, country.code).flatMap {
 
-                case Some(activeMatch) if activeMatch.matchType.isActiveTrader && isNotAmendingActiveRegistration =>
+                case Some(activeMatch) if activeMatch.isActiveTrader && isNotAmendingActiveRegistration =>
                   Future.successful(
                     Redirect(
                       controllers.euDetails.routes.FixedEstablishmentVRNAlreadyRegisteredController.onPageLoad(
@@ -95,7 +97,7 @@ class EuVatNumberController @Inject()(
                     )
                   )
 
-                case Some(activeMatch) if activeMatch.matchType.isQuarantinedTrader && isNotAmendingActiveRegistration =>
+                case Some(activeMatch) if activeMatch.isQuarantinedTrader(clock) && isNotAmendingActiveRegistration =>
                   Future.successful(Redirect(controllers.euDetails.routes.ExcludedVRNController.onPageLoad()))
 
                 case _ =>

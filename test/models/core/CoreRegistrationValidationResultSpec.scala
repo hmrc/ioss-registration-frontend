@@ -38,8 +38,7 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
             "FR",
             true,
             Seq(Match(
-              MatchType.FixedEstablishmentQuarantinedNETP,
-              "IM0987654321",
+              TraderId("IM0987654321"),
               Some("444444444"),
               "DE",
               Some(3),
@@ -57,7 +56,6 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
           "traderFound" -> true,
           "matches" -> Json.arr(
             Json.obj(
-              "matchType" -> "006",
               "traderId" -> "IM0987654321",
               "intermediary" -> "444444444",
               "memberState" -> "DE",
@@ -81,8 +79,7 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
             "FR",
             true,
             Seq(Match(
-              MatchType.FixedEstablishmentQuarantinedNETP,
-              "IM0987654321",
+              TraderId("IM0987654321"),
               None,
               "DE",
               None,
@@ -99,7 +96,6 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
           "traderFound" -> true,
           "matches" -> Json.arr(
             Json.obj(
-              "matchType" -> "006",
               "traderId" -> "IM0987654321",
               "memberState" -> "DE"
             ))
@@ -120,7 +116,6 @@ class CoreRegistrationValidationResultSpec extends AnyFreeSpec with Matchers wit
         "traderFound" -> true,
         "matches" -> Json.arr(
           Json.obj(
-            "matchType" -> "006",
             "traderId" -> "IM0987654321",
             "intermediary" -> "444444444",
             "memberState" -> "DE",

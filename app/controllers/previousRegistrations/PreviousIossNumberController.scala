@@ -21,11 +21,11 @@ import controllers.actions.{AmendingActiveRegistration, AuthenticatedControllerC
 import controllers.previousRegistrations.GetPreviousScheme.getPreviousScheme
 import forms.previousRegistrations.PreviousIossNumberFormProvider
 import logging.Logging
-import models.core.MatchType
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.{IossRegistrationNumberValidation, NonCompliantDetails}
 import models.requests.AuthenticatedDataRequest
 import models.{Country, Index, PreviousScheme, UserAnswers}
+import models.ossExclusions.ExclusionReason
 import pages.previousRegistrations.{PreviousIossNumberPage, PreviousIossSchemePage}
 import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -37,6 +37,7 @@ import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import views.html.previousRegistrations.PreviousIossNumberView
 
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,6 +46,7 @@ class PreviousIossNumberController @Inject()(
                                               cc: AuthenticatedControllerComponents,
                                               formProvider: PreviousIossNumberFormProvider,
                                               coreRegistrationValidationService: CoreRegistrationValidationService,
+                                              clock: Clock,
                                               view: PreviousIossNumberView
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging with GetCountry {
 
@@ -92,17 +94,17 @@ class PreviousIossNumberController @Inject()(
                     intermediaryNumber = previousSchemeNumbers.previousIntermediaryNumber,
                     countryCode = country.code
                   ).flatMap {
-                    case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.matchType.isActiveTrader =>
+                    case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.isActiveTrader =>
                       Future.successful(
                         Redirect(controllers.previousRegistrations.routes.SchemeStillActiveController.onPageLoad(
                           EmptyWaypoints,
                           activeMatch.memberState))
                       )
 
-                    case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.matchType.isQuarantinedTrader =>
+                    case Some(activeMatch) if isNotAmendingActiveRegistration && activeMatch.isQuarantinedTrader(clock) =>
                       Future.successful(Redirect(controllers.previousRegistrations.routes.SchemeQuarantinedController.onPageLoad(EmptyWaypoints)))
 
-                    case Some(activeMatch) if activeMatch.matchType == MatchType.TransferringMSID =>
+                    case Some(activeMatch) if activeMatch.exclusionStatusCode.exists(_ == ExclusionReason.TransferringMSID.numberValue) =>
                       saveAndRedirect(countryIndex, schemeIndex, previousSchemeNumbers,
                         Some(NonCompliantDetails(activeMatch.nonCompliantReturns, activeMatch.nonCompliantPayments)),
                         waypoints
