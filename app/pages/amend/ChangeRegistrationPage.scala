@@ -16,7 +16,7 @@
 
 package pages.amend
 
-import controllers.amend.{routes => amendRoutes}
+import controllers.amend.routes as amendRoutes
 import models.UserAnswers
 import pages.{CheckAnswersPage, Page, Waypoints}
 import play.api.mvc.Call
