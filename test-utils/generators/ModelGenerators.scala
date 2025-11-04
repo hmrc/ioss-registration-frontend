@@ -23,10 +23,10 @@ import models.domain.ModelHelpers.normaliseSpaces
 import models.domain.PreviousSchemeNumbers
 import models.enrolments.{EACDEnrolment, EACDEnrolments, EACDIdentifiers}
 import models.etmp.*
-import models.etmp.amend.EtmpAmendRegistrationChangeLog
+import models.etmp.amend.{EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationChangeLogLegacy}
 import models.euDetails.{EuDetails, RegistrationType}
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
-import models.ossRegistration.{OssAdminUse, OssContactDetails, OssEuTaxIdentifier, OssEuTaxIdentifierType, OssRegistration, OssTradeDetails, OssVatDetailSource, OssVatDetails, SalesChannels}
+import models.ossRegistration.{OssAdminUse, OssContactDetails, OssEuTaxIdentifier, OssEuTaxIdentifierType, OssRegistration, OssTradeDetails, OssVatDetails, OssVatDetailSource, SalesChannels}
 import models.previousRegistrations.NonCompliantDetails
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{choose, listOfN, option}
@@ -352,7 +352,7 @@ trait ModelGenerators extends EitherValues {
         contactDetails <- arbitrary[Boolean]
         bankDetails <- arbitrary[Boolean]
         reRegistration <- arbitrary[Boolean]
-      } yield EtmpAmendRegistrationChangeLog(tradingNames, fixedEstablishments, contactDetails, bankDetails, reRegistration)
+      } yield EtmpAmendRegistrationChangeLogLegacy(tradingNames, fixedEstablishments, contactDetails, bankDetails, reRegistration)
     }
 
   implicit lazy val arbitraryEtmpExclusion: Arbitrary[EtmpExclusion] =

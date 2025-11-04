@@ -20,8 +20,8 @@ import base.SpecBase
 import config.Constants.maxTradingNames
 import formats.Format.eisDateFormatter
 import models.{Bic, Country, Iban}
-import models.etmp._
-import models.etmp.amend.{AmendRegistrationResponse, EtmpAmendCustomerIdentification, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationRequest}
+import models.etmp.*
+import models.etmp.amend.{AmendRegistrationResponse, EtmpAmendCustomerIdentification, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationChangeLogLegacy, EtmpAmendRegistrationRequest}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 
@@ -112,7 +112,7 @@ object RegistrationData extends SpecBase {
 
   val etmpAmendRegistrationRequest: EtmpAmendRegistrationRequest = EtmpAmendRegistrationRequest(
     administration = etmpRegistrationRequest.administration.copy(messageType = EtmpMessageType.IOSSSubscriptionAmend),
-    changeLog = EtmpAmendRegistrationChangeLog(
+    changeLog = EtmpAmendRegistrationChangeLogLegacy(
       tradingNames = true,
       fixedEstablishments = true,
       contactDetails = true,

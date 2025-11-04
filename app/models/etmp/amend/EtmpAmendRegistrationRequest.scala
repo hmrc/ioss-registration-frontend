@@ -51,7 +51,35 @@ object EtmpAmendRegistrationRequest {
 
     EtmpAmendRegistrationRequest(
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),
-      changeLog = EtmpAmendRegistrationChangeLog(
+      changeLog = buildAmendRegistrationChangeLog(registration, rejoin, etmpRegistrationRequest, appConfig),
+      customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
+      tradingNames = etmpRegistrationRequest.tradingNames,
+      schemeDetails = etmpRegistrationRequest.schemeDetails,
+      bankDetails = etmpRegistrationRequest.bankDetails
+    )
+  }
+
+  private def buildAmendRegistrationChangeLog(
+                                               registration: EtmpDisplayRegistration,
+                                               rejoin: Boolean,
+                                               etmpRegistrationRequest: EtmpRegistrationRequest,
+                                               appConfig: FrontendAppConfig
+                                             ): EtmpAmendRegistrationChangeLog = {
+    
+    if(appConfig.release9Enabled) {
+      EtmpAmendRegistrationChangeLogNew(
+        tradingNames =
+          registration.tradingNames != etmpRegistrationRequest.tradingNames,
+        fixedEstablishments =
+          registration.schemeDetails.euRegistrationDetails != etmpRegistrationRequest.schemeDetails.euRegistrationDetails,
+        contactDetails =
+          contactDetailsDiff(registration.schemeDetails, etmpRegistrationRequest.schemeDetails),
+        bankDetails = registration.bankDetails != etmpRegistrationRequest.bankDetails,
+        reRegistration = rejoin,
+        otherAddress = false
+      )
+    } else {
+      EtmpAmendRegistrationChangeLogLegacy(
         tradingNames =
           registration.tradingNames != etmpRegistrationRequest.tradingNames,
         fixedEstablishments =
@@ -60,12 +88,8 @@ object EtmpAmendRegistrationRequest {
           contactDetailsDiff(registration.schemeDetails, etmpRegistrationRequest.schemeDetails),
         bankDetails = registration.bankDetails != etmpRegistrationRequest.bankDetails,
         reRegistration = rejoin
-      ),
-      customerIdentification = EtmpAmendCustomerIdentification(iossNumber),
-      tradingNames = etmpRegistrationRequest.tradingNames,
-      schemeDetails = etmpRegistrationRequest.schemeDetails,
-      bankDetails = etmpRegistrationRequest.bankDetails
-    )
+      )
+    }
   }
 
   private def contactDetailsDiff(

@@ -26,7 +26,7 @@ class EtmpAmendRegistrationChangeLogSpec extends SpecBase {
 
     "must serialize to JSON correctly" in {
 
-      val changeLog = EtmpAmendRegistrationChangeLog(
+      val changeLog = EtmpAmendRegistrationChangeLogLegacy(
         tradingNames = true,
         fixedEstablishments = true,
         contactDetails = true,
@@ -55,7 +55,7 @@ class EtmpAmendRegistrationChangeLogSpec extends SpecBase {
         "bankDetails" -> true
       )
 
-      val changeLog = EtmpAmendRegistrationChangeLog(
+      val changeLog = EtmpAmendRegistrationChangeLogLegacy(
         tradingNames = true,
         fixedEstablishments = true,
         contactDetails = true,

@@ -227,7 +227,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase with MockitoSugar {
 
         val etmpAmendRegistrationRequest: EtmpAmendRegistrationRequest = EtmpAmendRegistrationRequest(
           administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionAmend),
-          changeLog = EtmpAmendRegistrationChangeLog(
+          changeLog = EtmpAmendRegistrationChangeLogLegacy(
             tradingNames = true,
             fixedEstablishments = true,
             contactDetails = true,

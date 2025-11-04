@@ -16,18 +16,47 @@
 
 package models.etmp.amend
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, OFormat, Reads, Writes}
 
-case class EtmpAmendRegistrationChangeLog(
-                                           tradingNames: Boolean,
-                                           fixedEstablishments: Boolean,
-                                           contactDetails: Boolean,
-                                           bankDetails: Boolean,
-                                           reRegistration: Boolean
-                                         )
+trait EtmpAmendRegistrationChangeLog
 
 object EtmpAmendRegistrationChangeLog {
 
-  implicit val format: OFormat[EtmpAmendRegistrationChangeLog] = Json.format[EtmpAmendRegistrationChangeLog]
+  implicit val reads: Reads[EtmpAmendRegistrationChangeLog] =
+    EtmpAmendRegistrationChangeLogNew.format.widen[EtmpAmendRegistrationChangeLog] orElse
+      EtmpAmendRegistrationChangeLogLegacy.format.widen[EtmpAmendRegistrationChangeLog]
+
+  implicit val writes: Writes[EtmpAmendRegistrationChangeLog] = Writes {
+    case earcln: EtmpAmendRegistrationChangeLogNew => Json.toJson(earcln)(EtmpAmendRegistrationChangeLogNew.format)
+    case earcll: EtmpAmendRegistrationChangeLogLegacy => Json.toJson(earcll)(EtmpAmendRegistrationChangeLogLegacy.format)
+  }
+}
+
+case class EtmpAmendRegistrationChangeLogLegacy(
+                                                 tradingNames: Boolean,
+                                                 fixedEstablishments: Boolean,
+                                                 contactDetails: Boolean,
+                                                 bankDetails: Boolean,
+                                                 reRegistration: Boolean
+                                               ) extends EtmpAmendRegistrationChangeLog
+
+object EtmpAmendRegistrationChangeLogLegacy {
+
+  implicit val format: OFormat[EtmpAmendRegistrationChangeLogLegacy] = Json.format[EtmpAmendRegistrationChangeLogLegacy]
+
+}
+
+case class EtmpAmendRegistrationChangeLogNew(
+                                              tradingNames: Boolean,
+                                              fixedEstablishments: Boolean,
+                                              contactDetails: Boolean,
+                                              bankDetails: Boolean,
+                                              reRegistration: Boolean,
+                                              otherAddress: Boolean
+                                            ) extends EtmpAmendRegistrationChangeLog
+
+object EtmpAmendRegistrationChangeLogNew {
+
+  implicit val format: OFormat[EtmpAmendRegistrationChangeLogNew] = Json.format[EtmpAmendRegistrationChangeLogNew]
 
 }
