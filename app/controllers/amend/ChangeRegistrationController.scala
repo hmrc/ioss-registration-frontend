@@ -16,9 +16,12 @@
 
 package controllers.amend
 
-import controllers.actions._
+import controllers.actions.*
 import logging.Logging
 import models.CheckMode
+import models.audit.AmendRegistrationAuditModel
+import models.audit.RegistrationAuditType.AmendRegistration
+import models.audit.SubmissionResult.{Failure, Success}
 import models.domain.PreviousRegistration
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
@@ -27,7 +30,7 @@ import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PreviousRegistrationIossNumberQuery
-import services.{AccountService, RegistrationService}
+import services.{AccountService, AuditService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
@@ -37,7 +40,7 @@ import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSum
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
-import viewmodels.govuk.summarylist._
+import viewmodels.govuk.summarylist.*
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
@@ -49,6 +52,7 @@ class ChangeRegistrationController @Inject()(
                                               cc: AuthenticatedControllerComponents,
                                               registrationService: RegistrationService,
                                               accountService: AccountService,
+                                              auditService: AuditService,
                                               view: ChangeRegistrationView
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
@@ -131,10 +135,26 @@ class ChangeRegistrationController @Inject()(
               iossNumber,
               rejoin = false
             ).map {
-              case Right(_) =>
+              case Right(response) =>
+                auditService.audit(
+                  AmendRegistrationAuditModel.build(
+                    registrationAuditType = AmendRegistration,
+                    userAnswers = request.userAnswers,
+                    amendRegistrationResponse = Some(response),
+                    submissionResult = Success
+                  )(request.request)
+                )
                 Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
               case Left(e) =>
                 logger.error(s"Unexpected result on submit: ${e.body}")
+                auditService.audit(
+                  AmendRegistrationAuditModel.build(
+                    registrationAuditType = AmendRegistration,
+                    userAnswers = request.userAnswers,
+                    amendRegistrationResponse = None,
+                    submissionResult = Failure
+                  )(request.request)
+                )
                 Redirect(routes.ErrorSubmittingAmendmentController.onPageLoad())
             }
         }

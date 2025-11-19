@@ -29,5 +29,8 @@ object RegistrationAuditType extends Enumerable.Implicits {
     override val transactionName: String = "registration-submitted"
   }
 
-  // TODO -> AmendRegistration
+  case object AmendRegistration extends WithName("AmendRegistration") with RegistrationAuditType {
+    override val auditType: String = "RegistrationAmended"
+    override val transactionName: String = "registration-amended"
+  }
 }
