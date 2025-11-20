@@ -21,12 +21,15 @@ import config.Constants.correctionsPeriodsLimit
 import connectors.{RegistrationConnector, ReturnStatusConnector}
 import controllers.rejoin.validation.RejoinRegistrationValidation
 import controllers.rejoin.routes as rejoinRoutes
+import models.audit.SubmissionResult.{Failure, Success}
+import models.audit.{AmendRegistrationAuditModel, RegistrationAuditType}
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
+import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import models.responses.InternalServerError
 import models.{CheckMode, CurrentReturns, Index, Return, SubmissionStatus, UserAnswers}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
 import org.mockito.ArgumentMatchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -38,7 +41,9 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.euDetails.EuDetailsQuery
+import repositories.AuthenticatedUserAnswersRepository
 import services.*
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
@@ -60,6 +65,8 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
   private val mockReturnStatusConnector = mock[ReturnStatusConnector]
   private val country = arbitraryCountry.arbitrary.sample.value
   private val registrationValidationFailureRedirect = rejoinRoutes.CannotRejoinController.onPageLoad()
+  private val mockAuditService: AuditService = mock[AuditService]
+  private val mockRegistrationService = mock[RegistrationService]
 
   private val isCurrentIossAccount: Boolean = true
 
@@ -549,6 +556,110 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             status(result) mustBe SEE_OTHER
             redirectLocation(result).value mustEqual controllers.euDetails.routes.TaxRegisteredInEuController.onPageLoad(rejoinWaypoints).url
           }
+        }
+      }
+
+      "must audit success event then redirect when registration succeeds" in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val userAnswers = completeUserAnswersWithVatInfo
+
+        val registrationConnector = mock[RegistrationConnector]
+        when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
+        when(mockSessionRepository.set(any())) thenReturn true.toFuture
+        when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn Right(amendRegistrationResponse).toFuture
+        doNothing().when(mockAuditService).audit(any())(any(), any())
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[AuditService].toInstance(mockAuditService))
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(POST, controllers.amend.routes.ChangeRegistrationController.onSubmit(EmptyWaypoints, incompletePrompt = false).url)
+
+          val result = route(application, request).value
+
+          implicit val authenticatedDataRequest: AuthenticatedDataRequest[_] =
+            AuthenticatedDataRequest(
+              request = request,
+              credentials = testCredentials,
+              vrn = vrn,
+              enrolments = Enrolments(Set.empty),
+              iossNumber = Some(iossNumber),
+              userAnswers = userAnswers,
+              registrationWrapper = Some(registrationWrapper),
+              numberOfIossRegistrations = 1,
+              latestOssRegistration = None
+            )
+
+          val expectedAuditEvent = AmendRegistrationAuditModel.build(
+            RegistrationAuditType.AmendRegistration,
+            userAnswers,
+            Some(amendRegistrationResponse),
+            Success
+          )
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe controllers.amend.routes.AmendCompleteController.onPageLoad().url
+          verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
+        }
+      }
+
+      "must audit failure event and throw exception when registration fails" in {
+
+        val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+        val userAnswers = completeUserAnswersWithVatInfo
+
+        val registrationConnector = mock[RegistrationConnector]
+        when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
+
+        when(mockSessionRepository.set(any())) thenReturn true.toFuture
+        when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn Left(InternalServerError).toFuture
+        doNothing().when(mockAuditService).audit(any())(any(), any())
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .overrides(bind[AuditService].toInstance(mockAuditService))
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(POST, controllers.amend.routes.ChangeRegistrationController.onSubmit(EmptyWaypoints, incompletePrompt = false).url)
+
+          val result = route(application, request).value
+
+          implicit val authenticatedDataRequest: AuthenticatedDataRequest[_] =
+            AuthenticatedDataRequest(
+              request = request,
+              credentials = testCredentials,
+              vrn = vrn,
+              enrolments = Enrolments(Set.empty),
+              iossNumber = Some(iossNumber),
+              userAnswers = userAnswers,
+              registrationWrapper = Some(registrationWrapper),
+              numberOfIossRegistrations = 1,
+              latestOssRegistration = None
+            )
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe
+            controllers.amend.routes.ErrorSubmittingAmendmentController.onPageLoad().url
+
+          val expectedAuditEvent = AmendRegistrationAuditModel.build(
+            RegistrationAuditType.AmendRegistration,
+            userAnswers,
+            None,
+            Failure
+          )
+
+          verify(mockAuditService, times(1)).audit(eqTo(expectedAuditEvent))(any(), any())
         }
       }
     }

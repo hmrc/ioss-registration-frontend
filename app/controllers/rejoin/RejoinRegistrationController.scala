@@ -18,10 +18,12 @@ package controllers.rejoin
 
 import connectors.ReturnStatusConnector
 import controllers.CheckOutstandingReturns.existsOutstandingReturns
-import controllers.actions._
+import controllers.actions.*
 import controllers.rejoin.validation.RejoinRegistrationValidation
 import logging.Logging
 import models.amend.RegistrationWrapper
+import models.audit.{AmendRegistrationAuditModel, SubmissionResult}
+import models.audit.RegistrationAuditType.AmendRegistration
 import models.domain.PreviousRegistration
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import models.responses.ErrorResponse
@@ -32,7 +34,7 @@ import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.rejoin.NewIossReferenceQuery
-import services.RegistrationService
+import services.{AuditService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -42,7 +44,7 @@ import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSum
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
-import viewmodels.govuk.summarylist._
+import viewmodels.govuk.summarylist.*
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.rejoin.RejoinRegistrationView
 
@@ -55,6 +57,7 @@ class RejoinRegistrationController @Inject()(
                                               override val messagesApi: MessagesApi,
                                               cc: AuthenticatedControllerComponents,
                                               returnStatusConnector: ReturnStatusConnector,
+                                              auditService: AuditService,
                                               registrationService: RegistrationService,
                                               rejoinRegistrationValidator: RejoinRegistrationValidation,
                                               view: RejoinRegistrationView,
@@ -245,11 +248,27 @@ class RejoinRegistrationController @Inject()(
                           Future.successful(Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()))
                         case Success(updatedUserAnswers) =>
                           cc.sessionRepository.set(updatedUserAnswers).map { _ =>
+                            auditService.audit(
+                              AmendRegistrationAuditModel.build(
+                                registrationAuditType = AmendRegistration,
+                                userAnswers = request.userAnswers,
+                                amendRegistrationResponse = Some(amendRegistrationResponse),
+                                submissionResult = SubmissionResult.Success
+                              )(request.request)
+                            )
                             Redirect(RejoinRegistrationPage.navigate(EmptyWaypoints, userAnswers, userAnswers).route)
                           }
                       }
                     case Left(e) =>
                       logger.error(s"Unexpected result on submit: ${e.body}")
+                      auditService.audit(
+                        AmendRegistrationAuditModel.build(
+                          registrationAuditType = AmendRegistration,
+                          userAnswers = request.userAnswers,
+                          amendRegistrationResponse = None,
+                          submissionResult = SubmissionResult.Failure
+                        )(request.request)
+                      )
                       Future.successful(Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()))
                   }
               }
