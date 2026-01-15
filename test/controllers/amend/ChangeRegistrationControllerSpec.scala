@@ -311,7 +311,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
               val result = route(application, request).value
 
               status(result) mustBe SEE_OTHER
-              redirectLocation(result).value mustEqual controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints).url
+              redirectLocation(result).value mustEqual controllers.tradingNames.routes.TradingNameController.onPageLoad(waypoints, Index(0)).url
             }
           }
 
