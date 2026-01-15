@@ -149,7 +149,7 @@ trait CompletionChecks {
     }
 
   private def incompleteTradingNameRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isTradingNamesValid()) {
-      Some(Redirect(controllers.tradingNames.routes.HasTradingNameController.onPageLoad(waypoints)))
+      Some(Redirect(controllers.tradingNames.routes.TradingNameController.onPageLoad(waypoints, Index(0))))
     } else {
       None
     }

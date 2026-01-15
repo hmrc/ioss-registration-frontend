@@ -26,7 +26,7 @@ import models.audit.{AmendRegistrationAuditModel, RegistrationAuditType}
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
-import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
+import models.requests.{AuthenticatedDataRequest}
 import models.responses.InternalServerError
 import models.{CheckMode, CurrentReturns, Index, Return, SubmissionStatus, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
@@ -512,7 +512,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             val result = route(application, request).value
 
             status(result) mustBe SEE_OTHER
-            redirectLocation(result).value mustEqual controllers.tradingNames.routes.HasTradingNameController.onPageLoad(rejoinWaypoints).url
+            redirectLocation(result).value mustEqual controllers.tradingNames.routes.TradingNameController.onPageLoad(rejoinWaypoints, Index(0)).url
           }
         }
 
