@@ -24,13 +24,12 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object TaxRegisteredInEuSummary  {
+object TaxRegisteredInEuSummary {
 
   def row(
            answers: UserAnswers,
            waypoints: Waypoints,
-           sourcePage: CheckAnswersPage,
-           isCurrentIossAccount: Boolean
+           sourcePage: CheckAnswersPage
          )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TaxRegisteredInEuPage).map {
       answer =>
@@ -38,15 +37,15 @@ object TaxRegisteredInEuSummary  {
         val value = if (answer) "site.yes" else "site.no"
 
         SummaryListRowViewModel(
-          key     = "taxRegisteredInEu.mini.checkYourAnswersLabel",
-          value   = ValueViewModel(value),
-          actions = if (isCurrentIossAccount) {
+          key = "taxRegisteredInEu.mini.checkYourAnswersLabel",
+          value = ValueViewModel(value),
+          actions = if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
+            Nil
+          } else {
             Seq(
               ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
                 .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
             )
-          } else {
-            Nil
           }
         )
     }
@@ -58,12 +57,16 @@ object TaxRegisteredInEuSummary  {
         val value = if (answer) "site.yes" else "site.no"
 
         SummaryListRowViewModel(
-          key     = "taxRegisteredInEu.checkYourAnswersLabel",
-          value   = ValueViewModel(value),
-          actions = Seq(
-            ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
-          )
+          key = "taxRegisteredInEu.checkYourAnswersLabel",
+          value = ValueViewModel(value),
+          actions = if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
+            Nil
+          } else {
+            Seq(
+              ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
+                .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
+            )
+          }
         )
     }
 
@@ -74,8 +77,8 @@ object TaxRegisteredInEuSummary  {
         val value = if (answer) "site.yes" else "site.no"
 
         SummaryListRowViewModel(
-          key     = KeyViewModel("taxRegisteredInEu.mini.checkYourAnswersLabel").withCssClass("govuk-!-width-one-half"),
-          value   = ValueViewModel(value)
+          key = KeyViewModel("taxRegisteredInEu.mini.checkYourAnswersLabel").withCssClass("govuk-!-width-one-half"),
+          value = ValueViewModel(value)
         )
     }
 }

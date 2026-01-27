@@ -29,8 +29,7 @@ object HasTradingNameSummary {
   def row(
            answers: UserAnswers,
            waypoints: Waypoints,
-           sourcePage: CheckAnswersPage,
-           isCurrentIossAccount: Boolean
+           sourcePage: CheckAnswersPage
          )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(HasTradingNamePage).map {
       answer =>
@@ -40,20 +39,20 @@ object HasTradingNameSummary {
         val listRowViewModel = SummaryListRowViewModel(
           key = "hasTradingName.checkYourAnswersLabel",
           value = ValueViewModel(value),
-          actions = if (isCurrentIossAccount) {
+          actions = if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
+            Nil
+          } else {
             Seq(
               ActionItemViewModel("site.change", HasTradingNamePage.changeLink(waypoints, sourcePage).url)
                 .withVisuallyHiddenText(messages("hasTradingName.change.hidden"))
             )
-          } else {
-            Nil
           }
         )
 
-        if (isCurrentIossAccount) {
-          listRowViewModel
-        } else {
+        if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
           listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        } else {
+          listRowViewModel
         }
     }
 

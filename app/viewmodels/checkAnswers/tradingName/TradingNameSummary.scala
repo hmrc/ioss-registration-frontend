@@ -46,7 +46,7 @@ object TradingNameSummary {
     }
 
 
-  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)
                      (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllTradingNames).map {
       tradingNames =>
@@ -56,18 +56,24 @@ object TradingNameSummary {
             HtmlFormat.escape(name.name)
         }.mkString("<br/>")
 
-        SummaryListRowViewModel(
+        val listRowViewModel = SummaryListRowViewModel(
           key = "tradingName.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = if (isCurrentIossAccount) {
+          actions = if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
+            Nil
+          } else {
             Seq(
               ActionItemViewModel("site.change", AddTradingNamePage().changeLink(waypoints, sourcePage).url)
                 .withVisuallyHiddenText(messages("tradingName.change.hidden"))
             )
-          } else {
-            Nil
           }
         )
+        
+        if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
+          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        } else {
+          listRowViewModel
+        }
     }
 
   def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =

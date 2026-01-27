@@ -23,6 +23,7 @@ import models.audit.AmendRegistrationAuditModel
 import models.audit.RegistrationAuditType.AmendRegistration
 import models.audit.SubmissionResult.{Failure, Success}
 import models.domain.PreviousRegistration
+import models.etmp.{EtmpExclusion, EtmpExclusionReason}
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.previousRegistrations.PreviouslyRegisteredPage
@@ -45,6 +46,7 @@ import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
 import javax.inject.Inject
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
 class ChangeRegistrationController @Inject()(
@@ -78,8 +80,16 @@ class ChangeRegistrationController @Inject()(
 
           val selectedPreviousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
 
+          val maybeExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.lastOption.flatMap { exclusion =>
+            exclusion.exclusionReason match {
+              case EtmpExclusionReason.Reversal => None
+              case _ => Some(exclusion)
+            }
+          }
+          val isExcluded = maybeExclusion.isDefined
+
           val thisPage =
-            if (isPreviousRegistration) {
+            if (isPreviousRegistration || isExcluded) {
               ChangePreviousRegistrationPage
             } else {
               ChangeRegistrationPage
@@ -106,7 +116,7 @@ class ChangeRegistrationController @Inject()(
           val isValid = validate()(request.request)
           val hasPreviousRegistrations: Boolean = previousRegistrations.nonEmpty
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
-          val list = detailsList(waypoints, thisPage, isCurrentIossAccount)
+          val list = detailsList(waypoints, thisPage)
 
           Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount))
         }
@@ -160,24 +170,24 @@ class ChangeRegistrationController @Inject()(
         }
     }
 
-  private def detailsList(waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  private def detailsList(waypoints: Waypoints, sourcePage: CheckAnswersPage)
                          (implicit request: AuthenticatedMandatoryIossRequest[AnyContent]) = {
     SummaryListViewModel(
       rows =
-        (getTradingNameRows(waypoints, sourcePage, isCurrentIossAccount) ++
-          getPreviouslyRegisteredRows(waypoints, sourcePage, isCurrentIossAccount) ++
-          getRegisteredInEuRows(waypoints, sourcePage, isCurrentIossAccount) ++
-          getWebsitesRows(waypoints, sourcePage, isCurrentIossAccount) ++
+        (getTradingNameRows(waypoints, sourcePage) ++
+          getPreviouslyRegisteredRows(waypoints, sourcePage) ++
+          getRegisteredInEuRows(waypoints, sourcePage) ++
+          getWebsitesRows(waypoints, sourcePage) ++
           getBusinessContactDetailsRows(waypoints, sourcePage) ++
           getBankDetailsRows(waypoints, sourcePage)
           ).flatten
     )
   }
 
-  private def getTradingNameRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  private def getTradingNameRows(waypoints: Waypoints, sourcePage: CheckAnswersPage)
                                 (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
-    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, sourcePage, isCurrentIossAccount)
-    Seq(HasTradingNameSummary.row(request.userAnswers, waypoints, sourcePage, isCurrentIossAccount).map { sr =>
+    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(request.userAnswers, waypoints, sourcePage)
+    Seq(HasTradingNameSummary.row(request.userAnswers, waypoints, sourcePage).map { sr =>
       if (tradingNameSummaryRow.isDefined) {
         sr.withCssClass("govuk-summary-list__row--no-border")
       } else {
@@ -187,21 +197,20 @@ class ChangeRegistrationController @Inject()(
       tradingNameSummaryRow)
   }
 
-  private def getPreviouslyRegisteredRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  private def getPreviouslyRegisteredRows(waypoints: Waypoints, sourcePage: CheckAnswersPage)
                                          (implicit request: AuthenticatedMandatoryIossRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
 
     val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(
       answers = request.userAnswers,
       existingPreviousRegistrations = PreviousRegistration.fromEtmpPreviousEuRegistrationDetails(request.previousEURegistrationDetails),
       waypoints = waypoints,
-      sourcePage = sourcePage,
-      isCurrentIossAccount
+      sourcePage = sourcePage
     )
 
     val lockEditing: Boolean = request.userAnswers.get(PreviouslyRegisteredPage).contains(true)
 
     Seq(
-      PreviouslyRegisteredSummary.row(request.userAnswers, waypoints, sourcePage, lockEditing, isCurrentIossAccount).map { sr =>
+      PreviouslyRegisteredSummary.row(request.userAnswers, waypoints, sourcePage, lockEditing).map { sr =>
         if (previousRegistrationSummaryRow.isDefined) {
           sr.withCssClass("govuk-summary-list__row--no-border")
         } else {
@@ -212,11 +221,11 @@ class ChangeRegistrationController @Inject()(
     )
   }
 
-  private def getRegisteredInEuRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  private def getRegisteredInEuRows(waypoints: Waypoints, sourcePage: CheckAnswersPage)
                                    (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
-    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(request.userAnswers, waypoints, sourcePage, isCurrentIossAccount)
+    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(request.userAnswers, waypoints, sourcePage)
     Seq(
-      TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, sourcePage, isCurrentIossAccount).map { sr =>
+      TaxRegisteredInEuSummary.row(request.userAnswers, waypoints, sourcePage).map { sr =>
         if (euDetailsSummaryRow.isDefined) {
           sr.withCssClass("govuk-summary-list__row--no-border")
         } else {
@@ -227,9 +236,9 @@ class ChangeRegistrationController @Inject()(
     )
   }
 
-  private def getWebsitesRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  private def getWebsitesRows(waypoints: Waypoints, sourcePage: CheckAnswersPage)
                              (implicit request: AuthenticatedMandatoryIossRequest[_]): Seq[Option[SummaryListRow]] = {
-    Seq(WebsiteSummary.checkAnswersRow(request.userAnswers, waypoints, sourcePage, isCurrentIossAccount))
+    Seq(WebsiteSummary.checkAnswersRow(request.userAnswers, waypoints, sourcePage))
   }
 
   private def getBusinessContactDetailsRows(waypoints: Waypoints, sourcePage: CheckAnswersPage)

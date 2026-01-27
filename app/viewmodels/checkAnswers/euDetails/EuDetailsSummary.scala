@@ -67,7 +67,7 @@ object EuDetailsSummary {
       }
     )
 
-  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)
                      (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllEuDetailsQuery).map {
       euDetails =>
@@ -80,20 +80,20 @@ object EuDetailsSummary {
         val listRowViewModel = SummaryListRowViewModel(
           key = "euDetails.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = if (isCurrentIossAccount) {
+          actions = if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
+            Nil
+          } else {
             Seq(
               ActionItemViewModel("site.change", AddEuDetailsPage().changeLink(waypoints, sourcePage).url)
                 .withVisuallyHiddenText(messages("euDetails.change.hidden"))
             )
-          } else {
-            Nil
           }
         )
 
-        if (isCurrentIossAccount) {
-          listRowViewModel
-        } else {
+        if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
           listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        } else {
+          listRowViewModel
         }
     }
 

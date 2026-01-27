@@ -54,8 +54,7 @@ object PreviousRegistrationSummary {
                        answers: UserAnswers,
                        existingPreviousRegistrations: Seq[PreviousRegistration],
                        waypoints: Waypoints,
-                       sourcePage: CheckAnswersPage,
-                       isCurrentIossAccount: Boolean
+                       sourcePage: CheckAnswersPage
                      )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllPreviousRegistrationsQuery).map {
       previousRegistrations =>
@@ -72,7 +71,9 @@ object PreviousRegistrationSummary {
         val listRowViewModel = SummaryListRowViewModel(
           key = "previousRegistrations.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = if (isCurrentIossAccount) {
+          actions = if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
+            Nil
+          } else {
             Seq(
               if (sameListOfCountries) {
                 ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
@@ -82,15 +83,13 @@ object PreviousRegistrationSummary {
                   .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
               }
             )
-          } else {
-            Nil
           }
         )
 
-        if (isCurrentIossAccount) {
-          listRowViewModel
-        } else {
+        if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
           listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        } else {
+          listRowViewModel
         }
     }
 

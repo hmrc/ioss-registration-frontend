@@ -46,8 +46,7 @@ object WebsiteSummary {
   def checkAnswersRow(
                        answers: UserAnswers,
                        waypoints: Waypoints,
-                       sourcePage: CheckAnswersPage,
-                       isCurrentIossAccount: Boolean
+                       sourcePage: CheckAnswersPage
                      )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllWebsites).map {
       websites =>
@@ -62,20 +61,20 @@ object WebsiteSummary {
         val listRowViewModel = SummaryListRowViewModel(
           key = "websites.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = if (isCurrentIossAccount) {
+          actions = if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
+            Nil
+          } else {
             Seq(
               ActionItemViewModel("site.change", addWebsitePageChangeUrl)
                 .withVisuallyHiddenText(messages("websites.change.hidden"))
             )
-          } else {
-            Nil
           }
         )
 
-        if (isCurrentIossAccount) {
-          listRowViewModel
-        } else {
+        if (sourcePage.isInstanceOf[pages.amend.ChangePreviousRegistrationPage.type]) {
           listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
+        } else {
+          listRowViewModel
         }
     }
 
