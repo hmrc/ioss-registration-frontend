@@ -237,20 +237,16 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
           val view = application.injector.instanceOf[ChangeRegistrationView]
 
-          val excludedWaypoints = EmptyWaypoints.setNextWaypoint(
-            Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
-          )
-
           val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
           val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(
             completeUserAnswersWithVatInfo,
-            excludedWaypoints,
+            previousRegistrationWaypoints,
             amendYourPreviousAnswersPage
           ))
 
           status(result) mustBe OK
           contentAsString(result) mustBe view(
-            excludedWaypoints,
+            previousRegistrationWaypoints,
             vatInfoList,
             list,
             iossNumber,

@@ -96,7 +96,7 @@ class ChangeRegistrationController @Inject()(
             }
 
           val waypoints =
-            if (isPreviousRegistration) {
+            if (isPreviousRegistration || isExcluded) {
               EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
             } else {
               EmptyWaypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, ChangeRegistrationPage.urlFragment))
