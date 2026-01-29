@@ -19,7 +19,6 @@ package models.audit
 import models.UserAnswers
 import models.etmp.amend.AmendRegistrationResponse
 import models.requests.AuthenticatedDataRequest
-import models.responses.etmp.EtmpEnrolmentResponse
 import play.api.libs.json.{JsValue, Json}
 
 case class AmendRegistrationAuditModel(

@@ -18,7 +18,7 @@ package controllers.actions
 
 import formats.Format
 import logging.Logging
-import models.core.{Match, TraderId}
+import models.core.Match
 import models.requests.AuthenticatedDataRequest
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
