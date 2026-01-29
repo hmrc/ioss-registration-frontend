@@ -30,17 +30,15 @@ object PreviouslyRegisteredSummary {
            answers: UserAnswers,
            waypoints: Waypoints,
            sourcePage: CheckAnswersPage,
-           lockEditing: Boolean,
-           isCurrentIossAccount: Boolean
+           lockEditing: Boolean
          )(implicit messages: Messages): Option[SummaryListRow] =
 
     answers.get(PreviouslyRegisteredPage).map {
       (otherOneStopRegistrations: Boolean) =>
         val value = if (otherOneStopRegistrations) "site.yes" else "site.no"
-        val actions = if (lockEditing || !isCurrentIossAccount) {
+        val actions = if (lockEditing) {
           Nil
         } else {
-
           Seq(
             ActionItemViewModel("site.change", PreviouslyRegisteredPage.changeLink(waypoints, sourcePage).url)
               .withVisuallyHiddenText(messages("previouslyRegistered.change.hidden"))
@@ -51,6 +49,22 @@ object PreviouslyRegisteredSummary {
           key = "previouslyRegistered.checkYourAnswersLabel",
           value = ValueViewModel(value),
           actions = actions
+        )
+    }
+
+  def rowWithoutAction(
+                        answers: UserAnswers,
+                        waypoints: Waypoints,
+                        lockEditing: Boolean
+                      )(implicit messages: Messages): Option[SummaryListRow] =
+
+    answers.get(PreviouslyRegisteredPage).map {
+      (otherOneStopRegistrations: Boolean) =>
+        val value = if (otherOneStopRegistrations) "site.yes" else "site.no"
+
+        SummaryListRowViewModel(
+          key = "previouslyRegistered.checkYourAnswersLabel",
+          value = ValueViewModel(value)
         )
     }
 

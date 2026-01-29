@@ -67,7 +67,7 @@ object EuDetailsSummary {
       }
     )
 
-  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)
                      (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllEuDetailsQuery).map {
       euDetails =>
@@ -77,24 +77,30 @@ object EuDetailsSummary {
             HtmlFormat.escape(details.euCountry.name)
         }.mkString("<br/>")
 
-        val listRowViewModel = SummaryListRowViewModel(
+        SummaryListRowViewModel(
           key = "euDetails.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = if (isCurrentIossAccount) {
-            Seq(
-              ActionItemViewModel("site.change", AddEuDetailsPage().changeLink(waypoints, sourcePage).url)
-                .withVisuallyHiddenText(messages("euDetails.change.hidden"))
-            )
-          } else {
-            Nil
-          }
+          actions = Seq(
+            ActionItemViewModel("site.change", AddEuDetailsPage().changeLink(waypoints, sourcePage).url)
+              .withVisuallyHiddenText(messages("euDetails.change.hidden"))
+          )
         )
+    }
 
-        if (isCurrentIossAccount) {
-          listRowViewModel
-        } else {
-          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
-        }
+  def checkAnswersRowWithoutAction(answers: UserAnswers, waypoints: Waypoints)
+                                  (implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(AllEuDetailsQuery).map {
+      euDetails =>
+
+        val value = euDetails.map {
+          details =>
+            HtmlFormat.escape(details.euCountry.name)
+        }.mkString("<br/>")
+
+        SummaryListRowViewModel(
+          key = "euDetails.checkYourAnswersLabel",
+          value = ValueViewModel(HtmlContent(value))
+        )
     }
 
   def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =

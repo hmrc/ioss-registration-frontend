@@ -54,8 +54,7 @@ object PreviousRegistrationSummary {
                        answers: UserAnswers,
                        existingPreviousRegistrations: Seq[PreviousRegistration],
                        waypoints: Waypoints,
-                       sourcePage: CheckAnswersPage,
-                       isCurrentIossAccount: Boolean
+                       sourcePage: CheckAnswersPage
                      )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllPreviousRegistrationsQuery).map {
       previousRegistrations =>
@@ -64,34 +63,41 @@ object PreviousRegistrationSummary {
             HtmlFormat.escape(details.previousEuCountry.name)
         }.mkString("<br/>")
 
-
         val currentAnswerCountries = previousRegistrations.map(_.previousEuCountry)
         val existingCountries = existingPreviousRegistrations.map(previousRegistration => previousRegistration.country)
         val sameListOfCountries: Boolean = currentAnswerCountries.sortBy(_.code) == existingCountries.sortBy(_.code)
 
-        val listRowViewModel = SummaryListRowViewModel(
+        SummaryListRowViewModel(
           key = "previousRegistrations.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = if (isCurrentIossAccount) {
-            Seq(
-              if (sameListOfCountries) {
-                ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
-                  .withVisuallyHiddenText(messages("previousRegistrations.add.hidden"))
-              } else {
-                ActionItemViewModel("site.change", AddPreviousRegistrationPage().changeLink(waypoints, sourcePage).url)
-                  .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
-              }
-            )
-          } else {
-            Nil
-          }
+          actions = Seq(
+            if (sameListOfCountries) {
+              ActionItemViewModel("site.add", controllers.previousRegistrations.routes.AddPreviousRegistrationController.onPageLoad(waypoints).url)
+                .withVisuallyHiddenText(messages("previousRegistrations.add.hidden"))
+            } else {
+              ActionItemViewModel("site.change", AddPreviousRegistrationPage().changeLink(waypoints, sourcePage).url)
+                .withVisuallyHiddenText(messages("previousRegistrations.change.hidden"))
+            }
+          )
         )
+    }
 
-        if (isCurrentIossAccount) {
-          listRowViewModel
-        } else {
-          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
-        }
+  def checkAnswersRowWithoutAction(
+                                    answers: UserAnswers,
+                                    existingPreviousRegistrations: Seq[PreviousRegistration],
+                                    waypoints: Waypoints
+                                  )(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(AllPreviousRegistrationsQuery).map {
+      previousRegistrations =>
+        val value = previousRegistrations.map {
+          details =>
+            HtmlFormat.escape(details.previousEuCountry.name)
+        }.mkString("<br/>")
+
+        SummaryListRowViewModel(
+          key = "previousRegistrations.checkYourAnswersLabel",
+          value = ValueViewModel(HtmlContent(value))
+        )
     }
 
   def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =

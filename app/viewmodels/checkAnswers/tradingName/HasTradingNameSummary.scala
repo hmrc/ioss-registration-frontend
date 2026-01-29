@@ -29,32 +29,36 @@ object HasTradingNameSummary {
   def row(
            answers: UserAnswers,
            waypoints: Waypoints,
-           sourcePage: CheckAnswersPage,
-           isCurrentIossAccount: Boolean
+           sourcePage: CheckAnswersPage
          )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(HasTradingNamePage).map {
       answer =>
 
         val value = if (answer) "site.yes" else "site.no"
 
-        val listRowViewModel = SummaryListRowViewModel(
+        SummaryListRowViewModel(
           key = "hasTradingName.checkYourAnswersLabel",
           value = ValueViewModel(value),
-          actions = if (isCurrentIossAccount) {
-            Seq(
-              ActionItemViewModel("site.change", HasTradingNamePage.changeLink(waypoints, sourcePage).url)
-                .withVisuallyHiddenText(messages("hasTradingName.change.hidden"))
-            )
-          } else {
-            Nil
-          }
+          actions = Seq(
+            ActionItemViewModel("site.change", HasTradingNamePage.changeLink(waypoints, sourcePage).url)
+              .withVisuallyHiddenText(messages("hasTradingName.change.hidden"))
+          )
         )
+    }
 
-        if (isCurrentIossAccount) {
-          listRowViewModel
-        } else {
-          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
-        }
+  def rowWithoutAction(
+                        answers: UserAnswers,
+                        waypoints: Waypoints
+                      )(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(HasTradingNamePage).map {
+      answer =>
+
+        val value = if (answer) "site.yes" else "site.no"
+
+        SummaryListRowViewModel(
+          key = "hasTradingName.checkYourAnswersLabel",
+          value = ValueViewModel(value)
+        )
     }
 
   def amendedRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =

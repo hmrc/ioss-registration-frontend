@@ -25,7 +25,7 @@ import models.audit.{AmendRegistrationAuditModel, RegistrationAuditType}
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
-import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
+import models.requests.{AuthenticatedDataRequest}
 import models.responses.InternalServerError
 import models.{CheckMode, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
@@ -117,12 +117,18 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
       "must return OK and the correct view for a GET when no previous registrations exist" in {
 
-        val isCurrentIossAccount: Boolean = true
+        val registrationWithoutExclusion = registrationWrapper.copy(
+          registration = registrationWrapper.registration.copy(exclusions = List.empty)
+        )
 
-        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
 
-        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()))
+        val application = applicationBuilder(
+          userAnswers = Some(completeUserAnswersWithVatInfo),
+          clock = Some(Clock.systemUTC()),
+          registrationWrapper = Some(registrationWithoutExclusion)
+        )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
           .build()
@@ -137,7 +143,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val view = application.injector.instanceOf[ChangeRegistrationView]
 
           val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
-          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo, isCurrentIossAccount))
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo, waypoints, amendYourAnswersPage))
 
           status(result) mustBe OK
           contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber, isValid = true, hasPreviousRegistrations = false, isCurrentIossAccount = true)(request, messages(application)).toString
@@ -145,8 +151,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
       }
 
       "must return OK and the correct view for a GET when previous registrations exist" in {
-
-        val isCurrentIossAccount: Boolean = true
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
@@ -167,7 +171,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
           val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
           val list = SummaryListViewModel(rows =
-            getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo, isCurrentIossAccount, previousRegistrationWaypoints, amendYourPreviousAnswersPage)
+            getChangeRegistrationSummaryListExcluded(completeUserAnswersWithVatInfo, previousRegistrationWaypoints, amendYourPreviousAnswersPage)
           )
 
           status(result) mustBe OK
@@ -177,8 +181,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
       }
 
       "must return OK and the correct view for a GET when previous registration currently in focus" in {
-
-        val isCurrentIossAccount: Boolean = false
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
@@ -201,12 +203,55 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
           val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(answers))
           val list = SummaryListViewModel(rows =
-            getChangeRegistrationSummaryList(answers, isCurrentIossAccount, previousRegistrationWaypoints, amendYourPreviousAnswersPage)
+            getChangeRegistrationSummaryListExcluded(answers, previousRegistrationWaypoints, amendYourPreviousAnswersPage)
           )
 
           status(result) mustBe OK
           contentAsString(result) mustBe view(previousRegistrationWaypoints, vatInfoList, list, previousRegistration.iossNumber, isValid = true, hasPreviousRegistrations = true, isCurrentIossAccount = false)(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.toCurrentRegistration")) mustBe true
+        }
+      }
+
+      "must return OK and the correct view for a GET when trader is excluded" in {
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
+        when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+
+        val application = applicationBuilder(
+          userAnswers = Some(completeUserAnswersWithVatInfo),
+          clock = Some(Clock.systemUTC()),
+          registrationWrapper = Some(rejoinableRegistration)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[AccountService].toInstance(mockAccountService))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ChangeRegistrationView]
+
+          val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(completeUserAnswersWithVatInfo))
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryListExcluded(
+            completeUserAnswersWithVatInfo,
+            waypoints,
+            amendYourAnswersPage
+          ))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
+            waypoints,
+            vatInfoList,
+            list,
+            iossNumber,
+            isValid = true,
+            hasPreviousRegistrations = false,
+            isCurrentIossAccount = true
+          )(request, messages(application)).toString
         }
       }
     }
@@ -457,18 +502,72 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
   private def getChangeRegistrationSummaryList(
                                                 answers: UserAnswers,
-                                                isCurrentIossAccount: Boolean,
                                                 waypoints: Waypoints = waypoints,
                                                 page: CheckAnswersPage = amendYourAnswersPage
                                               )(implicit msgs: Messages): Seq[SummaryListRow] = {
 
-    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, waypoints, page, isCurrentIossAccount)
-    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, waypoints, page, isCurrentIossAccount)
-    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, waypoints, page, lockEditing = false, isCurrentIossAccount)
-    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, waypoints, page, isCurrentIossAccount)
-    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(answers, waypoints, page, isCurrentIossAccount)
-    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(answers, waypoints, page, isCurrentIossAccount)
-    val websiteSummaryRow = WebsiteSummary.checkAnswersRow(answers, waypoints, page, isCurrentIossAccount)
+    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, waypoints, page)
+    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, waypoints, page)
+    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, waypoints, page, lockEditing = false)
+    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, waypoints, page)
+    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.row(answers, waypoints, page)
+    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRow(answers, waypoints, page)
+    val websiteSummaryRow = WebsiteSummary.checkAnswersRow(answers, waypoints, page)
+    val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(answers, waypoints, page)
+    val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(answers, waypoints, page)
+    val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(answers, waypoints, page)
+    val bankDetailsAccountNameSummaryRow = BankDetailsSummary.rowAccountName(answers, waypoints, page)
+    val bankDetailsBicSummaryRow = BankDetailsSummary.rowBIC(answers, waypoints, page)
+    val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(answers, waypoints, page)
+
+    Seq(
+      hasTradingNameSummaryRow.map { sr =>
+        if (tradingNameSummaryRow.isDefined) {
+          sr.withCssClass("govuk-summary-list__row--no-border")
+        } else {
+          sr
+        }
+      },
+      tradingNameSummaryRow,
+      previouslyRegisteredSummaryRow.map { sr =>
+        if (previousRegistrationSummaryRow.isDefined) {
+          sr.withCssClass("govuk-summary-list__row--no-border")
+        } else {
+          sr
+        }
+      },
+      previousRegistrationSummaryRow,
+      taxRegisteredInEuSummaryRow.map { sr =>
+        if (euDetailsSummaryRow.isDefined) {
+          sr.withCssClass("govuk-summary-list__row--no-border")
+        } else {
+          sr
+        }
+      },
+      euDetailsSummaryRow,
+      websiteSummaryRow,
+      businessContactDetailsContactNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+      businessContactDetailsTelephoneSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+      businessContactDetailsEmailSummaryRow,
+      bankDetailsAccountNameSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+      bankDetailsBicSummaryRow.map(_.withCssClass("govuk-summary-list__row--no-border")),
+      bankDetailsIbanSummaryRow
+    ).flatten
+  }
+
+  private def getChangeRegistrationSummaryListExcluded(
+                                                        answers: UserAnswers,
+                                                        waypoints: Waypoints,
+                                                        page: CheckAnswersPage
+                                                      )(implicit msgs: Messages): Seq[SummaryListRow] = {
+
+    val hasTradingNameSummaryRow = HasTradingNameSummary.rowWithoutAction(answers, waypoints)
+    val tradingNameSummaryRow = TradingNameSummary.checkAnswersRowWithoutAction(answers, waypoints)
+    val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.rowWithoutAction(answers, waypoints, lockEditing = false)
+    val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRowWithoutAction(answers, Seq.empty, waypoints)
+    val taxRegisteredInEuSummaryRow = TaxRegisteredInEuSummary.rowWithoutAction(answers, waypoints)
+    val euDetailsSummaryRow = EuDetailsSummary.checkAnswersRowWithoutAction(answers, waypoints)
+    val websiteSummaryRow = WebsiteSummary.checkAnswersRowWithoutAction(answers, waypoints)
     val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.rowContactName(answers, waypoints, page)
     val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.rowTelephoneNumber(answers, waypoints, page)
     val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.rowEmailAddress(answers, waypoints, page)

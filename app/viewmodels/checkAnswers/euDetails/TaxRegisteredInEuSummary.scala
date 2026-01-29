@@ -29,8 +29,7 @@ object TaxRegisteredInEuSummary  {
   def row(
            answers: UserAnswers,
            waypoints: Waypoints,
-           sourcePage: CheckAnswersPage,
-           isCurrentIossAccount: Boolean
+           sourcePage: CheckAnswersPage
          )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TaxRegisteredInEuPage).map {
       answer =>
@@ -40,14 +39,25 @@ object TaxRegisteredInEuSummary  {
         SummaryListRowViewModel(
           key     = "taxRegisteredInEu.mini.checkYourAnswersLabel",
           value   = ValueViewModel(value),
-          actions = if (isCurrentIossAccount) {
-            Seq(
-              ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
-                .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
-            )
-          } else {
-            Nil
-          }
+          actions = Seq(
+            ActionItemViewModel("site.change", TaxRegisteredInEuPage.changeLink(waypoints, sourcePage).url)
+              .withVisuallyHiddenText(messages("taxRegisteredInEu.change.hidden"))
+          )
+        )
+    }
+
+  def rowWithoutAction(
+                        answers: UserAnswers,
+                        waypoints: Waypoints
+                      )(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(TaxRegisteredInEuPage).map {
+      answer =>
+
+        val value = if (answer) "site.yes" else "site.no"
+
+        SummaryListRowViewModel(
+          key     = "taxRegisteredInEu.mini.checkYourAnswersLabel",
+          value   = ValueViewModel(value)
         )
     }
 
