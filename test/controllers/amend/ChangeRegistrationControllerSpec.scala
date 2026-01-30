@@ -126,7 +126,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         val application = applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
-          clock = Some(Clock.systemUTC()),
           registrationWrapper = Some(registrationWithoutExclusion)
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
@@ -155,7 +154,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
 
-        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(Clock.systemUTC()), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
+        val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
           .build()
@@ -187,7 +186,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         val answers = completeUserAnswersWithVatInfo.set(PreviousRegistrationIossNumberQuery, previousRegistration.iossNumber).success.value
 
-        val application = applicationBuilder(userAnswers = Some(answers), clock = Some(Clock.systemUTC()), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
+        val application = applicationBuilder(userAnswers = Some(answers), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
           .build()
@@ -219,7 +218,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         val application = applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
-          clock = Some(Clock.systemUTC()),
           registrationWrapper = Some(rejoinableRegistration)
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
