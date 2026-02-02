@@ -46,7 +46,7 @@ object TradingNameSummary {
     }
 
 
-  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage, isCurrentIossAccount: Boolean)
+  def checkAnswersRow(answers: UserAnswers, waypoints: Waypoints, sourcePage: CheckAnswersPage)
                      (implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllTradingNames).map {
       tradingNames =>
@@ -59,14 +59,26 @@ object TradingNameSummary {
         SummaryListRowViewModel(
           key = "tradingName.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = if (isCurrentIossAccount) {
-            Seq(
-              ActionItemViewModel("site.change", AddTradingNamePage().changeLink(waypoints, sourcePage).url)
-                .withVisuallyHiddenText(messages("tradingName.change.hidden"))
-            )
-          } else {
-            Nil
-          }
+          actions = Seq(
+            ActionItemViewModel("site.change", AddTradingNamePage().changeLink(waypoints, sourcePage).url)
+              .withVisuallyHiddenText(messages("tradingName.change.hidden"))
+          )
+        )
+    }
+
+  def checkAnswersRowWithoutAction(answers: UserAnswers, waypoints: Waypoints)
+                                  (implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(AllTradingNames).map {
+      tradingNames =>
+
+        val value = tradingNames.map {
+          name =>
+            HtmlFormat.escape(name.name)
+        }.mkString("<br/>")
+
+        SummaryListRowViewModel(
+          key = "tradingName.checkYourAnswersLabel",
+          value = ValueViewModel(HtmlContent(value))
         )
     }
 

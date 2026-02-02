@@ -67,7 +67,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
   "StartRejoinJourney Controller" - {
 
     "must redirect to Rejoin Registration when a registration wrapper has been successfully retrieved and is passes exclusion sanity checks" in {
-      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
+      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now(stubClockAtArbitraryDate))
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
@@ -84,7 +84,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
       val application = applicationBuilder(
         userAnswers = Some(completeUserAnswersWithVatInfo),
-        clock = Some(Clock.systemUTC())
+        clock = Some(stubClockAtArbitraryDate)
       )
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
@@ -107,7 +107,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
       val exclusion = EtmpExclusion(
         exclusionReason = NoLongerSupplies,
         effectiveDate = effectiveDate,
-        decisionDate = LocalDate.now(),
+        decisionDate = LocalDate.now(stubClockAtArbitraryDate),
         quarantine = false
       )
 
@@ -117,7 +117,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
 
     "must redirect to Rejoin Registration when a registration wrapper has been successfully retrieved but it does not pass exclusion sanity checks" in {
-      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now().plusDays(1))
+      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now(stubClockAtArbitraryDate).plusDays(1))
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
@@ -128,7 +128,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
       val application = applicationBuilder(
         userAnswers = Some(completeUserAnswersWithVatInfo),
-        clock = Some(Clock.systemUTC())
+        clock = Some(stubClockAtArbitraryDate)
       )
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
@@ -147,12 +147,12 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
     }
 
     "must redirect to Cannot Rejoin Registration Page when there are outstanding returns" in {
-      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
+      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now(stubClockAtArbitraryDate))
 
       val dueReturn = Return(
-        firstDay = LocalDate.now(),
-        lastDay = LocalDate.now(),
-        dueDate = LocalDate.now().minusYears(correctionsPeriodsLimit - 1),
+        firstDay = LocalDate.now(stubClockAtArbitraryDate),
+        lastDay = LocalDate.now(stubClockAtArbitraryDate),
+        dueDate = LocalDate.now(stubClockAtArbitraryDate).minusYears(correctionsPeriodsLimit - 1),
         submissionStatus = SubmissionStatus.Due,
         inProgress = true,
         isOldest = true
@@ -167,7 +167,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
       val application = applicationBuilder(
         userAnswers = Some(completeUserAnswersWithVatInfo),
-        clock = Some(Clock.systemUTC())
+        clock = Some(stubClockAtArbitraryDate)
       )
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
@@ -187,7 +187,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
     }
 
     "validation on schemeDetails" - {
-      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now())
+      val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now(stubClockAtArbitraryDate))
 
       def createFilterPassingApplicationApplication(mockRejoinRegistrationValidation: RejoinRegistrationValidation) = {
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
@@ -199,7 +199,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
         applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
-          clock = Some(Clock.systemUTC())
+          clock = Some(stubClockAtArbitraryDate)
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[RegistrationService].toInstance(mockRegistrationService))

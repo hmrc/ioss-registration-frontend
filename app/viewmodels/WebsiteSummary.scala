@@ -46,8 +46,7 @@ object WebsiteSummary {
   def checkAnswersRow(
                        answers: UserAnswers,
                        waypoints: Waypoints,
-                       sourcePage: CheckAnswersPage,
-                       isCurrentIossAccount: Boolean
+                       sourcePage: CheckAnswersPage
                      )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllWebsites).map {
       websites =>
@@ -59,24 +58,32 @@ object WebsiteSummary {
 
         val addWebsitePageChangeUrl = AddWebsitePage().changeLink(waypoints, sourcePage).url
 
-        val listRowViewModel = SummaryListRowViewModel(
+        SummaryListRowViewModel(
           key = "websites.checkYourAnswersLabel",
           value = ValueViewModel(HtmlContent(value)),
-          actions = if (isCurrentIossAccount) {
-            Seq(
-              ActionItemViewModel("site.change", addWebsitePageChangeUrl)
-                .withVisuallyHiddenText(messages("websites.change.hidden"))
-            )
-          } else {
-            Nil
-          }
+          actions = Seq(
+            ActionItemViewModel("site.change", addWebsitePageChangeUrl)
+              .withVisuallyHiddenText(messages("websites.change.hidden"))
+          )
         )
+    }
 
-        if (isCurrentIossAccount) {
-          listRowViewModel
-        } else {
-          listRowViewModel.withCssClass("govuk-summary-list__row--no-actions")
-        }
+  def checkAnswersRowWithoutAction(
+                                    answers: UserAnswers,
+                                    waypoints: Waypoints
+                                  )(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(AllWebsites).map {
+      websites =>
+
+        val value = websites.map {
+          website =>
+            HtmlFormat.escape(website.site)
+        }.mkString("<br/>")
+
+        SummaryListRowViewModel(
+          key = "websites.checkYourAnswersLabel",
+          value = ValueViewModel(HtmlContent(value))
+        )
     }
 
   def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
