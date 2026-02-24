@@ -210,8 +210,13 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
 
         "must show row for when Eu Registration added" in {
 
+          val existingEuCountries = registrationWrapper.registration.schemeDetails.euRegistrationDetails.map(_.issuedBy)
+
+          val availableCountries = Country.euCountries.filterNot(c => existingEuCountries.contains(c.code))
+          val newCountry = availableCountries.head
+
           val newEuRegistration = EuOptionalDetails(
-            euCountry = arbitraryCountry.arbitrary.sample.value,
+            euCountry = newCountry,
             hasFixedEstablishment = Some(true),
             registrationType = Some(arbitraryRegistrationType.arbitrary.sample.value),
             euVatNumber = Some(arbitraryEuVatNumber.sample.value),
