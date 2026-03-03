@@ -48,8 +48,8 @@ error.summary.title = There is a problem
 
 saveProgress.button = Save and come back later
 
-checkYourAnswers.title = Check Your Answers
-checkYourAnswers.heading = Check Your Answers
+checkYourAnswers.title = Check your answers
+checkYourAnswers.heading = Check your answers
 checkYourAnswers.details.heading = Import One Stop Shop details
 checkYourAnswers.info.p1 = By registering for this scheme, you confirm that the information you are providing is correct and complete.
 checkYourAnswers.info.p2 = After registering, do not click the Back button or refresh the page.
