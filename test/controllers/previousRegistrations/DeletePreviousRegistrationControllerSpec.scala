@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,7 +163,6 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
 
     "must delete a record and redirect to the next page when the user answers Yes when not in Amend mode" in {
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val etmpCountries = registrationWrapper.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
+import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
+import pages.rejoin.RejoinRegistrationPage
+import pages.{BusinessContactDetailsPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.EmailVerificationCodesExceededView
 
 import javax.inject.Inject
@@ -32,8 +36,16 @@ class EmailVerificationCodesExceededController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode) {
     implicit request =>
-      Ok(view())
+      
+      val redirectLink: String = waypoints.registrationModificationMode match {
+        case AmendingActiveRegistration => ChangeRegistrationPage.route(waypoints).url
+        case RejoiningRegistration => RejoinRegistrationPage.route(waypoints).url
+        case AmendingPreviousRegistration => ChangePreviousRegistrationPage.route(waypoints).url
+        case NotModifyingExistingRegistration => BusinessContactDetailsPage.route(waypoints).url
+      }
+
+      Ok(view(redirectLink, waypoints.registrationModificationMode))
   }
 }

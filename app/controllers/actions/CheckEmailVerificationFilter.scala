@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
 import logging.Logging
-import models.{BusinessContactDetails, CheckMode, NormalMode}
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
-import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import models.{BusinessContactDetails, CheckMode, NormalMode}
 import pages.amend.ChangeRegistrationPage
-import play.api.mvc.{ActionFilter, Result}
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionFilter, Result}
+import repositories.AuthenticatedUserAnswersRepository
 import services.{EmailVerificationService, SaveForLaterService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -41,7 +42,8 @@ class CheckEmailVerificationFilterImpl(
                                         frontendAppConfig: FrontendAppConfig,
                                         emailVerificationService: EmailVerificationService,
                                         saveForLaterService: SaveForLaterService,
-                                        registrationConnector: RegistrationConnector
+                                        registrationConnector: RegistrationConnector,
+                                        authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
                                       )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
 
@@ -85,17 +87,22 @@ class CheckEmailVerificationFilterImpl(
       case Verified =>
         logger.info("CheckEmailVerificationFilter - Verified")
         None.toFuture
+
       case LockedTooManyLockedEmails =>
         logger.info("CheckEmailVerificationFilter - LockedTooManyLockedEmails")
-        Some(Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad().url)).toFuture
+        Some(Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad(waypoints).url)).toFuture
 
       case LockedPasscodeForSingleEmail =>
         logger.info("CheckEmailVerificationFilter - LockedPasscodeForSingleEmail")
-        saveForLaterService.saveAnswersRedirect(
-          waypoints,
-          routes.EmailVerificationCodesExceededController.onPageLoad().url,
-          request.uri
-        )(request, executionContext, hc).map(result => Some(result))
+        if (inAmend) {
+          resetContactDetailsInAmendAndRedirect(request)
+        } else {
+          saveForLaterService.saveAnswersRedirect(
+            waypoints,
+            routes.EmailVerificationCodesExceededController.onPageLoad(waypoints).url,
+            request.uri
+          )(request, executionContext, hc).map(result => Some(result))
+        }
 
       case _ =>
         logger.info("CheckEmailVerificationFilter - Not Verified")
@@ -111,16 +118,48 @@ class CheckEmailVerificationFilterImpl(
         Some(Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoint).url)).toFuture
     }
   }
+
+  private def resetContactDetailsInAmendAndRedirect(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = {
+    
+    val maybeOriginalRegistration = request.registrationWrapper.getOrElse {
+      val errorMessage: String = "Original registration not found"
+      logger.error(errorMessage)
+      val exception: Exception = new Exception(errorMessage)
+      throw exception
+    }
+
+    val businessContactDetails = BusinessContactDetails(
+      fullName = maybeOriginalRegistration.registration.schemeDetails.contactName,
+      telephoneNumber = maybeOriginalRegistration.registration.schemeDetails.businessTelephoneNumber,
+      emailAddress = maybeOriginalRegistration.registration.schemeDetails.businessEmailId
+    )
+
+    for {
+      originalBusinessContactDetails <- Future.fromTry(request.userAnswers.set(BusinessContactDetailsPage, businessContactDetails))
+      _ <- authenticatedUserAnswersRepository.set(originalBusinessContactDetails)
+    } yield {
+      Some(Redirect(routes.EmailVerificationCodesExceededController.onPageLoad(waypoints).url))
+    }
+  }
 }
 
 class CheckEmailVerificationFilterProvider @Inject()(
                                                       frontendAppConfig: FrontendAppConfig,
                                                       emailVerificationService: EmailVerificationService,
                                                       saveForLaterService: SaveForLaterService,
-                                                      registrationConnector: RegistrationConnector
+                                                      registrationConnector: RegistrationConnector,
+                                                      authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
                                                     )(implicit val executionContext: ExecutionContext) {
   def apply(inAmend: Boolean, waypoints: Waypoints): CheckEmailVerificationFilterImpl = {
-    new CheckEmailVerificationFilterImpl(inAmend, waypoints, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector)
+    new CheckEmailVerificationFilterImpl(
+      inAmend,
+      waypoints,
+      frontendAppConfig,
+      emailVerificationService,
+      saveForLaterService,
+      registrationConnector,
+      authenticatedUserAnswersRepository
+    )
   }
 }
 

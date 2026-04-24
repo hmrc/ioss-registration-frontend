@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,35 @@
  * limitations under the License.
  *@
 
+@import controllers.actions.*
+
 @this(
         layout: templates.Layout,
         govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(redirectLink: String, mode: RegistrationModificationMode)(implicit request: Request[_], messages: Messages)
+
+@paragraphText = @{
+    mode match {
+        case NotModifyingExistingRegistration => messages("emailVerificationCodesAndEmailsExceeded.paragraph.save")
+        case _ => messages("emailVerificationCodesAndEmailsExceeded.paragraph")
+    }
+}
+
+@redirectText = @{
+    mode match {
+        case NotModifyingExistingRegistration => messages("emailVerificationCodesAndEmailsExceeded.returnBTA", redirectLink)
+        case _ => messages("emailVerificationCodesAndEmailsExceeded.returnRegistrationDetails", redirectLink)
+    }
+}
 
 @layout(pageTitle = titleNoForm(messages("emailVerificationCodesAndEmailsExceeded.title"))) {
 
     <h1 class="govuk-heading-xl">@messages("emailVerificationCodesAndEmailsExceeded.heading")</h1>
 
-    <p class="govuk-body">@messages("emailVerificationCodesAndEmailsExceeded.paragraph")</p>
+    <p class="govuk-body">@paragraphText</p>
 
-    <p class="govuk-body">@Html(messages("emailVerificationCodesAndEmailsExceeded.returnBTA"))</p>
+    <p class="govuk-body">@Html(redirectText)</p>
 
 }

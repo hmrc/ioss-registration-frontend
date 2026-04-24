@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import controllers.actions.*
 import controllers.rejoin.validation.RejoinRegistrationValidation
 import logging.Logging
 import models.amend.RegistrationWrapper
-import models.audit.{AmendRegistrationAuditModel, SubmissionResult}
 import models.audit.RegistrationAuditType.AmendRegistration
+import models.audit.{AmendRegistrationAuditModel, SubmissionResult}
 import models.domain.PreviousRegistration
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
 import models.responses.ErrorResponse
@@ -70,7 +70,7 @@ class RejoinRegistrationController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] = cc.authAndRequireIoss(RejoiningRegistration, waypoints = EmptyWaypoints).async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(RejoiningRegistration, waypoints = waypoints).async {
     implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
       val registrationWrapper: RegistrationWrapper = request.registrationWrapper
@@ -107,7 +107,6 @@ class RejoinRegistrationController @Inject()(
           Future.successful(Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url))
         }
       }
-
   }
 
   private def defendAgainstInvalidExistingRegistrations(registrationWrapper: RegistrationWrapper, waypoints: Waypoints)

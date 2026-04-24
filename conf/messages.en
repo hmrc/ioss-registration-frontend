@@ -651,13 +651,17 @@ deleteWebsite.error.required = Select yes if you want to remove this website add
 
 emailVerificationCodesAndEmailsExceeded.title = You''ve tried too many email addresses
 emailVerificationCodesAndEmailsExceeded.heading = You''ve tried too many email addresses
-emailVerificationCodesAndEmailsExceeded.paragraph = We''ve saved your progress and you can try again in 24 hours.
-emailVerificationCodesAndEmailsExceeded.returnBTA = <a class="govuk-link" href="/business-account">Return to your BTA account</a>
+emailVerificationCodesAndEmailsExceeded.paragraph = You can try again in 24 hours.
+emailVerificationCodesAndEmailsExceeded.paragraph.save = We''ve saved your progress and you can try again in 24 hours.
+emailVerificationCodesAndEmailsExceeded.returnRegistrationDetails = <a class="govuk-link" href={0}>Return to your registration details</a>
+emailVerificationCodesAndEmailsExceeded.returnBTA = <a class="govuk-link" href={0}>Return to your BTA account</a>
 
 emailVerificationCodesExceeded.title = You''ve entered too many incorrect codes
 emailVerificationCodesExceeded.heading = You''ve entered too many incorrect codes
-emailVerificationCodesExceeded.paragraph = We''ve saved your progress. You can try again in 24 hours or use a different email address.
-emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href="/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/business-contact-details">Return to contact details page</a>
+emailVerificationCodesExceeded.paragraph = You can try again in 24 hours or use a different email address.
+emailVerificationCodesExceeded.paragraph.save = We''ve saved your progress. You can try again in 24 hours or use a different email address.
+emailVerificationCodesExceeded.returnRegistrationDetails = <a class="govuk-link" href={0}>Return to your registration details</a>
+emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href={0}>Return to contact details</a>
 
 noMoreWelsh.title = Mae gweddill y gwasanaeth hwn yn Saesneg yn unig ar hyn o bryd
 noMoreWelsh.heading = Mae gweddill y gwasanaeth hwn yn Saesneg yn unig ar hyn o bryd

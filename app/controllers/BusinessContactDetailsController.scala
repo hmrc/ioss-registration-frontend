@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ class BusinessContactDetailsController @Inject()(
         logger.info("saving as locked passcode for single email")
         saveForLaterService.saveAnswers(
           waypoints,
-          routes.EmailVerificationCodesExceededController.onPageLoad(),
+          routes.EmailVerificationCodesExceededController.onPageLoad(waypoints),
           routes.BusinessContactDetailsController.onPageLoad(waypoints)
         )
 
@@ -144,7 +144,7 @@ class BusinessContactDetailsController @Inject()(
         logger.info("saving as too many locked emails")
         saveForLaterService.saveAnswers(
           waypoints,
-          routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad(),
+          routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad(waypoints),
           routes.BusinessContactDetailsController.onPageLoad(waypoints)
         )
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ object RejoinRegistrationPage extends CheckAnswersPage {
   override val urlFragment: String = "rejoin-registration"
 
   override def route(waypoints: Waypoints): Call =
-    rejoinRoutes.RejoinRegistrationController.onPageLoad()
+    rejoinRoutes.RejoinRegistrationController.onPageLoad(waypoints)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     RejoinCompletePage
