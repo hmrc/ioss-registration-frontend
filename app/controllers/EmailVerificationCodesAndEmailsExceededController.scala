@@ -16,10 +16,9 @@
 
 package controllers
 
+import controllers.DetermineEmailVerificationErrorRedirect.determineEmailVerificationErrorRedirect
 import controllers.actions.*
 import pages.Waypoints
-import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
-import pages.rejoin.RejoinRegistrationPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -39,12 +38,11 @@ class EmailVerificationCodesAndEmailsExceededController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode) {
     implicit request =>
       
-      val redirectLink: String = waypoints.registrationModificationMode match {
-        case AmendingActiveRegistration => ChangeRegistrationPage.route(waypoints).url
-        case RejoiningRegistration => RejoinRegistrationPage.route(waypoints).url
-        case AmendingPreviousRegistration => ChangePreviousRegistrationPage.route(waypoints).url
-        case NotModifyingExistingRegistration => "/business-account"
-      }
+      val redirectLink: String = determineEmailVerificationErrorRedirect(
+        waypoints,
+        waypoints.registrationModificationMode,
+        allCodesAndEmailsExceeded = true
+      )
       
       Ok(view(redirectLink, waypoints.registrationModificationMode))
   }
