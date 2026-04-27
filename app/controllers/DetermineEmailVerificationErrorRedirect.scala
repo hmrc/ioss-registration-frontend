@@ -18,9 +18,10 @@ package controllers
 
 import config.Constants.btaUrl
 import controllers.actions.*
+import models.CheckMode
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.rejoin.RejoinRegistrationPage
-import pages.{BusinessContactDetailsPage, Waypoints}
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 
 object DetermineEmailVerificationErrorRedirect {
 
@@ -35,6 +36,22 @@ object DetermineEmailVerificationErrorRedirect {
       case AmendingPreviousRegistration => ChangePreviousRegistrationPage.route(waypoints).url
       case NotModifyingExistingRegistration if allCodesAndEmailsExceeded => btaUrl
       case NotModifyingExistingRegistration => BusinessContactDetailsPage.route(waypoints).url
+    }
+  }
+
+  def determineWaypoints(registrationModificationMode: RegistrationModificationMode) = {
+    registrationModificationMode match {
+      case AmendingActiveRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
+
+      case AmendingPreviousRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
+
+      case RejoiningRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
+
+      case NotModifyingExistingRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
     }
   }
 }

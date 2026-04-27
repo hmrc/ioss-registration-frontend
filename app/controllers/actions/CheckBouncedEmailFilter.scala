@@ -17,14 +17,12 @@
 package controllers.actions
 
 import config.FrontendAppConfig
+import controllers.DetermineEmailVerificationErrorRedirect.determineWaypoints
 import controllers.routes
 import logging.Logging
-import models.CheckMode
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedMandatoryIossRequest
-import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
-import pages.rejoin.RejoinRegistrationPage
-import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint}
+import pages.BusinessContactDetailsPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import services.EmailVerificationService
@@ -79,22 +77,6 @@ class CheckBouncedEmailFilterImpl(
       case NotVerified =>
         logger.info("CheckBouncedEmailFilter - Not Verified")
         Some(Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoints).url)).toFuture
-    }
-  }
-
-  private def determineWaypoints(registrationModificationMode: RegistrationModificationMode) = {
-    registrationModificationMode match {
-      case AmendingActiveRegistration =>
-        EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
-
-      case AmendingPreviousRegistration =>
-        EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
-
-      case RejoiningRegistration =>
-        EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
-
-      case NotModifyingExistingRegistration =>
-        EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
     }
   }
 }

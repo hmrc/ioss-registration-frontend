@@ -41,8 +41,8 @@ class BankDetailsController @Inject()(
 
   override protected def controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
-    cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false, waypoints = waypoints) {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = {
+    cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false) {
       implicit request =>
 
         val ossRegistration = request.latestOssRegistration
@@ -66,6 +66,7 @@ class BankDetailsController @Inject()(
 
         Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
     }
+  }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =
     cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false).async {

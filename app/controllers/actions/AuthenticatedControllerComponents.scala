@@ -17,10 +17,9 @@
 package controllers.actions
 
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest, AuthenticatedOptionalDataRequest}
-import pages.Waypoints
 import play.api.http.FileMimeTypes
 import play.api.i18n.{Langs, MessagesApi}
-import play.api.mvc._
+import play.api.mvc.*
 import repositories.AuthenticatedUserAnswersRepository
 
 import javax.inject.Inject
@@ -88,18 +87,16 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def authAndGetDataAndCheckVerifyEmail(
                                          registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
-                                         restrictFromPreviousRegistrations: Boolean = true,
-                                         waypoints: Waypoints
+                                         restrictFromPreviousRegistrations: Boolean = true
                                        ): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
     authAndGetData(registrationModificationMode, restrictFromPreviousRegistrations) andThen
-      checkEmailVerificationStatus(registrationModificationMode != NotModifyingExistingRegistration, waypoints)
+      checkEmailVerificationStatus(registrationModificationMode)
 
   def authAndRequireIoss(
                           modifyingExistingRegistrationMode: ModifyingExistingRegistrationMode,
-                          restrictFromPreviousRegistrations: Boolean = true,
-                          waypoints: Waypoints
+                          restrictFromPreviousRegistrations: Boolean = true
                         ): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
-    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations, waypoints) andThen
+    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations) andThen
       requireIoss() andThen
       checkBouncedEmail(modifyingExistingRegistrationMode)
   }

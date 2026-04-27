@@ -16,7 +16,7 @@
 
 package pages.rejoin
 
-import controllers.rejoin.{routes => rejoinRoutes}
+import controllers.rejoin.routes as rejoinRoutes
 import models.UserAnswers
 import pages.{CheckAnswersPage, Page, Waypoints}
 import play.api.mvc.Call
@@ -31,7 +31,7 @@ object RejoinRegistrationPage extends CheckAnswersPage {
   override val urlFragment: String = "rejoin-registration"
 
   override def route(waypoints: Waypoints): Call =
-    rejoinRoutes.RejoinRegistrationController.onPageLoad(waypoints)
+    rejoinRoutes.RejoinRegistrationController.onPageLoad()
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     RejoinCompletePage

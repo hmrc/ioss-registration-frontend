@@ -74,7 +74,7 @@ class ChangeRegistrationController @Inject()(
         EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
       }
 
-    cc.authAndRequireIoss(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations = false, waypoints = waypoints).async {
+    cc.authAndRequireIoss(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations = false).async {
       implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
         val futurePreviousRegistrations = if(request.hasMultipleIossEnrolments) {
@@ -125,7 +125,7 @@ class ChangeRegistrationController @Inject()(
 
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] =
-    cc.authAndRequireIoss(AmendingActiveRegistration, restrictFromPreviousRegistrations = false, waypoints = waypoints).async {
+    cc.authAndRequireIoss(AmendingActiveRegistration, restrictFromPreviousRegistrations = false).async {
       implicit request =>
 
         val iossNumber: String = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
