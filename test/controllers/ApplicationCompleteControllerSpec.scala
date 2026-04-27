@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import config.Constants.btaUrl
 import config.FrontendAppConfig
 import formats.Format.{dateFormatter, dateMonthYearFormatter}
 import models.{TradingName, UserAnswers}
@@ -72,7 +73,8 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
           None,
-          expectedList
+          expectedList,
+          btaUrl
         )(request, messages(application)).toString
       }
     }
@@ -105,7 +107,8 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
           ossRegistration,
-          expectedList
+          expectedList,
+          btaUrl
         )(request, messages(application)).toString
       }
     }

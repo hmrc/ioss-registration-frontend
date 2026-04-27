@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.Constants.btaUrl
 import controllers.actions.*
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.rejoin.RejoinRegistrationPage
@@ -32,7 +33,7 @@ object DetermineEmailVerificationErrorRedirect {
       case AmendingActiveRegistration => ChangeRegistrationPage.route(waypoints).url
       case RejoiningRegistration => RejoinRegistrationPage.route(waypoints).url
       case AmendingPreviousRegistration => ChangePreviousRegistrationPage.route(waypoints).url
-      case NotModifyingExistingRegistration if allCodesAndEmailsExceeded => "/business-account"
+      case NotModifyingExistingRegistration if allCodesAndEmailsExceeded => btaUrl
       case NotModifyingExistingRegistration => BusinessContactDetailsPage.route(waypoints).url
     }
   }

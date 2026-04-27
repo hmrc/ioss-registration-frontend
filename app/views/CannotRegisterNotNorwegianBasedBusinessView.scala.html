@@ -18,7 +18,7 @@
         layout: templates.Layout
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(btaUrl: String)(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("cannotRegisterNotNorwegianBasedBusiness.title"))) {
 
@@ -26,5 +26,5 @@
 
         <p class="govuk-body">@messages("cannotRegisterNotNorwegianBasedBusiness.p1")</p>
 
-        <p class="govuk-body">@Html(messages("cannotRegisterNotNorwegianBasedBusiness.link"))</p>
+        <p class="govuk-body">@Html(messages("cannotRegisterNotNorwegianBasedBusiness.link", btaUrl))</p>
     }

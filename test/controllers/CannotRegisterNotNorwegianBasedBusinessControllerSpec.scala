@@ -17,9 +17,10 @@
 package controllers
 
 import base.SpecBase
+import config.Constants.btaUrl
 import pages.{EmptyWaypoints, Waypoints}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.CannotRegisterNotNorwegianBasedBusinessView
 
 class CannotRegisterNotNorwegianBasedBusinessControllerSpec extends SpecBase {
@@ -40,7 +41,7 @@ class CannotRegisterNotNorwegianBasedBusinessControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[CannotRegisterNotNorwegianBasedBusinessView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(btaUrl)(request, messages(application)).toString
       }
     }
   }

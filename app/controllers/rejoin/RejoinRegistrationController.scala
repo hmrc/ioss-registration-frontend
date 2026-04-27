@@ -16,6 +16,7 @@
 
 package controllers.rejoin
 
+import config.Constants.btaUrl
 import connectors.ReturnStatusConnector
 import controllers.CheckOutstandingReturns.existsOutstandingReturns
 import controllers.actions.*
@@ -100,7 +101,7 @@ class RejoinRegistrationController @Inject()(
               ).flatten
             )
 
-            Future.successful(Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid)))
+            Future.successful(Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, btaUrl)))
           }
         }
         else {

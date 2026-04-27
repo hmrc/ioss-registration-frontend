@@ -16,6 +16,7 @@
 
 package controllers.ossExclusions
 
+import config.Constants.btaUrl
 import controllers.actions.AuthenticatedControllerComponents
 import formats.Format.quarantinedOSSRegistrationFormatter
 import logging.Logging
@@ -48,7 +49,7 @@ class CannotRegisterQuarantinedTraderController @Inject()(
             throw exception
           }.plusYears(2).plusDays(1).format(quarantinedOSSRegistrationFormatter)
 
-          Ok(view(excludeEndDate))
+          Ok(view(excludeEndDate, btaUrl))
         
         case _ =>
           val exception = new IllegalStateException("Expected effective date")

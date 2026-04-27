@@ -33,7 +33,8 @@
         iossNumber: String,
         isValid: Boolean,
         hasPreviousRegistrations: Boolean,
-        isCurrentIossAccount: Boolean
+        isCurrentIossAccount: Boolean,
+        btaUrl: String
 )(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
@@ -72,7 +73,7 @@
     )
 
     <p class="govuk-body govuk-!-margin-bottom-9">
-    @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA"))
+    @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA", btaUrl))
     </p>
 
     <h2 class="govuk-heading-m">@messages("changeRegistration.details.heading")</h2>

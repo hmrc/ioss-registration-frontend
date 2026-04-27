@@ -17,13 +17,14 @@
 package controllers
 
 import base.SpecBase
+import config.Constants.btaUrl
 import models.audit.{RegistrationAuditModel, RegistrationAuditType, SubmissionResult}
 import models.requests.AuthenticatedDataRequest
 import models.responses.etmp.EtmpEnrolmentResponse
-import models.responses.{ConflictFound, InternalServerError => ServerError}
+import models.responses.{ConflictFound, InternalServerError as ServerError}
 import models.{CheckMode, Index}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
@@ -32,7 +33,7 @@ import play.api.inject.bind
 import play.api.mvc.AnyContentAsEmpty
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.etmp.EtmpEnrolmentResponseQuery
 import queries.euDetails.EuDetailsQuery
 import repositories.AuthenticatedUserAnswersRepository
@@ -78,7 +79,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
 
           status(result) mustBe OK
 
-          contentAsString(result) mustBe view(waypoints, list, list, isValid = false)(request, messages(application)).toString
+          contentAsString(result) mustBe view(waypoints, list, list, isValid = false, btaUrl)(request, messages(application)).toString
         }
       }
     }

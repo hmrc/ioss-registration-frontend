@@ -33,6 +33,7 @@
 package controllers
 
 import base.SpecBase
+import config.Constants.btaUrl
 import connectors.RegistrationConnector
 import controllers.actions.*
 import models.CheckMode
@@ -74,7 +75,7 @@ class EmailVerificationCodesAndEmailsExceededControllerSpec extends SpecBase wit
 
         val view = application.injector.instanceOf[EmailVerificationCodesAndEmailsExceededView]
 
-        val redirectLink: String = "/business-account"
+        val redirectLink: String = btaUrl
 
         status(result) `mustBe` OK
         contentAsString(result) `mustBe` view(redirectLink, mode)(request, messages(application)).toString

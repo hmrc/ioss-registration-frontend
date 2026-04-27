@@ -16,7 +16,8 @@
 
 package controllers
 
-import controllers.actions._
+import config.Constants.btaUrl
+import controllers.actions.*
 import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -35,6 +36,6 @@ class CannotRegisterNotNorwegianBasedBusinessController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = (cc.actionBuilder andThen cc.identify) {
     implicit request =>
-      Ok(view())
+      Ok(view(btaUrl))
   }
 }

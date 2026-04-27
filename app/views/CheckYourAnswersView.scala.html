@@ -26,7 +26,7 @@
         govukWarningText: GovukWarningText
 )
 
-@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, isValid: Boolean)(implicit request: Request[_], messages: Messages)
+@(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, isValid: Boolean, btaUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
@@ -48,7 +48,7 @@
     )
 
     <p class="govuk-body govuk-!-margin-bottom-9">
-    @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA"))
+    @Html(messages("vatRegistrationDetails.checkYourAnswers.manageVatBTA", btaUrl))
     </p>
 
     <h2 class="govuk-heading-m">@messages("checkYourAnswers.details.heading")</h2>

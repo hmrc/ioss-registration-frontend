@@ -16,6 +16,7 @@
 
 package controllers.amend
 
+import config.Constants.btaUrl
 import controllers.actions.*
 import logging.Logging
 import models.CheckMode
@@ -117,7 +118,7 @@ class ChangeRegistrationController @Inject()(
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
           val list = detailsList(waypoints, thisPage, isExcluded)
 
-          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount))
+          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl))
         }
     }
   }

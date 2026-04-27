@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.Constants.btaUrl
 import controllers.actions.{AuthenticatedControllerComponents, NotModifyingExistingRegistration}
 import logging.Logging
 import models.CheckMode
@@ -33,7 +34,7 @@ import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSum
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
-import viewmodels.govuk.summarylist._
+import viewmodels.govuk.summarylist.*
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.CheckYourAnswersView
 
@@ -118,7 +119,7 @@ class CheckYourAnswersController @Inject()(
         ).flatten
       )
       val isValid = validate()
-      Ok(view(waypoints, vatRegistrationDetailsList, list, isValid))
+      Ok(view(waypoints, vatRegistrationDetailsList, list, isValid, btaUrl))
   }
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {

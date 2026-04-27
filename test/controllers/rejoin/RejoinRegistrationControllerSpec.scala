@@ -17,7 +17,7 @@
 package controllers.rejoin
 
 import base.SpecBase
-import config.Constants.correctionsPeriodsLimit
+import config.Constants.{btaUrl, correctionsPeriodsLimit}
 import connectors.{RegistrationConnector, ReturnStatusConnector}
 import controllers.rejoin.validation.RejoinRegistrationValidation
 import controllers.rejoin.routes as rejoinRoutes
@@ -163,7 +163,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo))
 
           status(result) `mustBe` OK
-          contentAsString(result) `mustBe` view(rejoinWaypoints, vatInfoList, list, iossNumber, isValid = true)(request, messages(application)).toString
+          contentAsString(result) `mustBe` view(rejoinWaypoints, vatInfoList, list, iossNumber, isValid = true, btaUrl)(request, messages(application)).toString
         }
       }
 

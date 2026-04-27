@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.Constants.btaUrl
 import config.FrontendAppConfig
 import controllers.actions.*
 import formats.Format.{dateFormatter, dateMonthYearFormatter}
@@ -73,7 +74,8 @@ class ApplicationCompleteController @Inject()(
           includedSalesDate.format(dateFormatter),
           frontendAppConfig.feedbackUrl,
           ossRegistration,
-          list
+          list,
+          btaUrl
         ))
       }).getOrElse(Redirect(JourneyRecoveryPage.route(EmptyWaypoints)))
   }

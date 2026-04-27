@@ -28,4 +28,6 @@ object Constants {
   val maxIossSchemes: Int = 1
   val emailVerificationMaxEmails: Int = 10
   val correctionsPeriodsLimit: Int = 3
+  
+  val btaUrl: String = "/business-account"
 }
