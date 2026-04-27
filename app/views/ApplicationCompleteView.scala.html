@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@
         feedbackUrl: String,
         ossRegistration: Option[OssRegistration],
         list: SummaryList,
+        btaUrl: String
 )(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("applicationComplete.title")), showBackLink = false) {
@@ -53,7 +54,7 @@
 
         <h2 class="govuk-heading-m">@messages("applicationComplete.next")</h2>
 
-        <p class="govuk-body">@Html(messages("applicationComplete.manageAccount"))</p>
+        <p class="govuk-body">@Html(messages("applicationComplete.manageAccount", btaUrl))</p>
 
         <p class="govuk-body">@messages("applicationComplete.checkInformation.contact")</p>
 

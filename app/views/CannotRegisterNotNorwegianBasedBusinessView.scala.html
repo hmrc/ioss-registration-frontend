@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
         layout: templates.Layout
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(btaUrl: String)(implicit request: Request[_], messages: Messages)
 
     @layout(pageTitle = titleNoForm(messages("cannotRegisterNotNorwegianBasedBusiness.title"))) {
 
@@ -26,5 +26,5 @@
 
         <p class="govuk-body">@messages("cannotRegisterNotNorwegianBasedBusiness.p1")</p>
 
-        <p class="govuk-body">@Html(messages("cannotRegisterNotNorwegianBasedBusiness.link"))</p>
+        <p class="govuk-body">@Html(messages("cannotRegisterNotNorwegianBasedBusiness.link", btaUrl))</p>
     }

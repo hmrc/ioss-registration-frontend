@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package controllers.amend
 
 import base.SpecBase
+import config.Constants.btaUrl
 import connectors.RegistrationConnector
 import controllers.amend.routes as amendRoutes
 import models.amend.{PreviousRegistration, RegistrationWrapper}
@@ -25,7 +26,7 @@ import models.audit.{AmendRegistrationAuditModel, RegistrationAuditType}
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
-import models.requests.{AuthenticatedDataRequest}
+import models.requests.AuthenticatedDataRequest
 import models.responses.InternalServerError
 import models.{CheckMode, Index, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
@@ -145,7 +146,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo, waypoints, amendYourAnswersPage))
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber, isValid = true, hasPreviousRegistrations = false, isCurrentIossAccount = true)(request, messages(application)).toString
+          contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber, isValid = true, hasPreviousRegistrations = false, isCurrentIossAccount = true, btaUrl)(request, messages(application)).toString
         }
       }
 
@@ -174,7 +175,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           )
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(previousRegistrationWaypoints, vatInfoList, list, iossNumber, isValid = true, hasPreviousRegistrations = true, isCurrentIossAccount = true)(request, messages(application)).toString
+          contentAsString(result) mustBe view(previousRegistrationWaypoints, vatInfoList, list, iossNumber, isValid = true, hasPreviousRegistrations = true, isCurrentIossAccount = true, btaUrl)(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.changePreviousRegistration")) mustBe true
         }
       }
@@ -206,7 +207,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           )
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(previousRegistrationWaypoints, vatInfoList, list, previousRegistration.iossNumber, isValid = true, hasPreviousRegistrations = true, isCurrentIossAccount = false)(request, messages(application)).toString
+          contentAsString(result) mustBe view(previousRegistrationWaypoints, vatInfoList, list, previousRegistration.iossNumber, isValid = true, hasPreviousRegistrations = true, isCurrentIossAccount = false, btaUrl)(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.toCurrentRegistration")) mustBe true
         }
       }
@@ -248,7 +249,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             iossNumber,
             isValid = true,
             hasPreviousRegistrations = false,
-            isCurrentIossAccount = true
+            isCurrentIossAccount = true,
+            btaUrl
           )(request, messages(application)).toString
         }
       }

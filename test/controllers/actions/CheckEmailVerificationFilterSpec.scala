@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.routes
-import models.{CheckMode, NormalMode}
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedDataRequest
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.EitherValues
+import models.{BusinessContactDetails, CheckMode, NormalMode, UserAnswers}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito
+import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
+import org.scalatest.{BeforeAndAfterEach, EitherValues}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
 import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
@@ -34,6 +35,7 @@ import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
+import repositories.AuthenticatedUserAnswersRepository
 import services.{EmailVerificationService, SaveForLaterService}
 import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
@@ -41,7 +43,7 @@ import utils.FutureSyntax.FutureOps
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with EitherValues {
+class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with EitherValues with BeforeAndAfterEach {
 
   class Harness(
                  inAmend: Boolean,
@@ -49,9 +51,18 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
                  frontendAppConfig: FrontendAppConfig,
                  emailVerificationService: EmailVerificationService,
                  saveForLaterService: SaveForLaterService,
-                 registrationConnector: RegistrationConnector
+                 registrationConnector: RegistrationConnector,
+                 authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
                )
-    extends CheckEmailVerificationFilterImpl(inAmend, waypoints, frontendAppConfig, emailVerificationService, saveForLaterService, registrationConnector) {
+    extends CheckEmailVerificationFilterImpl(
+      inAmend,
+      waypoints,
+      frontendAppConfig,
+      emailVerificationService,
+      saveForLaterService,
+      registrationConnector,
+      authenticatedUserAnswersRepository
+    ) {
     def callFilter(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = filter(request)
   }
 
@@ -59,16 +70,23 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
   private val mockSaveForLaterService = mock[SaveForLaterService]
   private val validEmailAddressUserAnswers = basicUserAnswersWithVatInfo.set(BusinessContactDetailsPage, contactDetails).success.value
   private val mockRegistrationConnector = mock[RegistrationConnector]
+  private val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
 
   private val expectedWaypoints =
-      EmptyWaypoints.setNextWaypoint(
-        Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
-      )
+    EmptyWaypoints.setNextWaypoint(
+      Waypoint(CheckYourAnswersPage, NormalMode, CheckYourAnswersPage.urlFragment)
+    )
 
   private val expectedAmendWaypoints =
     EmptyWaypoints.setNextWaypoint(
       Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment)
     )
+
+  override def beforeEach(): Unit = {
+    Mockito.reset(
+      mockSaveForLaterService
+    )
+  }
 
   ".filter" - {
 
@@ -91,7 +109,8 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
@@ -120,7 +139,8 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
@@ -150,7 +170,8 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
@@ -190,7 +211,8 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
@@ -199,7 +221,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
         }
       }
 
-      "must save the answers and redirect to Email Verification Codes Exceeded page when verification attempts on a single email are exceeded" in {
+      "must redirect to Email Verification Codes Exceeded page when verification attempts on a single email are exceeded" in {
 
         val app = applicationBuilder(None)
           .configure("features.email-verification-enabled" -> "true")
@@ -213,7 +235,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             eqTo(contactDetails.emailAddress), eqTo(userAnswersId))(any())) thenReturn LockedPasscodeForSingleEmail.toFuture
 
           when(mockSaveForLaterService.saveAnswersRedirect(any(), any(), any())(any(), any(), any())) thenReturn
-            Redirect(routes.EmailVerificationCodesExceededController.onPageLoad()).toFuture
+            Redirect(routes.EmailVerificationCodesExceededController.onPageLoad(expectedWaypoints)).toFuture
 
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, validEmailAddressUserAnswers, None, 1, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
@@ -224,19 +246,71 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
 
-          result mustBe Some(Redirect(controllers.routes.EmailVerificationCodesExceededController.onPageLoad().url))
+          result mustBe Some(Redirect(controllers.routes.EmailVerificationCodesExceededController.onPageLoad(expectedWaypoints).url))
 
           verify(mockSaveForLaterService, times(1))
             .saveAnswersRedirect(
               any(),
-              eqTo(routes.EmailVerificationCodesExceededController.onPageLoad().url),
+              eqTo(routes.EmailVerificationCodesExceededController.onPageLoad(expectedWaypoints).url),
               eqTo(request.uri)
             )(any(), any(), any())
+        }
+      }
+
+      "when in amend" - {
+
+        "must reset Business ContactDetails back to original answers and redirect to Email Verification Codes Exceeded page when verification attempts on a single email are exceeded" in {
+
+          val originalBusinessContactDetails: BusinessContactDetails = BusinessContactDetails(
+            fullName = registrationWrapper.registration.schemeDetails.contactName,
+            telephoneNumber = registrationWrapper.registration.schemeDetails.businessTelephoneNumber,
+            emailAddress = registrationWrapper.registration.schemeDetails.businessEmailId
+          )
+
+          val updatedAnswers: UserAnswers = basicUserAnswersWithVatInfo
+            .set(BusinessContactDetailsPage, originalBusinessContactDetails).success.value
+
+          val app = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+            .configure("features.email-verification-enabled" -> "true")
+            .overrides(
+              bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository),
+              bind[EmailVerificationService].toInstance(mockEmailVerificationService)
+            )
+            .build()
+
+          running(app) {
+
+            when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+            when(mockEmailVerificationService.isEmailVerified(
+              eqTo(contactDetails.emailAddress), eqTo(userAnswersId))(any())) thenReturn LockedPasscodeForSingleEmail.toFuture
+
+            val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, validEmailAddressUserAnswers, Some(registrationWrapper), 1, None)
+            val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+
+            val controller = new Harness(
+              inAmend = true,
+              waypoints = expectedAmendWaypoints,
+              frontendAppConfig = frontendAppConfig,
+              emailVerificationService = mockEmailVerificationService,
+              saveForLaterService = mockSaveForLaterService,
+              registrationConnector = mockRegistrationConnector,
+              authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
+            )
+
+            val result = controller.callFilter(request).futureValue
+
+            result mustBe Some(Redirect(controllers.routes.EmailVerificationCodesExceededController.onPageLoad(expectedAmendWaypoints).url))
+
+            verifyNoInteractions(mockSaveForLaterService)
+            verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(updatedAnswers))
+          }
         }
       }
 
@@ -252,7 +326,6 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           when(mockEmailVerificationService.isEmailVerified(
             eqTo(contactDetails.emailAddress), eqTo(userAnswersId))(any())) thenReturn LockedTooManyLockedEmails.toFuture
 
-
           val request = AuthenticatedDataRequest(FakeRequest(), testCredentials, vrn, Enrolments(Set.empty), None, validEmailAddressUserAnswers, None, 1, None)
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
@@ -262,12 +335,13 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
 
-          result mustBe Some(Redirect(controllers.routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad().url))
+          result mustBe Some(Redirect(controllers.routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad(expectedWaypoints).url))
         }
       }
     }
@@ -291,7 +365,8 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
@@ -320,7 +395,8 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
@@ -349,7 +425,8 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue
@@ -379,7 +456,8 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
-            registrationConnector = mockRegistrationConnector
+            registrationConnector = mockRegistrationConnector,
+            authenticatedUserAnswersRepository = mockAuthenticatedUserAnswersRepository
           )
 
           val result = controller.callFilter(request).futureValue

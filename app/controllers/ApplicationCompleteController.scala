@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.Constants.btaUrl
 import config.FrontendAppConfig
 import controllers.actions.*
 import formats.Format.{dateFormatter, dateMonthYearFormatter}
@@ -73,7 +74,8 @@ class ApplicationCompleteController @Inject()(
           includedSalesDate.format(dateFormatter),
           frontendAppConfig.feedbackUrl,
           ossRegistration,
-          list
+          list,
+          btaUrl
         ))
       }).getOrElse(Redirect(JourneyRecoveryPage.route(EmptyWaypoints)))
   }

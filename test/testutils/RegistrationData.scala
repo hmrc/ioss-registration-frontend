@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package testutils
 import base.SpecBase
 import config.Constants.maxTradingNames
 import formats.Format.eisDateFormatter
-import models.{Bic, Country, Iban}
 import models.etmp.*
-import models.etmp.amend.{AmendRegistrationResponse, EtmpAmendCustomerIdentification, EtmpAmendRegistrationChangeLog, EtmpAmendRegistrationChangeLogLegacy, EtmpAmendRegistrationRequest}
+import models.etmp.amend.*
+import models.{Bic, Country, Iban}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 

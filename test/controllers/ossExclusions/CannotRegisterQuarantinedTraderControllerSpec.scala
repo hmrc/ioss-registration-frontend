@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package controllers.ossExclusions
 
 import base.SpecBase
-import controllers.ossExclusions.{routes => ossExcludedRoutes}
+import config.Constants.btaUrl
+import controllers.ossExclusions.routes as ossExcludedRoutes
 import formats.Format.quarantinedOSSRegistrationFormatter
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
 import org.mockito.ArgumentMatchers.any
@@ -25,7 +26,7 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.oss.OssExclusionsService
 import utils.FutureSyntax.FutureOps
 import views.html.ossExclusions.CannotRegisterQuarantinedTraderView
@@ -65,7 +66,7 @@ class CannotRegisterQuarantinedTraderControllerSpec extends SpecBase {
           .effectiveDate.map(_.plusYears(2).plusDays(1).format(quarantinedOSSRegistrationFormatter)).get
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(formattedExclusionEndDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(formattedExclusionEndDate, btaUrl)(request, messages(application)).toString
       }
     }
 

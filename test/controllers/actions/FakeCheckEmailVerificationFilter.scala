@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package controllers.actions
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import org.scalatestplus.mockito.MockitoSugar.mock
+import repositories.AuthenticatedUserAnswersRepository
 import services.{EmailVerificationService, SaveForLaterService}
 
 import scala.concurrent.ExecutionContext
@@ -27,6 +28,7 @@ class FakeCheckEmailVerificationFilter extends CheckEmailVerificationFilterProvi
   mock[FrontendAppConfig],
   mock[EmailVerificationService],
   mock[SaveForLaterService],
-  mock[RegistrationConnector])(ExecutionContext.Implicits.global) {
+  mock[RegistrationConnector],
+  mock[AuthenticatedUserAnswersRepository])(ExecutionContext.Implicits.global) {
 
 }

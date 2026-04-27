@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,16 @@ package controllers.actions
 
 import config.FrontendAppConfig
 import models.requests.AuthenticatedMandatoryIossRequest
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
 import services.EmailVerificationService
 
 import scala.concurrent.{ExecutionContext, Future}
-import org.scalatestplus.mockito.MockitoSugar.mock
 
-class FakeCheckBouncedEmailFilter extends CheckBouncedEmailFilterImpl(
+class FakeCheckBouncedEmailFilter(
+                                   registrationModificationMode: RegistrationModificationMode
+                                 ) extends CheckBouncedEmailFilterImpl(
+  registrationModificationMode,
   mock[FrontendAppConfig],
   mock[EmailVerificationService]
 )(ExecutionContext.Implicits.global) {
@@ -40,6 +43,7 @@ class FakeCheckBouncedEmailFilterProvider() extends CheckBouncedEmailFilterProvi
   mock[EmailVerificationService]
 )(ExecutionContext.Implicits.global) {
 
-  override def apply(): CheckBouncedEmailFilterImpl = new FakeCheckBouncedEmailFilter()
-
+  override def apply(registrationModificationMode: RegistrationModificationMode): CheckBouncedEmailFilterImpl = {
+    new FakeCheckBouncedEmailFilter(registrationModificationMode)
+  }
 }

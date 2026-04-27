@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package controllers.actions
 
-import formats.Format
 import logging.Logging
 import models.core.Match
 import models.requests.AuthenticatedDataRequest
@@ -26,8 +25,7 @@ import services.core.CoreRegistrationValidationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import java.time.{Clock, LocalDate}
-import scala.util.Try
+import java.time.Clock
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,23 +36,9 @@ class CheckOtherCountryRegistrationFilterImpl @Inject()(
                                                        )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
 
-  private val exclusionStatusCode = 4
-
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
-    def getEffectiveDate(activeMatch: Match): LocalDate = {
-      activeMatch.exclusionEffectiveDate.flatMap { dateString =>
-        Try(LocalDate.parse(dateString, Format.eisDateFormatter)).toOption
-      } match {
-        case Some(date) => date
-        case _ =>
-          val e = new IllegalStateException(s"Exclusion status code ${activeMatch.exclusionStatusCode} didn't include an expected exclusion effective date")
-          logger.error(s"Must have an Exclusion Effective Date ${e.getMessage}", e)
-          throw e
-      }
-    }
 
     service.searchUkVrn(request.vrn)(hc, request).map {
       case _ if registrationModificationMode == AmendingActiveRegistration =>

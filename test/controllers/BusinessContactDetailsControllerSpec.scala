@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,7 +433,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
             eqTo(emailVerificationRequest.credId))(any())) thenReturn LockedTooManyLockedEmails.toFuture
 
           when(mockSaveForLaterService.saveAnswers(any(), any(), any())(any(), any(), any())) thenReturn
-            Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad()).toFuture
+            Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad(emptyWaypoints)).toFuture
 
           val application =
             applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))

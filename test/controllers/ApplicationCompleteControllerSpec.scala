@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import config.Constants.btaUrl
 import config.FrontendAppConfig
 import formats.Format.{dateFormatter, dateMonthYearFormatter}
 import models.{TradingName, UserAnswers}
@@ -72,7 +73,8 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
           None,
-          expectedList
+          expectedList,
+          btaUrl
         )(request, messages(application)).toString
       }
     }
@@ -105,7 +107,8 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
           ossRegistration,
-          expectedList
+          expectedList,
+          btaUrl
         )(request, messages(application)).toString
       }
     }

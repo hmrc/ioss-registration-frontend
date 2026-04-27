@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package controllers.amend
 
+import config.Constants.btaUrl
 import controllers.actions.*
 import logging.Logging
 import models.CheckMode
@@ -66,7 +67,14 @@ class ChangeRegistrationController @Inject()(
       AmendingActiveRegistration
     }
 
-    cc.authAndRequireIoss(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations = false, waypoints = EmptyWaypoints).async {
+    val waypoints =
+      if (isPreviousRegistration) {
+        EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
+      } else {
+        EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
+      }
+
+    cc.authAndRequireIoss(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations = false, waypoints = waypoints).async {
       implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
         val futurePreviousRegistrations = if(request.hasMultipleIossEnrolments) {
@@ -94,13 +102,6 @@ class ChangeRegistrationController @Inject()(
               ChangeRegistrationPage
             }
 
-          val waypoints =
-            if (isPreviousRegistration) {
-              EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
-            } else {
-              EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
-            }
-
           val iossNumber: String = selectedPreviousRegistration.getOrElse(request.iossNumber)
 
           val vatRegistrationDetailsList = SummaryListViewModel(
@@ -117,7 +118,7 @@ class ChangeRegistrationController @Inject()(
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
           val list = detailsList(waypoints, thisPage, isExcluded)
 
-          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount))
+          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl))
         }
     }
   }

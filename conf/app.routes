@@ -226,8 +226,8 @@ GET         /remove-website-address/:index                                contro
 POST        /remove-website-address/:index                                controllers.website.DeleteWebsiteController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, index: Index)
 
 # Email verification section
-GET         /email-verification-codes-and-emails-exceeded                 controllers.EmailVerificationCodesAndEmailsExceededController.onPageLoad()
-GET         /email-verification-codes-exceeded                            controllers.EmailVerificationCodesExceededController.onPageLoad()
+GET         /email-verification-codes-and-emails-exceeded                 controllers.EmailVerificationCodesAndEmailsExceededController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /email-verification-codes-exceeded                            controllers.EmailVerificationCodesExceededController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
 # Other
 GET         /successful                                                   controllers.ApplicationCompleteController.onPageLoad()
@@ -258,7 +258,7 @@ GET         /successful-amend                                             contro
 GET         /cannot-use-not-registered                                    controllers.NotRegisteredController.onPageLoad()
 
 GET         /start-rejoin-journey                                         controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-GET         /rejoin-registration                                          controllers.rejoin.RejoinRegistrationController.onPageLoad()
+GET         /rejoin-registration                                          controllers.rejoin.RejoinRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST        /rejoin-registration                                          controllers.rejoin.RejoinRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
 GET         /successful-rejoin                                            controllers.rejoin.RejoinCompleteController.onPageLoad()

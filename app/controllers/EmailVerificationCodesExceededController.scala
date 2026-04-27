@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.DetermineEmailVerificationErrorRedirect.determineEmailVerificationErrorRedirect
+import controllers.actions.*
+import pages.Waypoints
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.AmendWaypoints.AmendWaypointsOps
 import views.html.EmailVerificationCodesExceededView
 
 import javax.inject.Inject
@@ -32,8 +35,11 @@ class EmailVerificationCodesExceededController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode) {
     implicit request =>
-      Ok(view())
+      
+      val redirectLink: String = determineEmailVerificationErrorRedirect(waypoints, waypoints.registrationModificationMode)
+
+      Ok(view(redirectLink, waypoints.registrationModificationMode))
   }
 }

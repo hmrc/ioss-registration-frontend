@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import logging.Logging
 import models.CheckMode
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
 import models.requests.AuthenticatedMandatoryIossRequest
-import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoint}
+import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
+import pages.rejoin.RejoinRegistrationPage
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import services.EmailVerificationService
@@ -35,6 +36,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckBouncedEmailFilterImpl(
+                                   registrationModificationMode: RegistrationModificationMode,
                                    frontendAppConfig: FrontendAppConfig,
                                    emailVerificationService: EmailVerificationService
                                  )(implicit val executionContext: ExecutionContext)
@@ -47,7 +49,7 @@ class CheckBouncedEmailFilterImpl(
     val emailMatched = request.userAnswers.get(BusinessContactDetailsPage).exists(_.emailAddress == emailAddress)
 
     if (request.registrationWrapper.registration.schemeDetails.unusableStatus && emailMatched && frontendAppConfig.emailVerificationEnabled) {
-      checkVerificationStatusAndGetRedirect(request.request.userId, emailAddress)
+      checkVerificationStatusAndGetRedirect(request.request.userId, emailAddress, registrationModificationMode)
     } else {
       Future(None)
     }
@@ -55,25 +57,44 @@ class CheckBouncedEmailFilterImpl(
 
   private def checkVerificationStatusAndGetRedirect(
                                                      userId: String,
-                                                     emailAddress: String
+                                                     emailAddress: String,
+                                                     registrationModificationMode: RegistrationModificationMode
                                                    )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
+    
+    val waypoints = determineWaypoints(registrationModificationMode)
+
     emailVerificationService.isEmailVerified(emailAddress, userId).flatMap {
       case Verified =>
         logger.info("CheckBouncedEmailFilter - Verified")
         None.toFuture
 
       case LockedTooManyLockedEmails =>
-        logger.info("CheckEmailVerificationFilter - LockedTooManyLockedEmails")
-        Some(Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad().url)).toFuture
+        logger.info("CheckBouncedEmailFilter - LockedTooManyLockedEmails")
+        Some(Redirect(routes.EmailVerificationCodesAndEmailsExceededController.onPageLoad(waypoints).url)).toFuture
 
       case LockedPasscodeForSingleEmail =>
         logger.info("CheckBouncedEmailFilter - LockedPasscodeForSingleEmail")
-        Some(Redirect(routes.EmailVerificationCodesExceededController.onPageLoad().url)).toFuture
+        Some(Redirect(routes.EmailVerificationCodesExceededController.onPageLoad(waypoints).url)).toFuture
 
       case NotVerified =>
         logger.info("CheckBouncedEmailFilter - Not Verified")
-        val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
         Some(Redirect(routes.BusinessContactDetailsController.onPageLoad(waypoints).url)).toFuture
+    }
+  }
+
+  private def determineWaypoints(registrationModificationMode: RegistrationModificationMode) = {
+    registrationModificationMode match {
+      case AmendingActiveRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
+
+      case AmendingPreviousRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
+
+      case RejoiningRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
+
+      case NotModifyingExistingRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
     }
   }
 }
@@ -83,7 +104,6 @@ class CheckBouncedEmailFilterProvider @Inject()(
                                                  emailVerificationService: EmailVerificationService
                                                )(implicit ec: ExecutionContext) {
 
-  def apply(): CheckBouncedEmailFilterImpl =
-    new CheckBouncedEmailFilterImpl(frontendAppConfig, emailVerificationService)
-
+  def apply(registrationModificationMode: RegistrationModificationMode): CheckBouncedEmailFilterImpl =
+    new CheckBouncedEmailFilterImpl(registrationModificationMode, frontendAppConfig, emailVerificationService)
 }

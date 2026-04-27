@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import base.SpecBase
 import config.Constants.correctionsPeriodsLimit
 import connectors.{RegistrationConnector, ReturnStatusConnector}
 import controllers.rejoin.validation.RejoinRegistrationValidation
-import models.{CheckMode, CurrentReturns, Return, SubmissionStatus}
 import models.amend.RegistrationWrapper
 import models.etmp.EtmpExclusion
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
+import models.{CheckMode, CurrentReturns, Return, SubmissionStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.mockito.{ArgumentMatchers, Mockito}
@@ -40,7 +40,7 @@ import repositories.AuthenticatedUserAnswersRepository
 import services.RegistrationService
 import utils.FutureSyntax.FutureOps
 
-import java.time.{Clock, LocalDate}
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach with TableDrivenPropertyChecks with MockitoSugar {
@@ -66,7 +66,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
   "StartRejoinJourney Controller" - {
 
-    "must redirect to Rejoin Registration when a registration wrapper has been successfully retrieved and is passes exclusion sanity checks" in {
+    "must redirect to Rejoin Registration when a registration wrapper has been successfully retrieved and passes exclusion sanity checks" in {
       val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now(stubClockAtArbitraryDate))
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
@@ -99,7 +99,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe RejoinRegistrationPage.route(waypoints).url
+        redirectLocation(result).value mustBe RejoinRegistrationPage.route(rejoinWaypoints).url
       }
     }
 

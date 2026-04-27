@@ -231,7 +231,7 @@ vatRegistrationDetails.checkYourAnswers.organisationName = Business name
 vatRegistrationDetails.checkYourAnswers.individualName = Name
 vatRegistrationDetails.checkYourAnswers.vatRegistrationDate = UK VAT registration date
 vatRegistrationDetails.checkYourAnswers.businessAddress = Business address
-vatRegistrationDetails.checkYourAnswers.manageVatBTA = <a class="govuk-link" href="/business-account">Manage your UK VAT registration in your BTA account</a>
+vatRegistrationDetails.checkYourAnswers.manageVatBTA = <a class="govuk-link" href={0}>Manage your UK VAT registration in your BTA account</a>
 
 updateVatDetails.title = Update your VAT details
 updateVatDetails.heading = Update your VAT details
@@ -256,7 +256,7 @@ cannotRegisterNoNiProtocol.link = <a href="https://www.gov.uk/register-for-vat/s
 cannotRegisterNotNorwegianBasedBusiness.title = You cannot register for this service
 cannotRegisterNotNorwegianBasedBusiness.heading = You cannot register for this service
 cannotRegisterNotNorwegianBasedBusiness.p1 = To register as a Norwegian trader, your business trading address must be in Norway.
-cannotRegisterNotNorwegianBasedBusiness.link = <a href="/business-account" class="govuk-link">Return to your business tax account</a>
+cannotRegisterNotNorwegianBasedBusiness.link = <a href={0} class="govuk-link">Return to your business tax account</a>
 
 cannotRegisterNonEstablishedTaxablePerson.title = You cannot use this service
 cannotRegisterNonEstablishedTaxablePerson.heading = You cannot use this service
@@ -651,13 +651,17 @@ deleteWebsite.error.required = Select yes if you want to remove this website add
 
 emailVerificationCodesAndEmailsExceeded.title = You''ve tried too many email addresses
 emailVerificationCodesAndEmailsExceeded.heading = You''ve tried too many email addresses
-emailVerificationCodesAndEmailsExceeded.paragraph = We''ve saved your progress and you can try again in 24 hours.
-emailVerificationCodesAndEmailsExceeded.returnBTA = <a class="govuk-link" href="/business-account">Return to your BTA account</a>
+emailVerificationCodesAndEmailsExceeded.paragraph = You can try again in 24 hours.
+emailVerificationCodesAndEmailsExceeded.paragraph.save = We''ve saved your progress and you can try again in 24 hours.
+emailVerificationCodesAndEmailsExceeded.returnRegistrationDetails = <a class="govuk-link" href={0}>Return to your registration details</a>
+emailVerificationCodesAndEmailsExceeded.returnBTA = <a class="govuk-link" href={0}>Return to your BTA account</a>
 
 emailVerificationCodesExceeded.title = You''ve entered too many incorrect codes
 emailVerificationCodesExceeded.heading = You''ve entered too many incorrect codes
-emailVerificationCodesExceeded.paragraph = We''ve saved your progress. You can try again in 24 hours or use a different email address.
-emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href="/pay-vat-on-goods-sold-to-eu/register-for-import-one-stop-shop/business-contact-details">Return to contact details page</a>
+emailVerificationCodesExceeded.paragraph = You can try again in 24 hours or use a different email address.
+emailVerificationCodesExceeded.paragraph.save = We''ve saved your progress. You can try again in 24 hours or use a different email address.
+emailVerificationCodesExceeded.returnRegistrationDetails = <a class="govuk-link" href={0}>Return to your registration details</a>
+emailVerificationCodesExceeded.returnContactDetails = <a class="govuk-link" href={0}>Return to contact details</a>
 
 noMoreWelsh.title = Mae gweddill y gwasanaeth hwn yn Saesneg yn unig ar hyn o bryd
 noMoreWelsh.heading = Mae gweddill y gwasanaeth hwn yn Saesneg yn unig ar hyn o bryd
@@ -675,7 +679,7 @@ applicationComplete.registration.p1 = You can now use this service to fill out m
 applicationComplete.registration.p2 = You can also pay any Import One Stop Shop VAT that you owe.
 applicationComplete.registration.commencementDate = You can begin your {0} return on {1}. Include any sales from {2} onwards.
 applicationComplete.next = What happens next
-applicationComplete.manageAccount = <a class="govuk-link" href="/business-account">Manage your Import One Stop Shop returns in your account.</a>
+applicationComplete.manageAccount = <a class="govuk-link" href={0}>Manage your Import One Stop Shop returns in your account.</a>
 applicationComplete.checkInformation.contact = We'’ll email you if we need to check any information.
 applicationComplete.checkInformation.info = Read more information about <a class="govuk-link" href="https://www.gov.uk/guidance/completing-an-import-one-stop-shop-vat-return">how to complete an IOSS return.</a>
 applicationComplete.feedback.link.text = What did you think of this service?
@@ -803,7 +807,7 @@ cannotRegisterQuarantinedTrader.title = You cannot register for this service
 cannotRegisterQuarantinedTrader.heading = You cannot register for this service
 cannotRegisterQuarantinedTrader.p1 = We previously excluded you from the One Stop Shop scheme, so you cannot register for this service until {0}.
 cannotRegisterQuarantinedTrader.contact = If you believe this is an error, contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
-cannotRegisterQuarantinedTrader.BTA.link = <a class="govuk-link" href="/business-account">Return to your business tax account</a>
+cannotRegisterQuarantinedTrader.BTA.link = <a class="govuk-link" href={0}>Return to your business tax account</a>
 
 userResearch.heading = Help us improve the service
 userResearch.link.text = Sign up to take part in research about the One Stop Shop service.

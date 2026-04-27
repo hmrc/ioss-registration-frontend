@@ -1,5 +1,5 @@
 @*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
         govukButton: GovukButton
 )
 
-@(excludeEndDate: String)(implicit request: Request[_], messages: Messages)
+@(excludeEndDate: String, btaUrl: String)(implicit request: Request[_], messages: Messages)
 
   @layout(pageTitle = titleNoForm(messages("cannotRegisterQuarantinedTrader.title")), showBackLink = false) {
 
@@ -29,5 +29,5 @@
 
     <p class="govuk-body">@Html(messages("cannotRegisterQuarantinedTrader.contact"))</p>
 
-    <p class="govuk-body">@Html(messages("cannotRegisterQuarantinedTrader.BTA.link"))</p>
+    <p class="govuk-body">@Html(messages("cannotRegisterQuarantinedTrader.BTA.link", btaUrl))</p>
   }

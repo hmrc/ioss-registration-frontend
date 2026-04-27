@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package controllers
 
 import base.SpecBase
+import config.Constants.btaUrl
 import pages.{EmptyWaypoints, Waypoints}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.CannotRegisterNotNorwegianBasedBusinessView
 
 class CannotRegisterNotNorwegianBasedBusinessControllerSpec extends SpecBase {
@@ -40,7 +41,7 @@ class CannotRegisterNotNorwegianBasedBusinessControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[CannotRegisterNotNorwegianBasedBusinessView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(btaUrl)(request, messages(application)).toString
       }
     }
   }

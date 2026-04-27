@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package controllers.test
 
+import config.Constants.btaUrl
 import connectors.test.TestOnlyConnector
 import controllers.actions.UnauthenticatedControllerComponents
 import models.external.ExternalRequest
@@ -30,7 +31,7 @@ class TestOnlyController @Inject()(
                                     cc: UnauthenticatedControllerComponents
                                   )(implicit ec: ExecutionContext) extends FrontendController(cc) {
 
-  private val externalRequest = ExternalRequest("BTA", "/business-account")
+  private val externalRequest = ExternalRequest("BTA", btaUrl)
 
   def enterFromExternal(lang: Option[String] = None): Action[AnyContent] = (cc.actionBuilder andThen cc.identify).async {
     implicit request =>
