@@ -71,7 +71,7 @@ class RejoinRegistrationController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndRequireIoss(RejoiningRegistration, waypoints = waypoints).async {
+  def onPageLoad(): Action[AnyContent] = cc.authAndRequireIoss(RejoiningRegistration).async {
     implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
       val registrationWrapper: RegistrationWrapper = request.registrationWrapper
@@ -212,7 +212,7 @@ class RejoinRegistrationController @Inject()(
   }
 
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] =
-    cc.authAndRequireIoss(RejoiningRegistration, waypoints = waypoints).async {
+    cc.authAndRequireIoss(RejoiningRegistration).async {
       implicit request =>
 
         val canRejoin = request.registrationWrapper.registration.canRejoinRegistration(LocalDate.now(clock))

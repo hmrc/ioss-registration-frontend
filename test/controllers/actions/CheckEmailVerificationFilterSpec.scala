@@ -29,7 +29,7 @@ import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatest.{BeforeAndAfterEach, EitherValues}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint}
 import play.api.inject.bind
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
@@ -46,8 +46,7 @@ import scala.concurrent.Future
 class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with EitherValues with BeforeAndAfterEach {
 
   class Harness(
-                 inAmend: Boolean,
-                 waypoints: Waypoints,
+                 registrationModificationMode: RegistrationModificationMode,
                  frontendAppConfig: FrontendAppConfig,
                  emailVerificationService: EmailVerificationService,
                  saveForLaterService: SaveForLaterService,
@@ -55,8 +54,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
                  authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
                )
     extends CheckEmailVerificationFilterImpl(
-      inAmend,
-      waypoints,
+      registrationModificationMode,
       frontendAppConfig,
       emailVerificationService,
       saveForLaterService,
@@ -104,8 +102,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = false,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = NotModifyingExistingRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -134,8 +131,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = false,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = NotModifyingExistingRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -165,8 +161,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = false,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = NotModifyingExistingRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -206,8 +201,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = true,
-            waypoints = expectedAmendWaypoints,
+            registrationModificationMode = AmendingActiveRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -241,8 +235,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = false,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = NotModifyingExistingRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -295,8 +288,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
             val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
             val controller = new Harness(
-              inAmend = true,
-              waypoints = expectedAmendWaypoints,
+              registrationModificationMode = AmendingActiveRegistration,
               frontendAppConfig = frontendAppConfig,
               emailVerificationService = mockEmailVerificationService,
               saveForLaterService = mockSaveForLaterService,
@@ -330,8 +322,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = false,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = NotModifyingExistingRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -360,8 +351,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = false,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = NotModifyingExistingRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -390,8 +380,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = true,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = AmendingActiveRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -420,8 +409,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = true,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = AmendingActiveRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,
@@ -451,8 +439,7 @@ class CheckEmailVerificationFilterSpec extends SpecBase with MockitoSugar with E
           val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
           val controller = new Harness(
-            inAmend = true,
-            waypoints = expectedWaypoints,
+            registrationModificationMode = AmendingActiveRegistration,
             frontendAppConfig = frontendAppConfig,
             emailVerificationService = mockEmailVerificationService,
             saveForLaterService = mockSaveForLaterService,

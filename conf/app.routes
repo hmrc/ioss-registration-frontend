@@ -258,7 +258,7 @@ GET         /successful-amend                                             contro
 GET         /cannot-use-not-registered                                    controllers.NotRegisteredController.onPageLoad()
 
 GET         /start-rejoin-journey                                         controllers.rejoin.StartRejoinJourneyController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-GET         /rejoin-registration                                          controllers.rejoin.RejoinRegistrationController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET         /rejoin-registration                                          controllers.rejoin.RejoinRegistrationController.onPageLoad()
 POST        /rejoin-registration                                          controllers.rejoin.RejoinRegistrationController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints, incompletePrompt: Boolean)
 
 GET         /successful-rejoin                                            controllers.rejoin.RejoinCompleteController.onPageLoad()

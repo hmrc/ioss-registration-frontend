@@ -52,7 +52,7 @@ class CheckYourAnswersController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(NotModifyingExistingRegistration, waypoints = EmptyWaypoints) {
+  def onPageLoad(): Action[AnyContent] = cc.authAndGetDataAndCheckVerifyEmail(NotModifyingExistingRegistration) {
     implicit request =>
 
       val thisPage = CheckYourAnswersPage

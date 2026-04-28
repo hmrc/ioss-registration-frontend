@@ -18,13 +18,14 @@ package controllers.actions
 
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
+import controllers.DetermineEmailVerificationErrorRedirect.determineWaypoints
 import controllers.routes
 import logging.Logging
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, Verified}
 import models.requests.AuthenticatedDataRequest
 import models.{BusinessContactDetails, CheckMode, NormalMode}
 import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoint, Waypoints}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import repositories.AuthenticatedUserAnswersRepository
@@ -37,8 +38,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckEmailVerificationFilterImpl(
-                                        inAmend: Boolean,
-                                        waypoints: Waypoints,
+                                        registrationModificationMode: RegistrationModificationMode,
                                         frontendAppConfig: FrontendAppConfig,
                                         emailVerificationService: EmailVerificationService,
                                         saveForLaterService: SaveForLaterService,
@@ -54,11 +54,11 @@ class CheckEmailVerificationFilterImpl(
     if (frontendAppConfig.emailVerificationEnabled) {
       request.userAnswers.get(BusinessContactDetailsPage) match {
         case Some(contactDetails) =>
-          if (inAmend) {
+          if (registrationModificationMode != NotModifyingExistingRegistration) {
             registrationConnector.getRegistration()(hc).flatMap {
               case Right(registrationWrapper) =>
                 if (registrationWrapper.registration.schemeDetails.businessEmailId != contactDetails.emailAddress) {
-                  checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails, inAmend = true)
+                  checkVerificationStatusAndGetRedirect(registrationModificationMode, request, contactDetails, inAmend = true)
                 } else {
                   None.toFuture
                 }
@@ -68,7 +68,7 @@ class CheckEmailVerificationFilterImpl(
                 throw exception
             }
           } else {
-            checkVerificationStatusAndGetRedirect(waypoints, request, contactDetails, inAmend = false)
+            checkVerificationStatusAndGetRedirect(registrationModificationMode, request, contactDetails, inAmend = false)
           }
         case None => None.toFuture
       }
@@ -78,11 +78,13 @@ class CheckEmailVerificationFilterImpl(
   }
 
   private def checkVerificationStatusAndGetRedirect(
-                                                     waypoints: Waypoints,
+                                                     registrationModificationMode: RegistrationModificationMode,
                                                      request: AuthenticatedDataRequest[_],
                                                      contactDetails: BusinessContactDetails,
                                                      inAmend: Boolean
                                                    )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
+    val waypoints: NonEmptyWaypoints = determineWaypoints(registrationModificationMode)
+
     emailVerificationService.isEmailVerified(contactDetails.emailAddress, request.userId).flatMap {
       case Verified =>
         logger.info("CheckEmailVerificationFilter - Verified")
@@ -95,7 +97,7 @@ class CheckEmailVerificationFilterImpl(
       case LockedPasscodeForSingleEmail =>
         logger.info("CheckEmailVerificationFilter - LockedPasscodeForSingleEmail")
         if (inAmend) {
-          resetContactDetailsInAmendAndRedirect(request)
+          resetContactDetailsInAmendAndRedirect(waypoints, request)
         } else {
           saveForLaterService.saveAnswersRedirect(
             waypoints,
@@ -119,8 +121,11 @@ class CheckEmailVerificationFilterImpl(
     }
   }
 
-  private def resetContactDetailsInAmendAndRedirect(request: AuthenticatedDataRequest[_]): Future[Option[Result]] = {
-    
+  private def resetContactDetailsInAmendAndRedirect(
+                                                     waypoints: Waypoints,
+                                                     request: AuthenticatedDataRequest[_]
+                                                   ): Future[Option[Result]] = {
+
     val maybeOriginalRegistration = request.registrationWrapper.getOrElse {
       val errorMessage: String = "Original registration not found"
       logger.error(errorMessage)
@@ -150,10 +155,10 @@ class CheckEmailVerificationFilterProvider @Inject()(
                                                       registrationConnector: RegistrationConnector,
                                                       authenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository
                                                     )(implicit val executionContext: ExecutionContext) {
-  def apply(inAmend: Boolean, waypoints: Waypoints): CheckEmailVerificationFilterImpl = {
+  def apply(registrationModificationMode: RegistrationModificationMode): CheckEmailVerificationFilterImpl = {
+
     new CheckEmailVerificationFilterImpl(
-      inAmend,
-      waypoints,
+      registrationModificationMode,
       frontendAppConfig,
       emailVerificationService,
       saveForLaterService,
