@@ -54,7 +54,7 @@
 /* End of Fix for accessibility Audit */
 
 .autocomplete__input.govuk-input--error {
-    border-color: #d4351c;
+    border-color: #ca3535;
 }
 .autocomplete__dropdown-arrow-down {
     z-index: 0;
