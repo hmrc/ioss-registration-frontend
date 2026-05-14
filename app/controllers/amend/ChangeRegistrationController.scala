@@ -17,21 +17,26 @@
 package controllers.amend
 
 import config.Constants.btaUrl
+import config.FrontendAppConfig
 import controllers.actions.*
 import logging.Logging
 import models.CheckMode
 import models.audit.AmendRegistrationAuditModel
 import models.audit.RegistrationAuditType.AmendRegistration
 import models.audit.SubmissionResult.{Failure, Success}
-import models.domain.PreviousRegistration
-import models.etmp.{EtmpExclusion, EtmpExclusionReason}
+import models.domain.{PreviousRegistration, PreviousSchemeDetails}
+import models.etmp.{EtmpDisplayEuRegistrationDetails, EtmpDisplayRegistration, EtmpExclusion, EtmpExclusionReason}
+import models.euDetails.EuOptionalDetails
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BankDetailsPage, BusinessContactDetailsPage, CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PreviousRegistrationIossNumberQuery
+import queries.euDetails.{AllEuDetailsQuery, AllEuOptionalDetailsQuery}
+import queries.previousRegistration.AllPreviousRegistrationsQuery
+import queries.tradingNames.AllTradingNames
+import queries.{AllWebsites, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import services.{AccountService, AuditService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -55,7 +60,8 @@ class ChangeRegistrationController @Inject()(
                                               registrationService: RegistrationService,
                                               accountService: AccountService,
                                               auditService: AuditService,
-                                              view: ChangeRegistrationView
+                                              view: ChangeRegistrationView,
+                                              frontendAppConfig: FrontendAppConfig
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -117,8 +123,16 @@ class ChangeRegistrationController @Inject()(
           val hasPreviousRegistrations: Boolean = previousRegistrations.nonEmpty
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
           val list = detailsList(waypoints, thisPage, isExcluded)
+          val noChangesMade: Boolean =
+            request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
+              case Some(originalRegistration) =>
+                !answersHaveChanged(originalRegistration)
 
-          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl))
+              case None =>
+                true
+            }
+
+          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl, noChangesMade, frontendAppConfig.iossYourAccountUrl))
         }
     }
   }
@@ -294,5 +308,88 @@ class ChangeRegistrationController @Inject()(
       BankDetailsSummary.rowBIC(request.userAnswers, waypoints, sourcePage).map(_.withCssClass("govuk-summary-list__row--no-border")),
       BankDetailsSummary.rowIBAN(request.userAnswers, waypoints, sourcePage)
     )
+  }
+
+  private def answersHaveChanged(originalAnswers: EtmpDisplayRegistration)
+                                (implicit request: AuthenticatedMandatoryIossRequest[_]): Boolean = {
+
+    val tradingNamesChanged =
+      request.userAnswers.get(AllTradingNames).map(_.map(_.name)).getOrElse(Seq.empty) !=
+        originalAnswers.tradingNames.map(_.tradingName)
+
+    val previousRegistrationsChanged =
+      request.userAnswers.get(AllPreviousRegistrationsQuery).map(_.map(_.previousEuCountry.code)).getOrElse(Seq.empty) !=
+        originalAnswers.schemeDetails.previousEURegistrationDetails.map(_.issuedBy).distinct
+
+    val previousRegistrationSchemesChanged =
+      request.userAnswers.get(AllPreviousRegistrationsQuery).getOrElse(Seq.empty).exists { amendedCountry =>
+        val matchingOriginalRegistrations =
+          originalAnswers.schemeDetails.previousEURegistrationDetails
+            .filter(_.issuedBy == amendedCountry.previousEuCountry.code)
+
+        val originalSchemeNumbers =
+          matchingOriginalRegistrations.map { registration =>
+            PreviousSchemeDetails.fromEtmpPreviousEuRegistrationDetails(registration).previousSchemeNumbers
+          }
+
+        val amendedSchemeNumbers =
+          amendedCountry.previousSchemesDetails.map(_.previousSchemeNumbers)
+
+        originalSchemeNumbers.nonEmpty && amendedSchemeNumbers != originalSchemeNumbers
+      }
+
+    val registeredInEuChanged =
+      request.userAnswers.get(AllEuDetailsQuery).map(_.map(_.euCountry.code)).getOrElse(Seq.empty) !=
+        originalAnswers.schemeDetails.euRegistrationDetails.map(_.issuedBy)
+
+    val euDetailsChanged =
+      request.userAnswers.get(AllEuOptionalDetailsQuery).getOrElse(Seq.empty).exists { userDetail =>
+        originalAnswers.schemeDetails.euRegistrationDetails
+          .find(_.issuedBy == userDetail.euCountry.code)
+          .exists(registrationDetail => hasDetailsChanged(userDetail, registrationDetail))
+      }
+
+    val websitesChanged =
+      request.userAnswers.get(AllWebsites).map(_.map(_.site)).getOrElse(Seq.empty) !=
+        originalAnswers.schemeDetails.websites.map(_.websiteAddress)
+
+    val contactDetailsChanged =
+      request.userAnswers.get(BusinessContactDetailsPage).exists { contactDetails =>
+        contactDetails.fullName != originalAnswers.schemeDetails.contactName ||
+          contactDetails.telephoneNumber != originalAnswers.schemeDetails.businessTelephoneNumber ||
+          contactDetails.emailAddress != originalAnswers.schemeDetails.businessEmailId
+      }
+
+    val bankDetailsChanged =
+      request.userAnswers.get(BankDetailsPage).exists { bankDetails =>
+        bankDetails.accountName != originalAnswers.bankDetails.accountName ||
+          bankDetails.bic != originalAnswers.bankDetails.bic ||
+          bankDetails.iban != originalAnswers.bankDetails.iban
+      }
+
+    tradingNamesChanged ||
+      previousRegistrationsChanged ||
+      previousRegistrationSchemesChanged ||
+      registeredInEuChanged ||
+      euDetailsChanged ||
+      websitesChanged ||
+      contactDetailsChanged ||
+      bankDetailsChanged
+  }
+
+  private def hasDetailsChanged(userDetails: EuOptionalDetails, registrationDetails: EtmpDisplayEuRegistrationDetails): Boolean = {
+    val vatNumberWithoutCountryCode = userDetails.euVatNumber.map(_.stripPrefix(userDetails.euCountry.code))
+    val registrationVatNumber = registrationDetails.vatNumber
+
+    userDetails.fixedEstablishmentTradingName.exists(_ != registrationDetails.fixedEstablishmentTradingName) ||
+      userDetails.fixedEstablishmentAddress.exists(address =>
+        !registrationDetails.fixedEstablishmentAddressLine1.equals(address.line1) ||
+          !registrationDetails.fixedEstablishmentAddressLine2.equals(address.line2) ||
+          !registrationDetails.townOrCity.equals(address.townOrCity) ||
+          !registrationDetails.regionOrState.equals(address.stateOrRegion) ||
+          !registrationDetails.postcode.equals(address.postCode)
+      ) ||
+      !vatNumberWithoutCountryCode.equals(registrationVatNumber) ||
+      !userDetails.euTaxReference.equals(registrationDetails.taxIdentificationNumber)
   }
 }
