@@ -161,7 +161,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noChangesMade = true,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            unusableStatus = false
           )(request, messages(application)).toString
         }
       }
@@ -203,7 +204,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noChangesMade = true,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            unusableStatus = false
           )(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.changePreviousRegistration")) mustBe true
         }
@@ -248,7 +250,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = false,
             btaUrl,
             noChangesMade = true,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            unusableStatus = false
           )(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.toCurrentRegistration")) mustBe true
         }
@@ -296,7 +299,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noChangesMade = true,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            unusableStatus = false
           )(request, messages(application)).toString
         }
       }
@@ -353,8 +357,84 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noChangesMade = false,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            unusableStatus = false
           )(request, messages(application)).toString
+        }
+      }
+
+      "must show unusable status content and not show no changes made when unusableStatus is true" in {
+
+        val usableRegistrationWrapper = registrationWrapper.copy(registration =
+          registrationWrapper.registration.copy(schemeDetails =
+            registrationWrapper.registration.schemeDetails.copy(unusableStatus = true, businessEmailId = "test@test.com")
+          )
+        )
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(usableRegistrationWrapper).toFuture
+        when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+
+        val application = applicationBuilder(
+          userAnswers = Some(completeUserAnswersWithVatInfo),
+          registrationWrapper = Some(usableRegistrationWrapper)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[AccountService].toInstance(mockAccountService))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
+
+          status(result) mustBe OK
+
+          val content = contentAsString(result)
+
+          content must include(messages(application)("changeRegistration.info.p1"))
+          content must not include messages(application)("changeRegistration.noChangesMade")
+          content must not include messages(application)("changeRegistration.returnToYourAccount")
+        }
+      }
+
+      "must show no changes made when noChangesMade is true and unusableStatus is false" in {
+
+        val registrationWithoutExclusion = registrationWrapper.copy(
+          registration = registrationWrapper.registration.copy(exclusions = List.empty)
+        )
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
+        when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+
+        val application = applicationBuilder(
+          userAnswers = Some(completeUserAnswersWithVatInfo),
+          registrationWrapper = Some(registrationWithoutExclusion)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[AccountService].toInstance(mockAccountService))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
+
+          status(result) mustBe OK
+
+          val content = contentAsString(result)
+
+          content must include(messages(application)("changeRegistration.heading"))
+          content must include(messages(application)("changeRegistration.noChangesMade"))
+          content must include(messages(application)("changeRegistration.returnToYourAccount"))
+          content must not include messages(application)("changeRegistration.info.p1")
         }
       }
     }

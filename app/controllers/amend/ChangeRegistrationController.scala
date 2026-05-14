@@ -132,7 +132,8 @@ class ChangeRegistrationController @Inject()(
                 true
             }
 
-          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl, noChangesMade, frontendAppConfig.iossYourAccountUrl))
+          val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
+          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl, noChangesMade, frontendAppConfig.iossYourAccountUrl, unusableStatus))
         }
     }
   }
