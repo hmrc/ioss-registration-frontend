@@ -17,22 +17,27 @@
 package controllers.amend
 
 import config.Constants.btaUrl
+import config.FrontendAppConfig
 import controllers.actions.*
 import logging.Logging
 import models.CheckMode
 import models.audit.AmendRegistrationAuditModel
 import models.audit.RegistrationAuditType.AmendRegistration
 import models.audit.SubmissionResult.{Failure, Success}
-import models.domain.PreviousRegistration
-import models.etmp.{EtmpExclusion, EtmpExclusionReason}
+import models.domain.{PreviousRegistration, PreviousSchemeDetails}
+import models.etmp.{EtmpDisplayEuRegistrationDetails, EtmpDisplayRegistration, EtmpExclusion, EtmpExclusionReason}
+import models.euDetails.EuOptionalDetails
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{BankDetailsPage, BusinessContactDetailsPage, CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PreviousRegistrationIossNumberQuery
-import services.{AccountService, AuditService, RegistrationService}
+import queries.euDetails.{AllEuDetailsQuery, AllEuOptionalDetailsQuery}
+import queries.previousRegistration.AllPreviousRegistrationsQuery
+import queries.tradingNames.AllTradingNames
+import queries.{AllWebsites, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
+import services.{AccountService, AmendAnswersComparisonService, AuditService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
@@ -55,7 +60,9 @@ class ChangeRegistrationController @Inject()(
                                               registrationService: RegistrationService,
                                               accountService: AccountService,
                                               auditService: AuditService,
-                                              view: ChangeRegistrationView
+                                              view: ChangeRegistrationView,
+                                              frontendAppConfig: FrontendAppConfig,
+                                              amendAnswersComparisonService: AmendAnswersComparisonService
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -117,8 +124,17 @@ class ChangeRegistrationController @Inject()(
           val hasPreviousRegistrations: Boolean = previousRegistrations.nonEmpty
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
           val list = detailsList(waypoints, thisPage, isExcluded)
+          val noChangesMade: Boolean =
+            request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
+              case Some(originalRegistration) =>
+                !amendAnswersComparisonService.answersHaveChanged(originalRegistration, request.userAnswers)
 
-          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl))
+              case None =>
+                true
+            }
+
+          val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
+          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl, noChangesMade, frontendAppConfig.iossYourAccountUrl, unusableStatus))
         }
     }
   }
