@@ -18,17 +18,18 @@ package controllers.amend
 
 import base.SpecBase
 import config.Constants.btaUrl
+import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.amend.routes as amendRoutes
 import models.amend.{PreviousRegistration, RegistrationWrapper}
 import models.audit.SubmissionResult.{Failure, Success}
 import models.audit.{AmendRegistrationAuditModel, RegistrationAuditType}
-import models.etmp.EtmpExclusion
+import models.etmp.{EtmpDisplayRegistration, EtmpExclusion, EtmpTradingName}
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
 import models.requests.AuthenticatedDataRequest
 import models.responses.InternalServerError
-import models.{CheckMode, Index, UserAnswers}
+import models.{CheckMode, Index, TradingName, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
 import org.mockito.{ArgumentMatchers, Mockito}
@@ -37,12 +38,14 @@ import org.scalatestplus.mockito.MockitoSugar
 import pages.*
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
+import pages.tradingNames.HasTradingNamePage
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{running, *}
-import queries.PreviousRegistrationIossNumberQuery
+import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import queries.euDetails.EuDetailsQuery
+import queries.tradingNames.AllTradingNames
 import repositories.AuthenticatedUserAnswersRepository
 import services.*
 import testutils.RegistrationData.etmpDisplayRegistration
@@ -74,6 +77,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
   private val mockRegistrationService = mock[RegistrationService]
   private val mockAccountService = mock[AccountService]
   private val mockAuditService: AuditService = mock[AuditService]
+  private val mockAmendAnswersComparisonService: AmendAnswersComparisonService = mock[AmendAnswersComparisonService]
 
   private val amendRegistrationResponse: AmendRegistrationResponse =
     AmendRegistrationResponse(
@@ -105,6 +109,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
     Mockito.reset(mockRegistrationConnector)
     Mockito.reset(mockRegistrationService)
     Mockito.reset(mockAccountService)
+    Mockito.reset(mockAmendAnswersComparisonService)
   }
 
   "ChangeRegistration Controller" - {
@@ -131,11 +136,14 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
+          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
           .build()
 
         running(application) {
 
           val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
 
           implicit val msgs: Messages = messages(application)
           val result = route(application, request).value
@@ -146,7 +154,19 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(completeUserAnswersWithVatInfo, waypoints, amendYourAnswersPage))
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(waypoints, vatInfoList, list, iossNumber, isValid = true, hasPreviousRegistrations = false, isCurrentIossAccount = true, btaUrl)(request, messages(application)).toString
+          contentAsString(result) mustBe view(
+            waypoints,
+            vatInfoList,
+            list,
+            iossNumber,
+            isValid = true,
+            hasPreviousRegistrations = false,
+            isCurrentIossAccount = true,
+            btaUrl,
+            noChangesMade = true,
+            config.iossYourAccountUrl,
+            unusableStatus = false
+          )(request, messages(application)).toString
         }
       }
 
@@ -158,11 +178,14 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
+          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
           .build()
 
         running(application) {
 
           val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
 
           implicit val msgs: Messages = messages(application)
           val result = route(application, request).value
@@ -175,7 +198,19 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           )
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(previousRegistrationWaypoints, vatInfoList, list, iossNumber, isValid = true, hasPreviousRegistrations = true, isCurrentIossAccount = true, btaUrl)(request, messages(application)).toString
+          contentAsString(result) mustBe view(
+            previousRegistrationWaypoints,
+            vatInfoList,
+            list,
+            iossNumber,
+            isValid = true,
+            hasPreviousRegistrations = true,
+            isCurrentIossAccount = true,
+            btaUrl,
+            noChangesMade = true,
+            config.iossYourAccountUrl,
+            unusableStatus = false
+          )(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.changePreviousRegistration")) mustBe true
         }
       }
@@ -190,11 +225,14 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         val application = applicationBuilder(userAnswers = Some(answers), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
+          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
           .build()
 
         running(application) {
 
           val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = true).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
 
           implicit val msgs: Messages = messages(application)
           val result = route(application, request).value
@@ -207,7 +245,19 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           )
 
           status(result) mustBe OK
-          contentAsString(result) mustBe view(previousRegistrationWaypoints, vatInfoList, list, previousRegistration.iossNumber, isValid = true, hasPreviousRegistrations = true, isCurrentIossAccount = false, btaUrl)(request, messages(application)).toString
+          contentAsString(result) mustBe view(
+            previousRegistrationWaypoints,
+            vatInfoList,
+            list,
+            previousRegistration.iossNumber,
+            isValid = true,
+            hasPreviousRegistrations = true,
+            isCurrentIossAccount = false,
+            btaUrl,
+            noChangesMade = true,
+            config.iossYourAccountUrl,
+            unusableStatus = false
+          )(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.toCurrentRegistration")) mustBe true
         }
       }
@@ -223,11 +273,14 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
+          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
           .build()
 
         running(application) {
 
           val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
 
           implicit val msgs: Messages = messages(application)
           val result = route(application, request).value
@@ -250,7 +303,182 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isValid = true,
             hasPreviousRegistrations = false,
             isCurrentIossAccount = true,
-            btaUrl
+            btaUrl,
+            noChangesMade = true,
+            config.iossYourAccountUrl,
+            unusableStatus = false
+          )(request, messages(application)).toString
+        }
+      }
+
+      "has made changes to answers" in {
+
+        val originalRegistration = registrationWrapper.registration.copy(
+          tradingNames = Seq(EtmpTradingName("Original trading name")),
+          exclusions = List.empty
+        )
+
+        val changedUserAnswers = completeUserAnswersWithVatInfo
+          .set(HasTradingNamePage, true).success.value
+          .set(AllTradingNames, List(TradingName("Changed trading name"))).success.value
+          .set(OriginalRegistrationQuery(iossNumber), originalRegistration).success.value
+
+        val registrationWithoutExclusion = registrationWrapper.copy(
+          registration = originalRegistration
+        )
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
+        when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+        when(mockAmendAnswersComparisonService.answersHaveChanged(any[EtmpDisplayRegistration], any[UserAnswers])) thenReturn true
+
+        val application = applicationBuilder(
+          userAnswers = Some(changedUserAnswers),
+          registrationWrapper = Some(registrationWithoutExclusion)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[AccountService].toInstance(mockAccountService))
+          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ChangeRegistrationView]
+
+          val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(changedUserAnswers))
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(changedUserAnswers, waypoints, amendYourAnswersPage))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
+            waypoints,
+            vatInfoList,
+            list,
+            iossNumber,
+            isValid = true,
+            hasPreviousRegistrations = false,
+            isCurrentIossAccount = true,
+            btaUrl,
+            noChangesMade = false,
+            config.iossYourAccountUrl,
+            unusableStatus = false
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must show unusable status content and not show no changes made when unusableStatus is true" in {
+
+        val usableRegistrationWrapper = registrationWrapper.copy(registration =
+          registrationWrapper.registration.copy(schemeDetails =
+            registrationWrapper.registration.schemeDetails.copy(unusableStatus = true, businessEmailId = "test@test.com")
+          )
+        )
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(usableRegistrationWrapper).toFuture
+        when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+        when(mockAmendAnswersComparisonService.answersHaveChanged(any[EtmpDisplayRegistration], any[UserAnswers])) thenReturn false
+
+        val userAnswers = completeUserAnswersWithVatInfo
+          .set(OriginalRegistrationQuery(iossNumber), usableRegistrationWrapper.registration).success.value
+
+        val application = applicationBuilder(
+          userAnswers = Some(userAnswers),
+          registrationWrapper = Some(usableRegistrationWrapper)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[AccountService].toInstance(mockAccountService))
+          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
+
+          status(result) mustBe OK
+
+          val view = application.injector.instanceOf[ChangeRegistrationView]
+
+          val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(userAnswers))
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryListExcluded(userAnswers, waypoints, amendYourAnswersPage))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
+            waypoints,
+            vatInfoList,
+            list,
+            iossNumber,
+            isValid = true,
+            hasPreviousRegistrations = false,
+            isCurrentIossAccount = true,
+            btaUrl,
+            noChangesMade = true,
+            config.iossYourAccountUrl,
+            unusableStatus = true
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must show no changes made when noChangesMade is true and unusableStatus is false" in {
+
+        val registrationWithoutExclusion = registrationWrapper.copy(
+          registration = registrationWrapper.registration.copy(exclusions = List.empty)
+        )
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
+        when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+        when(mockAmendAnswersComparisonService.answersHaveChanged(any[EtmpDisplayRegistration], any[UserAnswers])) thenReturn false
+
+        val userAnswers = completeUserAnswersWithVatInfo
+          .set(OriginalRegistrationQuery(iossNumber), registrationWrapper.registration).success.value
+
+        val application = applicationBuilder(
+          userAnswers = Some(userAnswers),
+          registrationWrapper = Some(registrationWithoutExclusion)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[AccountService].toInstance(mockAccountService))
+          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
+
+          status(result) mustBe OK
+
+          val view = application.injector.instanceOf[ChangeRegistrationView]
+
+          val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(userAnswers))
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(userAnswers, waypoints, amendYourAnswersPage))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
+            waypoints,
+            vatInfoList,
+            list,
+            iossNumber,
+            isValid = true,
+            hasPreviousRegistrations = false,
+            isCurrentIossAccount = true,
+            btaUrl,
+            noChangesMade = true,
+            config.iossYourAccountUrl,
+            unusableStatus = false
           )(request, messages(application)).toString
         }
       }
