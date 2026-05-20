@@ -24,19 +24,15 @@ import models.CheckMode
 import models.audit.AmendRegistrationAuditModel
 import models.audit.RegistrationAuditType.AmendRegistration
 import models.audit.SubmissionResult.{Failure, Success}
-import models.domain.{PreviousRegistration, PreviousSchemeDetails}
-import models.etmp.{EtmpDisplayEuRegistrationDetails, EtmpDisplayRegistration, EtmpExclusion, EtmpExclusionReason}
-import models.euDetails.EuOptionalDetails
+import models.domain.PreviousRegistration
+import models.etmp.{EtmpDisplayRegistration, EtmpExclusion, EtmpExclusionReason}
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.{BankDetailsPage, BusinessContactDetailsPage, CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
+import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.euDetails.{AllEuDetailsQuery, AllEuOptionalDetailsQuery}
-import queries.previousRegistration.AllPreviousRegistrationsQuery
-import queries.tradingNames.AllTradingNames
-import queries.{AllWebsites, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
+import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import services.{AccountService, AmendAnswersComparisonService, AuditService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
