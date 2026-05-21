@@ -83,7 +83,7 @@
 
     @govukSummaryList(list)
 
-    @if(noChangesMade && !unusableStatus) {
+    @if(noChangesMade && !unusableStatus && isValid) {
         <p class="govuk-body">@messages("changeRegistration.noChangesMade")</p>
 
         <p class="govuk-body">

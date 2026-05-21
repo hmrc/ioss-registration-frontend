@@ -18,7 +18,7 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Index, UserAnswers}
-import pages.{Page, Waypoints, RecoveryOps}
+import pages.{NonEmptyWaypoints, Page, RecoveryOps, Waypoints}
 import play.api.mvc.Call
 import queries.euDetails.AllEuDetailsQuery
 
@@ -28,6 +28,14 @@ case class CannotRegisterFixedEstablishmentOperationOnlyPage(countryIndex: Index
     routes.CannotRegisterFixedEstablishmentOperationOnlyController.onPageLoad(waypoints, countryIndex)
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    answers.get(AllEuDetailsQuery).map {
+      case n if n.isEmpty => TaxRegisteredInEuPage
+      case n if n.nonEmpty => AddEuDetailsPage(Some(countryIndex))
+      case _ => TaxRegisteredInEuPage
+    }.orRecover
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
     answers.get(AllEuDetailsQuery).map {
       case n if n.isEmpty => TaxRegisteredInEuPage
       case n if n.nonEmpty => AddEuDetailsPage(Some(countryIndex))
