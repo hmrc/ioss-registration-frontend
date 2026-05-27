@@ -19,6 +19,11 @@ package queries
 import models.etmp.EtmpDisplayRegistration
 import play.api.libs.json.JsPath
 
+object OriginalRegistrationQuery extends Gettable[EtmpDisplayRegistration] with Settable[EtmpDisplayRegistration] {
+
+  override def path: JsPath = JsPath \ "originalRegistration"
+}
+
 case class OriginalRegistrationQuery(iossNumber: String) extends Gettable[EtmpDisplayRegistration] with Settable[EtmpDisplayRegistration] {
 
 

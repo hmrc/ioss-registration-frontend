@@ -35,9 +35,8 @@
         hasPreviousRegistrations: Boolean,
         isCurrentIossAccount: Boolean,
         btaUrl: String,
-        noChangesMade: Boolean,
-        yourAccountUrl: String,
-        unusableStatus: Boolean
+        noAmendmentsWithUnusableStatusCheck: Boolean,
+        yourAccountUrl: String
 )(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
@@ -83,26 +82,23 @@
 
     @govukSummaryList(list)
 
-    @if(noChangesMade && !unusableStatus && isValid) {
-        <p class="govuk-body">@messages("changeRegistration.noChangesMade")</p>
+    @if(isValid) {
+        @if(noAmendmentsWithUnusableStatusCheck) {
+            <p class="govuk-body">@messages("changeRegistration.noAmendments")</p>
+            <p class="govuk-body">@Html(messages("changeRegistration.returnToYourAccount", yourAccountUrl))</p>
 
-        <p class="govuk-body">
-            <a href="@yourAccountUrl" class="govuk-link" id="return-to-your-account">@messages("changeRegistration.returnToYourAccount")</a>
-        </p>
-    } else {
-        <p class="govuk-body">@messages("changeRegistration.info.p1")</p>
-
-        @if(isValid) {
+        } else {
+            <p class="govuk-body">@messages("changeRegistration.info.p1")</p>
             @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false)) {
                 @button("site.confirm", ChangeRegistrationPage.route(waypoints).url, waypoints)
             }
-        } else {
-            <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
-            <p class="govuk-body">@messages("error.missing_answers_prompt.general")</p>
+        }
+    } else {
+        <h2 class="govuk-heading-m push--top">@messages("error.missing_answers_header")</h2>
+        <p class="govuk-body">@messages("error.missing_answers_prompt.general")</p>
 
-            @formHelper(action = controllers.amend.routes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = true)) {
-                @button("error.resolve_missing_answers", ChangeRegistrationPage.route(waypoints).url, waypoints)
-            }
+        @formHelper(action = controllers.amend.routes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = true)) {
+            @button("error.resolve_missing_answers", ChangeRegistrationPage.route(waypoints).url, waypoints)
         }
     }
 

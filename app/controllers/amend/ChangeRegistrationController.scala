@@ -24,8 +24,8 @@ import models.CheckMode
 import models.audit.AmendRegistrationAuditModel
 import models.audit.RegistrationAuditType.AmendRegistration
 import models.audit.SubmissionResult.{Failure, Success}
-import models.domain.PreviousRegistration
-import models.etmp.{EtmpDisplayRegistration, EtmpExclusion, EtmpExclusionReason}
+import models.domain.{PreviousRegistration, VatCustomerInfo}
+import models.etmp.{EtmpExclusion, EtmpExclusionReason}
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.previousRegistrations.PreviouslyRegisteredPage
@@ -33,7 +33,7 @@ import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
-import services.{AccountService, AmendAnswersComparisonService, AuditService, RegistrationService}
+import services.{AccountService, AuditService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
@@ -48,7 +48,7 @@ import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ChangeRegistrationController @Inject()(
                                               override val messagesApi: MessagesApi,
@@ -57,8 +57,7 @@ class ChangeRegistrationController @Inject()(
                                               accountService: AccountService,
                                               auditService: AuditService,
                                               view: ChangeRegistrationView,
-                                              frontendAppConfig: FrontendAppConfig,
-                                              amendAnswersComparisonService: AmendAnswersComparisonService
+                                              frontendAppConfig: FrontendAppConfig
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -86,7 +85,7 @@ class ChangeRegistrationController @Inject()(
           Seq.empty.toFuture
         }
 
-        futurePreviousRegistrations.map { previousRegistrations =>
+        futurePreviousRegistrations.flatMap { previousRegistrations =>
 
           val selectedPreviousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
           val iossNumber: String = selectedPreviousRegistration.getOrElse(request.iossNumber)
@@ -130,17 +129,37 @@ class ChangeRegistrationController @Inject()(
           val hasPreviousRegistrations: Boolean = previousRegistrations.nonEmpty
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
           val list = detailsList(waypoints, thisPage, isExcluded)
-          val noChangesMade: Boolean =
-            request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
-              case Some(originalRegistration) =>
-                !amendAnswersComparisonService.answersHaveChanged(originalRegistration, request.userAnswers)
 
-              case None =>
-                true
-            }
+          request.userAnswers.vatInfo match {
+            case Some(_) =>
+              for {
+                originalUserAnswers <- registrationService.toUserAnswers(request.userId, request.registrationWrapper)
+                userAnswersWithoutOriginalRegistration <- Future.fromTry(request.userAnswers.remove(OriginalRegistrationQuery))
+              } yield {
 
-          val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
-          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl, noChangesMade, frontendAppConfig.iossYourAccountUrl, unusableStatus))
+                val noAmendments = originalUserAnswers.data == userAnswersWithoutOriginalRegistration.data
+                val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
+                val noAmendmentsWithUnusableStatusCheck: Boolean = noAmendments && !unusableStatus
+
+                Ok(view(
+                  waypoints,
+                  vatRegistrationDetailsList,
+                  list,
+                  iossNumber,
+                  isValid,
+                  hasPreviousRegistrations,
+                  isCurrentIossAccount,
+                  btaUrl,
+                  noAmendmentsWithUnusableStatusCheck,
+                  frontendAppConfig.iossYourAccountUrl
+                ))
+              }
+            case None =>
+              val errorMessage: String = "Vat information was not found"
+              logger.error(errorMessage)
+              val exception: Exception = new Exception(errorMessage)
+              Future.failed(exception)
+          }
         }
     }
   }

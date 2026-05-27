@@ -77,7 +77,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
   private val mockRegistrationService = mock[RegistrationService]
   private val mockAccountService = mock[AccountService]
   private val mockAuditService: AuditService = mock[AuditService]
-  private val mockAmendAnswersComparisonService: AmendAnswersComparisonService = mock[AmendAnswersComparisonService]
 
   private val amendRegistrationResponse: AmendRegistrationResponse =
     AmendRegistrationResponse(
@@ -109,7 +108,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
     Mockito.reset(mockRegistrationConnector)
     Mockito.reset(mockRegistrationService)
     Mockito.reset(mockAccountService)
-    Mockito.reset(mockAmendAnswersComparisonService)
   }
 
   "ChangeRegistration Controller" - {
@@ -129,6 +127,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
 
         val application = applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
@@ -136,7 +135,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
-          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .build()
 
         running(application) {
@@ -163,9 +162,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             hasPreviousRegistrations = false,
             isCurrentIossAccount = true,
             btaUrl,
-            noChangesMade = true,
-            config.iossYourAccountUrl,
-            unusableStatus = false
+            noAmendmentsWithUnusableStatusCheck = true,
+            config.iossYourAccountUrl
           )(request, messages(application)).toString
         }
       }
@@ -174,11 +172,12 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
-          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .build()
 
         running(application) {
@@ -207,9 +206,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             hasPreviousRegistrations = true,
             isCurrentIossAccount = true,
             btaUrl,
-            noChangesMade = true,
-            config.iossYourAccountUrl,
-            unusableStatus = false
+            noAmendmentsWithUnusableStatusCheck = true,
+            config.iossYourAccountUrl
           )(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.changePreviousRegistration")) mustBe true
         }
@@ -222,10 +220,12 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         val answers = completeUserAnswersWithVatInfo.set(PreviousRegistrationIossNumberQuery, previousRegistration.iossNumber).success.value
 
+        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn answers.toFuture
+
         val application = applicationBuilder(userAnswers = Some(answers), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
-          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .build()
 
         running(application) {
@@ -254,9 +254,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             hasPreviousRegistrations = true,
             isCurrentIossAccount = false,
             btaUrl,
-            noChangesMade = true,
+            noAmendmentsWithUnusableStatusCheck = true,
             config.iossYourAccountUrl,
-            unusableStatus = false
           )(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.toCurrentRegistration")) mustBe true
         }
@@ -266,6 +265,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
 
         val application = applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
@@ -273,7 +273,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
-          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .build()
 
         running(application) {
@@ -304,9 +304,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             hasPreviousRegistrations = false,
             isCurrentIossAccount = true,
             btaUrl,
-            noChangesMade = true,
-            config.iossYourAccountUrl,
-            unusableStatus = false
+            noAmendmentsWithUnusableStatusCheck = true,
+            config.iossYourAccountUrl
           )(request, messages(application)).toString
         }
       }
@@ -329,7 +328,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
-        when(mockAmendAnswersComparisonService.answersHaveChanged(any[EtmpDisplayRegistration], any[UserAnswers])) thenReturn true
 
         val application = applicationBuilder(
           userAnswers = Some(changedUserAnswers),
@@ -337,7 +335,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
-          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
           .build()
 
         running(application) {
@@ -364,9 +361,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             hasPreviousRegistrations = false,
             isCurrentIossAccount = true,
             btaUrl,
-            noChangesMade = false,
-            config.iossYourAccountUrl,
-            unusableStatus = false
+            noAmendmentsWithUnusableStatusCheck = false,
+            config.iossYourAccountUrl
           )(request, messages(application)).toString
         }
       }
@@ -381,7 +377,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(usableRegistrationWrapper).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
-        when(mockAmendAnswersComparisonService.answersHaveChanged(any[EtmpDisplayRegistration], any[UserAnswers])) thenReturn false
+        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
 
         val userAnswers = completeUserAnswersWithVatInfo
           .set(OriginalRegistrationQuery(iossNumber), usableRegistrationWrapper.registration).success.value
@@ -392,7 +388,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
-          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
           .build()
 
         running(application) {
@@ -421,9 +417,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             hasPreviousRegistrations = false,
             isCurrentIossAccount = true,
             btaUrl,
-            noChangesMade = true,
+            noAmendmentsWithUnusableStatusCheck = false,
             config.iossYourAccountUrl,
-            unusableStatus = true
           )(request, messages(application)).toString
         }
       }
@@ -436,7 +431,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
-        when(mockAmendAnswersComparisonService.answersHaveChanged(any[EtmpDisplayRegistration], any[UserAnswers])) thenReturn false
 
         val userAnswers = completeUserAnswersWithVatInfo
           .set(OriginalRegistrationQuery(iossNumber), registrationWrapper.registration).success.value
@@ -447,7 +441,6 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))
-          .overrides(bind[AmendAnswersComparisonService].toInstance(mockAmendAnswersComparisonService))
           .build()
 
         running(application) {
@@ -476,9 +469,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             hasPreviousRegistrations = false,
             isCurrentIossAccount = true,
             btaUrl,
-            noChangesMade = true,
-            config.iossYourAccountUrl,
-            unusableStatus = false
+            noAmendmentsWithUnusableStatusCheck = false,
+            config.iossYourAccountUrl
           )(request, messages(application)).toString
         }
       }
