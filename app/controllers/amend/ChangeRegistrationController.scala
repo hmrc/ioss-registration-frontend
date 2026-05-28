@@ -89,14 +89,23 @@ class ChangeRegistrationController @Inject()(
         futurePreviousRegistrations.map { previousRegistrations =>
 
           val selectedPreviousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
+          val iossNumber: String = selectedPreviousRegistration.getOrElse(request.iossNumber)
 
-          val maybeExclusion: Option[EtmpExclusion] = request.registrationWrapper.registration.exclusions.lastOption.flatMap { exclusion =>
-            exclusion.exclusionReason match {
-              case EtmpExclusionReason.Reversal => None
-              case _ => Some(exclusion)
+          val isExcluded = (request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
+            case Some(selectedRegistration) =>  selectedRegistration.exclusions.lastOption.map { exclusion =>
+              exclusion.exclusionReason match {
+                case EtmpExclusionReason.Reversal => false
+                case _ => true
+              }
             }
-          }
-          val isExcluded = maybeExclusion.isDefined
+            case _ =>
+              request.registrationWrapper.registration.exclusions.lastOption.map { exclusion =>
+                exclusion.exclusionReason match {
+                  case EtmpExclusionReason.Reversal => false
+                  case _ => true
+                }
+              }
+          }).getOrElse(false)
 
           val thisPage =
             if (isPreviousRegistration) {
@@ -104,8 +113,6 @@ class ChangeRegistrationController @Inject()(
             } else {
               ChangeRegistrationPage
             }
-
-          val iossNumber: String = selectedPreviousRegistration.getOrElse(request.iossNumber)
 
           val vatRegistrationDetailsList = SummaryListViewModel(
             rows = Seq(
