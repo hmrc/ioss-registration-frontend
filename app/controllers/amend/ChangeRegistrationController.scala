@@ -110,8 +110,6 @@ class ChangeRegistrationController @Inject()(
                 }
             }).getOrElse(false)
 
-          println(s"IS EXCLUDED ${isExcluded}")
-
           val thisPage =
             if (isPreviousRegistration) {
               ChangePreviousRegistrationPage
