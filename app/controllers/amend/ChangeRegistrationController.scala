@@ -91,21 +91,26 @@ class ChangeRegistrationController @Inject()(
           val selectedPreviousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
           val iossNumber: String = selectedPreviousRegistration.getOrElse(request.iossNumber)
 
-          val isExcluded = (request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
-            case Some(selectedRegistration) =>  selectedRegistration.exclusions.lastOption.map { exclusion =>
-              exclusion.exclusionReason match {
-                case EtmpExclusionReason.Reversal => false
-                case _ => true
-              }
-            }
-            case _ =>
-              request.registrationWrapper.registration.exclusions.lastOption.map { exclusion =>
+          val isExcluded =
+            (request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
+              case Some(selectedRegistration) if isPreviousRegistration => selectedRegistration.exclusions.lastOption.map { exclusion =>
                 exclusion.exclusionReason match {
                   case EtmpExclusionReason.Reversal => false
-                  case _ => true
+                  case _ =>
+                    true
                 }
               }
-          }).getOrElse(false)
+              case _ =>
+                request.registrationWrapper.registration.exclusions.lastOption.map { exclusion =>
+                  exclusion.exclusionReason match {
+                    case EtmpExclusionReason.Reversal => false
+                    case _ =>
+                      true
+                  }
+                }
+            }).getOrElse(false)
+
+          println(s"IS EXCLUDED ${isExcluded}")
 
           val thisPage =
             if (isPreviousRegistration) {
