@@ -43,7 +43,7 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{running, *}
-import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
+import queries.{AllOriginalRegistrationsRawQuery, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import queries.euDetails.EuDetailsQuery
 import queries.tradingNames.AllTradingNames
 import repositories.AuthenticatedUserAnswersRepository
@@ -218,9 +218,15 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
 
-        val answers = completeUserAnswersWithVatInfo.set(PreviousRegistrationIossNumberQuery, previousRegistration.iossNumber).success.value
+        val answers = completeUserAnswersWithVatInfo
+          .set(PreviousRegistrationIossNumberQuery, previousRegistration.iossNumber).success.value
+          .set(OriginalRegistrationQuery(previousRegistration.iossNumber), rejoinableRegistration.registration).success.value
 
-        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn answers.toFuture
+        val originalAnswers = answers
+            .remove(AllOriginalRegistrationsRawQuery).success.value
+            .remove(PreviousRegistrationIossNumberQuery).success.value
+
+        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn originalAnswers.toFuture
 
         val application = applicationBuilder(userAnswers = Some(answers), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))

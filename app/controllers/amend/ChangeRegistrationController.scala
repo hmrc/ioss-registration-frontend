@@ -20,19 +20,19 @@ import config.Constants.btaUrl
 import config.FrontendAppConfig
 import controllers.actions.*
 import logging.Logging
-import models.CheckMode
+import models.{CheckMode, UserAnswers}
 import models.audit.AmendRegistrationAuditModel
 import models.audit.RegistrationAuditType.AmendRegistration
 import models.audit.SubmissionResult.{Failure, Success}
-import models.domain.{PreviousRegistration, VatCustomerInfo}
-import models.etmp.{EtmpExclusion, EtmpExclusionReason}
+import models.domain.PreviousRegistration
+import models.etmp.EtmpExclusionReason
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
+import queries.{AllOriginalRegistrationsRawQuery, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import services.{AccountService, AuditService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -130,36 +130,32 @@ class ChangeRegistrationController @Inject()(
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
           val list = detailsList(waypoints, thisPage, isExcluded)
 
-          request.userAnswers.vatInfo match {
-            case Some(_) =>
-              for {
-                originalUserAnswers <- registrationService.toUserAnswers(request.userId, request.registrationWrapper)
-                userAnswersWithoutOriginalRegistration <- Future.fromTry(request.userAnswers.remove(OriginalRegistrationQuery))
-              } yield {
+          for {
+            originalUserAnswers <- getOriginalAnswers(request, selectedPreviousRegistration)
+            userAnswersWithoutOriginalRegistration <- Future.fromTry(request.userAnswers
+              .remove(AllOriginalRegistrationsRawQuery)
+              .flatMap(_.remove(PreviousRegistrationIossNumberQuery))
+            )
+          } yield {
 
-                val noAmendments = originalUserAnswers.data == userAnswersWithoutOriginalRegistration.data
-                val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
-                val noAmendmentsWithUnusableStatusCheck: Boolean = noAmendments && !unusableStatus
+            val noAmendments = originalUserAnswers.data == userAnswersWithoutOriginalRegistration.data
+            val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
+            val noAmendmentsWithUnusableStatusCheck: Boolean = noAmendments && !unusableStatus
 
-                Ok(view(
-                  waypoints,
-                  vatRegistrationDetailsList,
-                  list,
-                  iossNumber,
-                  isValid,
-                  hasPreviousRegistrations,
-                  isCurrentIossAccount,
-                  btaUrl,
-                  noAmendmentsWithUnusableStatusCheck,
-                  frontendAppConfig.iossYourAccountUrl
-                ))
-              }
-            case None =>
-              val errorMessage: String = "Vat information was not found"
-              logger.error(errorMessage)
-              val exception: Exception = new Exception(errorMessage)
-              Future.failed(exception)
+            Ok(view(
+              waypoints,
+              vatRegistrationDetailsList,
+              list,
+              iossNumber,
+              isValid,
+              hasPreviousRegistrations,
+              isCurrentIossAccount,
+              btaUrl,
+              noAmendmentsWithUnusableStatusCheck,
+              frontendAppConfig.iossYourAccountUrl
+            ))
           }
+
         }
     }
   }
@@ -336,4 +332,22 @@ class ChangeRegistrationController @Inject()(
       BankDetailsSummary.rowIBAN(request.userAnswers, waypoints, sourcePage)
     )
   }
+
+  private def getOriginalAnswers(request: AuthenticatedMandatoryIossRequest[AnyContent], selectedPreviousRegistration: Option[String]): Future[UserAnswers] =
+    selectedPreviousRegistration match {
+      case Some(iossNumber) =>
+        request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
+          case Some(originalRegistration) =>
+            registrationService.toUserAnswers(
+              request.userId,
+              request.registrationWrapper.copy(registration = originalRegistration)
+            )
+
+          case None =>
+            Future.failed(new Exception(s"Original registration not found for $iossNumber"))
+        }
+
+      case None =>
+        registrationService.toUserAnswers(request.userId, request.registrationWrapper)
+    }
 }
