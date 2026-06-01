@@ -20,20 +20,20 @@ import config.Constants.btaUrl
 import config.FrontendAppConfig
 import controllers.actions.*
 import logging.Logging
-import models.CheckMode
+import models.{CheckMode, UserAnswers}
 import models.audit.AmendRegistrationAuditModel
 import models.audit.RegistrationAuditType.AmendRegistration
 import models.audit.SubmissionResult.{Failure, Success}
 import models.domain.PreviousRegistration
-import models.etmp.{EtmpDisplayRegistration, EtmpExclusion, EtmpExclusionReason}
+import models.etmp.EtmpExclusionReason
 import models.requests.AuthenticatedMandatoryIossRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.previousRegistrations.PreviouslyRegisteredPage
 import pages.{CheckAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
-import services.{AccountService, AmendAnswersComparisonService, AuditService, RegistrationService}
+import queries.{AllOriginalRegistrationsRawQuery, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
+import services.{AccountService, AuditService, RegistrationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
@@ -48,7 +48,7 @@ import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class ChangeRegistrationController @Inject()(
                                               override val messagesApi: MessagesApi,
@@ -57,8 +57,7 @@ class ChangeRegistrationController @Inject()(
                                               accountService: AccountService,
                                               auditService: AuditService,
                                               view: ChangeRegistrationView,
-                                              frontendAppConfig: FrontendAppConfig,
-                                              amendAnswersComparisonService: AmendAnswersComparisonService
+                                              frontendAppConfig: FrontendAppConfig
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -86,7 +85,7 @@ class ChangeRegistrationController @Inject()(
           Seq.empty.toFuture
         }
 
-        futurePreviousRegistrations.map { previousRegistrations =>
+        futurePreviousRegistrations.flatMap { previousRegistrations =>
 
           val selectedPreviousRegistration: Option[String] = request.userAnswers.get(PreviousRegistrationIossNumberQuery)
           val iossNumber: String = selectedPreviousRegistration.getOrElse(request.iossNumber)
@@ -130,17 +129,33 @@ class ChangeRegistrationController @Inject()(
           val hasPreviousRegistrations: Boolean = previousRegistrations.nonEmpty
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
           val list = detailsList(waypoints, thisPage, isExcluded)
-          val noChangesMade: Boolean =
-            request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
-              case Some(originalRegistration) =>
-                !amendAnswersComparisonService.answersHaveChanged(originalRegistration, request.userAnswers)
 
-              case None =>
-                true
-            }
+          for {
+            originalUserAnswers <- getOriginalAnswers(request, selectedPreviousRegistration)
+            userAnswersWithoutOriginalRegistration <- Future.fromTry(request.userAnswers
+              .remove(AllOriginalRegistrationsRawQuery)
+              .flatMap(_.remove(PreviousRegistrationIossNumberQuery))
+            )
+          } yield {
 
-          val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
-          Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, hasPreviousRegistrations, isCurrentIossAccount, btaUrl, noChangesMade, frontendAppConfig.iossYourAccountUrl, unusableStatus))
+            val noAmendments = originalUserAnswers.data == userAnswersWithoutOriginalRegistration.data
+            val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
+            val noAmendmentsWithUnusableStatusCheck: Boolean = noAmendments && !unusableStatus
+
+            Ok(view(
+              waypoints,
+              vatRegistrationDetailsList,
+              list,
+              iossNumber,
+              isValid,
+              hasPreviousRegistrations,
+              isCurrentIossAccount,
+              btaUrl,
+              noAmendmentsWithUnusableStatusCheck,
+              frontendAppConfig.iossYourAccountUrl
+            ))
+          }
+
         }
     }
   }
@@ -317,4 +332,22 @@ class ChangeRegistrationController @Inject()(
       BankDetailsSummary.rowIBAN(request.userAnswers, waypoints, sourcePage)
     )
   }
+
+  private def getOriginalAnswers(request: AuthenticatedMandatoryIossRequest[AnyContent], selectedPreviousRegistration: Option[String]): Future[UserAnswers] =
+    selectedPreviousRegistration match {
+      case Some(iossNumber) =>
+        request.userAnswers.get(OriginalRegistrationQuery(iossNumber)) match {
+          case Some(originalRegistration) =>
+            registrationService.toUserAnswers(
+              request.userId,
+              request.registrationWrapper.copy(registration = originalRegistration)
+            )
+
+          case None =>
+            Future.failed(new Exception(s"Original registration not found for $iossNumber"))
+        }
+
+      case None =>
+        registrationService.toUserAnswers(request.userId, request.registrationWrapper)
+    }
 }
