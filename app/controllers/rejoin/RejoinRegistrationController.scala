@@ -96,6 +96,7 @@ class RejoinRegistrationController @Inject()(
               rows = Seq(
                 VatRegistrationDetailsSummary.rowBusinessName(userAnswers),
                 VatRegistrationDetailsSummary.rowIndividualName(userAnswers),
+                VatRegistrationDetailsSummary.rowPartOfVatUkGroup(userAnswers),
                 VatRegistrationDetailsSummary.rowUkVatRegistrationDate(userAnswers),
                 VatRegistrationDetailsSummary.rowBusinessAddress(userAnswers)
               ).flatten
