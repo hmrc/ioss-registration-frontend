@@ -198,5 +198,174 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustEqual NOT_FOUND
       }
     }
+
+    "must redirect to the next page when email contains capital letters" in {
+
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", "https://www.CAPITALTEST.com"))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("https://www.CAPITALTEST.com")).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must redirect to the next page when website contains uppercase HTTP protocol" in {
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", "HTTP://www.example.com"))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("HTTP://www.example.com")).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must redirect to the next page when website contains uppercase HTTPS protocol" in {
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", "HTTPS://www.example.com"))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("HTTPS://www.example.com")).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must redirect to the next page when website contains mixed case protocol" in {
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", "HtTpS://www.example.com"))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("HtTpS://www.example.com")).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must add https prefix when protocol is not supplied" in {
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", "www.example.com"))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("https://www.example.com")).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must preserve capital letters when adding https prefix" in {
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", "WWW.CAPITALTEST.COM"))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("https://WWW.CAPITALTEST.COM")).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must redirect to the next page when website contains mixed cases" in {
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+          .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", "https://WWW.testCAPITALlettersInMiXeDCaSeS.com"))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo.set(WebsitePage(index), Website("https://WWW.testCAPITALlettersInMiXeDCaSeS.com")).success.value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual WebsitePage(index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
   }
 }
