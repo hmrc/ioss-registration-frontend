@@ -30,8 +30,7 @@ class WebsiteFormProvider @Inject() extends Mappings {
       "value" -> text("website.error.required")
         .transform[String](
           value => {
-            val withPrefix = if (value.startsWith("http") || value.startsWith("https://")) value else s"https://$value"
-            withPrefix.toLowerCase
+            if (value.startsWith("http") || value.startsWith("https://")) value else s"https://$value"
           },
           identity
         )
