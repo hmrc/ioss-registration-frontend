@@ -233,7 +233,7 @@ vatRegistrationDetails.checkYourAnswers.individualName = Name
 vatRegistrationDetails.checkYourAnswers.vatRegistrationDate = UK VAT registration date
 vatRegistrationDetails.checkYourAnswers.businessAddress = Business address
 vatRegistrationDetails.checkYourAnswers.manageVatBTA = <a class="govuk-link" href={0}>Manage your UK VAT registration in your BTA account</a>
-vatRegistrationDetails.checkYourAnswers.partOfVatGroup = Part of a VAT group
+vatRegistrationDetails.checkYourAnswers.partOfVatGroup = Part of a UK VAT group
 
 updateVatDetails.title = Update your VAT details
 updateVatDetails.heading = Update your VAT details
