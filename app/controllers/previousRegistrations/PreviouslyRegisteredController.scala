@@ -72,7 +72,7 @@ class PreviouslyRegisteredController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
         value =>
-          if ((waypoints.inAmend || waypoints.inRejoin) && request.hasExistingPreviousEURegistrationDetails) {
+          if (!value && (waypoints.inAmend || waypoints.inRejoin) && request.hasExistingPreviousEURegistrationDetails) {
             throw new InvalidAmendModeOperationException(
               "Cannot change otherOneStopRegistrations when in amend mode and have existing registrations"
             )
