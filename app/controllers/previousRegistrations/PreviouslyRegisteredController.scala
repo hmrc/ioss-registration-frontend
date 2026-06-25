@@ -52,7 +52,7 @@ class PreviouslyRegisteredController @Inject()(
       val preparedForm = request.userAnswers.get(PreviouslyRegisteredPage) match {
         case None => form
         case Some(otherOneStopRegistrations: Boolean) =>
-          if (waypoints.inAmend && request.hasExistingPreviousEURegistrationDetails) {
+          if ((waypoints.inAmend || waypoints.inRejoin) && request.hasExistingPreviousEURegistrationDetails) {
             throw new InvalidAmendModeOperationException(
               "Cannot change otherOneStopRegistrations when in amend mode and have existing registrations"
             )
@@ -72,19 +72,25 @@ class PreviouslyRegisteredController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
         value =>
-          val cleanedAnswersTry =
-            if (!value && !waypoints.inCheck) {
-              request.userAnswers.remove(AllPreviousRegistrationsQuery)
-            } else {
-              Success(request.userAnswers)
-            }
+          if ((waypoints.inAmend || waypoints.inRejoin) && request.hasExistingPreviousEURegistrationDetails) {
+            throw new InvalidAmendModeOperationException(
+              "Cannot change otherOneStopRegistrations when in amend mode and have existing registrations"
+            )
+          } else {
+            val cleanedAnswersTry =
+              if (!value && !waypoints.inCheck) {
+                request.userAnswers.remove(AllPreviousRegistrationsQuery)
+              } else {
+                Success(request.userAnswers)
+              }
 
-          for {
-            cleanedAnswers <- Future.fromTry(cleanedAnswersTry)
-            updatedAnswers <- Future.fromTry(cleanedAnswers.set(PreviouslyRegisteredPage, value))
-            finalAnswers <- Future.fromTry(cleanup(updatedAnswers, DeriveNumberOfPreviousRegistrations, AllPreviousRegistrationsRawQuery))
-            _ <- cc.sessionRepository.set(finalAnswers)
-          } yield Redirect(PreviouslyRegisteredPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+            for {
+              cleanedAnswers <- Future.fromTry(cleanedAnswersTry)
+              updatedAnswers <- Future.fromTry(cleanedAnswers.set(PreviouslyRegisteredPage, value))
+              finalAnswers <- Future.fromTry(cleanup(updatedAnswers, DeriveNumberOfPreviousRegistrations, AllPreviousRegistrationsRawQuery))
+              _ <- cc.sessionRepository.set(finalAnswers)
+            } yield Redirect(PreviouslyRegisteredPage.navigate(waypoints, request.userAnswers, updatedAnswers).route)
+          }
       )
   }
 }
