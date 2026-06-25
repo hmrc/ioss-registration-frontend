@@ -25,7 +25,7 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsArray, JsObject}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.euDetails.{AllEuDetailsRawQuery, DeriveNumberOfEuRegistrations}
+import queries.euDetails.{AllEuDetailsQuery, AllEuDetailsRawQuery, DeriveNumberOfEuRegistrations}
 import queries.{Derivable, Settable}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.AmendWaypoints.AmendWaypointsOps
@@ -34,7 +34,7 @@ import views.html.euDetails.TaxRegisteredInEuView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Success, Try}
 
 class TaxRegisteredInEuController @Inject()(
                                              override val messagesApi: MessagesApi,
@@ -65,8 +65,16 @@ class TaxRegisteredInEuController @Inject()(
           BadRequest(view(formWithErrors, waypoints)).toFuture,
 
         value =>
+          val cleanedAnswersTry =
+            if (!value && !waypoints.inCheck) {
+              request.userAnswers.remove(AllEuDetailsQuery)
+            } else {
+              Success(request.userAnswers)
+            }
+
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(TaxRegisteredInEuPage, value))
+            cleanedAnswers <- Future.fromTry(cleanedAnswersTry)
+            updatedAnswers <- Future.fromTry(cleanedAnswers.set(TaxRegisteredInEuPage, value))
             finalAnswers <- Future.fromTry(cleanup(updatedAnswers, DeriveNumberOfEuRegistrations, AllEuDetailsRawQuery))
             _ <- cc.sessionRepository.set(finalAnswers)
           } yield Redirect(TaxRegisteredInEuPage.navigate(waypoints, request.userAnswers, finalAnswers).route)
