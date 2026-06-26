@@ -44,6 +44,9 @@ object AmendWaypoints {
       isInMode(RejoinRegistrationPage)
     }
 
+    def isInAmendOrRejoin: Boolean =
+      inAmend || inRejoin
+
     def inPreviousRegistrationAmend: Boolean = {
       isInMode(ChangePreviousRegistrationPage)
     }

@@ -72,13 +72,13 @@ class PreviouslyRegisteredController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, waypoints))),
 
         value =>
-          if (!value && (waypoints.inAmend || waypoints.inRejoin) && request.hasExistingPreviousEURegistrationDetails) {
+          if (!value && waypoints.isInAmendOrRejoin && request.hasExistingPreviousEURegistrationDetails) {
             throw new InvalidAmendModeOperationException(
               "Cannot change otherOneStopRegistrations when in amend mode and have existing registrations"
             )
           } else {
             val cleanedAnswersTry =
-              if (!value && !waypoints.inCheck) {
+              if (!value && !waypoints.inCheck && !waypoints.isInAmendOrRejoin) {
                 request.userAnswers.remove(AllPreviousRegistrationsQuery)
               } else {
                 Success(request.userAnswers)
