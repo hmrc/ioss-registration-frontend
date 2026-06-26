@@ -66,7 +66,7 @@ class TaxRegisteredInEuController @Inject()(
 
         value =>
           val cleanedAnswersTry =
-            if (!value && !waypoints.inCheck) {
+            if (!value && !waypoints.inCheck && !waypoints.isInAmendOrRejoin) {
               request.userAnswers.remove(AllEuDetailsQuery)
             } else {
               Success(request.userAnswers)
