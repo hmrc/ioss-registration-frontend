@@ -17,6 +17,7 @@
 package controllers
 
 import config.Constants.btaUrl
+import config.FrontendAppConfig
 import controllers.actions.{AuthenticatedControllerComponents, NotModifyingExistingRegistration}
 import logging.Logging
 import models.CheckMode
@@ -47,7 +48,8 @@ class CheckYourAnswersController @Inject()(
                                             registrationService: RegistrationService,
                                             saveForLaterService: SaveForLaterService,
                                             auditService: AuditService,
-                                            view: CheckYourAnswersView
+                                            view: CheckYourAnswersView,
+                                            appConfig: FrontendAppConfig
                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -119,7 +121,7 @@ class CheckYourAnswersController @Inject()(
           bankDetailsIbanSummaryRow
         ).flatten
       )
-      val isValid = validate()
+      val isValid = validate(appConfig.version7Enabled)
       Ok(view(waypoints, vatRegistrationDetailsList, list, isValid, btaUrl))
   }
 
