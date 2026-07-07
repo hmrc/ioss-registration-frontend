@@ -618,14 +618,17 @@ error.missing_answers_prompt.general = You need to complete the missing informat
 error.resolve_missing_answers = Resolve missing answers
 
 website.title = Enter a website you use to sell your goods
-website.heading = Enter a website you use to sell your goods
+website.heading = Enter a website you use to sell your goods (optional)
+website.hint.text = Leave blank if you do not sell goods online.
 website.checkYourAnswersLabel = Website address
 website.error.required = Enter a website address
 website.error.length = Website address must be 250 characters or less
 website.error.duplicate = You entered this website address already. Enter a different one.
 website.error.invalid = Enter a website address in the correct format, like https://www.gov.uk
 website.change.hidden = website address
+websites.add.hidden = add website address
 website.change.heading = What is your website address?
+website.noneSupplied = None supplied
 
 websites.checkYourAnswersLabel = Trading websites
 websites.checkYourAnswersLabel.added = Trading websites added

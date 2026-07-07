@@ -25,7 +25,6 @@ import pages.previousRegistrations.{PreviousSchemeTypePage, PreviouslyRegistered
 import pages.tradingNames._
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Result}
-import queries.AllWebsites
 import queries.euDetails.AllEuOptionalDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsWithOptionalVatNumberQuery
 import queries.tradingNames.AllTradingNames
@@ -87,10 +86,6 @@ trait CompletionChecks {
     }
   }
 
-  private def hasWebsiteValid()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
-    request.userAnswers.get(AllWebsites).getOrElse(List.empty).nonEmpty
-  }
-
   private def isDeregisteredPopulated()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
     request.userAnswers.get(PreviouslyRegisteredPage).exists {
       case true => request.userAnswers.get(AllPreviousRegistrationsWithOptionalVatNumberQuery).isDefined
@@ -102,7 +97,6 @@ trait CompletionChecks {
     getAllIncompleteDeregisteredDetails().isEmpty &&
       getAllIncompleteEuDetails().isEmpty &&
       isTradingNamesValid() &&
-      hasWebsiteValid() &&
       isEuDetailsPopulated() &&
       isDeregisteredPopulated()
   }
@@ -112,8 +106,7 @@ trait CompletionChecks {
       emptyEuDetailsRedirect(waypoints) ++
       incompleteCheckEuDetailsRedirect(waypoints) ++
       emptyDeregisteredRedirect(waypoints) ++
-      incompletePreviousRegistrationRedirect(waypoints) ++
-      incompleteWebsiteUrlsRedirect(waypoints)
+      incompletePreviousRegistrationRedirect(waypoints)
       ).headOption
   }
 
@@ -150,12 +143,6 @@ trait CompletionChecks {
 
   private def incompleteTradingNameRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isTradingNamesValid()) {
       Some(Redirect(controllers.tradingNames.routes.TradingNameController.onPageLoad(waypoints, Index(0))))
-    } else {
-      None
-    }
-
-  private def incompleteWebsiteUrlsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!hasWebsiteValid()) {
-      Some(Redirect(controllers.website.routes.WebsiteController.onPageLoad(waypoints, Index(0))))
     } else {
       None
     }

@@ -19,15 +19,15 @@ package controllers
 import base.SpecBase
 import forms.WebsiteFormProvider
 import models.{Index, UserAnswers, Website}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Gen
 import org.scalatestplus.mockito.MockitoSugar
 import pages.website.WebsitePage
-import pages.{EmptyWaypoints, Waypoints}
+import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.WebsiteView
 
@@ -75,7 +75,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), waypoints, index)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(Some("answer")), waypoints, index)(request, messages(application)).toString
       }
     }
 
@@ -104,7 +104,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
+    "must return a Business Contact Details when blank data is submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
@@ -113,14 +113,10 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
           FakeRequest(POST, websiteRoute)
             .withFormUrlEncodedBody(("value", ""))
 
-        val boundForm = form.bind(Map("value" -> ""))
-
-        val view = application.injector.instanceOf[WebsiteView]
-
         val result = route(application, request).value
 
-        status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, waypoints, index)(request, messages(application)).toString
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual BusinessContactDetailsPage.route(waypoints).url
       }
     }
 
