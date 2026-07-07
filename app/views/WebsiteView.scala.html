@@ -17,13 +17,15 @@
 @import components.ButtonGroup
 @import pages.website.WebsitePage
 @import viewmodels.InputWidth._
+@import config.FrontendAppConfig
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukInput: GovukInput,
-    button: ButtonGroup
+    button: ButtonGroup,
+    appConfig: FrontendAppConfig
 )
 
 
@@ -54,7 +56,11 @@
                     field = form("value"),
                     label = LabelViewModel(
                         if(form("value").value.isEmpty) {
-                            messages("website.heading")
+                            if(appConfig.version7Enabled) {
+                                messages("website.heading.optional")
+                            } else {
+                                messages("website.heading")
+                            }
                         } else {
                             messages("website.change.heading")
                         }
@@ -62,7 +68,13 @@
                 )
                 .withWidth(Full)
                 .withPrefix(PrefixOrSuffix(content = Text("https://")))
-                .withHint(HintViewModel(messages("website.hint.text")))
+                .withHint(
+                    if(appConfig.version7Enabled) {
+                        HintViewModel(messages("website.hint.text"))
+                    } else {
+                        HintViewModel(content = Empty)
+                    }
+                )
             )
         }
 

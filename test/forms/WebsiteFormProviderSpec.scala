@@ -16,8 +16,11 @@
 
 package forms
 
+import config.FrontendAppConfig
 import forms.behaviours.StringFieldBehaviours
 import models.Index
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.data.FormError
 
 class WebsiteFormProviderSpec extends StringFieldBehaviours {
@@ -31,72 +34,98 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
   val validData3 = "http://www.validwebsite.com"
   val index = Index(0)
   val emptyExistingAnswers = Seq.empty[String]
+  private val mockAppConfig = mock[FrontendAppConfig]
 
-  val formProvider: WebsiteFormProvider = new WebsiteFormProvider()
-  val form = formProvider(index, emptyExistingAnswers)
+  val fieldName = "value"
 
   ".value" - {
 
-    val fieldName = "value"
+    "when version 7 enabled" - {
 
-    behave like fieldThatBindsValidData(
-      form,
-      fieldName,
-      validData
-    )
+      when(mockAppConfig.version7Enabled).thenReturn(true)
 
-    "bind valid website without www prefix" in {
-      val result = form.bind(Map(fieldName -> validData2))
-      result.value.value mustBe Some(validData2)
-      result.errors mustBe empty
+      val form = new WebsiteFormProvider(mockAppConfig)(index, emptyExistingAnswers)
+
+      behave like fieldThatBindsValidData(
+        form,
+        fieldName,
+        validData
+      )
+
+      "bind valid website without www prefix" in {
+        val result = form.bind(Map(fieldName -> validData2))
+        result.value.value mustBe Some(validData2)
+        result.errors mustBe empty
+      }
+
+      "bind valid website with http:// prefix" in {
+        val result = form.bind(Map(fieldName -> validData3))
+        result.value.value mustBe Some(validData3)
+        result.errors mustBe empty
+      }
+
+      "must not bind invalid website data" in {
+        val invalidWebsite = "invalid"
+        val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
+        result.errors mustBe Seq(FormError(fieldName, invalidKey))
+      }
+
+      "must not bind invalid website data with missing ." in {
+        val invalidWebsite = "https://websitecom"
+        val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
+        result.errors mustBe Seq(FormError(fieldName, invalidKey))
+      }
+
+      "must not bind invalid website data with incorrect https://" in {
+        val invalidWebsite = "https:/www.website.com"
+        val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
+        result.errors mustBe Seq(FormError(fieldName, invalidKey))
+      }
+
+      "must not bind a website longer than 250 characters" in {
+        val longWebsite = s"https://${"a" * 241}.com"
+
+        val result = form.bind(Map(fieldName -> longWebsite))
+
+        result.errors must contain only FormError(fieldName, lengthKey)
+      }
+
+      "bind blank as None" in {
+        val result = form.bind(Map(fieldName -> ""))
+
+        result.errors mustBe empty
+        result.value mustBe Some(None)
+      }
+
+      "must fail to bind when given a duplicate value" in {
+        val existingAnswers = Seq("https://foo.com", "https://bar.com")
+        val answer = "https://bar.com"
+        val form = new WebsiteFormProvider(mockAppConfig)(index, existingAnswers)
+
+        val result = form.bind(Map(fieldName -> answer)).apply(fieldName)
+        result.errors must contain only FormError(fieldName, "website.error.duplicate")
+      }
     }
 
-    "bind valid website with http:// prefix" in {
-      val result = form.bind(Map(fieldName -> validData3))
-      result.value.value mustBe Some(validData3)
-      result.errors mustBe empty
-    }
+    "when version 7 disabled" - {
 
-    "must not bind invalid website data" in {
-      val invalidWebsite = "invalid"
-      val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
-      result.errors mustBe Seq(FormError(fieldName, invalidKey))
-    }
+      when(mockAppConfig.version7Enabled).thenReturn(false)
 
-    "must not bind invalid website data with missing ." in {
-      val invalidWebsite = "https://websitecom"
-      val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
-      result.errors mustBe Seq(FormError(fieldName, invalidKey))
-    }
+      val form = new WebsiteFormProvider(mockAppConfig)(index, emptyExistingAnswers)
+      val fieldName = "value"
 
-    "must not bind invalid website data with incorrect https://" in {
-      val invalidWebsite = "https:/www.website.com"
-      val result = form.bind(Map(fieldName -> invalidWebsite)).apply(fieldName)
-      result.errors mustBe Seq(FormError(fieldName, invalidKey))
-    }
+      behave like mandatoryField(
+        form,
+        fieldName,
+        requiredError = FormError(fieldName, requiredKey)
+      )
 
-    "must not bind a website longer than 250 characters" in {
-      val longWebsite = s"https://${"a" * 241}.com"
-
-      val result = form.bind(Map(fieldName -> longWebsite))
-
-      result.errors must contain only FormError(fieldName, lengthKey)
-    }
-
-    "bind blank as None" in {
-      val result = form.bind(Map(fieldName -> ""))
-
-      result.errors mustBe empty
-      result.value mustBe Some(None)
-    }
-
-    "must fail to bind when given a duplicate value" in {
-      val existingAnswers = Seq("https://foo.com", "https://bar.com")
-      val answer = "https://bar.com"
-      val form = new WebsiteFormProvider()(index, existingAnswers)
-
-      val result = form.bind(Map(fieldName -> answer)).apply(fieldName)
-      result.errors must contain only FormError(fieldName, "website.error.duplicate")
+      behave like fieldWithMaxLength(
+        form,
+        fieldName,
+        maxLength = maxLength,
+        lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
+      )
     }
   }
 }

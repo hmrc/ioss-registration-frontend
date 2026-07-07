@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
 import forms.WebsiteFormProvider
 import models.{Index, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
@@ -37,8 +38,9 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
 
   private val index = Index(0)
   private val waypoints: Waypoints = EmptyWaypoints
+  private val mockAppConfig = mock[FrontendAppConfig]
 
-  private val formProvider = new WebsiteFormProvider()
+  private val formProvider = new WebsiteFormProvider(mockAppConfig)
   private val form = formProvider(index, Seq.empty)
 
   private lazy val websiteRoute = website.routes.WebsiteController.onPageLoad(waypoints, index).url
@@ -104,9 +106,31 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return a Business Contact Details when blank data is submitted" in {
+    "must return a Bad Request and errors when invalid data is submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", ""))
+
+        val boundForm = form.bind(Map("value" -> ""))
+
+        val view = application.injector.instanceOf[WebsiteView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) mustEqual view(boundForm, waypoints, index)(request, messages(application)).toString
+      }
+    }
+
+    "must return a Business Contact Details when blank data is submitted" in {
+
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+        .configure("features.version7" -> true)
+        .build()
 
       running(application) {
         val request =

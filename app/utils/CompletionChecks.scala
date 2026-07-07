@@ -20,20 +20,20 @@ import models._
 import models.euDetails.EuOptionalDetails
 import models.previousRegistrations.PreviousRegistrationDetailsWithOptionalVatNumber
 import models.requests.AuthenticatedDataRequest
-import pages._
+import pages.*
 import pages.previousRegistrations.{PreviousSchemeTypePage, PreviouslyRegisteredPage}
-import pages.tradingNames._
+import pages.tradingNames.*
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Result}
+import queries.AllWebsites
 import queries.euDetails.AllEuOptionalDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsWithOptionalVatNumberQuery
 import queries.tradingNames.AllTradingNames
-import utils.EuDetailsCompletionChecks._
+import utils.EuDetailsCompletionChecks.*
 
 import scala.concurrent.Future
 
 trait CompletionChecks {
-
 
   protected def withCompleteDataModel[A](index: Index, data: Index => Option[A], onFailure: Option[A] => Result)
                                         (onSuccess: => Result): Result = {
@@ -86,6 +86,10 @@ trait CompletionChecks {
     }
   }
 
+  private def hasWebsiteValid()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
+    request.userAnswers.get(AllWebsites).getOrElse(List.empty).nonEmpty
+  }
+
   private def isDeregisteredPopulated()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
     request.userAnswers.get(PreviouslyRegisteredPage).exists {
       case true => request.userAnswers.get(AllPreviousRegistrationsWithOptionalVatNumberQuery).isDefined
@@ -93,20 +97,32 @@ trait CompletionChecks {
     }
   }
 
-  def validate()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
+  def validate(version7Enabled: Boolean = false)(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
     getAllIncompleteDeregisteredDetails().isEmpty &&
       getAllIncompleteEuDetails().isEmpty &&
       isTradingNamesValid() &&
+      (if (version7Enabled) true else hasWebsiteValid())  &&
       isEuDetailsPopulated() &&
       isDeregisteredPopulated()
   }
 
-  def getFirstValidationErrorRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
+  def getFirstValidationErrorRedirect(
+                                       waypoints: Waypoints,
+                                       version7Enabled: Boolean = false
+                                     )(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = {
+    
+    val websiteRedirects = if (version7Enabled) {
+      None
+    } else {
+      incompleteWebsiteUrlsRedirect(waypoints)
+    }
+    
     (incompleteTradingNameRedirect(waypoints) ++
       emptyEuDetailsRedirect(waypoints) ++
       incompleteCheckEuDetailsRedirect(waypoints) ++
       emptyDeregisteredRedirect(waypoints) ++
-      incompletePreviousRegistrationRedirect(waypoints)
+      incompletePreviousRegistrationRedirect(waypoints) ++
+      websiteRedirects
       ).headOption
   }
 
@@ -143,6 +159,12 @@ trait CompletionChecks {
 
   private def incompleteTradingNameRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!isTradingNamesValid()) {
       Some(Redirect(controllers.tradingNames.routes.TradingNameController.onPageLoad(waypoints, Index(0))))
+    } else {
+      None
+    }
+
+  private def incompleteWebsiteUrlsRedirect(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[AnyContent]): Option[Result] = if (!hasWebsiteValid()) {
+      Some(Redirect(controllers.website.routes.WebsiteController.onPageLoad(waypoints, Index(0))))
     } else {
       None
     }
