@@ -17,6 +17,7 @@
 package controllers.rejoin
 
 import config.Constants.btaUrl
+import config.FrontendAppConfig
 import connectors.ReturnStatusConnector
 import controllers.CheckOutstandingReturns.existsOutstandingReturns
 import controllers.actions.*
@@ -62,7 +63,8 @@ class RejoinRegistrationController @Inject()(
                                               registrationService: RegistrationService,
                                               rejoinRegistrationValidator: RejoinRegistrationValidation,
                                               view: RejoinRegistrationView,
-                                              clock: Clock
+                                              clock: Clock,
+                                              appConfig: FrontendAppConfig
                                             )(implicit ec: ExecutionContext)
   extends FrontendBaseController
     with I18nSupport
@@ -90,7 +92,7 @@ class RejoinRegistrationController @Inject()(
             val userAnswers = request.userAnswers
 
             val list = detailsList(waypoints, thisPage, userAnswers)
-            val isValid = validate()(request.request)
+            val isValid = validate(appConfig.version7Enabled)(request.request)
 
             val vatRegistrationDetailsList = SummaryListViewModel(
               rows = Seq(

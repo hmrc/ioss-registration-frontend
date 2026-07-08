@@ -17,10 +17,13 @@
 package pages.website
 
 import models.{Index, NormalMode, UserAnswers, Website}
+import pages.amend.ChangeRegistrationPage
+import pages.rejoin.RejoinRegistrationPage
 import pages.{AddToListQuestionPage, AddToListSection, BusinessContactDetailsPage, CheckYourAnswersPage, NonEmptyWaypoints, Page, QuestionPage, Waypoint, Waypoints, WebsiteSection}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.AllWebsites
+import utils.AmendWaypoints.AmendWaypointsOps
 
 import scala.util.Try
 
@@ -38,6 +41,10 @@ case class WebsitePage(index: Index) extends QuestionPage[Website] with AddToLis
     answers.get(this) match {
       case Some(_) =>
         AddWebsitePage(None)
+      case None if waypoints.inRejoin =>
+        RejoinRegistrationPage
+      case None if waypoints.inAmend =>
+        ChangeRegistrationPage
       case None =>
         BusinessContactDetailsPage
     }
@@ -47,6 +54,10 @@ case class WebsitePage(index: Index) extends QuestionPage[Website] with AddToLis
     answers.get(this) match {
       case Some(_) =>
         AddWebsitePage(None)
+      case None if waypoints.inRejoin =>
+        RejoinRegistrationPage
+      case None if waypoints.inAmend =>
+        ChangeRegistrationPage
       case None =>
         CheckYourAnswersPage
     }

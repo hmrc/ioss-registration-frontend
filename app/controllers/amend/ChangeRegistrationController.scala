@@ -126,7 +126,7 @@ class ChangeRegistrationController @Inject()(
             ).flatten
           )
 
-          val isValid = validate()(request.request)
+          val isValid = validate(frontendAppConfig.version7Enabled)(request.request)
           val hasPreviousRegistrations: Boolean = previousRegistrations.nonEmpty
           val isCurrentIossAccount: Boolean = request.iossNumber == iossNumber
           val list = detailsList(waypoints, thisPage, isExcluded)
