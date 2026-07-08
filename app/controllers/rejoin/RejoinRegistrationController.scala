@@ -226,7 +226,7 @@ class RejoinRegistrationController @Inject()(
           if (canRejoin && !existsOutstandingReturns(currentReturns, clock)) {
             defendAgainstInvalidExistingRegistrations(request.registrationWrapper, waypoints) {
 
-              getFirstValidationErrorRedirect(waypoints)(request.request) match {
+              getFirstValidationErrorRedirect(waypoints, appConfig.version7Enabled)(request.request) match {
                 case Some(errorRedirect) => if (incompletePrompt) {
                   errorRedirect.toFuture
                 } else {

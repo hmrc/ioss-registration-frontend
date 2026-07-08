@@ -128,7 +128,7 @@ class CheckYourAnswersController @Inject()(
   def onSubmit(waypoints: Waypoints, incompletePrompt: Boolean): Action[AnyContent] = cc.authAndGetData().async {
     implicit request =>
 
-      getFirstValidationErrorRedirect(waypoints) match {
+      getFirstValidationErrorRedirect(waypoints, appConfig.version7Enabled) match {
         case Some(errorRedirect) => if (incompletePrompt) {
           errorRedirect.toFuture
         } else {

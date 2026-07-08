@@ -86,20 +86,28 @@ object WebsiteSummary {
   def checkAnswersRowWithoutAction(
                                     answers: UserAnswers,
                                     waypoints: Waypoints
-                                  )(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AllWebsites).map {
-      websites =>
+                                  )(implicit messages: Messages): Option[SummaryListRow] = {
 
-        val value = websites.map {
-          website =>
-            HtmlFormat.escape(website.site)
-        }.mkString("<br/>")
+    val websites = answers.get(AllWebsites).getOrElse(Seq.empty)
+    val hasWebsites = websites.nonEmpty
 
-        SummaryListRowViewModel(
-          key = "websites.checkYourAnswersLabel",
-          value = ValueViewModel(HtmlContent(value))
-        )
+
+    val value = if (hasWebsites) {
+     websites.map {
+       website =>
+         HtmlFormat.escape(website.site)
+     }.mkString("<br/>")
+    } else {
+      messages("website.noneSupplied")
     }
+
+    val listRowViewModel = SummaryListRowViewModel(
+      key = "websites.checkYourAnswersLabel",
+      value = ValueViewModel(HtmlContent(value))
+    )
+
+    Some(listRowViewModel)
+  }
 
   def amendedAnswersRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AllWebsites).map {

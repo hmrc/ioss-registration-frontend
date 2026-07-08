@@ -168,7 +168,7 @@ class ChangeRegistrationController @Inject()(
 
         val iossNumber: String = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
 
-        getFirstValidationErrorRedirect(waypoints)(request.request) match {
+        getFirstValidationErrorRedirect(waypoints, frontendAppConfig.version7Enabled)(request.request) match {
           case Some(errorRedirect) => if (incompletePrompt) {
             errorRedirect.toFuture
           } else {
