@@ -18,12 +18,15 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Country, Index, UserAnswers}
+import pages.amend.ChangeRegistrationPage
+import pages.rejoin.RejoinRegistrationPage
 import pages.website.WebsitePage
-import pages.{AddItemPage, CheckYourAnswersPage, NonEmptyWaypoints, Page, QuestionPage, RecoveryOps, Waypoints}
+import pages.{AddItemPage, CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, RecoveryOps, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
 import queries.euDetails.DeriveNumberOfEuRegistrations
+import utils.AmendWaypoints.AmendWaypointsOps
 
 object AddEuDetailsPage{
    val normalModeUrlFragment: String = "add-tax-details"
@@ -68,26 +71,21 @@ final case class AddEuDetailsPage(override val index: Option[Index] = None) exte
     }.orRecover
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
-    answers.get(this).map {
-      case true =>
-        index
-          .map { i =>
-            if (i.position + 1 < Country.euCountries.size) {
-              EuCountryPage(Index(i.position + 1))
-            } else {
-              CheckYourAnswersPage
-            }
-          }
-          .getOrElse {
-            answers
-              .get(deriveNumberOfItems)
-              .map(n => EuCountryPage(Index(n)))
-              .orRecover
-          }
+    answers.get(this) match {
+      case Some(true) =>
+        answers.get(deriveNumberOfItems).map { n =>
+          EuCountryPage(Index(n))
+        }.getOrElse(JourneyRecoveryPage)
 
-      case false =>
+      case Some(false) if waypoints.inRejoin =>
+        RejoinRegistrationPage
+      case Some(false) if waypoints.inAmend =>
+        ChangeRegistrationPage
+      case Some(false) =>
         CheckYourAnswersPage
-    }.orRecover
+      case _ =>
+        JourneyRecoveryPage
+    }
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfEuRegistrations
 }
