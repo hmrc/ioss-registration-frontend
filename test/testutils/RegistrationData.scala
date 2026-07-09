@@ -20,6 +20,7 @@ import base.SpecBase
 import config.Constants.maxTradingNames
 import formats.Format.eisDateFormatter
 import models.etmp.*
+import models.etmp.EtmpExclusionReason.Reversal
 import models.etmp.amend.*
 import models.{Bic, Country, Iban}
 import org.scalacheck.Arbitrary.arbitrary
@@ -106,7 +107,7 @@ object RegistrationData extends SpecBase {
     tradingNames = Gen.listOfN(maxTradingNames, arbitraryEtmpTradingName.arbitrary).sample.value,
     schemeDetails = etmpDisplaySchemeDetails,
     bankDetails = genBankDetails,
-    exclusions = Gen.listOfN(3, arbitrary[EtmpExclusion]).sample.value,
+    exclusions = Gen.listOfN(3, arbitrary[EtmpExclusion]).retryUntil(_.last.exclusionReason != Reversal).sample.value,
     adminUse = etmpAdminUse
   )
 

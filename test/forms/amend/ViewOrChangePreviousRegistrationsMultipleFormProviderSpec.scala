@@ -26,7 +26,11 @@ class ViewOrChangePreviousRegistrationsMultipleFormProviderSpec extends StringFi
   private val requiredKey = "viewOrChangePreviousRegistrationsMultiple.error.required"
   private val invalidKey = "viewOrChangePreviousRegistrationsMultiple.error.invalid"
 
-  private val previousRegistrations: Seq[PreviousRegistration] = Gen.listOf(arbitraryPreviousRegistration.arbitrary).sample.value
+  private val numberOfPreviousRegistrations: Int = Gen.chooseNum(1, 10).sample.value
+  private val previousRegistrations: Seq[PreviousRegistration] = Gen.listOfN(
+    numberOfPreviousRegistrations,
+    arbitraryPreviousRegistration.arbitrary
+  ).sample.value
   private val form: Form[String] = new ViewOrChangePreviousRegistrationsMultipleFormProvider()(previousRegistrations)
   private val validAnswer: String = previousRegistrations.map(_.iossNumber).head
   private val invalidAnswer: String = arbitraryPreviousRegistration.arbitrary
