@@ -40,7 +40,7 @@ class AuthenticatedUserAnswersRepositorySpec
 
   private val mockConfiguration = mock[Configuration]
   private val mockConfig = mock[Config]
-  private val mockEncryptionService: EncryptionService = new EncryptionService(mockConfiguration)
+  private val mockEncryptionService: EncryptionService = mock[EncryptionService]
   private val encryptor = new UserAnswersEncryptor(mockAppConfig, mockEncryptionService)
   private val secretKey: String = "VqmXp7yigDFxbCUdDdNZVIvbW6RgPNJsliv6swQNCL8="
 
@@ -54,6 +54,11 @@ class AuthenticatedUserAnswersRepositorySpec
   when(mockConfiguration.underlying) thenReturn mockConfig
   when(mockConfig.getString(any())) thenReturn secretKey
   when(mockAppConfig.encryptionKey) thenReturn secretKey
+
+  private val encryptedUserAnswersData = "WovNVJUSKWKgpi/IrP3cgnx1COboOHM/0XqRS8XWpoD0Gj2Ng+DxqPUEXnEP"
+
+  when(mockEncryptionService.encryptField(any())) thenReturn encryptedUserAnswersData
+  when(mockEncryptionService.decryptField(any())) thenReturn userAnswers.data.toString
 
   ".set" - {
 
