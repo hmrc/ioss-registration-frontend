@@ -18,12 +18,15 @@ package pages.euDetails
 
 import controllers.euDetails.routes
 import models.{Country, Index, UserAnswers}
+import pages.amend.ChangeRegistrationPage
+import pages.rejoin.RejoinRegistrationPage
 import pages.website.WebsitePage
-import pages.{AddItemPage, Page, QuestionPage, Waypoints,RecoveryOps}
+import pages.{AddItemPage, CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, RecoveryOps, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
 import queries.euDetails.DeriveNumberOfEuRegistrations
+import utils.AmendWaypoints.AmendWaypointsOps
 
 object AddEuDetailsPage{
    val normalModeUrlFragment: String = "add-tax-details"
@@ -66,6 +69,23 @@ final case class AddEuDetailsPage(override val index: Option[Index] = None) exte
           }
       case false => WebsitePage(Index(0))
     }.orRecover
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
+    answers.get(this) match {
+      case Some(true) =>
+        answers.get(deriveNumberOfItems).map { n =>
+          EuCountryPage(Index(n))
+        }.getOrElse(JourneyRecoveryPage)
+
+      case Some(false) if waypoints.inRejoin =>
+        RejoinRegistrationPage
+      case Some(false) if waypoints.inAmend =>
+        ChangeRegistrationPage
+      case Some(false) =>
+        CheckYourAnswersPage
+      case _ =>
+        JourneyRecoveryPage
+    }
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfEuRegistrations
 }

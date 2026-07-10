@@ -28,7 +28,9 @@ import org.mockito.Mockito.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
+import pages.website.WebsitePage
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.AnyContentAsEmpty
 import play.api.mvc.Results.Redirect
@@ -40,6 +42,7 @@ import repositories.AuthenticatedUserAnswersRepository
 import services.{AuditService, RegistrationService, SaveForLaterService}
 import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
+import viewmodels.WebsiteSummary
 import viewmodels.govuk.SummaryListFluency
 import views.html.CheckYourAnswersView
 
@@ -71,15 +74,17 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
         running(application) {
           val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
+          implicit val msgs: Messages = messages(application)
           val result = route(application, request).value
 
           val view = application.injector.instanceOf[CheckYourAnswersView]
           val waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(CheckYourAnswersPage, CheckMode, CheckYourAnswersPage.urlFragment))
-          val list = SummaryListViewModel(Seq.empty)
+          val vatRegistrationDetailsList = SummaryListViewModel(Seq.empty)
+          val list = SummaryListViewModel(Seq(WebsiteSummary.checkAnswersRow(emptyUserAnswers, waypoints, CheckYourAnswersPage)).flatten)
 
           status(result) mustBe OK
 
-          contentAsString(result) mustBe view(waypoints, list, list, isValid = false, btaUrl)(request, messages(application)).toString
+          contentAsString(result) mustBe view(waypoints, vatRegistrationDetailsList, list, isValid = false, btaUrl)(request, messages(application)).toString
         }
       }
     }

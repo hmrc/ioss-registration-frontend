@@ -49,7 +49,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
       administration = EtmpAdministration(messageType = EtmpMessageType.IOSSSubscriptionCreate),
       customerIdentification = getCustomerIdentification(vrn, appConfig),
       tradingNames = getTradingNames(answers),
-      schemeDetails = getSchemeDetails(answers, commencementDate),
+      schemeDetails = getSchemeDetails(answers, commencementDate, appConfig),
       bankDetails = getBankDetails(answers)
     )
 
@@ -61,7 +61,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
     }
   
   }
-  private def getSchemeDetails(answers: UserAnswers, commencementDate: LocalDate): EtmpSchemeDetails = {
+  private def getSchemeDetails(answers: UserAnswers, commencementDate: LocalDate, appConfig: FrontendAppConfig): EtmpSchemeDetails = {
 
     val nonCompliantDetailsAnswers = getNonCompliantDetails(answers)
 
@@ -69,7 +69,7 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
       commencementDate = commencementDate.format(eisDateFormatter),
       euRegistrationDetails = getEuTaxRegistrations(answers),
       previousEURegistrationDetails = getPreviousRegistrationDetails(answers),
-      websites = getWebsites(answers),
+      websites = getWebsites(answers, appConfig),
       contactName = getBusinessContactDetails(answers).fullName,
       businessTelephoneNumber = getBusinessContactDetails(answers).telephoneNumber,
       businessEmailId = getBusinessContactDetails(answers).emailAddress,
@@ -102,12 +102,14 @@ object EtmpRegistrationRequest extends EtmpEuRegistrations with EtmpPreviousEuRe
     }
   }
 
-  private def getWebsites(answers: UserAnswers): List[EtmpWebsite] =
+  private def getWebsites(answers: UserAnswers, appConfig: FrontendAppConfig): List[EtmpWebsite] =
     answers.get(AllWebsites) match {
       case Some(websites) =>
         for {
           website <- websites
         } yield EtmpWebsite(websiteAddress = website.site)
+      case _ if appConfig.version7Enabled =>
+        List.empty
       case _ =>
         val exception = new IllegalStateException("User must have at least one website")
         logger.error(exception.getMessage, exception)

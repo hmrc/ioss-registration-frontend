@@ -17,17 +17,18 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
 import forms.WebsiteFormProvider
 import models.{Index, UserAnswers, Website}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Gen
 import org.scalatestplus.mockito.MockitoSugar
 import pages.website.WebsitePage
-import pages.{EmptyWaypoints, Waypoints}
+import pages.{BusinessContactDetailsPage, EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.WebsiteView
 
@@ -37,8 +38,9 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
 
   private val index = Index(0)
   private val waypoints: Waypoints = EmptyWaypoints
+  private val mockAppConfig = mock[FrontendAppConfig]
 
-  private val formProvider = new WebsiteFormProvider()
+  private val formProvider = new WebsiteFormProvider(mockAppConfig)
   private val form = formProvider(index, Seq.empty)
 
   private lazy val websiteRoute = website.routes.WebsiteController.onPageLoad(waypoints, index).url
@@ -75,7 +77,7 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), waypoints, index)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(Some("answer")), waypoints, index)(request, messages(application)).toString
       }
     }
 
@@ -111,9 +113,9 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, websiteRoute)
-            .withFormUrlEncodedBody(("value", ""))
+            .withFormUrlEncodedBody(("value", "invalid"))
 
-        val boundForm = form.bind(Map("value" -> ""))
+        val boundForm = form.bind(Map("value" -> "invalid"))
 
         val view = application.injector.instanceOf[WebsiteView]
 
@@ -121,6 +123,24 @@ class WebsiteControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, waypoints, index)(request, messages(application)).toString
+      }
+    }
+
+    "must return a Business Contact Details when blank data is submitted" in {
+
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+        .configure("features.version7" -> true)
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, websiteRoute)
+            .withFormUrlEncodedBody(("value", ""))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual BusinessContactDetailsPage.route(waypoints).url
       }
     }
 
