@@ -29,7 +29,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckPartOfVatGroupFilterImpl(
                                      restrictFromPartOfVatGroup: Boolean
-                                   )(implicit val executionContext: ExecutionContext) extends ActionFilter[AuthenticatedDataRequest] with Logging {
+                                   )(implicit val executionContext: ExecutionContext)
+  extends ActionFilter[AuthenticatedDataRequest] with Logging {
 
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
     if (restrictFromPartOfVatGroup) {
@@ -40,7 +41,7 @@ class CheckPartOfVatGroupFilterImpl(
           None.toFuture
         }
       }.getOrElse {
-        val errorMessage = "VAT Info unavailable. must have VAT info"
+        val errorMessage = "VAT info unavailable, must have VAT info."
         logger.error(errorMessage)
         val exception: IllegalStateException = new IllegalStateException(errorMessage)
         throw exception

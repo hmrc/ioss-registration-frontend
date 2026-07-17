@@ -28,7 +28,6 @@ import org.mockito.Mockito.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
-import pages.website.WebsitePage
 import pages.{ApplicationCompletePage, CheckYourAnswersPage, EmptyWaypoints, ErrorSubmittingRegistrationPage, Waypoint, Waypoints}
 import play.api.i18n.Messages
 import play.api.inject.bind
