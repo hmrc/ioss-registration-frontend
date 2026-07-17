@@ -276,3 +276,5 @@ GET         /start-amend-previous-journey/                                contro
 GET         /amend-there-is-a-problem                                     controllers.amend.AmendJourneyRecoveryController.onPageLoad()
 
 GET         /cannot-register-quarantined-trader                           controllers.ossExclusions.CannotRegisterQuarantinedTraderController.onPageLoad()
+
+GET         /cannot-access-page                                           controllers.CannotAccessPageController.onPageLoad()

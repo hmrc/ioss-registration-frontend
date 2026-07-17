@@ -43,7 +43,8 @@ class FixedEstablishmentTradingNameController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
 
-  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
+  def onPageLoad(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPartOfVatGroup = true).async {
     implicit request =>
 
       getCountry(waypoints, countryIndex) {
@@ -60,7 +61,8 @@ class FixedEstablishmentTradingNameController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
+  def onSubmit(waypoints: Waypoints, countryIndex: Index): Action[AnyContent] =
+    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPartOfVatGroup = true).async {
     implicit request =>
 
       getCountry(waypoints, countryIndex) {

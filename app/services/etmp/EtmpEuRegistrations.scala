@@ -20,31 +20,35 @@ import logging.Logging
 import models.etmp.{EtmpEuRegistrationDetails, TaxRefTraderID, TraderId, VatNumberTraderId}
 import models.euDetails.RegistrationType
 import models.{Country, CountryWithValidationDetails, Index, InternationalAddress, UserAnswers}
-import pages.euDetails._
+import pages.euDetails.*
 import queries.euDetails.AllEuDetailsRawQuery
 
 trait EtmpEuRegistrations extends Logging {
 
   def getEuTaxRegistrations(answers: UserAnswers): List[EtmpEuRegistrationDetails] = {
-    answers.get(TaxRegisteredInEuPage) match {
-      case Some(true) =>
-        answers.get(AllEuDetailsRawQuery) match {
-          case Some(euDetails) =>
-            euDetails.value.zipWithIndex.map {
-              case (_, index) =>
-                processEuDetails(answers, Index(index))
-            }.toList
-          case None =>
-            val exception = new IllegalStateException("User must provide Eu details when tax registered n the EU")
-            logger.error(exception.getMessage, exception)
-            throw exception
-        }
-      case Some(false) =>
-        List.empty
-      case _ =>
-        val exception = new IllegalStateException("User must answer if they are tax registered in the EU")
-        logger.error(exception.getMessage, exception)
-        throw exception
+    if (answers.vatInfo.exists(_.partOfVatGroup)) {
+      List.empty
+    } else {
+      answers.get(TaxRegisteredInEuPage) match {
+        case Some(true) =>
+          answers.get(AllEuDetailsRawQuery) match {
+            case Some(euDetails) =>
+              euDetails.value.zipWithIndex.map {
+                case (_, index) =>
+                  processEuDetails(answers, Index(index))
+              }.toList
+            case None =>
+              val exception = new IllegalStateException("User must provide Eu details when tax registered n the EU")
+              logger.error(exception.getMessage, exception)
+              throw exception
+          }
+        case Some(false) =>
+          List.empty
+        case _ =>
+          val exception = new IllegalStateException("User must answer if they are tax registered in the EU")
+          logger.error(exception.getMessage, exception)
+          throw exception
+      }
     }
   }
 

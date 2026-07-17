@@ -819,3 +819,6 @@ cannotRegisterQuarantinedTrader.BTA.link = <a class="govuk-link" href={0}>Return
 
 userResearch.heading = Help us improve the service
 userResearch.link.text = Sign up to take part in research about the One Stop Shop service.
+
+cannotAccessPage.title = You cannot access this page
+cannotAccessPage.heading = You cannot access this page

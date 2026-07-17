@@ -29,9 +29,13 @@ import queries.euDetails.AllEuOptionalDetailsQuery
 case object EuDetailsCompletionChecks extends CompletionChecks {
 
   def isEuDetailsPopulated()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
-    request.userAnswers.get(TaxRegisteredInEuPage).exists {
-      case true => request.userAnswers.get(AllEuOptionalDetailsQuery).exists(_.nonEmpty)
-      case false => request.userAnswers.get(AllEuOptionalDetailsQuery).getOrElse(List.empty).isEmpty
+    if (request.userAnswers.vatInfo.exists(_.partOfVatGroup)) {
+      true
+    } else {
+      request.userAnswers.get(TaxRegisteredInEuPage).exists {
+        case true => request.userAnswers.get(AllEuOptionalDetailsQuery).exists(_.nonEmpty)
+        case false => request.userAnswers.get(AllEuOptionalDetailsQuery).getOrElse(List.empty).isEmpty
+      }
     }
   }
 

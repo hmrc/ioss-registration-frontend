@@ -19,7 +19,8 @@ package pages.previousRegistrations
 import controllers.previousRegistrations.routes
 import models.{Index, UserAnswers}
 import pages.euDetails.TaxRegisteredInEuPage
-import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, Waypoints, RecoveryOps}
+import pages.website.WebsitePage
+import pages.{CheckYourAnswersPage, JourneyRecoveryPage, NonEmptyWaypoints, Page, QuestionPage, RecoveryOps, Waypoints}
 import play.api.libs.json.JsPath
 import play.api.mvc.Call
 import queries.previousRegistration.DeriveNumberOfPreviousRegistrations
@@ -36,6 +37,7 @@ case object PreviouslyRegisteredPage extends QuestionPage[Boolean] {
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(this).map {
       case true => PreviousEuCountryPage(Index(0))
+      case false if answers.vatInfo.exists(_.partOfVatGroup) => WebsitePage(Index(0))
       case false => TaxRegisteredInEuPage
     }.orRecover
 

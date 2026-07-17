@@ -65,9 +65,12 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def requireIoss: IossRequiredAction
 
+  def checkPartOfVatGroup: CheckPartOfVatGroupFilter
+
   def authAndGetData(
                       registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
-                      restrictFromPreviousRegistrations: Boolean = true
+                      restrictFromPreviousRegistrations: Boolean = true,
+                      restrictFromPartOfVatGroup: Boolean = false
                     ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     val modifyingExistingRegistration = registrationModificationMode != NotModifyingExistingRegistration
     actionBuilder andThen
@@ -76,7 +79,8 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       checkPreviousRegistration(registrationModificationMode, restrictFromPreviousRegistrations) andThen
       getData andThen
       requireData(modifyingExistingRegistration) andThen
-      checkOtherCountryRegistration(registrationModificationMode)
+      checkOtherCountryRegistration(registrationModificationMode) andThen
+      checkPartOfVatGroup(restrictFromPartOfVatGroup)
   }
 
   def authAndGetOptionalData(): ActionBuilder[AuthenticatedOptionalDataRequest, AnyContent] = {
@@ -122,5 +126,6 @@ case class DefaultAuthenticatedControllerComponents @Inject()(
                                                                checkRegistration: CheckRegistrationFilterProvider,
                                                                requireIoss: IossRequiredAction,
                                                                checkBouncedEmail: CheckBouncedEmailFilterProvider,
-                                                               checkPreviousRegistration: CheckAmendPreviousRegistrationFilterProvider
+                                                               checkPreviousRegistration: CheckAmendPreviousRegistrationFilterProvider,
+                                                               checkPartOfVatGroup: CheckPartOfVatGroupFilter
                                                              ) extends AuthenticatedControllerComponents
