@@ -111,8 +111,12 @@ class RegistrationService @Inject()(
         Try(hasPreviousRegistrationsUA)
       }
 
-      hasTaxRegisteredInEuUA <- previousRegistrationsUA.set(TaxRegisteredInEuPage, etmpEuDetails.nonEmpty)
-      taxRegistrationsInEuUA <- if (etmpEuDetails.nonEmpty) {
+      hasTaxRegisteredInEuUA <- if (!previousRegistrationsUA.vatInfo.exists(_.partOfVatGroup)) {
+        previousRegistrationsUA.set(TaxRegisteredInEuPage, etmpEuDetails.nonEmpty)
+      } else {
+        Try(previousRegistrationsUA)
+      }
+      taxRegistrationsInEuUA <- if (!previousRegistrationsUA.vatInfo.exists(_.partOfVatGroup) && etmpEuDetails.nonEmpty) {
         hasTaxRegisteredInEuUA.set(AllEuDetailsQuery, convertToEuDetails(etmpEuDetails).toList)
       } else {
         Try(hasTaxRegisteredInEuUA)
