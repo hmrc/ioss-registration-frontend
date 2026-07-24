@@ -37,12 +37,11 @@ class FixedEstablishmentVRNAlreadyRegisteredController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints, countryCode: String): Action[AnyContent] = {
-    cc.authAndGetData(waypoints.registrationModificationMode) {
+    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPartOfVatGroup = true) {
       implicit request =>
         Country.fromCountryCode(countryCode).map { country =>
           Ok(view(country.name))
         }.getOrElse(throw new RuntimeException(s"countryCode $countryCode not found"))
     }
   }
-
 }

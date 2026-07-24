@@ -130,6 +130,7 @@ trait SpecBase
           userAnswers, registrationWrapper.getOrElse(this.registrationWrapper), enrolments, ossRegistration, numberOfIossRegistrations
         )),
         bind[CheckAmendPreviousRegistrationFilterProvider].toInstance(new FakeCheckAmendPreviousRegistrationFilterProvider()),
+        bind[CheckPartOfVatGroupFilter].toInstance(new FakeCheckPartOfVatGroupFilterProvider()),
         bind[Clock].toInstance(clockToBind)
       )
   }

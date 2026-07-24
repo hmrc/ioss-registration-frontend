@@ -19,6 +19,7 @@ package pages.previousRegistrations
 import controllers.previousRegistrations.routes
 import models.{Country, Index, UserAnswers}
 import pages.euDetails.TaxRegisteredInEuPage
+import pages.website.WebsitePage
 import pages.{AddItemPage, Page, QuestionPage, RecoveryOps, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
@@ -65,6 +66,8 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
               .map(n => PreviousEuCountryPage(Index(n)))
               .orRecover
           }
+      case false if answers.vatInfo.exists(_.partOfVatGroup) => WebsitePage(Index(0))
+
       case false => TaxRegisteredInEuPage
     }.orRecover
   }

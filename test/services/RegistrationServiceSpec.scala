@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import models.Country.euCountries
 import models.amend.RegistrationWrapper
-import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
+import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers, VatCustomerInfo}
 import models.etmp.*
 import models.euDetails.{EuDetails, RegistrationType}
 import models.previousRegistrations.PreviousRegistrationDetails
@@ -198,25 +198,52 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
       )
     }
 
-    "unwrap received registration into user answers" in {
+    "unwrap received registration into user answers" - {
 
-      val userAnswers: UserAnswers = emptyUserAnswersWithVatInfo
-        .set(BusinessBasedInNiPage, true).success.value
-        .set(HasTradingNamePage, true).success.value
-        .set(AllTradingNames, convertedTradingNames).success.value
-        .set(PreviouslyRegisteredPage, true).success.value
-        .set(AllPreviousRegistrationsQuery, previousRegistrations.toList).success.value
-        .set(TaxRegisteredInEuPage, true).success.value
-        .set(AllEuDetailsQuery, euDetails.toList).success.value
-        .set(AllWebsites, convertWebsites).success.value
-        .set(BusinessContactDetailsPage, contactDetails).success.value
-        .set(BankDetailsPage, convertedBankDetails).success.value
+      "when part of VAT group" in {
 
-      val receivedRegistrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpRegistration)
+        val vatInfoWithVatGroup: VatCustomerInfo = vatCustomerInfo.copy(partOfVatGroup = true)
+        val emptyUserAnswersWithVatGroupVatInfo = emptyUserAnswersWithVatInfo.copy(
+          vatInfo = Some(vatInfoWithVatGroup)
+        )
 
-      val result = registrationService.toUserAnswers(userId = userAnswersId, registrationWrapper = receivedRegistrationWrapper).futureValue
+        val userAnswers: UserAnswers = emptyUserAnswersWithVatGroupVatInfo
+          .set(BusinessBasedInNiPage, true).success.value
+          .set(HasTradingNamePage, true).success.value
+          .set(AllTradingNames, convertedTradingNames).success.value
+          .set(PreviouslyRegisteredPage, true).success.value
+          .set(AllPreviousRegistrationsQuery, previousRegistrations.toList).success.value
+          .set(AllWebsites, convertWebsites).success.value
+          .set(BusinessContactDetailsPage, contactDetails).success.value
+          .set(BankDetailsPage, convertedBankDetails).success.value
 
-      result mustBe userAnswers.copy(lastUpdated = result.lastUpdated)
+        val receivedRegistrationWrapper: RegistrationWrapper = RegistrationWrapper(vatInfoWithVatGroup, etmpRegistration)
+
+        val result = registrationService.toUserAnswers(userId = userAnswersId, registrationWrapper = receivedRegistrationWrapper).futureValue
+
+        result mustBe userAnswers.copy(lastUpdated = result.lastUpdated)
+      }
+
+      "when not part of VAT group" in {
+
+        val userAnswers: UserAnswers = emptyUserAnswersWithVatInfo
+          .set(BusinessBasedInNiPage, true).success.value
+          .set(HasTradingNamePage, true).success.value
+          .set(AllTradingNames, convertedTradingNames).success.value
+          .set(PreviouslyRegisteredPage, true).success.value
+          .set(AllPreviousRegistrationsQuery, previousRegistrations.toList).success.value
+          .set(TaxRegisteredInEuPage, true).success.value
+          .set(AllEuDetailsQuery, euDetails.toList).success.value
+          .set(AllWebsites, convertWebsites).success.value
+          .set(BusinessContactDetailsPage, contactDetails).success.value
+          .set(BankDetailsPage, convertedBankDetails).success.value
+
+        val receivedRegistrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpRegistration)
+
+        val result = registrationService.toUserAnswers(userId = userAnswersId, registrationWrapper = receivedRegistrationWrapper).futureValue
+
+        result mustBe userAnswers.copy(lastUpdated = result.lastUpdated)
+      }
     }
   }
 }
