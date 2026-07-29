@@ -712,6 +712,7 @@ continueRegistration.continue = Yes
 continueRegistration.delete = No, delete my answers and start again
 
 changeRegistration.title = Change your registration
+changeRegistration.reviewRegistrationDetails.title = Review your registration
 changeRegistration.heading = Change your registration
 changeRegistration.reviewRegistrationDetails.heading = Review your registration
 changeRegistration.reference = IOSS number: {0}

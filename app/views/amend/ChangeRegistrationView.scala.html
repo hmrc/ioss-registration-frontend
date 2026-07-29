@@ -41,7 +41,14 @@
         reviewRegistrationDetails: Boolean
 )(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
+@titleText = @{
+    reviewRegistrationDetails match {
+        case true => messages("changeRegistration.reviewRegistrationDetails.title")
+        case _ => messages("changeYourRegistration.title")
+    }
+}
+
+@layout(pageTitle = titleNoForm(titleText), showBackLink = false) {
 
     @if(!isValid) {
         @govukWarningText(WarningText(
