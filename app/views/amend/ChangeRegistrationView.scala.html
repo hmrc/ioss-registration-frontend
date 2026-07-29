@@ -16,13 +16,14 @@
 
 @import controllers.amend.{routes => amendRoutes}
 @import pages.amend.{ChangeRegistrationPage, StartAmendJourneyPage, ViewOrChangePreviousRegistrationPage}
-@import views.html.components.CancelAmendRegButton
+@import views.html.components.{CancelAmendRegButton, ReviewRegDetailsButton}
 
 @this(
         formHelper: FormWithCSRF,
         layout: templates.Layout,
         govukSummaryList: GovukSummaryList,
         button: CancelAmendRegButton,
+        reviewButton: ReviewRegDetailsButton,
         govukErrorSummary: GovukErrorSummary,
         govukWarningText: GovukWarningText
 )
@@ -36,7 +37,8 @@
         isCurrentIossAccount: Boolean,
         btaUrl: String,
         noAmendmentsWithUnusableStatusCheck: Boolean,
-        yourAccountUrl: String
+        yourAccountUrl: String,
+        reviewRegistrationDetails: Boolean
 )(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("changeRegistration.title")), showBackLink = false) {
@@ -48,7 +50,11 @@
         ))
     }
 
-    <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
+    @if(reviewRegistrationDetails) {
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.reviewRegistrationDetails.heading")</h1>
+    } else {
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
+    }
 
     @if(hasPreviousRegistrations) {
         <p class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</p>
@@ -83,14 +89,21 @@
     @govukSummaryList(list)
 
     @if(isValid) {
-        @if(noAmendmentsWithUnusableStatusCheck) {
-            <p class="govuk-body">@messages("changeRegistration.noAmendments")</p>
-            <p class="govuk-body">@Html(messages("changeRegistration.returnToYourAccount", yourAccountUrl))</p>
-
-        } else {
-            <p class="govuk-body">@messages("changeRegistration.info.p1")</p>
+        @if(reviewRegistrationDetails) {
+            <p class="govuk-body">@messages("changeRegistration.reviewRegistrationDetails")</p>
             @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false)) {
-                @button("site.confirm", ChangeRegistrationPage.route(waypoints).url, waypoints)
+                @reviewButton("site.confirm", ChangeRegistrationPage.route(waypoints).url, waypoints)
+            }
+        } else {
+            @if(noAmendmentsWithUnusableStatusCheck) {
+                <p class="govuk-body">@messages("changeRegistration.noAmendments")</p>
+                <p class="govuk-body">@Html(messages("changeRegistration.returnToYourAccount", yourAccountUrl))</p>
+
+            } else {
+                <p class="govuk-body">@messages("changeRegistration.info.p1")</p>
+                @formHelper(action = amendRoutes.ChangeRegistrationController.onSubmit(waypoints, incompletePrompt = false)) {
+                    @button("site.confirm", ChangeRegistrationPage.route(waypoints).url, waypoints)
+                }
             }
         }
     } else {
