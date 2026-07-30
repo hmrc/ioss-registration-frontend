@@ -24,7 +24,7 @@ import controllers.amend.routes as amendRoutes
 import models.amend.{PreviousRegistration, RegistrationWrapper}
 import models.audit.SubmissionResult.{Failure, Success}
 import models.audit.{AmendRegistrationAuditModel, RegistrationAuditType}
-import models.etmp.{EtmpDisplayRegistration, EtmpExclusion, EtmpTradingName}
+import models.etmp.{EtmpAdminUse, EtmpDisplayRegistration, EtmpExclusion, EtmpTradingName}
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
 import models.requests.AuthenticatedDataRequest
@@ -163,7 +163,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noAmendmentsWithUnusableStatusCheck = true,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            reviewRegistrationDetails = false
           )(request, messages(application)).toString
         }
       }
@@ -207,7 +208,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noAmendmentsWithUnusableStatusCheck = true,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            reviewRegistrationDetails = false
           )(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.changePreviousRegistration")) mustBe true
         }
@@ -262,6 +264,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             btaUrl,
             noAmendmentsWithUnusableStatusCheck = true,
             config.iossYourAccountUrl,
+            reviewRegistrationDetails = false
           )(request, messages(application)).toString
           contentAsString(result).contains(msgs("changeRegistration.toCurrentRegistration")) mustBe true
         }
@@ -311,7 +314,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noAmendmentsWithUnusableStatusCheck = true,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            reviewRegistrationDetails = false
           )(request, messages(application)).toString
         }
       }
@@ -368,7 +372,8 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noAmendmentsWithUnusableStatusCheck = false,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            reviewRegistrationDetails = false
           )(request, messages(application)).toString
         }
       }
@@ -425,6 +430,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             btaUrl,
             noAmendmentsWithUnusableStatusCheck = false,
             config.iossYourAccountUrl,
+            reviewRegistrationDetails = false
           )(request, messages(application)).toString
         }
       }
@@ -476,7 +482,70 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             isCurrentIossAccount = true,
             btaUrl,
             noAmendmentsWithUnusableStatusCheck = false,
-            config.iossYourAccountUrl
+            config.iossYourAccountUrl,
+            reviewRegistrationDetails = false
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must show confirm details when registration review is true" in {
+
+        val oldChangeDate = LocalDateTime.now(stubClockAtArbitraryDate).minusYears(2).minusDays(1)
+          
+        val originalRegistration = registrationWrapper.registration.copy(
+          tradingNames = Seq(EtmpTradingName("Original trading name")),
+          exclusions = List.empty,
+          adminUse = EtmpAdminUse(changeDate = Some(oldChangeDate))
+        )
+
+        val changedUserAnswers = completeUserAnswersWithVatInfo
+          .set(HasTradingNamePage, true).success.value
+          .set(AllTradingNames, List(TradingName("Changed trading name"))).success.value
+          .set(OriginalRegistrationQuery(iossNumber), originalRegistration).success.value
+
+        val registrationWithoutExclusion = registrationWrapper.copy(
+          registration = originalRegistration
+        )
+
+        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
+        when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+
+        val application = applicationBuilder(
+          userAnswers = Some(changedUserAnswers),
+          registrationWrapper = Some(registrationWithoutExclusion),
+          clock = Some(stubClockAtArbitraryDate)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[AccountService].toInstance(mockAccountService))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val config = application.injector.instanceOf[FrontendAppConfig]
+
+          implicit val msgs: Messages = messages(application)
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[ChangeRegistrationView]
+
+          val vatInfoList = SummaryListViewModel(rows = getChangeRegistrationVatRegistrationDetailsSummaryList(changedUserAnswers))
+          val list = SummaryListViewModel(rows = getChangeRegistrationSummaryList(changedUserAnswers, waypoints, amendYourAnswersPage))
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe view(
+            waypoints,
+            vatInfoList,
+            list,
+            iossNumber,
+            isValid = true,
+            hasPreviousRegistrations = false,
+            isCurrentIossAccount = true,
+            btaUrl,
+            noAmendmentsWithUnusableStatusCheck = false,
+            config.iossYourAccountUrl,
+            reviewRegistrationDetails = true
           )(request, messages(application)).toString
         }
       }

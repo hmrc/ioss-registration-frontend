@@ -47,6 +47,7 @@ import viewmodels.govuk.summarylist.*
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
 import views.html.amend.ChangeRegistrationView
 
+import java.time.{Clock, LocalDateTime}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -57,7 +58,8 @@ class ChangeRegistrationController @Inject()(
                                               accountService: AccountService,
                                               auditService: AuditService,
                                               view: ChangeRegistrationView,
-                                              frontendAppConfig: FrontendAppConfig
+                                              frontendAppConfig: FrontendAppConfig,
+                                              clock: Clock
                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with CompletionChecks with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -142,6 +144,14 @@ class ChangeRegistrationController @Inject()(
             val noAmendments = originalUserAnswers.data == userAnswersWithoutOriginalRegistration.data
             val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
             val noAmendmentsWithUnusableStatusCheck: Boolean = noAmendments && !unusableStatus
+            val changeDate = request.registrationWrapper.registration.adminUse.changeDate
+            val reviewRegistrationDetails = changeDate.exists(_.isBefore(LocalDateTime.now(clock).minusYears(2)))
+
+            val registrationDueForReview: Boolean = if (frontendAppConfig.registrationReviewEnabled) {
+              reviewRegistrationDetails
+            } else {
+              false
+            }
 
             Ok(view(
               waypoints,
@@ -153,7 +163,8 @@ class ChangeRegistrationController @Inject()(
               isCurrentIossAccount,
               btaUrl,
               noAmendmentsWithUnusableStatusCheck,
-              frontendAppConfig.iossYourAccountUrl
+              frontendAppConfig.iossYourAccountUrl,
+              registrationDueForReview
             ))
           }
 

@@ -712,13 +712,16 @@ continueRegistration.continue = Yes
 continueRegistration.delete = No, delete my answers and start again
 
 changeRegistration.title = Change your registration
+changeRegistration.reviewRegistrationDetails.title = Review your registration
 changeRegistration.heading = Change your registration
+changeRegistration.reviewRegistrationDetails.heading = Review your registration
 changeRegistration.reference = IOSS number: {0}
 changeRegistration.changePreviousRegistration = View or change your previous registration
 changeRegistration.toCurrentRegistration = Return to your current registration
 changeRegistration.details.heading = Import One Stop Shop details
 changeRegistration.info.p1 = Confirm these changes to save them to your account.
 changeRegistration.noAmendments = You have not made any changes.
+changeRegistration.reviewRegistrationDetails = Confirm your details are correct.
 changeRegistration.returnToYourAccount = <a class="govuk-link" id="return-to-your-account" href="{0}">Return to your account</a>
 
 cancelAmendRegistration.title = Do you want to delete your changes?
