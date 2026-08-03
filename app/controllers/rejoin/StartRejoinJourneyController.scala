@@ -69,7 +69,10 @@ class StartRejoinJourneyController @Inject()(
           rejoinRegistrationValidator.validateEuRegistrations(registrationWrapper, waypoints)(hc(request), request.request, ec).flatMap {
             case Left(redirect) =>
               logger.info(s"Failed validating eu registrations, redirecting to '${redirect.url}'")
-              Future.successful(Redirect(redirect))
+              for {
+                userAnswers <- registrationService.toUserAnswers(request.userId, registrationWrapper)
+                _ <- authenticatedUserAnswersRepository.set(userAnswers)
+              } yield Redirect(redirect)
 
             case _ =>
               for {
