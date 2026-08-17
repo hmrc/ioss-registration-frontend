@@ -571,7 +571,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
               userAnswers = userAnswers,
               registrationWrapper = Some(registrationWrapper),
               numberOfIossRegistrations = 1,
-              latestOssRegistration = None
+              compositeAccount = None
             )
 
           val expectedAuditEvent = AmendRegistrationAuditModel.build(
@@ -620,7 +620,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
               userAnswers = userAnswers,
               registrationWrapper = Some(registrationWrapper),
               numberOfIossRegistrations = 1,
-              latestOssRegistration = None
+              compositeAccount = None
             )
 
           status(result) `mustBe` SEE_OTHER

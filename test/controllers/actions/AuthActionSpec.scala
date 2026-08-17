@@ -19,9 +19,9 @@ package controllers.actions
 import base.SpecBase
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import connectors.RegistrationConnector
 import controllers.auth.routes as authRoutes
 import controllers.routes
+import models.CompositeAccount
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
@@ -29,11 +29,11 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.oss.OssRegistrationService
-import services.{AccountService, UrlBuilderService}
+import services.{AccountService, CompositeAccountService, UrlBuilderService}
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 import testutils.TestAuthRetrievals.Ops
-import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Retrieval, ~}
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
@@ -55,15 +55,18 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
     def onPageLoad(): Action[AnyContent] = (defaultAction andThen authAction) { _ => Results.Ok }
   }
 
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
-  val mockAccountService: AccountService = mock[AccountService]
-  val mockOssRegistrationService: OssRegistrationService = mock[OssRegistrationService]
+  private val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  private val mockAccountService: AccountService = mock[AccountService]
+  private val mockCompositeAccountService: CompositeAccountService = mock[CompositeAccountService]
+
+  private val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
 
   override def beforeEach(): Unit = {
-    reset(mockAuthConnector)
-    reset(mockAccountService)
-    reset(mockOssRegistrationService)
+    reset(
+      mockAuthConnector,
+      mockAccountService,
+      mockCompositeAccountService
+    )
   }
 
   "Auth Action" - {
@@ -82,9 +85,9 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ vatEnrolment ~ Some(Organisation) ~ ConfidenceLevel.L250).toFuture
 
-          when(mockOssRegistrationService.getLatestOssRegistration(any(), any())(any())) thenReturn ossRegistration.toFuture
+          when(mockCompositeAccountService.getCompositeAccount(any(), any())(any())) thenReturn compositeAccount.toFuture
 
-          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
           val controller = new Harness(action, actionBuilder)
           val result = controller.onPageLoad()(fakeRequest)
 
@@ -107,9 +110,9 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ vatDecEnrolment ~ Some(Organisation) ~ ConfidenceLevel.L250).toFuture
 
-          when(mockOssRegistrationService.getLatestOssRegistration(any(), any())(any())) thenReturn ossRegistration.toFuture
+          when(mockCompositeAccountService.getCompositeAccount(any(), any())(any())) thenReturn compositeAccount.toFuture
 
-          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
           val controller = new Harness(action, actionBuilder)
           val result = controller.onPageLoad()(fakeRequest)
 
@@ -132,9 +135,9 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ vatEnrolment ~ Some(Individual) ~ ConfidenceLevel.L250).toFuture
 
-          when(mockOssRegistrationService.getLatestOssRegistration(any(), any())(any())) thenReturn ossRegistration.toFuture
+          when(mockCompositeAccountService.getCompositeAccount(any(), any())(any())) thenReturn compositeAccount.toFuture
 
-          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
           val controller = new Harness(action, actionBuilder)
           val result = controller.onPageLoad()(fakeRequest)
 
@@ -157,7 +160,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ Enrolments(Set.empty) ~ Some(Organisation) ~ ConfidenceLevel.L50).toFuture
 
-          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
           val controller = new Harness(action, actionBuilder)
           val result = controller.onPageLoad()(fakeRequest)
 
@@ -181,7 +184,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ vatEnrolment ~ Some(Individual) ~ ConfidenceLevel.L50).toFuture
 
-          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
           val controller = new Harness(action, actionBuilder)
           val result = controller.onPageLoad()(fakeRequest)
 
@@ -205,7 +208,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (Some(testCredentials) ~ Enrolments(Set.empty) ~ Some(Individual) ~ ConfidenceLevel.L250).toFuture
 
-          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
           val controller = new Harness(action, actionBuilder)
           val result = controller.onPageLoad()(fakeRequest)
 
@@ -229,7 +232,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           when(mockAuthConnector.authorise[RetrievalsType](any(), any())(any(), any())) thenReturn
             (None ~ Enrolments(Set.empty) ~ Some(Individual) ~ ConfidenceLevel.L50).toFuture
 
-          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+          val action = new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
           val controller = new Harness(action, actionBuilder)
           val result = controller.onPageLoad()(fakeRequest)
 
@@ -255,7 +258,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
             appConfig,
             urlBuilder,
             mockAccountService,
-            mockOssRegistrationService
+            mockCompositeAccountService
           )
           val controller = new Harness(authAction, actionBuilder)
           val result = controller.onPageLoad()(FakeRequest("", "/endpoint"))
@@ -277,7 +280,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
           val urlBuilder = application.injector.instanceOf[UrlBuilderService]
           val actionBuilder = application.injector.instanceOf[DefaultActionBuilder]
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
           val controller = new Harness(authAction, actionBuilder)
           val request = FakeRequest("", "/endpoint")
           val result = controller.onPageLoad()(request)
@@ -304,7 +307,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
             appConfig,
             urlBuilder,
             mockAccountService,
-            mockOssRegistrationService
+            mockCompositeAccountService
           )
           val controller = new Harness(authAction, actionBuilder)
           val result = controller.onPageLoad()(FakeRequest("", "/endpoint"))
@@ -331,7 +334,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
             appConfig,
             urlBuilder,
             mockAccountService,
-            mockOssRegistrationService
+            mockCompositeAccountService
           )
           val controller = new Harness(authAction, actionBuilder)
           val result = controller.onPageLoad()(FakeRequest())
@@ -358,7 +361,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
             appConfig,
             urlBuilder,
             mockAccountService,
-            mockOssRegistrationService
+            mockCompositeAccountService
           )
           val controller = new Harness(authAction, actionBuilder)
           val result = controller.onPageLoad()(FakeRequest())
@@ -385,7 +388,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
             appConfig,
             urlBuilder,
             mockAccountService,
-            mockOssRegistrationService
+            mockCompositeAccountService
           )
           val controller = new Harness(authAction, actionBuilder)
           val request = FakeRequest().withHeaders(HeaderNames.xSessionId -> "123")
@@ -411,7 +414,7 @@ class AuthActionSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach 
             val urlBuilder = application.injector.instanceOf[UrlBuilderService]
             val actionBuilder = application.injector.instanceOf[DefaultActionBuilder]
 
-            val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(e), appConfig, urlBuilder, mockAccountService, mockOssRegistrationService)
+            val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(e), appConfig, urlBuilder, mockAccountService, mockCompositeAccountService)
             val controller = new Harness(authAction, actionBuilder)
             val request = FakeRequest().withHeaders(HeaderNames.xSessionId -> "123")
             val result = controller.onPageLoad()(request)

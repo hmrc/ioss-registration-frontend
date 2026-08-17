@@ -74,10 +74,10 @@ class CheckVatDetailsController @Inject()(
             },
 
             value =>
-              val updatedAnswersTry = request.latestOssRegistration match {
-                case Some(ossReg) if ossReg.tradingNames.nonEmpty =>
-                  ossReg.tradingNames.zipWithIndex.foldLeft(Try(request.userAnswers)) {
-                    case (acc, (name, index)) => acc.flatMap(_.set(TradingNamePage(Index(index)), TradingName(name)))
+              val updatedAnswersTry = request.compositeAccount match {
+                case Some(compositeAccount) if compositeAccount.tradingNames.nonEmpty =>
+                  compositeAccount.tradingNames.zipWithIndex.foldLeft(Try(request.userAnswers)) {
+                    case (acc, (tradingName, index)) => acc.flatMap(_.set(TradingNamePage(Index(index)), TradingName(tradingName.name)))
                   }.flatMap(_.set(HasTradingNamePage, true))
                 case _ =>
                   Success(request.userAnswers)

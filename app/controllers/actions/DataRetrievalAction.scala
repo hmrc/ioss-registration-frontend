@@ -41,7 +41,7 @@ class AuthenticatedDataRetrievalAction @Inject()(
         migrationService
           .migrate(sessionId, request.userId)
           .map(_ => Left(Redirect(request.path)))
-
+        
       case None =>
         authenticatedUserAnswersRepository
           .get(request.userId)
@@ -57,7 +57,8 @@ class AuthenticatedDataRetrievalAction @Inject()(
                 request.iossNumber,
                 Some(answers),
                 request.numberOfIossRegistrations,
-                request.latestOssRegistration).toFuture.map(Right(_))
+                request.compositeAccount
+              ).toFuture.map(Right(_))
           }
     }
   }
@@ -76,7 +77,8 @@ class AuthenticatedDataRetrievalAction @Inject()(
             request.iossNumber,
             Some(ua),
             request.numberOfIossRegistrations,
-            request.latestOssRegistration))
+            request.compositeAccount
+          ))
     }.getOrElse(AuthenticatedOptionalDataRequest(
       request,
       request.credentials,
@@ -85,7 +87,7 @@ class AuthenticatedDataRetrievalAction @Inject()(
       request.iossNumber,
       None,
       request.numberOfIossRegistrations,
-      request.latestOssRegistration
+      request.compositeAccount
     ).toFuture)
   }
 }

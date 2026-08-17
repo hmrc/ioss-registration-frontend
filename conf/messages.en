@@ -309,11 +309,8 @@ addTradingName.change.hidden = {0}
 addTradingName.remove.hidden = {0}
 addTradingName.addAnother = Add another trading name?
 addTradingName.addAnother.hint = You can add up to 10 trading names.
-addTradingName.p1 = We added the trading names you entered when you registered for the One Stop Shop service. Check they are still correct.
-addTradingName.ossWarning = Any changes you make here will also update the trading names in your One Stop Shop registration.
-addTradingName.ossAndIossWarning = Any changes you make here will also update the trading names in your One Stop Shop and previous Import One Stop Shop registrations.
-addTradingName.oneIossWarning = Any changes you make here will also update the trading names in your previous Import One Stop Shop registration.
-addTradingName.IossWarning = Any changes you make here will also update the trading names in all of your Import One Stop Shop registrations.
+addTradingName.p1 = We have added the details you entered for a previous One Stop Shop scheme. Check they are still correct.
+addTradingName.otherAdditionalAccountsWarning = Changes you make here will also update the trading names in any One Stop Shop or Import One Stop Shop accounts you registered for.
 
 deleteTradingName.title = Are you sure you want to remove {0}?
 deleteTradingName.heading = Are you sure you want to remove {0}?
@@ -677,10 +674,7 @@ applicationComplete.title = You are registered for the Import One Stop Shop sche
 applicationComplete.heading = You are registered for the Import One Stop Shop scheme
 applicationComplete.reference = Your IOSS number is <br><span class="govuk-!-font-weight-bold">{0}</span>
 applicationComplete.registration.text = We''ve received your registration for <span class="govuk-!-font-weight-bold">{0}</span>
-applicationComplete.registration.updatedOssText = We''ve also updated your One Stop Shop registration.
-applicationComplete.registration.updatedOssAndIossText = We''ve also updated your One Stop Shop and previous Import One Stop Shop registrations.
-applicationComplete.registration.updatedOneIossText = We''ve also updated your previous Import One Stop Shop registration.
-applicationComplete.registration.updatedIossText = We''ve also updated your previous Import One Stop Shop registrations.
+applicationComplete.registration.updated = We''ve also updated any One Stop Shop or Import One Stop Shop registrations you have.
 applicationComplete.registration.p1 = You can now use this service to fill out monthly returns for goods sold to consumers in the EU and Northern Ireland.
 applicationComplete.registration.p2 = You can also pay any Import One Stop Shop VAT that you owe.
 applicationComplete.registration.commencementDate = You can begin your {0} return on {1}. Include any sales from {2} onwards.

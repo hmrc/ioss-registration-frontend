@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package models.ossRegistration
+package models.intermediaries
 
+import models.etmp.EtmpIdType
 import play.api.libs.json.{Json, OFormat}
 
-case class OssContactDetails(
-                              fullName: String,
-                              telephoneNumber: String,
-                              emailAddress: String
-                            )
+case class EtmpCustomerIdentification(idType: EtmpIdType, idValue: String)
 
-object OssContactDetails {
-  
-  implicit val format: OFormat[OssContactDetails] = Json.format[OssContactDetails]
+object EtmpCustomerIdentification {
+
+  implicit val format: OFormat[EtmpCustomerIdentification] = Json.format[EtmpCustomerIdentification]
 }

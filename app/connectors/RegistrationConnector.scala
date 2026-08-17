@@ -18,7 +18,7 @@ package connectors
 
 import config.Service
 import connectors.ExternalEntryUrlHttpParser.{ExternalEntryUrlResponse, ExternalEntryUrlResponseReads}
-import connectors.RegistrationHttpParser._
+import connectors.RegistrationHttpParser.*
 import connectors.VatCustomerInfoHttpParser.{VatCustomerInfoResponse, VatCustomerInfoResponseReads}
 import logging.Logging
 import models.enrolments.EACDEnrolments
@@ -28,9 +28,9 @@ import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.domain.Vrn
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, StringContextOps}
-import  uk.gov.hmrc.http.HttpReads.Implicits._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,6 +40,8 @@ class RegistrationConnector @Inject()(config: Configuration, httpClientV2: HttpC
                                      (implicit executionContext: ExecutionContext) extends HttpErrorFunctions with Logging {
 
   private val baseUrl: Service = config.get[Service]("microservice.services.ioss-registration")
+  private val ossBaseUrl: Service = config.get[Service]("microservice.services.one-stop-shop-registration")
+  private val intermediaryBaseUrl: Service = config.get[Service]("microservice.services.ioss-intermediary-registration")
 
   def getVatCustomerInfo()(implicit hc: HeaderCarrier): Future[VatCustomerInfoResponse] =
     httpClientV2.get(url"$baseUrl/vat-information").execute[VatCustomerInfoResponse]
@@ -63,14 +65,14 @@ class RegistrationConnector @Inject()(config: Configuration, httpClientV2: HttpC
     httpClientV2.get(url"$baseUrl/accounts").execute[EACDEnrolments]
 
   def getOssRegistrationExclusion(vrn: Vrn)(implicit hc: HeaderCarrier): Future[OssDisplayRegistrationResponse] = {
-    val baseUrl: Service = config.get[Service]("microservice.services.one-stop-shop-registration")
-
-    httpClientV2.get(url"$baseUrl/registration/$vrn").execute[OssDisplayRegistrationResponse]
+    httpClientV2.get(url"$ossBaseUrl/registration/$vrn").execute[OssDisplayRegistrationResponse]
   }
 
   def getOssRegistration(vrn: Vrn)(implicit hc: HeaderCarrier): Future[OssRegistrationResponse] = {
-    val baseUrl: Service = config.get[Service]("microservice.services.one-stop-shop-registration")
-
-    httpClientV2.get(url"$baseUrl/registration/$vrn").execute[OssRegistrationResponse]
+    httpClientV2.get(url"$ossBaseUrl/registration/$vrn").execute[OssRegistrationResponse]
+  }
+  
+  def getIntermediaryRegistration(intermediaryNumber: String)(implicit hc: HeaderCarrier): Future[IntermediaryDisplayRegistrationResponse] = {
+    httpClientV2.get(url"$intermediaryBaseUrl/get-registration/$intermediaryNumber").execute[IntermediaryDisplayRegistrationResponse]
   }
 }

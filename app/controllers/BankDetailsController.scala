@@ -44,27 +44,23 @@ class BankDetailsController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = {
     cc.authAndGetDataAndCheckVerifyEmail(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false) {
       implicit request =>
-
-        val ossRegistration = request.latestOssRegistration
+        
+        val compositeAccount = request.compositeAccount
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         val preparedForm = request.userAnswers.get(BankDetailsPage) match {
           case Some(value) =>
             form.fill(value)
           case None =>
-            ossRegistration match {
-              case Some(ossReg) =>
-                form.fill(BankDetails(
-                  accountName = ossReg.bankDetails.accountName,
-                  bic = ossReg.bankDetails.bic,
-                  iban = ossReg.bankDetails.iban
-                ))
+            compositeAccount match {
+              case Some(account) =>
+                form.fill(account.bankDetails)
               case None =>
                 form
             }
         }
 
-        Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
+        Ok(view(preparedForm, waypoints, compositeAccount, numberOfIossRegistrations))
     }
   }
 
@@ -72,12 +68,12 @@ class BankDetailsController @Inject()(
     cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false).async {
       implicit request =>
 
-        val ossRegistration = request.latestOssRegistration
+        val compositeAccount = request.compositeAccount
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         form.bindFromRequest().fold(
           formWithErrors => {
-            Future.successful(BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations)))
+            Future.successful(BadRequest(view(formWithErrors, waypoints, compositeAccount, numberOfIossRegistrations)))
           },
           value => {
             for {

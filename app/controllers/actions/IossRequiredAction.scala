@@ -18,8 +18,8 @@ package controllers.actions
 
 import logging.Logging
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
+import play.api.mvc.Results.*
 import play.api.mvc.{ActionRefiner, Result}
-import play.api.mvc.Results._
 import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
@@ -47,7 +47,7 @@ class IossRequiredActionImpl @Inject()()(implicit val executionContext: Executio
                 registrationWrapper,
                 request.userAnswers,
                 numberOfIossRegistrations = request.numberOfIossRegistrations,
-                latestOssRegistration =  request.latestOssRegistration
+                compositeAccount =  request.compositeAccount
               )
             ).toFuture
           case _ =>

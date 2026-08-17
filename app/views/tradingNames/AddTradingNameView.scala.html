@@ -20,7 +20,7 @@
 @import viewmodels.{LegendSize, ListItemWrapper}
 @import views.html.components.ButtonGroup
 @import pages.tradingNames.AddTradingNamePage
-@import models.ossRegistration.OssRegistration
+@import models.CompositeAccount
 
 @this(
         layout: templates.Layout,
@@ -28,7 +28,8 @@
         govukErrorSummary: GovukErrorSummary,
         govukRadios: GovukRadios,
         button: ButtonGroup,
-        addToList: components.addToList
+        addToList: components.addToList,
+        govukWarningText: GovukWarningText
 )
 
 @(
@@ -36,12 +37,12 @@
     waypoints: Waypoints,
     tradingNames: Seq[ListItemWrapper],
     canAddTradingNames: Boolean,
-    ossRegistration: Option[OssRegistration],
+    compositeAccount: Option[CompositeAccount],
     numberOfIossRegistrations: Int
 )(implicit request: Request[_], messages: Messages)
 
 @titleText = @{
-    if(ossRegistration.exists(_.tradingNames.nonEmpty)) {
+    if(compositeAccount.exists(_.tradingNames.nonEmpty)) {
         if(numberOfIossRegistrations > 0) {
             tradingNames.size match {
                 case 1 => messages("addTradingName.title.ossAndIossRegistration.singular")
@@ -63,7 +64,7 @@
             case 1 => messages("addTradingName.title.iossRegistration.singular")
             case i => messages("addTradingName.title.iossRegistration.plural", i)
         }
-    }else {
+    } else {
         tradingNames.size match {
             case 1 => messages("addTradingName.title.singular")
             case i => messages("addTradingName.title.plural", i)
@@ -72,7 +73,7 @@
 }
 
 @headingText = @{
-    if(ossRegistration.exists(_.tradingNames.nonEmpty)) {
+    if(compositeAccount.exists(_.tradingNames.nonEmpty)) {
         if(numberOfIossRegistrations > 0) {
             tradingNames.size match {
                 case 1 => messages("addTradingName.heading.ossAndIossRegistration.singular")
@@ -94,7 +95,7 @@
         case 1 => messages("addTradingName.heading.iossRegistration.singular")
         case i => messages("addTradingName.heading.iossRegistration.plural", i)
         }
-    }else {
+    } else {
         tradingNames.size match {
             case 1 => messages("addTradingName.heading.singular")
             case i => messages("addTradingName.heading.plural", i)
@@ -112,7 +113,7 @@
 
         <h1 class="govuk-heading-l">@headingText</h1>
 
-        @if(ossRegistration.exists(_.tradingNames.nonEmpty) && numberOfIossRegistrations < 1) {
+        @if(compositeAccount.exists(_.tradingNames.nonEmpty) || numberOfIossRegistrations > 0) {
             <p class="govuk-hint govuk-!-margin-bottom-6">@messages("addTradingName.p1")</p>
         }
 
@@ -132,36 +133,11 @@
             <input type="hidden" name="value" id="value" value="false"/>
         }
 
-        @if(ossRegistration.exists(_.tradingNames.nonEmpty)) {
-            @if(numberOfIossRegistrations > 0) {
-                <div class="govuk-warning-text">
-                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-                    <strong class="govuk-warning-text__text">
-                        @messages("addTradingName.ossAndIossWarning")
-                    </strong>
-                </div>
-            } else {
-                <div class="govuk-warning-text">
-                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-                    <strong class="govuk-warning-text__text">
-                        @messages("addTradingName.ossWarning")
-                    </strong>
-                </div>
-            }
-        } else if(numberOfIossRegistrations > 1) {
-            <div class="govuk-warning-text">
-                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-                <strong class="govuk-warning-text__text">
-                    @messages("addTradingName.IossWarning")
-                </strong>
-            </div>
-        } else if(numberOfIossRegistrations == 1 && waypoints.inRejoin) {
-            <div class="govuk-warning-text">
-                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-                <strong class="govuk-warning-text__text">
-                    @messages("addTradingName.oneIossWarning")
-                </strong>
-            </div>
+        @if(compositeAccount.exists(_.tradingNames.nonEmpty) || numberOfIossRegistrations > 0) {
+                @govukWarningText(WarningText(
+                    iconFallbackText = Option(messages("site.warning")),
+                    content = Text(messages("addTradingName.otherAdditionalAccountsWarning"))
+                ))
         }
 
         @button("site.continue", AddTradingNamePage().route(waypoints).url, waypoints)

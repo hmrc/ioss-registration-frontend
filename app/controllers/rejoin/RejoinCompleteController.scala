@@ -60,7 +60,7 @@ class RejoinCompleteController @Inject()(
         val commencementDate = LocalDate.now(clock)
         val returnStartDate: LocalDate = commencementDate.withDayOfMonth(commencementDate.lengthOfMonth()).plusDays(1)
         val includedSalesDate = commencementDate.withDayOfMonth(1)
-        val ossRegistration = request.latestOssRegistration
+        val compositeAccount = request.compositeAccount
         val numberOfIossRegistrations = request.numberOfIossRegistrations
         val originalRegistration = request.registrationWrapper
         val list: SummaryList = detailsList(originalRegistration)
@@ -76,7 +76,7 @@ class RejoinCompleteController @Inject()(
             commencementDate = commencementDate,
             returnStartDate = returnStartDate,
             includedSalesDate = includedSalesDate,
-            ossRegistration = ossRegistration,
+            compositeAccount = compositeAccount,
             numberOfIossRegistrations = numberOfIossRegistrations,
             list = list
           )

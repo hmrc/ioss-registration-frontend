@@ -19,7 +19,7 @@ package controllers.checkVatDetails
 import base.SpecBase
 import forms.checkVatDetails.CheckVatDetailsFormProvider
 import models.CheckVatDetails
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.checkVatDetails.CheckVatDetailsPage
@@ -29,11 +29,16 @@ import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
 import viewmodels.CheckVatDetailsViewModel
 import views.html.checkVatDetails.CheckVatDetailsView
+import models.CompositeAccount
+import models.intermediaries.EtmpDisplayRegistration
+import pages.tradingNames.HasTradingNamePage
+import queries.tradingNames.AllTradingNames
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 
 class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
 
@@ -107,6 +112,44 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result).value mustBe CheckVatDetailsPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).route.url
+        verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
+      }
+    }
+
+    "must update the answers with composite account trading names when they are present " +
+      "and save the page answer and redirect to the next page when valid data is submitted" in {
+
+      val intermediaryRegistration: EtmpDisplayRegistration = arbitraryEtmpDisplayRegistration.arbitrary.sample.value
+
+      val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration, Some(intermediaryRegistration))
+
+      val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn true.toFuture
+
+      val application =
+        applicationBuilder(
+          userAnswers = Some(basicUserAnswersWithVatInfo),
+          compositeAccount = compositeAccount
+        )
+          .overrides(
+            bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, checkVatDetailsRoute)
+            .withFormUrlEncodedBody(("value", CheckVatDetails.Yes.toString))
+
+        val result = route(application, request).value
+        val expectedAnswers = basicUserAnswersWithVatInfo
+          .set(AllTradingNames, compositeAccount.value.tradingNames.toList).success.value
+          .set(HasTradingNamePage, true).success.value
+          .set(CheckVatDetailsPage, CheckVatDetails.Yes).success.value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustBe CheckVatDetailsPage.navigate(waypoints, basicUserAnswersWithVatInfo, expectedAnswers).route.url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }

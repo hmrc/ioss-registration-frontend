@@ -22,7 +22,7 @@ import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.emailVerification.{EmailVerificationRequest, VerifyEmail}
 import models.ossRegistration.*
-import models.{BankDetails, Bic, BusinessContactDetails, CheckMode, Iban, Index, UserAnswers, Website}
+import models.{BankDetails, Bic, BusinessContactDetails, CheckMode, CompositeAccount, Iban, Index, UserAnswers, Website}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -109,7 +109,7 @@ trait SpecBase
                                     clock: Option[Clock] = None,
                                     registrationWrapper: Option[RegistrationWrapper] = None,
                                     enrolments: Option[Enrolments] = None,
-                                    ossRegistration: Option[OssRegistration] = None,
+                                    compositeAccount: Option[CompositeAccount] = None,
                                     numberOfIossRegistrations: Int = 0
                                   ): GuiceApplicationBuilder = {
 
@@ -117,7 +117,7 @@ trait SpecBase
 
     new GuiceApplicationBuilder()
       .overrides(
-        bind[AuthenticatedIdentifierAction].toInstance(new FakeAuthenticatedIdentifierAction(ossRegistration, numberOfIossRegistrations)),
+        bind[AuthenticatedIdentifierAction].toInstance(new FakeAuthenticatedIdentifierAction(compositeAccount, numberOfIossRegistrations)),
         bind[AuthenticatedDataRetrievalAction].toInstance(new FakeAuthenticatedDataRetrievalAction(userAnswers, vrn)),
         bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers)),
         bind[AuthenticatedDataRequiredActionImpl].toInstance(FakeAuthenticatedDataRequiredAction(userAnswers)),
@@ -127,7 +127,7 @@ trait SpecBase
         bind[SavedAnswersRetrievalActionProvider].toInstance(new FakeSavedAnswersRetrievalActionProvider(userAnswers, vrn)),
         bind[CheckBouncedEmailFilterProvider].toInstance(new FakeCheckBouncedEmailFilterProvider()),
         bind[IossRequiredAction].toInstance(new FakeIossRequiredAction(
-          userAnswers, registrationWrapper.getOrElse(this.registrationWrapper), enrolments, ossRegistration, numberOfIossRegistrations
+          userAnswers, registrationWrapper.getOrElse(this.registrationWrapper), enrolments, compositeAccount, numberOfIossRegistrations
         )),
         bind[CheckAmendPreviousRegistrationFilterProvider].toInstance(new FakeCheckAmendPreviousRegistrationFilterProvider()),
         bind[CheckPartOfVatGroupFilter].toInstance(new FakeCheckPartOfVatGroupFilterProvider()),

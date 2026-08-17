@@ -27,7 +27,7 @@ import models.domain.PreviousSchemeDetails
 import models.euDetails.EuOptionalDetails
 import models.external.ExternalEntryUrl
 import models.previousRegistrations.PreviousRegistrationDetails
-import models.{Country, TradingName, UserAnswers, Website}
+import models.{CompositeAccount, Country, TradingName, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalacheck.Gen
@@ -42,6 +42,7 @@ import queries.euDetails.AllEuOptionalDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
 import queries.{AllWebsites, OriginalRegistrationQuery}
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
 import viewmodels.WebsiteSummary
@@ -71,6 +72,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
 
   private val originalRegistration = userAnswers.set(OriginalRegistrationQuery(iossNumber), registrationWrapper.registration).success.value
 
+  private val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
 
   "AmendComplete Controller" - {
 
@@ -102,7 +104,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             "Company name",
             summaryList,
             None,
-            1
+            0
           )(request, messages(application)).toString
         }
       }
@@ -150,7 +152,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1
+              0
             )(request, messages(application)).toString
 
             val expectedRow = TradingNameSummary.amendedAnswersRow(updatedAnswers).get
@@ -199,7 +201,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1
+              0
             )(request, messages(application)).toString
 
             val expectedRow = PreviousRegistrationSummary.amendedAnswersRow(updatedAnswers).get
@@ -249,7 +251,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1
+              0
             )(request, messages(application)).toString
 
             val expectedRow = EuDetailsSummary.amendedAnswersRow(updatedAnswers).get
@@ -286,7 +288,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1
+              0
             )(request, messages(application)).toString
 
             val expectedRow = WebsiteSummary.amendedAnswersRow(updatedAnswers).get
@@ -302,7 +304,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         val updatedAnswers = originalRegistration
           .set(AllTradingNames, List(newTradingName)).success.value
 
-        val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration)
+        val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount)
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -326,7 +328,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             yourAccountUrl,
             "Company name",
             summaryList,
-            ossRegistration,
+            compositeAccount,
             0
           )(request, messages(application)).toString
 
@@ -339,7 +341,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         val updatedAnswers = originalRegistration
           .set(AllTradingNames, List(newTradingName)).success.value
 
-        val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1)
+        val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount, numberOfIossRegistrations = 1)
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -362,7 +364,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             yourAccountUrl,
             "Company name",
             summaryList,
-            ossRegistration,
+            compositeAccount,
             1
           )(request, messages(application)).toString
         }

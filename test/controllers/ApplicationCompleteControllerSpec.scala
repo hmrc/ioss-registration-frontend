@@ -20,17 +20,17 @@ import base.SpecBase
 import config.Constants.btaUrl
 import config.FrontendAppConfig
 import formats.Format.{dateFormatter, dateMonthYearFormatter}
-import models.{TradingName, UserAnswers}
-import models.ossRegistration.OssRegistration
 import models.responses.etmp.EtmpEnrolmentResponse
+import models.{BankDetails, BusinessContactDetails, CompositeAccount, TradingName, UserAnswers}
 import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.etmp.EtmpEnrolmentResponseQuery
 import queries.tradingNames.AllTradingNames
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
-import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.ApplicationCompleteView
 
@@ -47,6 +47,24 @@ class ApplicationCompleteControllerSpec extends SpecBase {
   private val userAnswers: UserAnswers = completeUserAnswersWithVatInfo
     .set(EtmpEnrolmentResponseQuery, etmpEnrolmentResponse).success.value
 
+  private val compositeAccount: Option[CompositeAccount] = {
+    ossRegistration.map { ossReg =>
+      CompositeAccount(
+        tradingNames = ossReg.tradingNames.map(TradingName(_)),
+        contactDetails = BusinessContactDetails(
+          fullName = ossReg.contactDetails.fullName,
+          telephoneNumber = ossReg.contactDetails.telephoneNumber,
+          emailAddress = ossReg.contactDetails.emailAddress
+        ),
+        bankDetails = BankDetails(
+          accountName = ossReg.bankDetails.accountName,
+          bic = ossReg.bankDetails.bic,
+          iban = ossReg.bankDetails.iban
+        )
+      )
+    }
+  }
+
   "ApplicationComplete Controller" - {
 
     "must return OK and the correct view for a GET" in {
@@ -58,7 +76,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
         val config = application.injector.instanceOf[FrontendAppConfig]
         implicit val msgs: Messages = messages(application)
-        val expectedList: SummaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(userAnswers, ossRegistration))
+        val expectedList: SummaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(userAnswers, compositeAccount))
 
         val result = route(application, request).value
 
@@ -85,14 +103,16 @@ class ApplicationCompleteControllerSpec extends SpecBase {
       val updatedAnswers = userAnswers
         .set(AllTradingNames, List(newTradingName)).success.value
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration).build()
+      val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
+      
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)
 
         val config = application.injector.instanceOf[FrontendAppConfig]
         implicit val msgs: Messages = messages(application)
-        val expectedList: SummaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, ossRegistration))
+        val expectedList: SummaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, compositeAccount))
 
         val result = route(application, request).value
 
@@ -106,7 +126,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
           returnStartDate.format(dateFormatter),
           includedSalesDate.format(dateFormatter),
           config.feedbackUrl(request),
-          ossRegistration,
+          compositeAccount,
           expectedList,
           btaUrl
         )(request, messages(application)).toString
@@ -116,11 +136,11 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
   private def getAmendedRegistrationSummaryList(
                                                  answers: UserAnswers,
-                                                 ossRegistration: Option[OssRegistration]
+                                                 compositeAccount: Option[CompositeAccount]
                                                )(implicit msgs: Messages): Seq[SummaryListRow] = {
     val hasTradingNameSummaryRow = HasTradingNameSummary.amendedRow(answers)
     val tradingNameSummaryRow = TradingNameSummary.amendedAnswersRow(answers)
-    val removedTradingNameRow = TradingNameSummary.removedAnswersRow(getRemovedTradingNames(answers, ossRegistration))
+    val removedTradingNameRow = TradingNameSummary.removedAnswersRow(getRemovedTradingNames(answers, compositeAccount))
     val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.amendedRowContactName(answers)
     val businessContactDetailsTelephoneSummaryRow = BusinessContactDetailsSummary.amendedRowTelephoneNumber(answers)
     val businessContactDetailsEmailSummaryRow = BusinessContactDetailsSummary.amendedRowEmailAddress(answers)
@@ -141,12 +161,11 @@ class ApplicationCompleteControllerSpec extends SpecBase {
     ).flatten
   }
 
-  private def getRemovedTradingNames(answers: UserAnswers, ossRegistration: Option[OssRegistration]): Seq[String] = {
+  private def getRemovedTradingNames(answers: UserAnswers, compositeAccount: Option[CompositeAccount]): Seq[String] = {
 
     val amendedAnswers = answers.get(AllTradingNames).getOrElse(List.empty)
-    val originalAnswers = ossRegistration.map(_.tradingNames).getOrElse(List.empty)
+    val originalAnswers = compositeAccount.map(_.tradingNames.map(_.name)).getOrElse(List.empty)
 
     originalAnswers.diff(amendedAnswers)
-
   }
 }

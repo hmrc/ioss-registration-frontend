@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.domain.Vrn
-@import models.ossRegistration.OssRegistration
+@import models.CompositeAccount
 
 @this(
         layout: templates.Layout,
@@ -30,7 +30,7 @@
         yourAccountUrl: String,
         organisationName: String,
         list: SummaryList,
-        ossRegistration: Option[OssRegistration],
+        compositeAccount: Option[CompositeAccount],
         numberOfIossRegistrations: Int
 )(implicit request: Request[_], messages: Messages)
 
@@ -57,14 +57,8 @@
       )
 
       @if(list.rows.nonEmpty) {
-        @if(ossRegistration.nonEmpty) {
-            @if(numberOfIossRegistrations > 0) {
-                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssAndIossText")</p>
-            } else {
-                <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
-            }
-        } else if(numberOfIossRegistrations > 1) {
-            <p class="govuk-body">@messages("applicationComplete.registration.updatedIossText")</p>
+        @if(compositeAccount.nonEmpty || numberOfIossRegistrations > 0) {
+            <p class="govuk-body">@messages("applicationComplete.registration.updated")</p>
         }
       }
 

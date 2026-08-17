@@ -53,27 +53,27 @@ class BusinessContactDetailsController @Inject()(
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
     cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPreviousRegistrations = false) {
       implicit request =>
-
-        val ossRegistration = request.latestOssRegistration
+        
+        val compositeAccount = request.compositeAccount
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         val preparedForm = request.userAnswers.get(BusinessContactDetailsPage) match {
           case Some(value) =>
             form.fill(value)
           case None =>
-            ossRegistration match {
-              case Some(ossReg) =>
+            compositeAccount match {
+              case Some(account) =>
                 form.fill(BusinessContactDetails(
-                  fullName = ossReg.contactDetails.fullName,
-                  telephoneNumber = ossReg.contactDetails.telephoneNumber,
-                  emailAddress = ossReg.contactDetails.emailAddress
+                  fullName = account.contactDetails.fullName,
+                  telephoneNumber = account.contactDetails.telephoneNumber,
+                  emailAddress = account.contactDetails.emailAddress
                 ))
               case None =>
                 form
             }
         }
 
-        Ok(view(preparedForm, waypoints, ossRegistration, numberOfIossRegistrations))
+        Ok(view(preparedForm, waypoints, compositeAccount, numberOfIossRegistrations))
     }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] =
@@ -82,12 +82,12 @@ class BusinessContactDetailsController @Inject()(
 
         val messages = messagesApi.preferred(request)
         val bankDetailsCompleted = request.userAnswers.get(BankDetailsPage).isDefined
-        val ossRegistration = request.latestOssRegistration
+        val compositeAccount = request.compositeAccount
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         form.bindFromRequest().fold(
           formWithErrors =>
-            BadRequest(view(formWithErrors, waypoints, ossRegistration, numberOfIossRegistrations)).toFuture,
+            BadRequest(view(formWithErrors, waypoints, compositeAccount, numberOfIossRegistrations)).toFuture,
 
           value => {
             val continueUrl = if (waypoints.inAmend) {
