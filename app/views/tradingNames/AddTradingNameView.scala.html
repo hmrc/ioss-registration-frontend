@@ -133,7 +133,7 @@
             <input type="hidden" name="value" id="value" value="false"/>
         }
 
-        @if(compositeAccount.exists(_.tradingNames.nonEmpty) || numberOfIossRegistrations > 0) {
+        @if(compositeAccount.nonEmpty || numberOfIossRegistrations > 0) {
                 @govukWarningText(WarningText(
                     iconFallbackText = Option(messages("site.warning")),
                     content = Text(messages("addTradingName.otherAdditionalAccountsWarning"))

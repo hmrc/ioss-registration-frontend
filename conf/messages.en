@@ -465,10 +465,7 @@ businessContactDetails.change.fullName.hidden = your contact name or department
 businessContactDetails.change.telephoneNumber.hidden = your telephone number
 businessContactDetails.change.emailAddress.hidden = your email address
 businessContactDetails.button.sendCode = Send code and continue
-businessContactDetails.ossWarning = Any changes you make here will also update the contact details in your One Stop Shop registration.
-businessContactDetails.ossAndIossWarning = Any changes you make here will also update the contact details in your One Stop Shop and previous Import One Stop Shop registrations.
-businessContactDetails.oneIossWarning = Any changes you make here will also update the contact details in your previous Import One Stop Shop registration.
-businessContactDetails.iossWarning = Any changes you make here will also update the contact details in all of your Import One Stop Shop registrations.
+businessContactDetails.ossAndIossWarning = Changes you make here will also update the contact details in any One Stop Shop or Import One Stop Shop accounts you registered for.
 
 previouslyRegistered.title = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
 previouslyRegistered.heading = Has your business ever registered for an Import One Stop Shop scheme in an EU country?
@@ -603,10 +600,7 @@ bankDetails.change.hidden = your bank account details
 bankDetails.change.accountName.hidden = the name on this bank account
 bankDetails.change.bic.hidden = your BIC or SWIFT code
 bankDetails.change.iban.hidden = your IBAN
-bankDetails.ossWarning = Any changes you make here will also update the bank details in your One Stop Shop registration.
-bankDetails.ossAndIossWarning = Any changes you make here will also update the bank details in your One Stop Shop and previous Import One Stop Shop registrations.
-bankDetails.oneIossWarning = Any changes you make here will also update the bank details in your previous Import One Stop Shop registration.
-bankDetails.iossWarning = Any changes you make here will also update the bank details in all of your Import One Stop Shop registrations.
+bankDetails.ossAndIossWarning = Changes you make here will also update the bank details in any One Stop Shop or Import One Stop Shop accounts you registered for.
 
 error.missing_answers = Some of your information is missing. You must complete this before you can submit your changes.
 error.missing_answers_header = Some information is missing.
