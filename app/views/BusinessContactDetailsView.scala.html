@@ -40,7 +40,7 @@
 
       <h1 class="govuk-heading-l govuk-!-margin-bottom-3">@messages("businessContactDetails.heading")</h1>
 
-      @if(compositeAccount.nonEmpty && numberOfIossRegistrations < 1) {
+      @if(compositeAccount.nonEmpty && !waypoints.isInAmendOrRejoin) {
         <p class="govuk-body govuk-!-margin-bottom-4">@messages("businessContactDetails.OssDetails")</p>
       }
 
@@ -77,7 +77,7 @@
         .asEmail()
       )
 
-      @if(compositeAccount.nonEmpty || numberOfIossRegistrations > 0) {
+      @if(compositeAccount.nonEmpty || waypoints.inAmend && numberOfIossRegistrations > 1 || waypoints.inRejoin) {
         @govukWarningText(WarningText(
             iconFallbackText = Option(messages("site.warning")),
             content = Text(messages("businessContactDetails.ossAndIossWarning"))

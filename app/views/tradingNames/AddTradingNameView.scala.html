@@ -113,7 +113,7 @@
 
         <h1 class="govuk-heading-l">@headingText</h1>
 
-        @if(compositeAccount.exists(_.tradingNames.nonEmpty) || numberOfIossRegistrations > 0) {
+        @if(compositeAccount.exists(_.tradingNames.nonEmpty) && !waypoints.isInAmendOrRejoin) {
             <p class="govuk-hint govuk-!-margin-bottom-6">@messages("addTradingName.p1")</p>
         }
 
@@ -133,7 +133,7 @@
             <input type="hidden" name="value" id="value" value="false"/>
         }
 
-        @if(compositeAccount.nonEmpty || numberOfIossRegistrations > 0) {
+        @if(compositeAccount.nonEmpty || waypoints.inAmend && numberOfIossRegistrations > 1 || waypoints.inRejoin) {
                 @govukWarningText(WarningText(
                     iconFallbackText = Option(messages("site.warning")),
                     content = Text(messages("addTradingName.otherAdditionalAccountsWarning"))

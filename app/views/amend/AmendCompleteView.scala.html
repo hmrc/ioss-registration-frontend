@@ -16,6 +16,7 @@
 
 @import uk.gov.hmrc.domain.Vrn
 @import models.CompositeAccount
+@import utils.AmendWaypoints.AmendWaypointsOps
 
 @this(
         layout: templates.Layout,
@@ -31,7 +32,8 @@
         organisationName: String,
         list: SummaryList,
         compositeAccount: Option[CompositeAccount],
-        numberOfIossRegistrations: Int
+        numberOfIossRegistrations: Int,
+        isInAmendOrRejoin: Boolean
 )(implicit request: Request[_], messages: Messages)
 
   @layout(pageTitle = titleNoForm(messages("amendComplete.title")), showBackLink = false) {
@@ -57,7 +59,7 @@
       )
 
       @if(list.rows.nonEmpty) {
-        @if(compositeAccount.nonEmpty || numberOfIossRegistrations > 0) {
+        @if(compositeAccount.nonEmpty && !isInAmendOrRejoin) {
             <p class="govuk-body">@messages("applicationComplete.registration.updated")</p>
         }
       }

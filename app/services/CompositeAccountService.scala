@@ -105,7 +105,7 @@ class CompositeAccountService @Inject()(
       bankDetails = bankDetails
     ))
   }
-  
+
   private def getLatestOssRegistration(vrn: Vrn)(implicit hc: HeaderCarrier): Future[Option[OssRegistration]] = {
     registrationConnector.getOssRegistration(vrn).map {
       case Right(ossRegistration) => Some(ossRegistration)

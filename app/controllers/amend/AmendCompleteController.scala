@@ -41,6 +41,7 @@ import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummar
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.amend.AmendCompleteView
+import utils.AmendWaypoints.AmendWaypointsOps
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -64,6 +65,7 @@ class AmendCompleteController @Inject()(
         val iossNumber = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
         val compositeAccount = request.compositeAccount
         val numberOfIossRegistrations = request.numberOfIossRegistrations
+        val isInAmendOrRejoin: Boolean = waypoints.isInAmendOrRejoin
 
         for {
           externalEntryUrl <- registrationConnector.getSavedExternalEntry()
@@ -84,7 +86,8 @@ class AmendCompleteController @Inject()(
                   organisationName,
                   list,
                   compositeAccount,
-                  numberOfIossRegistrations
+                  numberOfIossRegistrations,
+                  isInAmendOrRejoin
                 )
               )
             }
