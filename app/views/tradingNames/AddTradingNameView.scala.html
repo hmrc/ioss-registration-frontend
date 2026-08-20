@@ -43,26 +43,9 @@
 
 @titleText = @{
     if(compositeAccount.exists(_.tradingNames.nonEmpty)) {
-        if(numberOfIossRegistrations > 0) {
-            tradingNames.size match {
-                case 1 => messages("addTradingName.title.ossAndIossRegistration.singular")
-                case i => messages("addTradingName.title.ossAndIossRegistration.plural", i)
-            }
-        } else {
-            tradingNames.size match {
-                case 1 => messages("addTradingName.title.ossRegistration.singular")
-                case i => messages("addTradingName.title.ossRegistration.plural", i)
-            }
-        }
-    } else if(numberOfIossRegistrations > 1) {
         tradingNames.size match {
-            case 1 => messages("addTradingName.title.iossRegistrations.singular")
-            case i => messages("addTradingName.title.iossRegistrations.plural", i)
-        }
-    } else if(numberOfIossRegistrations == 1 && waypoints.inRejoin) {
-        tradingNames.size match {
-            case 1 => messages("addTradingName.title.iossRegistration.singular")
-            case i => messages("addTradingName.title.iossRegistration.plural", i)
+            case 1 => messages("addTradingName.title.ossAndIossRegistration.singular")
+            case i => messages("addTradingName.title.ossAndIossRegistration.plural", i)
         }
     } else {
         tradingNames.size match {
@@ -74,26 +57,9 @@
 
 @headingText = @{
     if(compositeAccount.exists(_.tradingNames.nonEmpty)) {
-        if(numberOfIossRegistrations > 0) {
-            tradingNames.size match {
-                case 1 => messages("addTradingName.heading.ossAndIossRegistration.singular")
-                case i => messages("addTradingName.heading.ossAndIossRegistration.plural", i)
-            }
-        } else {
-            tradingNames.size match {
-                case 1 => messages("addTradingName.heading.ossRegistration.singular")
-                case i => messages("addTradingName.heading.ossRegistration.plural", i)
-            }
-        }
-    } else if(numberOfIossRegistrations > 1) {
         tradingNames.size match {
-            case 1 => messages("addTradingName.heading.iossRegistrations.singular")
-            case i => messages("addTradingName.heading.iossRegistrations.plural", i)
-        }
-    } else if(numberOfIossRegistrations == 1 && waypoints.inRejoin) {
-        tradingNames.size match {
-        case 1 => messages("addTradingName.heading.iossRegistration.singular")
-        case i => messages("addTradingName.heading.iossRegistration.plural", i)
+            case 1 => messages("addTradingName.heading.ossAndIossRegistration.singular")
+            case i => messages("addTradingName.heading.ossAndIossRegistration.plural", i)
         }
     } else {
         tradingNames.size match {
