@@ -42,31 +42,35 @@
 )(implicit request: Request[_], messages: Messages)
 
 @titleText = @{
-    if(compositeAccount.exists(_.tradingNames.nonEmpty)) {
-        tradingNames.size match {
-            case 1 => messages("addTradingName.title.ossAndIossRegistration.singular")
-            case i => messages("addTradingName.title.ossAndIossRegistration.plural", i)
+    if(compositeAccount.exists(_.tradingNames.nonEmpty) ||
+        (waypoints.inAmend && numberOfIossRegistrations > 1 && tradingNames.nonEmpty) ||
+        (waypoints.inRejoin && tradingNames.nonEmpty)) {
+            tradingNames.size match {
+                case 1 => messages("addTradingName.title.ossAndIossRegistration.singular")
+                case i => messages("addTradingName.title.ossAndIossRegistration.plural", i)
+            }
+        } else {
+            tradingNames.size match {
+                case 1 => messages("addTradingName.title.singular")
+                case i => messages("addTradingName.title.plural", i)
+            }
         }
-    } else {
-        tradingNames.size match {
-            case 1 => messages("addTradingName.title.singular")
-            case i => messages("addTradingName.title.plural", i)
-        }
-    }
 }
 
 @headingText = @{
-    if(compositeAccount.exists(_.tradingNames.nonEmpty)) {
-        tradingNames.size match {
-            case 1 => messages("addTradingName.heading.ossAndIossRegistration.singular")
-            case i => messages("addTradingName.heading.ossAndIossRegistration.plural", i)
+    if(compositeAccount.exists(_.tradingNames.nonEmpty) ||
+        (waypoints.inAmend && numberOfIossRegistrations > 1 && tradingNames.nonEmpty) ||
+        (waypoints.inRejoin && tradingNames.nonEmpty)) {
+            tradingNames.size match {
+                case 1 => messages("addTradingName.heading.ossAndIossRegistration.singular")
+                case i => messages("addTradingName.heading.ossAndIossRegistration.plural", i)
+            }
+        } else {
+            tradingNames.size match {
+                case 1 => messages("addTradingName.heading.singular")
+                case i => messages("addTradingName.heading.plural", i)
+            }
         }
-    } else {
-        tradingNames.size match {
-            case 1 => messages("addTradingName.heading.singular")
-            case i => messages("addTradingName.heading.plural", i)
-        }
-    }
 }
 
 @layout(pageTitle = title(form, titleText)) {
