@@ -27,15 +27,14 @@ import models.domain.PreviousSchemeDetails
 import models.euDetails.EuOptionalDetails
 import models.external.ExternalEntryUrl
 import models.previousRegistrations.PreviousRegistrationDetails
-import models.{CheckMode, CompositeAccount, Country, TradingName, UserAnswers, Website}
+import models.{CompositeAccount, Country, TradingName, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import pages.amend.ChangeRegistrationPage
-import pages.{BusinessContactDetailsPage, EmptyWaypoints, NonEmptyWaypoints, Waypoint}
+import pages.BusinessContactDetailsPage
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -77,8 +76,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
 
   private val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
 
-  private val amendWaypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
-  private lazy val changeRegRoute: String = amendRoutes.AmendCompleteController.onPageLoad(amendWaypoints).url
+  private lazy val changeRegRoute: String = amendRoutes.AmendCompleteController.onPageLoad().url
 
   override def beforeEach(): Unit = {
     Mockito.reset(mockRegistrationConnector)
@@ -114,8 +112,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
             "Company name",
             summaryList,
             None,
-            0,
-            isInAmendOrRejoin = true
+            0
           )(request, messages(application)).toString
         }
       }
@@ -163,8 +160,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
               "Company name",
               summaryList,
               None,
-              0,
-              isInAmendOrRejoin = true
+              0
             )(request, messages(application)).toString
 
             val expectedRow = TradingNameSummary.amendedAnswersRow(updatedAnswers).get
@@ -213,8 +209,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
               "Company name",
               summaryList,
               None,
-              0,
-              isInAmendOrRejoin = true
+              0
             )(request, messages(application)).toString
 
             val expectedRow = PreviousRegistrationSummary.amendedAnswersRow(updatedAnswers).get
@@ -264,8 +259,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
               "Company name",
               summaryList,
               None,
-              0,
-              isInAmendOrRejoin = true
+              0
             )(request, messages(application)).toString
 
             val expectedRow = EuDetailsSummary.amendedAnswersRow(updatedAnswers).get
@@ -302,8 +296,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
               "Company name",
               summaryList,
               None,
-              0,
-              isInAmendOrRejoin = true
+              0
             )(request, messages(application)).toString
 
             val expectedRow = WebsiteSummary.amendedAnswersRow(updatedAnswers).get
@@ -335,7 +328,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
           implicit val msgs: Messages = messages(application)
           val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
 
-          println(summaryList)
           status(result) mustEqual OK
 
           contentAsString(result) mustBe view(
@@ -346,8 +338,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
             "Company name",
             summaryList,
             compositeAccount,
-            0,
-            isInAmendOrRejoin = true
+            0
           )(request, messages(application)).toString
         }
       }
@@ -382,8 +373,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
             "Company name",
             summaryList,
             compositeAccount,
-            1,
-            isInAmendOrRejoin = true
+            1
           )(request, messages(application)).toString
         }
       }
@@ -418,8 +408,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
             "Company name",
             summaryList,
             None,
-            1,
-            isInAmendOrRejoin = true
+            1
           )(request, messages(application)).toString
         }
       }
@@ -454,8 +443,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
             "Company name",
             summaryList,
             None,
-            2,
-            isInAmendOrRejoin = true
+            2
           )(request, messages(application)).toString
         }
       }

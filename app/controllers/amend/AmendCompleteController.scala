@@ -65,7 +65,6 @@ class AmendCompleteController @Inject()(
         val iossNumber = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
         val compositeAccount = request.compositeAccount
         val numberOfIossRegistrations = request.numberOfIossRegistrations
-        val isInAmendOrRejoin: Boolean = waypoints.isInAmendOrRejoin
 
         for {
           externalEntryUrl <- registrationConnector.getSavedExternalEntry()
@@ -86,8 +85,7 @@ class AmendCompleteController @Inject()(
                   organisationName,
                   list,
                   compositeAccount,
-                  numberOfIossRegistrations,
-                  isInAmendOrRejoin
+                  numberOfIossRegistrations
                 )
               )
             }
