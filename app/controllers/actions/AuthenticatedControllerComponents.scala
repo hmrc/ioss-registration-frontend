@@ -106,11 +106,13 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
   }
 
   def authAndGetDataForSavedRegistration(
+                                          registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
                                           restrictFromPartOfVatGroup: Boolean = false
                                         ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
 
     actionBuilder andThen
       identify andThen
+      checkRegistration(registrationModificationMode) andThen
       getData andThen
       requireData(false) andThen
       checkPartOfVatGroup(restrictFromPartOfVatGroup)
