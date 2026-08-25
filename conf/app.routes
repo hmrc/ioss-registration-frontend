@@ -278,3 +278,9 @@ GET         /amend-there-is-a-problem                                     contro
 GET         /cannot-register-quarantined-trader                           controllers.ossExclusions.CannotRegisterQuarantinedTraderController.onPageLoad()
 
 GET         /cannot-access-page                                           controllers.CannotAccessPageController.onPageLoad()
+
+GET        /already-registered-vat-cannot-be-used-for-save-and-come-back           controllers.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String)
+
+GET        /expired-vat-cannot-be-used-for-save-and-come-back                      controllers.ExpiredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /quarantined-vat-cannot-be-used-for-save-and-come-back                  controllers.QuarantinedVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String, exclusionDate: String)

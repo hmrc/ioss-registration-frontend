@@ -104,6 +104,17 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       requireIoss() andThen
       checkBouncedEmail(modifyingExistingRegistrationMode)
   }
+
+  def authAndGetDataForSavedRegistration(
+                                          restrictFromPartOfVatGroup: Boolean = false
+                                        ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+
+    actionBuilder andThen
+      identify andThen
+      getData andThen
+      requireData(false) andThen
+      checkPartOfVatGroup(restrictFromPartOfVatGroup)
+  }
 }
 
 
