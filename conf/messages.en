@@ -837,4 +837,4 @@ expiredVatCannotBeUsedForSaveAndComeBack.link = <a href="https://www.gov.uk/regi
 
 quarantinedVatCannotBeUsedForSaveAndComeBack.title = You can no longer register for this service
 quarantinedVatCannotBeUsedForSaveAndComeBack.heading = You can no longer register for this service
-quarantinedVatCannotBeUsedForSaveAndComeBack.p = {0} has blocked your account from One Stop Shop services until {1}.
+quarantinedVatCannotBeUsedForSaveAndComeBack.p = {0} has blocked your account from all VAT One Stop Shop schemes until {1}.
