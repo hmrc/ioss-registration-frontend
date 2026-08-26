@@ -279,8 +279,9 @@ GET         /cannot-register-quarantined-trader                           contro
 
 GET         /cannot-access-page                                           controllers.CannotAccessPageController.onPageLoad()
 
-GET        /already-registered-vat-cannot-be-used-for-save-and-come-back           controllers.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String)
+# Save and come back kickouts
+GET        /cannot-register-vat-already-registered                        controllers.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String)
 
-GET        /expired-vat-cannot-be-used-for-save-and-come-back                      controllers.ExpiredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+GET        /cannot-register-vat-expired                                   controllers.ExpiredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 
-GET        /quarantined-vat-cannot-be-used-for-save-and-come-back                  controllers.QuarantinedVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String, exclusionDate: String)
+GET        /cannot-register-vat-quarantined                               controllers.QuarantinedVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String, exclusionDate: String)
