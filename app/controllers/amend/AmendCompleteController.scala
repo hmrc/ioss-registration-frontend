@@ -18,27 +18,27 @@ package controllers.amend
 
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
-import controllers.actions._
+import controllers.actions.*
 import logging.Logging
-import models.{Country, TradingName, UserAnswers, Website}
 import models.domain.PreviousSchemeDetails
 import models.etmp.{EtmpDisplayEuRegistrationDetails, EtmpDisplayRegistration}
 import models.euDetails.EuOptionalDetails
 import models.requests.AuthenticatedMandatoryIossRequest
+import models.{Country, TradingName, UserAnswers, Website}
 import pages.{BankDetailsPage, BusinessContactDetailsPage, JourneyRecoveryPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{AllWebsites, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import queries.euDetails.{AllEuDetailsQuery, AllEuOptionalDetailsQuery}
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
+import queries.{AllWebsites, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.WebsiteSummary
-import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.amend.AmendCompleteView
 
@@ -62,7 +62,7 @@ class AmendCompleteController @Inject()(
       implicit request => {
 
         val iossNumber = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
-        val ossRegistration = request.latestOssRegistration
+        val compositeAccount = request.compositeAccount
         val numberOfIossRegistrations = request.numberOfIossRegistrations
 
         for {
@@ -83,7 +83,7 @@ class AmendCompleteController @Inject()(
                   frontendAppConfig.iossYourAccountUrl,
                   organisationName,
                   list,
-                  ossRegistration,
+                  compositeAccount,
                   numberOfIossRegistrations
                 )
               )

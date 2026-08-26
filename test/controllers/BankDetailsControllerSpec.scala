@@ -18,7 +18,8 @@ package controllers
 
 import base.SpecBase
 import forms.BankDetailsFormProvider
-import models.{BankDetails, Bic, Iban}
+import models.intermediaries.EtmpDisplayRegistration
+import models.{BankDetails, Bic, CompositeAccount, Iban}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
@@ -28,6 +29,7 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.auth.core.Enrolments
 import views.html.BankDetailsView
 
@@ -40,6 +42,8 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
   private val waypoints: Waypoints = EmptyWaypoints
 
   private lazy val bankDetailsRoute = routes.BankDetailsController.onPageLoad().url
+
+  private val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
 
   private val genBic = arbitrary[Bic].sample.value
   private val genIban = arbitrary[Iban].sample.value
@@ -59,8 +63,8 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, waypoints, None, 0)(request, messages(application)).toString
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(form, waypoints, None, 0)(request, messages(application)).toString
       }
     }
 
@@ -75,8 +79,8 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(bankDetails), waypoints, None, 1)(request, messages(application)).toString
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(form.fill(bankDetails), waypoints, None, 0)(request, messages(application)).toString
       }
     }
 
@@ -101,9 +105,9 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         val expectedAnswers = basicUserAnswersWithVatInfo.set(BankDetailsPage, bankDetails).success.value
 
-        status(result) mustEqual SEE_OTHER
+        status(result) `mustBe` SEE_OTHER
 
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad().url
+        redirectLocation(result).value `mustBe` routes.CheckYourAnswersController.onPageLoad().url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
       }
     }
@@ -123,8 +127,8 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, waypoints, None, 0)(request, messages(application)).toString
+        status(result) `mustBe` BAD_REQUEST
+        contentAsString(result) `mustBe` view(boundForm, waypoints, None, 0)(request, messages(application)).toString
       }
     }
 
@@ -137,8 +141,8 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        status(result) `mustBe` SEE_OTHER
+        redirectLocation(result).value `mustBe` routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
@@ -153,14 +157,14 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        status(result) `mustBe` SEE_OTHER
+        redirectLocation(result).value `mustBe` routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
     "must return OK and the correct view for a GET when Oss Registration is present" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = ossRegistration).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), compositeAccount = compositeAccount).build()
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsRoute)
@@ -168,21 +172,47 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[BankDetailsView]
 
         val expectedBankDetails = BankDetails(
-          accountName = "OSS Account Name",
-          bic = Bic("OSSBIC123"),
-          iban = Iban("GB33BUKB20201555555555").value
+          accountName = ossRegistration.value.bankDetails.accountName,
+          bic = ossRegistration.value.bankDetails.bic,
+          iban = ossRegistration.value.bankDetails.iban
         )
 
         val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(expectedBankDetails), waypoints, ossRegistration, 0)(request, messages(application)).toString
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(form.fill(expectedBankDetails), waypoints, compositeAccount, 0)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when Intermediary Registration is present" in {
+
+      val intermediaryRegistration: EtmpDisplayRegistration = arbitraryEtmpDisplayRegistration.arbitrary.sample.value
+
+      val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(intermediaryRegistration = Some(intermediaryRegistration))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), compositeAccount = compositeAccount).build()
+
+      running(application) {
+        val request = FakeRequest(GET, bankDetailsRoute)
+
+        val view = application.injector.instanceOf[BankDetailsView]
+
+        val expectedBankDetails = BankDetails(
+          accountName = intermediaryRegistration.bankDetails.accountName,
+          bic = intermediaryRegistration.bankDetails.bic,
+          iban = intermediaryRegistration.bankDetails.iban
+        )
+
+        val result = route(application, request).value
+
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(form.fill(expectedBankDetails), waypoints, compositeAccount, 0)(request, messages(application)).toString
       }
     }
 
     "must return OK and the correct view for a GET when Oss Registration and Ioss registrations are present" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = ossRegistration, numberOfIossRegistrations = 1).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), compositeAccount = compositeAccount, numberOfIossRegistrations = 1).build()
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsRoute)
@@ -190,22 +220,22 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[BankDetailsView]
 
         val expectedBankDetails = BankDetails(
-          accountName = "OSS Account Name",
-          bic = Bic("OSSBIC123"),
-          iban = Iban("GB33BUKB20201555555555").value
+          accountName = ossRegistration.value.bankDetails.accountName,
+          bic = ossRegistration.value.bankDetails.bic,
+          iban = ossRegistration.value.bankDetails.iban
         )
 
         val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(expectedBankDetails), waypoints, ossRegistration, 1)(request, messages(application)).toString
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(form.fill(expectedBankDetails), waypoints, compositeAccount, 1)(request, messages(application)).toString
 
       }
     }
 
     "must return OK and the correct view for a GET when 1 previous Ioss registration is present" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = None, numberOfIossRegistrations = 1).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), numberOfIossRegistrations = 1).build()
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsRoute)
@@ -214,15 +244,15 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, waypoints, None, 1)(request, messages(application)).toString
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(form, waypoints, None, 1)(request, messages(application)).toString
 
       }
     }
 
     "must return OK and the correct view for a GET when more than 1 Ioss registrations are present" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), ossRegistration = None, numberOfIossRegistrations = 2).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), numberOfIossRegistrations = 2).build()
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsRoute)
@@ -231,8 +261,8 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, waypoints, None, 2)(request, messages(application)).toString
+        status(result) `mustBe` OK
+        contentAsString(result) `mustBe` view(form, waypoints, None, 2)(request, messages(application)).toString
       }
     }
   }

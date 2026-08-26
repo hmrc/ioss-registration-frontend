@@ -16,10 +16,9 @@
 
 package controllers.actions
 
-import models.UserAnswers
 import models.amend.RegistrationWrapper
-import models.ossRegistration.OssRegistration
 import models.requests.{AuthenticatedDataRequest, AuthenticatedMandatoryIossRequest}
+import models.{CompositeAccount, UserAnswers}
 import play.api.mvc.Result
 import uk.gov.hmrc.auth.core.Enrolments
 import utils.FutureSyntax.FutureOps
@@ -31,7 +30,7 @@ case class FakeIossRequiredActionImpl(
                                        dataToReturn: Option[UserAnswers],
                                        registrationWrapper: RegistrationWrapper,
                                        maybeEnrolments: Option[Enrolments],
-                                       ossRegistration: Option[OssRegistration],
+                                       compositeAccount: Option[CompositeAccount],
                                        numberOfIossRegistrations: Int
                                      )
   extends IossRequiredActionImpl()(ExecutionContext.Implicits.global) {
@@ -53,7 +52,7 @@ case class FakeIossRequiredActionImpl(
       registrationWrapper,
       data,
       numberOfIossRegistrations,
-      ossRegistration
+      compositeAccount
     )).toFuture
   }
 }
@@ -62,11 +61,11 @@ class FakeIossRequiredAction(
                               dataToReturn: Option[UserAnswers],
                               registrationWrapper: RegistrationWrapper,
                               enrolments: Option[Enrolments] = None,
-                              ossRegistration: Option[OssRegistration],
+                              compositeAccount: Option[CompositeAccount],
                               numberOfIossRegistrations: Int
                             )
   extends IossRequiredAction()(ExecutionContext.Implicits.global) {
   override def apply(): IossRequiredActionImpl =
-    FakeIossRequiredActionImpl(dataToReturn, registrationWrapper, enrolments, ossRegistration, numberOfIossRegistrations)
+    FakeIossRequiredActionImpl(dataToReturn, registrationWrapper, enrolments, compositeAccount, numberOfIossRegistrations)
 }
 

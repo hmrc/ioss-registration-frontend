@@ -17,8 +17,8 @@
 package controllers.actions
 
 import base.SpecBase
-import connectors.{SavedUserAnswers, SaveForLaterConnector}
-import models.UserAnswers
+import connectors.{SaveForLaterConnector, SavedUserAnswers}
+import models.{CompositeAccount, UserAnswers}
 import models.requests.AuthenticatedOptionalDataRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
@@ -29,11 +29,12 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
 import repositories.AuthenticatedUserAnswersRepository
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.auth.core.Enrolments
 
 import java.time.{Clock, Instant, ZoneId}
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with EitherValues {
 
@@ -141,7 +142,7 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
         val sessionRepository = mock[AuthenticatedUserAnswersRepository]
         val connector = mock[SaveForLaterConnector]
 
-        val latestOssRegistration = ossRegistration
+        val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
         val answers = UserAnswers(userAnswersId).set(SavedProgressPage, "/url").success.value
         val action = new Harness(sessionRepository, connector)
         val request = FakeRequest(GET, "/test/url?k=session-id")
@@ -155,14 +156,14 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
             iossNumber = None,
             userAnswers = Some(answers),
             1,
-            latestOssRegistration
+            compositeAccount
           )
         ).futureValue
 
         verifyNoInteractions(connector)
         verifyNoInteractions(sessionRepository)
         result.value.userAnswers mustBe Some(answers)
-        result.value.latestOssRegistration mustBe latestOssRegistration
+        result.value.compositeAccount mustBe compositeAccount
       }
     }
 
@@ -193,10 +194,8 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
         verifyNoInteractions(connector)
         verifyNoInteractions(sessionRepository)
         result.value.userAnswers mustBe Some(answers)
-        result.value.latestOssRegistration mustBe None
+        result.value.compositeAccount mustBe None
       }
     }
-
   }
-
 }

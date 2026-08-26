@@ -18,7 +18,7 @@ package controllers.tradingNames
 
 import config.Constants.maxTradingNames
 import controllers.AnswerExtractor
-import controllers.actions._
+import controllers.actions.*
 import forms.tradingNames.AddTradingNameFormProvider
 import pages.Waypoints
 import pages.tradingNames.AddTradingNamePage
@@ -49,38 +49,38 @@ class AddTradingNameController @Inject()(
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
-      getDerivedItems(waypoints, DeriveNumberOfTradingNames) {
-        number =>
 
-          val canAddTradingNames = number < maxTradingNames
-          val tradingNamesSummary = TradingNameSummary.addToListRows(request.userAnswers, waypoints, AddTradingNamePage())
-          val ossRegistration = request.latestOssRegistration
-          val numberOfIossRegistrations = request.numberOfIossRegistrations
+      getDerivedItems(waypoints, DeriveNumberOfTradingNames) { number =>
+        
+        val canAddTradingNames = number < maxTradingNames
+        val tradingNamesSummary = TradingNameSummary.addToListRows(request.userAnswers, waypoints, AddTradingNamePage())
+        val compositeAccount = request.compositeAccount
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
 
-          Ok(view(form, waypoints, tradingNamesSummary, canAddTradingNames, ossRegistration, numberOfIossRegistrations)).toFuture
+        Ok(view(form, waypoints, tradingNamesSummary, canAddTradingNames, compositeAccount, numberOfIossRegistrations)).toFuture
       }
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(waypoints.registrationModificationMode).async {
     implicit request =>
-      getDerivedItems(waypoints, DeriveNumberOfTradingNames) {
-        number =>
+      
+      getDerivedItems(waypoints, DeriveNumberOfTradingNames) { number =>
 
-          val canAddTradingNames = number < maxTradingNames
-          val tradingNamesSummary = TradingNameSummary.addToListRows(request.userAnswers, waypoints, AddTradingNamePage())
-          val ossRegistration = request.latestOssRegistration
-          val numberOfIossRegistrations = request.numberOfIossRegistrations
+        val canAddTradingNames = number < maxTradingNames
+        val tradingNamesSummary = TradingNameSummary.addToListRows(request.userAnswers, waypoints, AddTradingNamePage())
+        val compositeAccount = request.compositeAccount
+        val numberOfIossRegistrations = request.numberOfIossRegistrations
 
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              BadRequest(view(formWithErrors, waypoints, tradingNamesSummary, canAddTradingNames, ossRegistration, numberOfIossRegistrations)).toFuture,
+        form.bindFromRequest().fold(
+          formWithErrors =>
+            BadRequest(view(formWithErrors, waypoints, tradingNamesSummary, canAddTradingNames, compositeAccount, numberOfIossRegistrations)).toFuture,
 
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(AddTradingNamePage(), value))
-                _ <- cc.sessionRepository.set(updatedAnswers)
-              } yield Redirect(AddTradingNamePage().navigate(waypoints, request.userAnswers, updatedAnswers).route)
-          )
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(AddTradingNamePage(), value))
+              _ <- cc.sessionRepository.set(updatedAnswers)
+            } yield Redirect(AddTradingNamePage().navigate(waypoints, request.userAnswers, updatedAnswers).route)
+        )
       }
   }
 }

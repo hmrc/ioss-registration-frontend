@@ -19,10 +19,10 @@ package controllers.rejoin
 import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
-import models.{TradingName, UserAnswers}
 import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.external.ExternalEntryUrl
+import models.{CompositeAccount, TradingName, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -36,6 +36,7 @@ import queries.OriginalRegistrationQuery
 import queries.rejoin.NewIossReferenceQuery
 import queries.tradingNames.AllTradingNames
 import services.core.CoreRegistrationValidationService
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
@@ -52,6 +53,8 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
   private val commencementDate = LocalDate.now(stubClockAtArbitraryDate)
   private val returnStartDate = commencementDate.withDayOfMonth(commencementDate.lengthOfMonth()).plusDays(1)
   private val includedSalesDate = commencementDate.withDayOfMonth(1)
+
+  private val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
 
   private val userAnswers = UserAnswers(
     userAnswersId,
@@ -89,9 +92,9 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         implicit val msgs: Messages = messages(application)
         val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(userAnswers, Some(registrationWrapper)))
 
-        status(result) mustEqual OK
+        status(result) `mustBe` OK
 
-        contentAsString(result) mustEqual view(
+        contentAsString(result) `mustBe` view(
           vrn,
           config.feedbackUrl(request),
           None,
@@ -139,10 +142,10 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
 
         val exception = intercept[RuntimeException] {
           val result = route(application, request).value
-          status(result) mustEqual OK
+          status(result) `mustBe` OK
         }
 
-        exception.getMessage mustEqual "NewIossReference has not been set in answers"
+        exception.getMessage `mustBe` "NewIossReference has not been set in answers"
       }
     }
 
@@ -189,10 +192,10 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
 
         val exception = intercept[RuntimeException] {
           val result = route(application, request).value
-          status(result) mustEqual OK
+          status(result) `mustBe` OK
         }
 
-        exception.getMessage mustEqual "OrganisationName has not been set in answers"
+        exception.getMessage `mustBe` "OrganisationName has not been set in answers"
       }
     }
 
@@ -202,7 +205,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
       val updatedAnswers = originalRegistration
         .set(AllTradingNames, List(newTradingName)).success.value
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration)
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount)
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
         .build()
@@ -219,9 +222,9 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         implicit val msgs: Messages = messages(application)
         val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
 
-        status(result) mustEqual OK
+        status(result) `mustBe` OK
 
-        contentAsString(result) mustEqual view(
+        contentAsString(result) `mustBe` view(
           vrn,
           config.feedbackUrl(request),
           None,
@@ -231,7 +234,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
           commencementDate,
           returnStartDate,
           includedSalesDate,
-          ossRegistration,
+          compositeAccount,
           0,
           summaryList
         )(request, messages(application)).toString
@@ -244,7 +247,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
       val updatedAnswers = originalRegistration
         .set(AllTradingNames, List(newTradingName)).success.value
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1)
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount, numberOfIossRegistrations = 1)
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
         .build()
@@ -261,9 +264,9 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         implicit val msgs: Messages = messages(application)
         val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
 
-        status(result) mustEqual OK
+        status(result) `mustBe` OK
 
-        contentAsString(result) mustEqual view(
+        contentAsString(result) `mustBe` view(
           vrn,
           config.feedbackUrl(request),
           None,
@@ -273,7 +276,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
           commencementDate,
           returnStartDate,
           includedSalesDate,
-          ossRegistration,
+          compositeAccount,
           1,
           summaryList
         )(request, messages(application)).toString
@@ -303,9 +306,9 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         implicit val msgs: Messages = messages(application)
         val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
 
-        status(result) mustEqual OK
+        status(result) `mustBe` OK
 
-        contentAsString(result) mustEqual view(
+        contentAsString(result) `mustBe` view(
           vrn,
           config.feedbackUrl(request),
           None,
@@ -345,9 +348,9 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         implicit val msgs: Messages = messages(application)
         val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(updatedAnswers, Some(registrationWrapper)))
 
-        status(result) mustEqual OK
+        status(result) `mustBe` OK
 
-        contentAsString(result) mustEqual view(
+        contentAsString(result) `mustBe` view(
           vrn,
           config.feedbackUrl(request),
           None,

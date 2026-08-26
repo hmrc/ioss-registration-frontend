@@ -19,11 +19,12 @@ package models.ossRegistration
 import play.api.libs.json.{Json, OFormat}
 
 case class OssContactDetails(
-                           fullName: String,
-                           telephoneNumber: String,
-                           emailAddress: String
-                         )
+                              fullName: String,
+                              telephoneNumber: String,
+                              emailAddress: String
+                            )
 
 object OssContactDetails {
+  
   implicit val format: OFormat[OssContactDetails] = Json.format[OssContactDetails]
 }

@@ -20,9 +20,8 @@ import config.Constants.btaUrl
 import config.FrontendAppConfig
 import controllers.actions.*
 import formats.Format.{dateFormatter, dateMonthYearFormatter}
-import models.{TradingName, UserAnswers}
-import models.ossRegistration.OssRegistration
 import models.requests.AuthenticatedDataRequest
+import models.{CompositeAccount, TradingName, UserAnswers}
 import pages.{BankDetailsPage, BusinessContactDetailsPage, EmptyWaypoints, JourneyRecoveryPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -38,7 +37,6 @@ import views.html.ApplicationCompleteView
 import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.util.{Failure, Success}
-
 
 class ApplicationCompleteController @Inject()(
                                                override val messagesApi: MessagesApi,
@@ -59,12 +57,12 @@ class ApplicationCompleteController @Inject()(
       } yield {
 
         val iossReferenceNumber = etmpEnrolmentResponse.iossReference
-        val ossRegistration = request.latestOssRegistration
+        val compositeAccount = request.compositeAccount
 
         val commencementDate = LocalDate.now(clock)
         val returnStartDate = commencementDate.withDayOfMonth(commencementDate.lengthOfMonth()).plusDays(1)
         val includedSalesDate = commencementDate.withDayOfMonth(1)
-        val list: SummaryList = detailsList(ossRegistration)
+        val list: SummaryList = detailsList(compositeAccount)
 
         Ok(view(
           iossReferenceNumber,
@@ -73,7 +71,7 @@ class ApplicationCompleteController @Inject()(
           returnStartDate.format(dateFormatter),
           includedSalesDate.format(dateFormatter),
           frontendAppConfig.feedbackUrl,
-          ossRegistration,
+          compositeAccount,
           list,
           btaUrl
         ))
@@ -87,15 +85,15 @@ class ApplicationCompleteController @Inject()(
       case _ => None
     }
 
-  private def detailsList(ossRegistration: Option[OssRegistration])(implicit request: AuthenticatedDataRequest[AnyContent]) = {
-    ossRegistration match {
-      case Some(registration) =>
+  private def detailsList(compositeAccount: Option[CompositeAccount])(implicit request: AuthenticatedDataRequest[AnyContent]) = {
+    compositeAccount match {
+      case Some(compositeAccountDetails) =>
         SummaryListViewModel(
           rows = (
-            getHasTradingNameRows(registration) ++
-              getTradingNameRows(registration) ++
-              getBusinessContactDetailsRows(registration) ++
-              getBankDetailsRows(registration)
+            getHasTradingNameRows(compositeAccountDetails) ++
+              getTradingNameRows(compositeAccountDetails) ++
+              getBusinessContactDetailsRows(compositeAccountDetails) ++
+              getBankDetailsRows(compositeAccountDetails)
             ).flatten
         )
       case None =>
@@ -103,10 +101,10 @@ class ApplicationCompleteController @Inject()(
     }
   }
 
-  private def getHasTradingNameRows(ossRegistration: OssRegistration)
+  private def getHasTradingNameRows(compositeAccount: CompositeAccount)
                                    (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = ossRegistration.tradingNames
+    val originalAnswers = compositeAccount.tradingNames
     val amendedAnswers = request.userAnswers.get(AllTradingNames).getOrElse(List.empty)
     val hasChangedToNo = amendedAnswers.isEmpty && originalAnswers.nonEmpty
     val hasChangedToYes = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || originalAnswers.isEmpty
@@ -121,10 +119,10 @@ class ApplicationCompleteController @Inject()(
     }
   }
 
-  private def getTradingNameRows(ossRegistration: OssRegistration)
+  private def getTradingNameRows(compositeAccount: CompositeAccount)
                                 (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = ossRegistration.tradingNames
+    val originalAnswers = compositeAccount.tradingNames.map(_.name)
     val amendedAnswers = request.userAnswers.get(AllTradingNames).map(_.map(_.name)).getOrElse(List.empty)
     val addedTradingName = amendedAnswers.diff(originalAnswers)
     val removedTradingNames = originalAnswers.diff(amendedAnswers)
@@ -149,12 +147,12 @@ class ApplicationCompleteController @Inject()(
     Seq(addedTradingNameRow, removedTradingNameRow).flatten
   }
 
-  private def getBusinessContactDetailsRows(ossRegistration: OssRegistration)
+  private def getBusinessContactDetailsRows(compositeAccount: CompositeAccount)
                                            (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
 
-    val originalContactName = ossRegistration.contactDetails.fullName
-    val originalTelephone = ossRegistration.contactDetails.telephoneNumber
-    val originalEmail = ossRegistration.contactDetails.emailAddress
+    val originalContactName = compositeAccount.contactDetails.fullName
+    val originalTelephone = compositeAccount.contactDetails.telephoneNumber
+    val originalEmail = compositeAccount.contactDetails.emailAddress
     val amendedUA = request.userAnswers.get(BusinessContactDetailsPage)
 
     Seq(
@@ -178,10 +176,10 @@ class ApplicationCompleteController @Inject()(
     )
   }
 
-  private def getBankDetailsRows(ossRegistration: OssRegistration)
+  private def getBankDetailsRows(compositeAccount: CompositeAccount)
                                 (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
 
-    val originalAnswers = ossRegistration.bankDetails
+    val originalAnswers = compositeAccount.bankDetails
     val amendedUA = request.userAnswers.get(BankDetailsPage)
 
     Seq(

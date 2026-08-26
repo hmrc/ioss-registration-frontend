@@ -18,6 +18,7 @@ package connectors
 
 import logging.Logging
 import models.amend.RegistrationWrapper
+import models.intermediaries.EtmpDisplayRegistration
 import models.etmp.amend.AmendRegistrationResponse
 import models.ossExclusions.OssExcludedTrader
 import models.ossRegistration.OssRegistration
@@ -27,7 +28,6 @@ import play.api.http.Status.{CONFLICT, CREATED, INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-
 object RegistrationHttpParser extends Logging {
 
   type RegistrationResultResponse = Either[ErrorResponse, EtmpEnrolmentResponse]
@@ -35,6 +35,7 @@ object RegistrationHttpParser extends Logging {
   type AmendRegistrationResultResponse = Either[ErrorResponse, AmendRegistrationResponse]
   type OssDisplayRegistrationResponse = Either[ErrorResponse, Option[OssExcludedTrader]]
   type OssRegistrationResponse = Either[ErrorResponse, OssRegistration]
+  type IntermediaryDisplayRegistrationResponse = Either[ErrorResponse, EtmpDisplayRegistration]
 
   implicit object RegistrationResponseReads extends HttpReads[RegistrationResultResponse] {
 
@@ -109,7 +110,7 @@ object RegistrationHttpParser extends Logging {
           Left(InternalServerError)
       }
   }
-  
+
   implicit object OssRegistrationResponseReads extends HttpReads[OssRegistrationResponse] {
 
     override def read(method: String, url: String, response: HttpResponse): OssRegistrationResponse =
@@ -126,6 +127,25 @@ object RegistrationHttpParser extends Logging {
           logger.error(s"Unknown error happened on display registration $status with body ${response.body}")
           Left(InternalServerError)
       }
+  }
+
+  implicit object IntermediaryDisplayRegistrationResponseReads extends HttpReads[IntermediaryDisplayRegistrationResponse] {
+
+    override def read(method: String, url: String, response: HttpResponse): IntermediaryDisplayRegistrationResponse = {
+      response.status match {
+        case OK => (response.json \ "etmpDisplayRegistration").validate[EtmpDisplayRegistration] match {
+          case JsSuccess(etmpDisplayRegistration, _) => Right(etmpDisplayRegistration)
+          case JsError(errors) =>
+            logger.error(s"Failed trying to parse Intermediary ETMP Display Registration response JSON with body ${response.body}" +
+              s" and status ${response.status} with errors: $errors")
+            Left(InvalidJson)
+        }
+
+        case status =>
+          logger.error(s"Unknown error occurred on Intermediary ETMP Display Registration with status: $status, with body: ${response.body}")
+          Left(UnexpectedResponseStatus(response.status, s"Unexpected Intermediary ETMP Display Registration response, with status: $status."))
+      }
+    }
   }
 }
 

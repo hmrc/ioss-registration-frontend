@@ -22,12 +22,11 @@ import controllers.auth.routes as authRoutes
 import controllers.routes
 import logging.Logging
 import models.requests.{AuthenticatedIdentifierRequest, SessionRequest}
-import play.api.mvc.Results.*
 import play.api.mvc.*
-import services.oss.OssRegistrationService
-import services.{AccountService, UrlBuilderService}
-import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
+import play.api.mvc.Results.*
+import services.{AccountService, CompositeAccountService, UrlBuilderService}
 import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.domain.Vrn
@@ -44,7 +43,7 @@ class AuthenticatedIdentifierAction @Inject()(
                                                config: FrontendAppConfig,
                                                urlBuilderService: UrlBuilderService,
                                                accountService: AccountService,
-                                               ossRegistrationService: OssRegistrationService
+                                               compositeAccountService: CompositeAccountService
                                              )
                                              (implicit val executionContext: ExecutionContext)
   extends ActionRefiner[Request, AuthenticatedIdentifierRequest]
@@ -70,26 +69,26 @@ class AuthenticatedIdentifierAction @Inject()(
         Retrievals.affinityGroup and
         Retrievals.confidenceLevel
     ) {
-
+      
       case Some(credentials) ~ enrolments ~ Some(Organisation) ~ _ =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
           case (Some(vrn), futureMaybeIossNumber) =>
             for {
               (numberOfIossRegistrations, maybeIossNumber) <- futureMaybeIossNumber
-              latestOssRegistration <- ossRegistrationService.getLatestOssRegistration(enrolments, vrn)
-            } yield Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber, numberOfIossRegistrations, latestOssRegistration))
+              compositeAccount <- compositeAccountService.getCompositeAccount(enrolments, vrn)
+            } yield Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber, numberOfIossRegistrations, compositeAccount))
             
           case _ => throw InsufficientEnrolments()
         }
-
+        
       case Some(credentials) ~ enrolments ~ Some(Individual) ~ confidence =>
         (findVrnFromEnrolments(enrolments), findIossNumberFromEnrolments(enrolments)) match {
           case (Some(vrn), futureMaybeIossNumber) =>
             if (confidence >= ConfidenceLevel.L250) {
               for {
                 (numberOfIossRegistrations, maybeIossNumber) <- futureMaybeIossNumber
-                latestOssRegistration <- ossRegistrationService.getLatestOssRegistration(enrolments, vrn)
-              } yield Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber, numberOfIossRegistrations, latestOssRegistration))
+                compositeAccount <- compositeAccountService.getCompositeAccount(enrolments, vrn)
+              } yield Right(AuthenticatedIdentifierRequest(request, credentials, vrn, enrolments, maybeIossNumber, numberOfIossRegistrations, compositeAccount))
             } else {
               throw InsufficientConfidenceLevel()
             }

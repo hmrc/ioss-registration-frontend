@@ -17,8 +17,9 @@
 package controllers.actions
 
 import base.SpecBase
-import models.UserAnswers
+import models.intermediaries.EtmpDisplayRegistration
 import models.requests.{AuthenticatedIdentifierRequest, AuthenticatedOptionalDataRequest, SessionRequest, UnauthenticatedOptionalDataRequest}
+import models.{CompositeAccount, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
@@ -29,6 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
 import repositories.{AuthenticatedUserAnswersRepository, UnauthenticatedUserAnswersRepository}
 import services.DataMigrationService
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.HeaderNames
 
@@ -171,34 +173,70 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "when latestOssRegistration is provided" - {
+    "when a composite account is provided" - {
 
-      "must include latestOssRegistration in the request" in {
+      "and the account is an OSS registration" - {
 
-        val answers = UserAnswers(userAnswersId, Json.obj("foo" -> "bar"))
-        val latestOssRegistration = ossRegistration
+        "must include compositeAccount in the request" in {
 
-        val sessionRepository = mock[AuthenticatedUserAnswersRepository]
-        val migrationService = mock[DataMigrationService]
+          val answers = UserAnswers(userAnswersId, Json.obj("foo" -> "bar"))
+          val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
 
-        when(sessionRepository.get(any())) thenReturn Future.successful(Some(answers))
+          val sessionRepository = mock[AuthenticatedUserAnswersRepository]
+          val migrationService = mock[DataMigrationService]
 
-        val action = new AuthenticatedHarness(sessionRepository, migrationService)
-        val request = FakeRequest(GET, "/test/url")
+          when(sessionRepository.get(any())) thenReturn Future.successful(Some(answers))
 
-        val result = action.callRefine(AuthenticatedIdentifierRequest(
-          request,
-          testCredentials,
-          vrn,
-          Enrolments(Set.empty),
-          Some(iossNumber),
-          1,
-          latestOssRegistration
-        )).futureValue
+          val action = new AuthenticatedHarness(sessionRepository, migrationService)
+          val request = FakeRequest(GET, "/test/url")
 
-        verify(migrationService, never()).migrate(any(), any())
-        result.value.latestOssRegistration mustBe latestOssRegistration
+          val result = action.callRefine(AuthenticatedIdentifierRequest(
+            request,
+            testCredentials,
+            vrn,
+            Enrolments(Set.empty),
+            Some(iossNumber),
+            1,
+            compositeAccount
+          )).futureValue
+
+          verify(migrationService, never()).migrate(any(), any())
+          result.value.compositeAccount mustBe compositeAccount
+        }
       }
+
+      "and the account is an Intermediary registration" - {
+
+        "must include compositeAccount in the request" in {
+
+          val answers = UserAnswers(userAnswersId, Json.obj("foo" -> "bar"))
+          val intermediaryRegistration: EtmpDisplayRegistration = arbitraryEtmpDisplayRegistration.arbitrary.sample.value
+          val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(intermediaryRegistration = Some(intermediaryRegistration))
+
+          val sessionRepository = mock[AuthenticatedUserAnswersRepository]
+          val migrationService = mock[DataMigrationService]
+
+          when(sessionRepository.get(any())) thenReturn Future.successful(Some(answers))
+
+          val action = new AuthenticatedHarness(sessionRepository, migrationService)
+          val request = FakeRequest(GET, "/test/url")
+
+          val result = action.callRefine(AuthenticatedIdentifierRequest(
+            request,
+            testCredentials,
+            vrn,
+            Enrolments(Set.empty),
+            Some(iossNumber),
+            1,
+            compositeAccount
+          )).futureValue
+
+          verify(migrationService, never()).migrate(any(), any())
+          result.value.compositeAccount mustBe compositeAccount
+        }
+      }
+
+
     }
 
     "when latestOssRegistration is not provided" - {
@@ -222,11 +260,11 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
           Enrolments(Set.empty),
           Some(iossNumber),
           1,
-          None // No latestOssRegistration provided
+          None // No compositeAccount provided
         )).futureValue
 
         verify(migrationService, never()).migrate(any(), any())
-        result.value.latestOssRegistration mustBe None
+        result.value.compositeAccount mustBe None
       }
     }
   }

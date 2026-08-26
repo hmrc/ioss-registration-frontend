@@ -49,7 +49,7 @@ class CheckPartOfVatGroupFilterSpec extends SpecBase {
       userAnswers = emptyUserAnswersWithVatInfo,
       registrationWrapper = None,
       numberOfIossRegistrations = 0,
-      latestOssRegistration = None
+      compositeAccount = None
     )
   }
 

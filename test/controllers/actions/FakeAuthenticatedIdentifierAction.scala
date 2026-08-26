@@ -17,12 +17,11 @@
 package controllers.actions
 
 import config.FrontendAppConfig
-import models.ossRegistration.OssRegistration
+import models.CompositeAccount
 import models.requests.AuthenticatedIdentifierRequest
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.{Request, Result}
-import services.oss.OssRegistrationService
-import services.{AccountService, UrlBuilderService}
+import services.{AccountService, CompositeAccountService, UrlBuilderService}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolments}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.domain.Vrn
@@ -30,12 +29,12 @@ import utils.FutureSyntax.FutureOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeAuthenticatedIdentifierAction(ossRegistration: Option[OssRegistration], numberOfIossRegistrations: Int) extends AuthenticatedIdentifierAction(
+class FakeAuthenticatedIdentifierAction(compositeAccount: Option[CompositeAccount], numberOfIossRegistrations: Int) extends AuthenticatedIdentifierAction(
   mock[AuthConnector],
   mock[FrontendAppConfig],
   mock[UrlBuilderService],
   mock[AccountService],
-  mock[OssRegistrationService]
+  mock[CompositeAccountService]
 )(ExecutionContext.Implicits.global) {
 
   override def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedIdentifierRequest[A]]] =
@@ -46,6 +45,6 @@ class FakeAuthenticatedIdentifierAction(ossRegistration: Option[OssRegistration]
       Enrolments(Set.empty),
       Some("IM9001234567"),
       numberOfIossRegistrations,
-      ossRegistration
+      compositeAccount
     )).toFuture
 }

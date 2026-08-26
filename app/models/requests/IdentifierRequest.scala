@@ -16,7 +16,7 @@
 
 package models.requests
 
-import models.ossRegistration.OssRegistration
+import models.CompositeAccount
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.Credentials
@@ -30,7 +30,7 @@ case class AuthenticatedIdentifierRequest[A](
                                               enrolments: Enrolments,
                                               iossNumber: Option[String],
                                               numberOfIossRegistrations: Int,
-                                              latestOssRegistration: Option[OssRegistration]
+                                              compositeAccount: Option[CompositeAccount]
                                             ) extends WrappedRequest[A](request) {
 
   val userId: String = credentials.providerId

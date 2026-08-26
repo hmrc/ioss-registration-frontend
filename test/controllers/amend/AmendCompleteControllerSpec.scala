@@ -27,10 +27,12 @@ import models.domain.PreviousSchemeDetails
 import models.euDetails.EuOptionalDetails
 import models.external.ExternalEntryUrl
 import models.previousRegistrations.PreviousRegistrationDetails
-import models.{Country, TradingName, UserAnswers, Website}
+import models.{CompositeAccount, Country, TradingName, UserAnswers, Website}
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalacheck.Gen
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.BusinessContactDetailsPage
 import play.api.i18n.Messages
@@ -42,6 +44,7 @@ import queries.euDetails.AllEuOptionalDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import queries.tradingNames.AllTradingNames
 import queries.{AllWebsites, OriginalRegistrationQuery}
+import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
 import viewmodels.WebsiteSummary
@@ -52,7 +55,7 @@ import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummar
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.amend.AmendCompleteView
 
-class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
+class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
   private val mockRegistrationConnector = mock[RegistrationConnector]
 
@@ -71,6 +74,13 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
 
   private val originalRegistration = userAnswers.set(OriginalRegistrationQuery(iossNumber), registrationWrapper.registration).success.value
 
+  private val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
+
+  private lazy val changeRegRoute: String = amendRoutes.AmendCompleteController.onPageLoad().url
+
+  override def beforeEach(): Unit = {
+    Mockito.reset(mockRegistrationConnector)
+  }
 
   "AmendComplete Controller" - {
 
@@ -86,7 +96,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
         running(application) {
-          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val request = FakeRequest(GET, changeRegRoute)
           val config = application.injector.instanceOf[FrontendAppConfig]
           val result = route(application, request).value
           val view = application.injector.instanceOf[AmendCompleteView]
@@ -102,7 +112,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             "Company name",
             summaryList,
             None,
-            1
+            0
           )(request, messages(application)).toString
         }
       }
@@ -113,7 +123,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           .build()
 
         running(application) {
-          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val request = FakeRequest(GET, changeRegRoute)
           val result = route(application, request).value
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe routes.JourneyRecoveryController.onPageLoad().url
@@ -136,7 +146,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
           running(application) {
-            val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+            val request = FakeRequest(GET, changeRegRoute)
             val config = application.injector.instanceOf[FrontendAppConfig]
             val result = route(application, request).value
             val view = application.injector.instanceOf[AmendCompleteView]
@@ -150,7 +160,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1
+              0
             )(request, messages(application)).toString
 
             val expectedRow = TradingNameSummary.amendedAnswersRow(updatedAnswers).get
@@ -185,7 +195,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
           running(application) {
-            val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+            val request = FakeRequest(GET, changeRegRoute)
             val config = application.injector.instanceOf[FrontendAppConfig]
             val result = route(application, request).value
             val view = application.injector.instanceOf[AmendCompleteView]
@@ -199,7 +209,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1
+              0
             )(request, messages(application)).toString
 
             val expectedRow = PreviousRegistrationSummary.amendedAnswersRow(updatedAnswers).get
@@ -235,7 +245,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
           running(application) {
-            val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+            val request = FakeRequest(GET, changeRegRoute)
             val config = application.injector.instanceOf[FrontendAppConfig]
             val result = route(application, request).value
             val view = application.injector.instanceOf[AmendCompleteView]
@@ -249,7 +259,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1
+              0
             )(request, messages(application)).toString
 
             val expectedRow = EuDetailsSummary.amendedAnswersRow(updatedAnswers).get
@@ -272,7 +282,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
           when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
           running(application) {
-            val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+            val request = FakeRequest(GET, changeRegRoute)
             val config = application.injector.instanceOf[FrontendAppConfig]
             val result = route(application, request).value
             val view = application.injector.instanceOf[AmendCompleteView]
@@ -286,7 +296,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
               "Company name",
               summaryList,
               None,
-              1
+              0
             )(request, messages(application)).toString
 
             val expectedRow = WebsiteSummary.amendedAnswersRow(updatedAnswers).get
@@ -302,15 +312,16 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         val updatedAnswers = originalRegistration
           .set(AllTradingNames, List(newTradingName)).success.value
 
-        val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration)
+        val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount)
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
         when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(ossRegistration).toFuture
 
         running(application) {
-          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val request = FakeRequest(GET, changeRegRoute)
           val config = application.injector.instanceOf[FrontendAppConfig]
           val result = route(application, request).value
           val view = application.injector.instanceOf[AmendCompleteView]
@@ -326,10 +337,9 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             yourAccountUrl,
             "Company name",
             summaryList,
-            ossRegistration,
+            compositeAccount,
             0
           )(request, messages(application)).toString
-
         }
       }
 
@@ -339,7 +349,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         val updatedAnswers = originalRegistration
           .set(AllTradingNames, List(newTradingName)).success.value
 
-        val application = applicationBuilder(userAnswers = Some(updatedAnswers), ossRegistration = ossRegistration, numberOfIossRegistrations = 1)
+        val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount, numberOfIossRegistrations = 1)
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
@@ -347,7 +357,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
         running(application) {
-          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val request = FakeRequest(GET, changeRegRoute)
           val config = application.injector.instanceOf[FrontendAppConfig]
           val result = route(application, request).value
           val view = application.injector.instanceOf[AmendCompleteView]
@@ -362,7 +372,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
             yourAccountUrl,
             "Company name",
             summaryList,
-            ossRegistration,
+            compositeAccount,
             1
           )(request, messages(application)).toString
         }
@@ -382,7 +392,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
         running(application) {
-          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val request = FakeRequest(GET, changeRegRoute)
           val config = application.injector.instanceOf[FrontendAppConfig]
           val result = route(application, request).value
           val view = application.injector.instanceOf[AmendCompleteView]
@@ -417,7 +427,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar {
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
         running(application) {
-          val request = FakeRequest(GET, amendRoutes.AmendCompleteController.onPageLoad().url)
+          val request = FakeRequest(GET, changeRegRoute)
           val config = application.injector.instanceOf[FrontendAppConfig]
           val result = route(application, request).value
           val view = application.injector.instanceOf[AmendCompleteView]

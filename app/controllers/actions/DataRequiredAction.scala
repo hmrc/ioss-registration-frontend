@@ -17,7 +17,7 @@
 package controllers.actions
 
 import connectors.RegistrationConnector
-import controllers.filters.{routes => filterRoutes}
+import controllers.filters.routes as filterRoutes
 import controllers.routes
 import models.UserAnswers
 import models.amend.RegistrationWrapper
@@ -37,7 +37,7 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
                                                      isInAmendMode: Boolean
                                                    )(implicit val executionContext: ExecutionContext)
   extends ActionRefiner[AuthenticatedOptionalDataRequest, AuthenticatedDataRequest] {
-
+  
   override protected def refine[A](request: AuthenticatedOptionalDataRequest[A]): Future[Either[Result, AuthenticatedDataRequest[A]]] = {
     request.userAnswers match {
       case None =>
@@ -66,7 +66,8 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
             userAnswers = data,
             registrationWrapper = maybeRegistrationWrapper,
             numberOfIossRegistrations = request.numberOfIossRegistrations,
-            latestOssRegistration =  request.latestOssRegistration))
+            compositeAccount = request.compositeAccount
+          ))
         )
     }
   }

@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import models.ossRegistration.OssRegistration
+@import models.CompositeAccount
 
 @this(
         layout: templates.Layout,
@@ -28,7 +28,7 @@
         returnStartDate: String,
         includedSalesDate: String,
         feedbackUrl: String,
-        ossRegistration: Option[OssRegistration],
+        compositeAccount: Option[CompositeAccount],
         list: SummaryList,
         btaUrl: String
 )(implicit request: Request[_], messages: Messages)
@@ -42,8 +42,8 @@
 
         <p class="govuk-body">@Html(messages("applicationComplete.registration.text", organisationName))</p>
 
-        @if(ossRegistration.nonEmpty && list.rows.nonEmpty) {
-            <p class="govuk-body">@messages("applicationComplete.registration.updatedOssText")</p>
+        @if(compositeAccount.nonEmpty && list.rows.nonEmpty) {
+            <p class="govuk-body">@messages("applicationComplete.registration.updated")</p>
         }
 
         <p class="govuk-body">@messages("applicationComplete.registration.p1")</p>

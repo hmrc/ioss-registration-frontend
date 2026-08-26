@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import models.amend.RegistrationWrapper
 import models.domain.VatCustomerInfo
 import models.enrolments.EACDEnrolments
+import models.intermediaries.EtmpDisplayRegistration
 import models.external.ExternalEntryUrl
 import models.ossExclusions.{ExclusionReason, OssExcludedTrader}
 import models.ossRegistration.OssRegistration
@@ -48,6 +49,7 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
       .configure(
         "microservice.services.ioss-registration.port" -> server.port,
         "microservice.services.one-stop-shop-registration.port" -> server.port,
+        "microservice.services.ioss-intermediary-registration.port" -> server.port
       ).build()
 
   ".getCustomerVatInfo" - {
@@ -453,6 +455,92 @@ class RegistrationConnectorSpec extends SpecBase with WireMockHelper {
         val result = connector.getOssRegistration(vrn).futureValue
 
         result mustBe Right(ossRegistration)
+      }
+    }
+  }
+
+  ".getIntermediaryRegistration" - {
+
+    val intermediaryNumber: String = "IN9001234567"
+
+    val url: String = s"/ioss-intermediary-registration/get-registration/$intermediaryNumber"
+
+    "must return OK with Right(EtmpDisplayRegistration) response body" in {
+
+      val registration: EtmpDisplayRegistration = arbitraryEtmpDisplayRegistration.arbitrary.sample.value
+
+      running(application) {
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val responseBody = {
+          s"""{
+             | "etmpDisplayRegistration" : {
+             |    "customerIdentification" : ${Json.toJson(registration.customerIdentification)},
+             |    "tradingNames" : ${Json.toJson(registration.tradingNames)},
+             |    "clientDetails" : ${Json.toJson(registration.clientDetails)},
+             |    "intermediaryDetails" : ${Json.toJson(registration.intermediaryDetails)},
+             |    "otherAddress" : ${Json.toJson(registration.otherAddress)},
+             |    "schemeDetails" : ${Json.toJson(registration.schemeDetails)},
+             |    "exclusions" : ${Json.toJson(registration.exclusions)},
+             |    "bankDetails" : ${Json.toJson(registration.bankDetails)},
+             |    "adminUse" : ${Json.toJson(registration.adminUse)}
+             | }
+             |}""".stripMargin
+        }
+
+        server.stubFor(
+          get(urlEqualTo(url)).willReturn(
+            ok().withBody(responseBody)
+          )
+        )
+
+        val result = connector.getIntermediaryRegistration(intermediaryNumber).futureValue
+
+        result `mustBe` Right(registration)
+      }
+    }
+
+    "must return Left(InvalidJson) when response cannot be parsed correctly" in {
+
+      running(application) {
+
+        val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+        val responseBody = Json.obj("registration" -> "error").toString()
+
+        server.stubFor(
+          get(urlEqualTo(url)).willReturn(
+            ok().withBody(responseBody)
+          )
+        )
+
+        val result = connector.getIntermediaryRegistration(intermediaryNumber).futureValue
+
+        result `mustBe` Left(InvalidJson)
+      }
+    }
+
+    Seq(BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_IMPLEMENTED, BAD_GATEWAY, SERVICE_UNAVAILABLE).foreach { status =>
+
+      s"must return Left(UnexpectedStatus) when the server responds with status: $status" in {
+
+        val errorBody: String = s"Unexpected Intermediary ETMP Display Registration response, with status: $status."
+
+        running(application) {
+
+          val connector: RegistrationConnector = application.injector.instanceOf[RegistrationConnector]
+
+          server.stubFor(
+            get(urlEqualTo(url)).willReturn(
+              aResponse().withStatus(status)
+            )
+          )
+
+          val result = connector.getIntermediaryRegistration(intermediaryNumber).futureValue
+
+          result `mustBe` Left(UnexpectedResponseStatus(status, errorBody))
+        }
       }
     }
   }

@@ -20,9 +20,9 @@ import connectors.SaveForLaterConnector
 import controllers.actions.FakeSavedAnswersRetrievalAction.{mockSaveForLaterConnector, mockSessionRepository}
 import models.UserAnswers
 import models.requests.AuthenticatedOptionalDataRequest
+import org.scalatestplus.mockito.MockitoSugar.mock
 import repositories.AuthenticatedUserAnswersRepository
 import uk.gov.hmrc.domain.Vrn
-import org.scalatestplus.mockito.MockitoSugar.mock
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +39,7 @@ class FakeSavedAnswersRetrievalAction(dataToReturn: Option[UserAnswers], vrn: Vr
         request.iossNumber,
         dataToReturn,
         request.numberOfIossRegistrations,
-        request.latestOssRegistration
+        request.compositeAccount
       ))
 }
 

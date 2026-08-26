@@ -65,7 +65,7 @@ class SavedAnswersRetrievalAction(repository: AuthenticatedUserAnswersRepository
         request.iossNumber,
         maybeUserAnswers,
         request.numberOfIossRegistrations,
-        request.latestOssRegistration
+        request.compositeAccount
       )
     }
   }
