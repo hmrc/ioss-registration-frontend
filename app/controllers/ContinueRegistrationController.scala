@@ -44,13 +44,20 @@ class ContinueRegistrationController @Inject()(
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataForSavedRegistration() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataForSavedRegistration().async {
     implicit request =>
-        request.userAnswers.get(SavedProgressPage).map(
-          _ => Ok(view(form))
-        ).getOrElse(
-          Redirect(controllers.routes.IndexController.onPageLoad())
-        )
+      request.userAnswers.get(SavedProgressPage) match {
+        case Some(_) =>
+          coreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(waypoints).flatMap {
+            case Some(redirectResult) =>
+              deleteSavedRegistration(redirectResult)
+            case None =>
+              Future.successful(Ok(view(form)))
+          }
+
+        case None =>
+          Future.successful(Redirect(controllers.routes.IndexController.onPageLoad()))
+      }
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataForSavedRegistration().async {
@@ -61,12 +68,7 @@ class ContinueRegistrationController @Inject()(
         value =>
           (value, request.userAnswers.get(SavedProgressPage)) match {
             case (ContinueRegistration.Continue, Some(url)) =>
-              coreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(waypoints).flatMap {
-                case Some(redirectResult) =>
-                  deleteSavedRegistration(redirectResult)
-                case None =>
-                  Future.successful(Redirect(Call(GET, url)))
-              }
+              Future.successful(Redirect(Call(GET, url)))
 
             case (ContinueRegistration.Delete, _) =>
               for {

@@ -52,10 +52,10 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Left(responses.NotFound).toFuture
+      when(mockCoreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(any())(any(), any())) thenReturn None.toFuture
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers.set(SavedProgressPage, "testUrl").success.value))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+        .overrides(bind[CoreSavedAnswersRevalidationService].toInstance(mockCoreSavedAnswersRevalidationService))
         .build()
 
       running(application) {
@@ -67,6 +67,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form)(request, messages(application)).toString
+        verify(mockCoreSavedAnswersRevalidationService, times(1)).checkAndValidateSavedUserAnswers(any())(any(), any())
       }
     }
 
@@ -158,7 +159,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
           .build()
 
       running(application) {
-        val request = FakeRequest(POST, continueRegistrationRoute)
+        val request = FakeRequest(GET, continueRegistrationRoute)
           .withFormUrlEncodedBody(
           "value" -> Continue.toString
         )
@@ -206,7 +207,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
           .build()
 
       running(application) {
-        val request = FakeRequest(POST, continueRegistrationRoute)
+        val request = FakeRequest(GET, continueRegistrationRoute)
           .withFormUrlEncodedBody(
             "value" -> Continue.toString
           )
@@ -256,7 +257,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
           .build()
 
       running(application) {
-        val request = FakeRequest(POST, continueRegistrationRoute)
+        val request = FakeRequest(GET, continueRegistrationRoute)
           .withFormUrlEncodedBody(
             "value" -> Continue.toString
           )
