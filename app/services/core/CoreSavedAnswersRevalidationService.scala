@@ -192,25 +192,27 @@ class CoreSavedAnswersRevalidationService @Inject()(
 
   private def previousSchemeRedirect(waypoints: Waypoints, previousScheme: PreviousScheme, maybeMatch: Option[Match]): Option[Result] = {
 
-    previousScheme match {
+    maybeMatch match {
 
-      case PreviousScheme.OSSU =>
-        maybeMatch match {
+      case Some(activeMatch) if activeMatch.isQuarantinedTrader(clock) =>
+        Some(Redirect(
+          routes.QuarantinedVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints, activeMatch.memberState, activeMatch.getEffectiveDate)
+        ))
 
-          case Some(activeMatch) if activeMatch.isQuarantinedTrader(clock) =>
-            Some(Redirect(
-              routes.QuarantinedVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints, activeMatch.memberState, activeMatch.getEffectiveDate)
-            ))
-
-          case _ =>
-            None
-        }
-
-      case PreviousScheme.OSSNU =>
-        None
+      case Some(activeMatch) if isIOSS(previousScheme) && activeMatch.isActiveTrader =>
+        Some(Redirect(
+          controllers.routes.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints, activeMatch.memberState)
+        ))
 
       case _ =>
         None
+    }
+  }
+
+  private def isIOSS(scheme: PreviousScheme): Boolean = {
+    scheme match {
+      case PreviousScheme.IOSSWI | PreviousScheme.IOSSWOI => true
+      case _                                              => false
     }
   }
 
