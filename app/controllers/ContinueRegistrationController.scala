@@ -17,12 +17,14 @@
 package controllers
 
 import connectors.SaveForLaterConnector
-import controllers.actions._
+import controllers.actions.*
 import forms.ContinueRegistrationFormProvider
 import models.ContinueRegistration
+import models.requests.AuthenticatedDataRequest
 import pages.{JourneyRecoveryPage, SavedProgressPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import services.core.CoreSavedAnswersRevalidationService
 import uk.gov.hmrc.http.HttpVerbs.GET
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ContinueRegistrationView
@@ -35,37 +37,56 @@ class ContinueRegistrationController @Inject()(
                                          cc: AuthenticatedControllerComponents,
                                          saveForLaterConnector: SaveForLaterConnector,
                                          formProvider: ContinueRegistrationFormProvider,
-                                         view: ContinueRegistrationView
+                                         view: ContinueRegistrationView,
+                                         coreSavedAnswersRevalidationService: CoreSavedAnswersRevalidationService
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData() {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataForSavedRegistration().async {
     implicit request =>
-        request.userAnswers.get(SavedProgressPage).map(
-          _ => Ok(view(form))
-        ).getOrElse(
-          Redirect(controllers.routes.IndexController.onPageLoad())
-        )
+      request.userAnswers.get(SavedProgressPage) match {
+        case Some(_) =>
+          coreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(waypoints).flatMap {
+            case Some(redirectResult) =>
+              deleteSavedRegistration(redirectResult)
+            case None =>
+              Future.successful(Ok(view(form)))
+          }
 
+        case None =>
+          Future.successful(Redirect(controllers.routes.IndexController.onPageLoad()))
+      }
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData().async {
+  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataForSavedRegistration().async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors))),
         value =>
           (value, request.userAnswers.get(SavedProgressPage)) match {
-            case (ContinueRegistration.Continue, Some(url)) => Future.successful(Redirect(Call(GET, url)))
+            case (ContinueRegistration.Continue, Some(url)) =>
+              Future.successful(Redirect(Call(GET, url)))
+
             case (ContinueRegistration.Delete, _) =>
               for {
                 _ <- cc.sessionRepository.clear(request.userId)
                 _ <- saveForLaterConnector.delete()
               } yield Redirect(controllers.routes.IndexController.onPageLoad())
-            case _ => Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url))
+            case _ =>
+              Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url))
           }
       )
+  }
+
+  private def deleteSavedRegistration(
+                                       redirect: Result
+                                     )(implicit request: AuthenticatedDataRequest[_]): Future[Result] = {
+    for {
+      _ <- cc.sessionRepository.clear(request.userId)
+      _ <- saveForLaterConnector.delete()
+    } yield redirect
   }
 }

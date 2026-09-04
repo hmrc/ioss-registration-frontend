@@ -801,3 +801,16 @@ userResearch.link.text = Sign up to take part in research about the One Stop Sho
 
 cannotAccessPage.title = You cannot access this page
 cannotAccessPage.heading = You cannot access this page
+
+alreadyRegisteredVatCannotBeUsedForSaveAndComeBack.title = You can no longer register for this service
+alreadyRegisteredVatCannotBeUsedForSaveAndComeBack.heading = You can no longer register for this service
+alreadyRegisteredVatCannotBeUsedForSaveAndComeBack.p = This account is already registered on an Import One Stop Shop scheme in {0}.
+
+expiredVatCannotBeUsedForSaveAndComeBack.title = You can no longer register for this service
+expiredVatCannotBeUsedForSaveAndComeBack.heading = You can no longer register for this service
+expiredVatCannotBeUsedForSaveAndComeBack.p = The VAT number for this account has expired.
+expiredVatCannotBeUsedForSaveAndComeBack.link = <a href="https://www.gov.uk/register-for-vat/how-register-for-vat" class="govuk-link">Apply for a new VAT number to use this service</a>
+
+quarantinedVatCannotBeUsedForSaveAndComeBack.title = You can no longer register for this service
+quarantinedVatCannotBeUsedForSaveAndComeBack.heading = You can no longer register for this service
+quarantinedVatCannotBeUsedForSaveAndComeBack.p = {0} has blocked your account from all VAT One Stop Shop schemes until {1}.
