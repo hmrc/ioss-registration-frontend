@@ -20,17 +20,17 @@ import base.SpecBase
 import connectors.{RegistrationConnector, SaveForLaterConnector}
 import forms.ContinueRegistrationFormProvider
 import models.ContinueRegistration.{Continue, Delete}
-import models.core.{Match, TraderId}
 import models.responses
-import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{EmptyWaypoints, JourneyRecoveryPage, SavedProgressPage, Waypoints}
 import play.api.inject.bind
+import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
-import services.core.CoreRegistrationValidationService
+import services.core.CoreSavedAnswersRevalidationService
 import utils.FutureSyntax.FutureOps
 import views.html.ContinueRegistrationView
 
@@ -46,7 +46,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
   private lazy val continueRegistrationRoute = routes.ContinueRegistrationController.onPageLoad().url
   private val mockRegistrationConnector = mock[RegistrationConnector]
-  private val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
+  private val mockCoreSavedAnswersRevalidationService = mock[CoreSavedAnswersRevalidationService]
 
   "ContinueRegistration Controller" - {
 
@@ -75,11 +75,14 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
       val userAnswersRepository = mock[AuthenticatedUserAnswersRepository]
       val saveForLaterConnector = mock[SaveForLaterConnector]
 
+      when(mockCoreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(any())(any(), any())) thenReturn None.toFuture
+
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers.set(SavedProgressPage, "testUrl").success.value))
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(userAnswersRepository),
-            bind[SaveForLaterConnector].toInstance(saveForLaterConnector)
+            bind[SaveForLaterConnector].toInstance(saveForLaterConnector),
+            bind[CoreSavedAnswersRevalidationService].toInstance(mockCoreSavedAnswersRevalidationService)
           )
           .build()
 
@@ -132,11 +135,9 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
       val mockUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
       val mockSaveForLaterConnector = mock[SaveForLaterConnector]
 
-      val vatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = Some(LocalDate.now(stubClockAtArbitraryDate)))
+      val redirectResult = Redirect(controllers.routes.ExpiredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(EmptyWaypoints))
 
-      when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn
-        Right(vatInfo).toFuture
-
+      when(mockCoreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(any())(any(), any())) thenReturn Some(redirectResult).toFuture
       when(mockUserAnswersRepository.clear(any())) thenReturn Future.successful(true)
       when(mockSaveForLaterConnector.delete()(any())) thenReturn Right(true).toFuture
 
@@ -150,14 +151,17 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
           )
         )
           .overrides(
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector),
+            bind[CoreSavedAnswersRevalidationService].toInstance(mockCoreSavedAnswersRevalidationService),
             bind[AuthenticatedUserAnswersRepository].toInstance(mockUserAnswersRepository),
             bind[SaveForLaterConnector].toInstance(mockSaveForLaterConnector)
           )
           .build()
 
       running(application) {
-        val request = FakeRequest(GET, continueRegistrationRoute)
+        val request = FakeRequest(POST, continueRegistrationRoute)
+          .withFormUrlEncodedBody(
+          "value" -> Continue.toString
+        )
 
         val result = route(application, request).value
 
@@ -178,26 +182,9 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
       val mockUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
       val mockSaveForLaterConnector = mock[SaveForLaterConnector]
 
-      val vatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = None)
+      val redirectResult = Redirect(controllers.routes.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(EmptyWaypoints, "DE"))
 
-      val genericMatch = Match(
-        TraderId("IM9001234566"),
-        None,
-        "DE",
-        None,
-        None,
-        None,
-        None,
-        None
-      )
-
-      val activeMatch = genericMatch
-
-      when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn
-        Right(vatInfo).toFuture
-
-      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn
-        Some(activeMatch).toFuture
+      when(mockCoreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(any())(any(), any())) thenReturn Some(redirectResult).toFuture
 
       when(mockUserAnswersRepository.clear(any())) thenReturn Future.successful(true)
       when(mockSaveForLaterConnector.delete()(any())) thenReturn Right(true).toFuture
@@ -212,15 +199,17 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
           )
         )
           .overrides(
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector),
-            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+            bind[CoreSavedAnswersRevalidationService].toInstance(mockCoreSavedAnswersRevalidationService),
             bind[AuthenticatedUserAnswersRepository].toInstance(mockUserAnswersRepository),
             bind[SaveForLaterConnector].toInstance(mockSaveForLaterConnector)
           )
           .build()
 
       running(application) {
-        val request = FakeRequest(GET, continueRegistrationRoute)
+        val request = FakeRequest(POST, continueRegistrationRoute)
+          .withFormUrlEncodedBody(
+            "value" -> Continue.toString
+          )
 
         val result = route(application, request).value
 
@@ -228,7 +217,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
         redirectLocation(result).value mustEqual
           controllers.routes.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController
-            .onPageLoad(EmptyWaypoints, activeMatch.memberState)
+            .onPageLoad(EmptyWaypoints, "DE")
             .url
 
         verify(mockUserAnswersRepository, times(1)).clear(any())
@@ -238,31 +227,15 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to the quarantined page and delete the saved registration when the trader is quarantined" in {
 
-      val genericMatch = Match(
-        TraderId("IM9001234566"),
-        None,
-        "DE",
-        Some(2),
-        None,
-        None,
-        None,
-        None
-      )
+      val effectiveDate = LocalDate.now(stubClockAtArbitraryDate).minusMonths(6).toString
+
+      val redirectResult = Redirect(controllers.routes.QuarantinedVatCannotBeUsedForSaveAndComeBackController.onPageLoad(EmptyWaypoints, "DE", effectiveDate))
 
       val mockUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
       val mockSaveForLaterConnector = mock[SaveForLaterConnector]
 
-      val vatInfo = vatCustomerInfo.copy(deregistrationDecisionDate = None)
 
-      val expectedMatch = genericMatch.copy(
-        exclusionStatusCode = Some(4),
-        exclusionEffectiveDate = Some(LocalDate.now(stubClockAtArbitraryDate).minusMonths(6).toString)
-      )
-
-      when(mockCoreRegistrationValidationService.searchUkVrn(eqTo(vrn))(any(), any())) thenReturn Future.successful(Option(expectedMatch))
-
-      when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatInfo).toFuture
-
+      when(mockCoreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(any())(any(), any())) thenReturn Some(redirectResult).toFuture
       when(mockUserAnswersRepository.clear(any())) thenReturn Future.successful(true)
       when(mockSaveForLaterConnector.delete()(any())) thenReturn Right(true).toFuture
 
@@ -276,15 +249,17 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
           )
         )
           .overrides(
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector),
-            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
+            bind[CoreSavedAnswersRevalidationService].toInstance(mockCoreSavedAnswersRevalidationService),
             bind[AuthenticatedUserAnswersRepository].toInstance(mockUserAnswersRepository),
             bind[SaveForLaterConnector].toInstance(mockSaveForLaterConnector)
           )
           .build()
 
       running(application) {
-        val request = FakeRequest(GET, continueRegistrationRoute)
+        val request = FakeRequest(POST, continueRegistrationRoute)
+          .withFormUrlEncodedBody(
+            "value" -> Continue.toString
+          )
 
         val result = route(application, request).value
 
@@ -294,8 +269,8 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
           controllers.routes.QuarantinedVatCannotBeUsedForSaveAndComeBackController
             .onPageLoad(
               EmptyWaypoints,
-              expectedMatch.memberState,
-              expectedMatch.getEffectiveDate
+             "DE",
+              effectiveDate
             )
             .url
 

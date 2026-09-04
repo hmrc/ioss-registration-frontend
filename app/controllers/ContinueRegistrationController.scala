@@ -16,50 +16,41 @@
 
 package controllers
 
-import connectors.{RegistrationConnector, SaveForLaterConnector}
+import connectors.SaveForLaterConnector
 import controllers.actions.*
 import forms.ContinueRegistrationFormProvider
 import models.ContinueRegistration
-import models.domain.VatCustomerInfo
 import models.requests.AuthenticatedDataRequest
 import pages.{JourneyRecoveryPage, SavedProgressPage, Waypoints}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
-import services.core.CoreRegistrationValidationService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import services.core.CoreSavedAnswersRevalidationService
 import uk.gov.hmrc.http.HttpVerbs.GET
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ContinueRegistrationView
 
-import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ContinueRegistrationController @Inject()(
                                          override val messagesApi: MessagesApi,
                                          cc: AuthenticatedControllerComponents,
-                                         registrationConnector: RegistrationConnector,
-                                         coreRegistrationValidationService: CoreRegistrationValidationService,
                                          saveForLaterConnector: SaveForLaterConnector,
                                          formProvider: ContinueRegistrationFormProvider,
                                          view: ContinueRegistrationView,
-                                         clock: Clock
+                                         coreSavedAnswersRevalidationService: CoreSavedAnswersRevalidationService
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataForSavedRegistration().async {
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataForSavedRegistration() {
     implicit request =>
-        request.userAnswers.get(SavedProgressPage) match {
-
-          case Some(_) =>
-            checkRegistrationStatus(waypoints)
-
-          case None =>
-            Future.successful(Redirect(controllers.routes.IndexController.onPageLoad()))
-        }
+        request.userAnswers.get(SavedProgressPage).map(
+          _ => Ok(view(form))
+        ).getOrElse(
+          Redirect(controllers.routes.IndexController.onPageLoad())
+        )
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetDataForSavedRegistration().async {
@@ -69,55 +60,23 @@ class ContinueRegistrationController @Inject()(
           Future.successful(BadRequest(view(formWithErrors))),
         value =>
           (value, request.userAnswers.get(SavedProgressPage)) match {
-            case (ContinueRegistration.Continue, Some(url)) => Future.successful(Redirect(Call(GET, url)))
+            case (ContinueRegistration.Continue, Some(url)) =>
+              coreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(waypoints).flatMap {
+                case Some(redirectResult) =>
+                  deleteSavedRegistration(redirectResult)
+                case None =>
+                  Future.successful(Redirect(Call(GET, url)))
+              }
+
             case (ContinueRegistration.Delete, _) =>
               for {
                 _ <- cc.sessionRepository.clear(request.userId)
                 _ <- saveForLaterConnector.delete()
               } yield Redirect(controllers.routes.IndexController.onPageLoad())
-            case _ => Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url))
+            case _ =>
+              Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url))
           }
       )
-  }
-
-  private def checkRegistrationStatus(waypoints: Waypoints)(implicit request: AuthenticatedDataRequest[_]): Future[Result] = {
-
-    implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
-    registrationConnector.getVatCustomerInfo().flatMap {
-      case Right(vatInfo) if checkVrnExpired(vatInfo) =>
-        deleteSavedRegistration(Redirect(controllers.routes.ExpiredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints)))
-
-      case Right(_) =>
-        coreRegistrationValidationService.searchUkVrn(request.vrn).flatMap {
-
-          case Some(activeMatch) if activeMatch.isActiveTrader =>
-            deleteSavedRegistration(
-              Redirect(controllers.routes.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints, activeMatch.memberState))
-            )
-
-          case Some(activeMatch) if activeMatch.isQuarantinedTrader(clock) =>
-            deleteSavedRegistration(
-              Redirect(
-                controllers.routes.QuarantinedVatCannotBeUsedForSaveAndComeBackController
-                  .onPageLoad(waypoints, activeMatch.memberState, activeMatch.getEffectiveDate)
-              )
-            )
-
-          case _ =>
-            Future.successful(Ok(view(form)))
-        }
-
-      case _ =>
-        Future.successful(Ok(view(form)))
-    }
-  }
-
-  private def checkVrnExpired(vatInfo: VatCustomerInfo): Boolean = {
-    vatInfo.deregistrationDecisionDate.exists(
-      !_.isAfter(LocalDate.now(clock))
-    )
   }
 
   private def deleteSavedRegistration(
