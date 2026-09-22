@@ -16,9 +16,14 @@
 
 package controllers.actions
 
+import controllers.euDetails.routes as euRoutes
 import controllers.routes
 import logging.Logging
+import models.CheckMode
 import models.requests.AuthenticatedDataRequest
+import pages.amend.ChangeRegistrationPage
+import pages.rejoin.RejoinRegistrationPage
+import pages.{EmptyWaypoints, NonEmptyWaypoints, Waypoint}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 import utils.FutureSyntax.FutureOps
@@ -26,35 +31,63 @@ import utils.FutureSyntax.FutureOps
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class CheckPartOfVatGroupFilterImpl(
-                                     restrictFromPartOfVatGroup: Boolean
+                                     restrictFromPartOfVatGroup: Boolean,
+                                     modifyingExistingRegistration: Boolean,
+                                     registrationModificationMode: RegistrationModificationMode
                                    )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
 
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
     if (restrictFromPartOfVatGroup) {
-      request.userAnswers.vatInfo.map { vatCustomerInfo =>
-        if (vatCustomerInfo.partOfVatGroup) {
-          Some(Redirect(routes.CannotAccessPageController.onPageLoad())).toFuture
+      request.registrationWrapper.map { registrationWrapper =>
+        if (registrationWrapper.vatInfo.partOfVatGroup) {
+          // TODO -> Test
+          if (modifyingExistingRegistration) {
+              if (registrationWrapper.registration.schemeDetails.euRegistrationDetails.nonEmpty) {
+                // TODO -> Redirect to new page and delete FE
+
+                val waypoints = determineWaypoints(registrationModificationMode)
+                Some(Redirect(euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad(waypoints))).toFuture
+              } else {
+                None.toFuture
+              }
+          } else {
+            Some(Redirect(routes.CannotAccessPageController.onPageLoad())).toFuture
+          }
         } else {
           None.toFuture
         }
       }.getOrElse {
-        val errorMessage = "VAT info unavailable, must have VAT info."
-        logger.error(errorMessage)
-        val exception: IllegalStateException = new IllegalStateException(errorMessage)
-        throw exception
+        throwException("Registration unavailable, must have a Registration.")
       }
     } else {
       None.toFuture
+    }
+  }
+
+  private def throwException(errorMessage: String): Future[Option[Result]] = {
+    logger.error(errorMessage)
+    val exception: IllegalStateException = new IllegalStateException(errorMessage)
+    throw exception
+  }
+  
+  private def determineWaypoints(registrationModificationMode: RegistrationModificationMode): NonEmptyWaypoints = {
+    registrationModificationMode match {
+      case AmendingActiveRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
+        
+      case RejoiningRegistration =>
+        EmptyWaypoints.setNextWaypoint(Waypoint(RejoinRegistrationPage, CheckMode, RejoinRegistrationPage.urlFragment))
+        
+        // TODO -> case _
     }
   }
 }
 
 class CheckPartOfVatGroupFilter @Inject()()(implicit val executionContext: ExecutionContext) {
 
-  def apply(restrictFromPartOfVatGroup: Boolean): CheckPartOfVatGroupFilterImpl = {
-    new CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup)
+  def apply(restrictFromPartOfVatGroup: Boolean, modifyingExistingRegistration: Boolean, registrationModificationMode: RegistrationModificationMode): CheckPartOfVatGroupFilterImpl = {
+    new CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup, modifyingExistingRegistration, registrationModificationMode)
   }
 }

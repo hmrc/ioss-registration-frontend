@@ -82,7 +82,7 @@ class RegistrationService @Inject()(
       ))
   }
 
-  def toUserAnswers(userId: String, registrationWrapper: RegistrationWrapper): Future[UserAnswers] = {
+  def toUserAnswers(userId: String, registrationWrapper: RegistrationWrapper, removeFe: Boolean = false): Future[UserAnswers] = {
 
     val etmpTradingNames = registrationWrapper.registration.tradingNames
     val etmpPreviousRegistrations = registrationWrapper.registration.schemeDetails.previousEURegistrationDetails
@@ -111,12 +111,12 @@ class RegistrationService @Inject()(
         Try(hasPreviousRegistrationsUA)
       }
 
-      hasTaxRegisteredInEuUA <- if (!previousRegistrationsUA.vatInfo.exists(_.partOfVatGroup)) {
+      hasTaxRegisteredInEuUA <- if (!previousRegistrationsUA.vatInfo.exists(_.partOfVatGroup) || removeFe) {
         previousRegistrationsUA.set(TaxRegisteredInEuPage, etmpEuDetails.nonEmpty)
       } else {
         Try(previousRegistrationsUA)
       }
-      taxRegistrationsInEuUA <- if (!previousRegistrationsUA.vatInfo.exists(_.partOfVatGroup) && etmpEuDetails.nonEmpty) {
+      taxRegistrationsInEuUA <- if (!previousRegistrationsUA.vatInfo.exists(_.partOfVatGroup) && etmpEuDetails.nonEmpty || removeFe) {
         hasTaxRegisteredInEuUA.set(AllEuDetailsQuery, convertToEuDetails(etmpEuDetails).toList)
       } else {
         Try(hasTaxRegisteredInEuUA)

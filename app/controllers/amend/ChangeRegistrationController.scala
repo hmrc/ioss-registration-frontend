@@ -78,7 +78,7 @@ class ChangeRegistrationController @Inject()(
         EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
       }
 
-    cc.authAndRequireIoss(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations = false).async {
+    cc.authAndRequireIoss(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations = false, restrictFromPartOfVatGroup = true).async {
       implicit request: AuthenticatedMandatoryIossRequest[AnyContent] =>
 
         val futurePreviousRegistrations = if(request.hasMultipleIossEnrolments) {

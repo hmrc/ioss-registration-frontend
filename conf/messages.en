@@ -814,3 +814,8 @@ expiredVatCannotBeUsedForSaveAndComeBack.link = <a href="https://www.gov.uk/regi
 quarantinedVatCannotBeUsedForSaveAndComeBack.title = You can no longer register for this service
 quarantinedVatCannotBeUsedForSaveAndComeBack.heading = You can no longer register for this service
 quarantinedVatCannotBeUsedForSaveAndComeBack.p = {0} has blocked your account from all VAT One Stop Shop schemes until {1}.
+
+deleteAllFixedEstablishmentsAsPartOfVatGroup.title = Delete your fixed establishment information
+deleteAllFixedEstablishmentsAsPartOfVatGroup.heading = Delete your fixed establishment information
+deleteAllFixedEstablishmentsAsPartOfVatGroup.p1 = Your business is now registered as a VAT group. To comply with EU law, we cannot hold information about fixed establishments. We''ll now delete these fixed establishment details from your IOSS registration:
+deleteAllFixedEstablishmentsAsPartOfVatGroup.contact = If you have any questions, contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
