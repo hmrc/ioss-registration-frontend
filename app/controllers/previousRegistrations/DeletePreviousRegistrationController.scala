@@ -40,7 +40,6 @@ class DeletePreviousRegistrationController @Inject()(
                                                       formProvider: DeletePreviousRegistrationFormProvider,
                                                       view: DeletePreviousRegistrationView
                                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
-
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
@@ -99,5 +98,4 @@ class DeletePreviousRegistrationController @Inject()(
         }
     )
   }
-
 }

@@ -17,14 +17,13 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import controllers.routes
 import forms.previousRegistrations.PreviousIossNumberFormProvider
 import models.core.{Match, TraderId}
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.NonCompliantDetails
 import models.{Country, Index, PreviousScheme}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -34,7 +33,7 @@ import pages.previousRegistrations.{PreviousEuCountryPage, PreviousIossNumberPag
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.previousRegistration.NonCompliantQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.core.CoreRegistrationValidationService
@@ -76,17 +75,12 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
   "PreviousIossNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val application = applicationBuilder(userAnswers = Some(baseAnswers))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .build()
 
       running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-          Mockito.reset(mockRegistrationConnector)
-
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
+        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
 
           val request = FakeRequest(GET, previousIossNumberRoute(waypoints))
 
@@ -97,27 +91,20 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(form, waypoints, index, index, country,
             hasIntermediary = false, ossHintText)(request, messages(application)).toString
-
-          verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
+
       val userAnswers = baseAnswers
         .set(PreviousIossNumberPage(index, index), PreviousSchemeNumbers("answer", None)).success.value
 
-      val mockRegistrationConnector = mock[RegistrationConnector]
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .build()
 
       running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-          Mockito.reset(mockRegistrationConnector)
-
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
+        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
 
           val request = FakeRequest(GET, previousIossNumberRoute(waypoints))
 
@@ -130,33 +117,28 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
             view(form.fill(
               PreviousSchemeNumbers("answer", None)), waypoints, index, index, country, hasIntermediary = false, ossHintText
             )(request, messages(application)).toString
-
-          verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
       }
     }
 
     "must save the answer and redirect to the next page when valid data is submitted" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
       val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val application =
         applicationBuilder(userAnswers = Some(baseAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
           .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
+        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
           Mockito.reset(mockSessionRepository)
           Mockito.reset(mockCoreRegistrationValidationService)
-          Mockito.reset(mockRegistrationConnector)
 
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
           when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request =
             FakeRequest(POST, previousIossNumberRoute(waypoints))
@@ -168,33 +150,28 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual PreviousIossNumberPage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-          verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
       }
     }
 
     "continue normally when active IOSS found" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
       val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val application =
         applicationBuilder(userAnswers = Some(baseAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
           .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
+        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
           Mockito.reset(mockSessionRepository)
           Mockito.reset(mockCoreRegistrationValidationService)
-          Mockito.reset(mockRegistrationConnector)
 
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
           when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request =
             FakeRequest(POST, previousIossNumberRoute(waypoints))
@@ -206,7 +183,6 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual PreviousIossNumberPage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-          verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
       }
     }
@@ -224,6 +200,7 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
       )
 
       "Redirect to scheme still active when active IOSS found when not in Amend mode" in {
+
         val countryCode = genericMatch.memberState
 
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
@@ -261,14 +238,12 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
       }
 
       "Allow found IOSS when in Amend mode" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-        val mockRegistrationConnector = mock[RegistrationConnector]
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
         when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val amendModeWaypoints = createCheckModeWayPoint(ChangeRegistrationPage)
 
@@ -276,7 +251,6 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
         running(application) {
@@ -290,11 +264,11 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual PreviousIossNumberPage(index, index).navigate(amendModeWaypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-          verify(mockRegistrationConnector, times(1)).getRegistration()(any())
         }
       }
 
       "Redirect to scheme quarantined when quarantined IOSS found when not in Amend mode" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
@@ -330,15 +304,13 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
       }
 
       "Allow quarantined IOSS found when in Amend mode" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-        val mockRegistrationConnector = mock[RegistrationConnector]
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
         when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
           Future.successful(Some(genericMatch.copy(exclusionStatusCode = Some(4))))
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val amendModeWaypoints = createCheckModeWayPoint(ChangeRegistrationPage)
 
@@ -346,7 +318,6 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
         running(application) {
@@ -360,12 +331,12 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual PreviousIossNumberPage(index, index).navigate(amendModeWaypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-          verify(mockRegistrationConnector, times(1)).getRegistration()(any())
         }
       }
 
 
       "must save non-compliant details from the active scheme and redirect to the next page when match type is TransferringMSID" in {
+
         val userAnswers = emptyUserAnswers
           .set(PreviousEuCountryPage(index), country).success.value
           .set(PreviousSchemePage(index, index), PreviousScheme.IOSSWOI).success.value
@@ -376,26 +347,21 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
 
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-        val mockRegistrationConnector = mock[RegistrationConnector]
 
         val application =
           applicationBuilder(userAnswers = Some(userAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
         running(application) {
-          forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
+          forAll(allModeModeWaypoints) { (_, waypoints, _) =>
             Mockito.reset(mockSessionRepository)
             Mockito.reset(mockCoreRegistrationValidationService)
-            Mockito.reset(mockRegistrationConnector)
 
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
             when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
               Some(transferringMsidMatch).toFuture
-            when(mockRegistrationConnector.getRegistration()(any()))
-              .thenReturn(Future.successful(Right(registrationWrapper)))
 
             val request =
               FakeRequest(POST, previousIossNumberSubmitRoute(waypoints))
@@ -414,25 +380,18 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
             redirectLocation(result).value mustEqual PreviousIossNumberPage(index, index).navigate(waypoints, userAnswers, expectedAnswers).url
             verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
             verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-            verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
           }
         }
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val application = applicationBuilder(userAnswers = Some(baseAnswers))
-        .overrides(
-          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-        )
         .build()
 
       running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-          Mockito.reset(mockRegistrationConnector)
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
+        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
 
           val request =
             FakeRequest(POST, previousIossNumberRoute(waypoints))
@@ -447,13 +406,12 @@ class PreviousIossNumberControllerSpec extends SpecBase with MockitoSugar with T
           status(result) mustEqual BAD_REQUEST
           contentAsString(result) mustEqual
             view(boundForm, waypoints, index, index, country, hasIntermediary = false, ossHintText)(request, messages(application)).toString
-
-          verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
       }
     }
 
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
+
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {

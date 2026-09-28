@@ -17,22 +17,21 @@
 package controllers.amend
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import forms.amend.ViewOrChangePreviousRegistrationsMultipleFormProvider
 import models.UserAnswers
 import models.amend.PreviousRegistration
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ViewOrChangePreviousRegistrationsMultiplePage
-import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.PreviousRegistrationIossNumberQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.AccountService
@@ -50,13 +49,11 @@ class ViewOrChangePreviousRegistrationsMultipleControllerSpec extends SpecBase w
   private val formProvider = new ViewOrChangePreviousRegistrationsMultipleFormProvider()
   private val form: Form[String] = formProvider(previousRegistrations)
 
-  private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val mockAccountService: AccountService = mock[AccountService]
 
   private val validAnswer: String = Gen.oneOf(previousRegistrations.map(_.iossNumber)).sample.value
 
   override def beforeEach(): Unit = {
-    Mockito.reset(mockRegistrationConnector)
     Mockito.reset(mockAccountService)
   }
 
@@ -64,11 +61,9 @@ class ViewOrChangePreviousRegistrationsMultipleControllerSpec extends SpecBase w
 
     "must return OK and the correct view for a GET" in {
 
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockAccountService.getPreviousRegistrations()(any())) thenReturn previousRegistrations.toFuture
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .build()
 
@@ -88,11 +83,11 @@ class ViewOrChangePreviousRegistrationsMultipleControllerSpec extends SpecBase w
 
       val userAnswers = emptyUserAnswersWithVatInfo.set(ViewOrChangePreviousRegistrationsMultiplePage, "").success.value
 
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockAccountService.getPreviousRegistrations()(any())) thenReturn previousRegistrations.toFuture
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+      val application = applicationBuilder(
+        userAnswers = Some(userAnswers)
+      )
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .build()
 
@@ -113,11 +108,9 @@ class ViewOrChangePreviousRegistrationsMultipleControllerSpec extends SpecBase w
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockAccountService.getPreviousRegistrations()(any())) thenReturn previousRegistrations.toFuture
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
         .build()
@@ -143,11 +136,9 @@ class ViewOrChangePreviousRegistrationsMultipleControllerSpec extends SpecBase w
       val invalidAnswer: String = arbitraryPreviousRegistration.arbitrary
         .suchThat(_.iossNumber.toSeq != previousRegistrations.map(_.iossNumber)).sample.value.iossNumber
 
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockAccountService.getPreviousRegistrations()(any())) thenReturn previousRegistrations.toFuture
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[AccountService].toInstance(mockAccountService))
         .build()
 
@@ -164,37 +155,6 @@ class ViewOrChangePreviousRegistrationsMultipleControllerSpec extends SpecBase w
 
         status(result) mustBe BAD_REQUEST
         contentAsString(result) mustBe view(boundForm, waypoints, previousRegistrations)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, viewOrChangePreviousRegistrationsMultipleRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
-      }
-    }
-
-    "redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, viewOrChangePreviousRegistrationsMultipleRoute)
-            .withFormUrlEncodedBody(("value", ""))
-
-        val result = route(application, request).value
-
-        status(result) mustBe SEE_OTHER
-
-        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
   }

@@ -14,19 +14,16 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth._
-@import pages.Waypoints
 @import controllers.euDetails.routes
 @import models.euDetails.EuDetails
+@import pages.Waypoints
 @import viewmodels.DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
-    govukInput: GovukInput,
-    govukButton: GovukButton,
-    govukTable: GovukTable
+    govukTable: GovukTable,
+    govukButton: GovukButton
 )
 
 @(waypoints: Waypoints, viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel)(implicit request: Request[_], messages: Messages)
@@ -44,7 +41,7 @@
     <p class="govuk-body">@Html(messages("deleteAllFixedEstablishmentsAsPartOfVatGroup.contact"))</p>
 
         @govukButton(
-            ButtonViewModel(messages("site.continue"))
+            ButtonViewModel(messages("site.continue")).withAttribute("id", "continue")
         )
     }
 }

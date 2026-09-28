@@ -35,7 +35,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, StringContextOps}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class RegistrationConnector @Inject()(config: Configuration, httpClientV2: HttpClientV2)
                                      (implicit executionContext: ExecutionContext) extends HttpErrorFunctions with Logging {
 

@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package pages.euDetails
+package pages
 
-import controllers.euDetails.routes
-import models.UserAnswers
-import pages.amend.AmendCompletePage
-import pages.{Page, Waypoints}
+import controllers.routes
+import models.{Index, UserAnswers}
+import pages.website.WebsitePage
 import play.api.mvc.Call
 
-case object DeleteAllFixedEstablishmentsAsPartOfVatGroupPage extends Page {
+case object SavedProgressRemoveFixedEstablishmentsPage extends Page {
 
   override def route(waypoints: Waypoints): Call = {
-    routes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad(waypoints)
+    routes.SavedProgressRemoveFixedEstablishmentsController.onPageLoad(waypoints)
   }
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    AmendCompletePage
+    WebsitePage(Index(0))
   }
 }

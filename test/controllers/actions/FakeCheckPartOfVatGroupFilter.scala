@@ -24,13 +24,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class FakeCheckPartOfVatGroupFilter
-  extends CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup = true) {
+  extends CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup = true, registrationModificationMode = NotModifyingExistingRegistration) {
 
-  override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] =
+  override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
     None.toFuture
+  }
 }
 
 class FakeCheckPartOfVatGroupFilterProvider extends CheckPartOfVatGroupFilter() {
 
-  override def apply(restrictFromPartOfVatGroup: Boolean): CheckPartOfVatGroupFilterImpl = new FakeCheckPartOfVatGroupFilter()
+  override def apply(restrictFromPartOfVatGroup: Boolean, registrationModificationMode: RegistrationModificationMode): CheckPartOfVatGroupFilterImpl = {
+    new FakeCheckPartOfVatGroupFilter()
+  }
 }

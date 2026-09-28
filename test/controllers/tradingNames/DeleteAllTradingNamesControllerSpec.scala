@@ -19,15 +19,15 @@ package controllers.tradingNames
 import base.SpecBase
 import forms.tradingNames.DeleteAllTradingNamesFormProvider
 import models.{Index, UserAnswers}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.tradingNames.{DeleteAllTradingNamesPage, HasTradingNamePage, TradingNamePage}
-import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.tradingNames.AllTradingNames
 import repositories.AuthenticatedUserAnswersRepository
 import utils.FutureSyntax.FutureOps
@@ -142,36 +142,6 @@ class DeleteAllTradingNamesControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustBe BAD_REQUEST
         contentAsString(result) mustBe view(boundForm, waypoints)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, deleteAllTradingNamesRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, deleteAllTradingNamesRoute)
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
   }

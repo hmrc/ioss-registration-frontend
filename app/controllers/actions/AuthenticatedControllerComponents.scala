@@ -80,7 +80,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       getData andThen
       requireData(modifyingExistingRegistration) andThen
       checkOtherCountryRegistration(registrationModificationMode) andThen
-      checkPartOfVatGroup(restrictFromPartOfVatGroup, modifyingExistingRegistration, registrationModificationMode)
+      checkPartOfVatGroup(restrictFromPartOfVatGroup, registrationModificationMode)
   }
 
   def authAndGetOptionalData(): ActionBuilder[AuthenticatedOptionalDataRequest, AnyContent] = {
@@ -111,13 +111,12 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
                                           registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
                                           restrictFromPartOfVatGroup: Boolean = false
                                         ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
-    val modifyingExistingRegistration = registrationModificationMode != NotModifyingExistingRegistration
     actionBuilder andThen
       identify andThen
       checkRegistration(registrationModificationMode) andThen
       getData andThen
       requireData(false) andThen
-      checkPartOfVatGroup(restrictFromPartOfVatGroup, modifyingExistingRegistration, registrationModificationMode)
+      checkPartOfVatGroup(restrictFromPartOfVatGroup, registrationModificationMode)
   }
 }
 

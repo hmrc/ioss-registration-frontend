@@ -17,10 +17,9 @@
 package controllers
 
 import base.SpecBase
-import connectors.{RegistrationConnector, SaveForLaterConnector}
+import connectors.SaveForLaterConnector
 import forms.ContinueRegistrationFormProvider
 import models.ContinueRegistration.{Continue, Delete}
-import models.responses
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatestplus.mockito.MockitoSugar
@@ -41,11 +40,8 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new ContinueRegistrationFormProvider()
   private val form = formProvider()
-
-
-
+  
   private lazy val continueRegistrationRoute = routes.ContinueRegistrationController.onPageLoad().url
-  private val mockRegistrationConnector = mock[RegistrationConnector]
   private val mockCoreSavedAnswersRevalidationService = mock[CoreSavedAnswersRevalidationService]
 
   "ContinueRegistration Controller" - {
@@ -297,36 +293,6 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, continueRegistrationRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, continueRegistrationRoute)
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 

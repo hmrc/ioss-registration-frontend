@@ -17,23 +17,23 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import controllers.routes
 import forms.previousRegistrations.DeletePreviousRegistrationFormProvider
+import models.amend.RegistrationWrapper
 import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.{Country, Index, PreviousScheme}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
 import pages.{CannotRemoveExistingPreviousRegistrationsPage, CheckYourAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoints}
-import pages.previousRegistrations._
+import pages.previousRegistrations.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.previousRegistration.PreviousRegistrationQuery
 import repositories.AuthenticatedUserAnswersRepository
 import testutils.RegistrationData
@@ -98,9 +98,7 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
       }
     }
 
-
     "must return OK and the correct view for a GET when in Amend mode and the country has not been previously saved" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val etmpCountries = registrationWrapper.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy)
 
@@ -116,13 +114,7 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
           .set(PreviousOssNumberPage(index, index), newPreviousSchemeNumbers).success.value
 
       val application = applicationBuilder(userAnswers = Some(newUserAnswers))
-        .overrides(
-          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-        )
         .build()
-
-      when(mockRegistrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(registrationWrapper)))
 
       running(application) {
         val request = FakeRequest(GET, deletePreviousRegistrationRoute(amendModeWaypoints))
@@ -133,21 +125,16 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
 
         status(result) `mustEqual` OK
         contentAsString(result) mustEqual view(form, amendModeWaypoints, index, newCountry.name)(request, messages(application)).toString
-        verify(mockRegistrationConnector, times(1)).getRegistration()(any())
       }
     }
 
     "must error for a GET when in Amend mode and the country has been previously saved" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
-      val application = applicationBuilder(userAnswers = Some(baseUserAnswers))
-        .overrides(
-          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-        )
+      val application = applicationBuilder(
+        userAnswers = Some(baseUserAnswers),
+        registrationWrapper = Some(austrianContainingRegistrationWrapper)
+      )
         .build()
-
-      when(mockRegistrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(austrianContainingRegistrationWrapper)))
 
       running(application) {
         val request = FakeRequest(GET, deletePreviousRegistrationRoute(amendModeWaypoints))
@@ -156,12 +143,11 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
 
         status(result) `mustEqual` SEE_OTHER
         redirectLocation(result).value mustEqual CannotRemoveExistingPreviousRegistrationsPage.route(amendModeWaypoints).url
-
-        verify(mockRegistrationConnector, times(1)).getRegistration()(any())
       }
     }
 
     "must delete a record and redirect to the next page when the user answers Yes when not in Amend mode" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       val etmpCountries = registrationWrapper.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy)
@@ -204,8 +190,8 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
     }
 
     "must delete a record and redirect to the next page when the user answers Yes when in Amend mode and the country has not been saved" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val etmpCountries = registrationWrapper.registration.schemeDetails.previousEURegistrationDetails.map(_.issuedBy)
 
@@ -223,13 +209,10 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
       val application =
         applicationBuilder(userAnswers = Some(newUserAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-        when(mockRegistrationConnector.getRegistration()(any))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val request =
           FakeRequest(POST, deletePreviousRegistrationRoute(amendModeWaypoints))
@@ -245,24 +228,23 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
           .navigate(amendModeWaypoints, emptyUserAnswers, expectedAnswers).url
 
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-        verify(mockRegistrationConnector, times(1)).getRegistration()(any())
       }
     }
 
     "must redirect to an error page when trying to delete when the country is in the saved registration list" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val application =
-        applicationBuilder(userAnswers = Some(baseUserAnswers))
+        applicationBuilder(
+          userAnswers = Some(baseUserAnswers),
+          registrationWrapper = Some(austrianContainingRegistrationWrapper)
+        )
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-        when(mockRegistrationConnector.getRegistration()(any))
-          .thenReturn(Future.successful(Right(austrianContainingRegistrationWrapper)))
 
         val request =
           FakeRequest(POST, deletePreviousRegistrationRoute(amendModeWaypoints))
@@ -276,11 +258,11 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
         result.failed.futureValue mustBe a[InvalidAmendModeOperationException]
 
         verify(mockSessionRepository, times(0)).set(eqTo(expectedAnswers))
-        verify(mockRegistrationConnector, times(1)).getRegistration()(any())
       }
     }
 
     "must not delete a record and redirect to the next page when the user answers No when not in Amend mode" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
@@ -304,7 +286,6 @@ class DeletePreviousRegistrationControllerSpec extends SpecBase with MockitoSuga
         }
       }
     }
-
 
     "must return a Bad Request and errors when invalid data is submitted when not in Amend mode" in {
 

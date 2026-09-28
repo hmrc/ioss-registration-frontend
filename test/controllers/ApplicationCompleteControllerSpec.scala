@@ -105,7 +105,10 @@ class ApplicationCompleteControllerSpec extends SpecBase {
 
       val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
       
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount).build()
+      val application = applicationBuilder(
+        userAnswers = Some(updatedAnswers),
+        compositeAccount = compositeAccount
+      ).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ApplicationCompleteController.onPageLoad().url)

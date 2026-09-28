@@ -17,25 +17,24 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
-import controllers.previousRegistrations.{routes => prevRoutes}
+import controllers.previousRegistrations.routes as prevRoutes
 import controllers.routes
 import forms.previousRegistrations.AddPreviousRegistrationFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.{PreviousRegistrationDetailsWithOptionalVatNumber, SchemeDetailsWithOptionalVatNumber}
 import models.{CheckMode, Country, Index, PreviousScheme, PreviousSchemeType}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
-import pages.previousRegistrations._
+import pages.previousRegistrations.*
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import viewmodels.checkAnswers.previousRegistrations.PreviousRegistrationSummary
 import views.html.previousRegistrations.AddPreviousRegistrationView
@@ -171,18 +170,16 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar w
       }
     }
 
-
     "must save the answer and redirect to the next page when valid data is submitted when in amend mode" in {
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val registrationConnector: RegistrationConnector = mock[RegistrationConnector]
 
       val application =
-        applicationBuilder(userAnswers = Some(baseAnswers))
+        applicationBuilder(
+          userAnswers = Some(baseAnswers),
+          registrationWrapper = Some(registrationWrapper)
+        )
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
           .build()
-
-      when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
 
       val amendModeWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
       val expectedAnswers = baseAnswers.set(AddPreviousRegistrationPage(), true).success.value
@@ -205,10 +202,8 @@ class AddPreviousRegistrationControllerSpec extends SpecBase with MockitoSugar w
         redirectLocation(result).value mustEqual AddPreviousRegistrationPage().navigate(expectedWaypoints, baseAnswers, expectedAnswers).url
 
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-        verify(registrationConnector, times(1)).getRegistration()(any())
       }
     }
-
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 

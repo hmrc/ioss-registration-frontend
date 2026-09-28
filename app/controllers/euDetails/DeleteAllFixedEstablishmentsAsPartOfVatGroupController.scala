@@ -16,7 +16,6 @@
 
 package controllers.euDetails
 
-import connectors.RegistrationConnector
 import controllers.actions.*
 import logging.Logging
 import models.euDetails.EuDetails
@@ -27,7 +26,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.euDetails.AllEuDetailsQuery
 import services.RegistrationService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.AmendWaypoints.AmendWaypointsOps
 import utils.FutureSyntax.FutureOps
 import viewmodels.DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel
 import views.html.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupView
@@ -38,7 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
                                                                         override val messagesApi: MessagesApi,
                                                                         cc: AuthenticatedControllerComponents,
-                                                                        registrationConnector: RegistrationConnector,
                                                                         registrationService: RegistrationService,
                                                                         view: DeleteAllFixedEstablishmentsAsPartOfVatGroupView
                                                                       )(implicit ec: ExecutionContext)
@@ -46,32 +43,24 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = {
-    val modifyingExistingRegistrationMode = if (waypoints.inAmend) {
-      AmendingActiveRegistration
-    } else {
-      RejoiningRegistration
-    }
+  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
+    implicit request =>
+      
+      request.registrationWrapper match {
+        case Some(registration) =>
+          registrationService.toUserAnswers(request.userId, registration, removeFe = true).flatMap { answers =>
+            val euDetailsList: List[EuDetails] = answers.get(AllEuDetailsQuery).getOrElse(List.empty)
+            val viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel = DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel(euDetailsList)
 
-    cc.authAndGetData(modifyingExistingRegistrationMode).async {
-      implicit request =>
+            Ok(view(waypoints, viewModel)).toFuture
+          }
 
-        registrationConnector.getRegistration().flatMap {
-          case Right(registrationWrapper) =>
-            registrationService.toUserAnswers(request.userId, registrationWrapper, removeFe = true).flatMap { answers =>
-
-              val euDetailsList: List[EuDetails] = answers.get(AllEuDetailsQuery).getOrElse(List.empty)
-              val viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel = DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel(euDetailsList)
-
-              Ok(view(waypoints, viewModel)).toFuture
-            }
-          case Left(error) =>
-            val errorMessage: String = s"An error occurred when retrieving registration with error: ${error.body}."
-            logger.error(errorMessage, error)
-            val exception: Exception = new Exception(errorMessage)
-            throw exception
-        }
-    }
+        case _ =>
+          val errorMessage: String = s"Registration not available. Must have a registration."
+          logger.error(errorMessage)
+          val exception: IllegalStateException = new IllegalStateException(errorMessage)
+          throw exception
+      }
   }
 
   def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {

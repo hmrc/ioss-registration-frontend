@@ -120,7 +120,7 @@ trait SpecBase
         bind[AuthenticatedIdentifierAction].toInstance(new FakeAuthenticatedIdentifierAction(compositeAccount, numberOfIossRegistrations)),
         bind[AuthenticatedDataRetrievalAction].toInstance(new FakeAuthenticatedDataRetrievalAction(userAnswers, vrn)),
         bind[UnauthenticatedDataRetrievalAction].toInstance(new FakeUnauthenticatedDataRetrievalAction(userAnswers)),
-        bind[AuthenticatedDataRequiredActionImpl].toInstance(FakeAuthenticatedDataRequiredAction(userAnswers)),
+        bind[AuthenticatedDataRequiredAction].toInstance(new FakeAuthenticatedDataRequiredActionProvider(userAnswers, registrationWrapper, compositeAccount, numberOfIossRegistrations)),
         bind[CheckOtherCountryRegistrationFilter].toInstance(new FakeCheckOtherCountryRegistrationFilter()),
         bind[CheckRegistrationFilterProvider].toInstance(new FakeCheckRegistrationFilterProvider()),
         bind[CheckEmailVerificationFilterProvider].toInstance(new FakeCheckEmailVerificationFilter()),

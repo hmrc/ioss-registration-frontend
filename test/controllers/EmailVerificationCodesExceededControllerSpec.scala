@@ -17,30 +17,18 @@
 package controllers
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import controllers.actions.*
 import models.CheckMode
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito
-import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.rejoin.RejoinRegistrationPage
 import pages.{BusinessContactDetailsPage, CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import utils.FutureSyntax.FutureOps
 import views.html.EmailVerificationCodesExceededView
 
 class EmailVerificationCodesExceededControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
-
-  private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
-
-  override def beforeEach(): Unit = {
-    Mockito.reset(mockRegistrationConnector)
-  }
 
   "EmailVerificationCodesExceeded Controller" - {
 
@@ -73,8 +61,6 @@ class EmailVerificationCodesExceededControllerSpec extends SpecBase with Mockito
 
       s"must return OK and the correct view for a GET in $mode" in {
 
-        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
-
         val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(page, CheckMode, page.urlFragment))
         val aMode: RegistrationModificationMode = mode
 
@@ -82,7 +68,6 @@ class EmailVerificationCodesExceededControllerSpec extends SpecBase with Mockito
           userAnswers = Some(basicUserAnswersWithVatInfo),
           registrationWrapper = Some(registrationWrapper)
         )
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
         running(application) {
@@ -96,7 +81,6 @@ class EmailVerificationCodesExceededControllerSpec extends SpecBase with Mockito
 
           status(result) `mustBe` OK
           contentAsString(result) `mustBe` view(redirectLink, aMode)(request, messages(application)).toString
-          verify(mockRegistrationConnector, times(1)).getRegistration()(any())
         }
       }
     }

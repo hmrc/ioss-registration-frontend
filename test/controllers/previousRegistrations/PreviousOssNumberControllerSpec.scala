@@ -17,14 +17,12 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
-import controllers.routes
 import forms.previousRegistrations.PreviousOssNumberFormProvider
 import models.core.{Match, TraderId}
 import models.domain.PreviousSchemeNumbers
 import models.previousRegistrations.PreviousSchemeHintText
 import models.{Country, CountryWithValidationDetails, Index, PreviousScheme}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -34,7 +32,7 @@ import pages.previousRegistrations.{PreviousEuCountryPage, PreviousOssNumberPage
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import services.core.CoreRegistrationValidationService
 import views.html.previousRegistrations.PreviousOssNumberView
@@ -66,17 +64,12 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
   "PreviousOssNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val application = applicationBuilder(userAnswers = Some(baseAnswers))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .build()
 
       running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-          Mockito.reset(mockRegistrationConnector)
-
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
+        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
 
           val request = FakeRequest(GET, previousOssNumberRoute(waypoints))
 
@@ -87,25 +80,19 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
           status(result) mustEqual OK
           contentAsString(result) mustEqual
             view(form, waypoints, index, index, countryWithValidation, PreviousSchemeHintText.Both)(request, messages(application)).toString
-          verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
+
       val userAnswers = baseAnswers.set(PreviousOssNumberPage(index, index), PreviousSchemeNumbers("answer", None)).success.value
 
-      val mockRegistrationConnector = mock[RegistrationConnector]
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .build()
 
       running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-          Mockito.reset(mockRegistrationConnector)
-
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
+        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
 
           val request = FakeRequest(GET, previousOssNumberRoute(waypoints))
 
@@ -116,7 +103,6 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
           status(result) mustEqual OK
           contentAsString(result) mustEqual
             view(form.fill("answer"), waypoints, index, index, countryWithValidation, PreviousSchemeHintText.Both)(request, messages(application)).toString
-          verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
         }
       }
     }
@@ -124,27 +110,23 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
     "must save the answer and redirect to the next page when valid data is submitted" - {
 
       "when the ID starts with EU it sets to non-union" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-        val mockRegistrationConnector = mock[RegistrationConnector]
 
         val application =
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
         running(application) {
-          forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
+          forAll(allModeModeWaypoints) { (_, waypoints, _) =>
             Mockito.reset(mockSessionRepository)
             Mockito.reset(mockCoreRegistrationValidationService)
-            Mockito.reset(mockRegistrationConnector)
 
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
             when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
-            when(mockRegistrationConnector.getRegistration()(any()))
-              .thenReturn(Future.successful(Right(registrationWrapper)))
 
             val request =
               FakeRequest(POST, previousOssNumberRoute(waypoints))
@@ -158,33 +140,28 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
             verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-            verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
           }
         }
       }
 
       "when the ID doesn't start with EU it sets to union" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-        val mockRegistrationConnector = mock[RegistrationConnector]
 
         val application =
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
         running(application) {
-          forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
+          forAll(allModeModeWaypoints) { (_, waypoints, _) =>
             Mockito.reset(mockSessionRepository)
             Mockito.reset(mockCoreRegistrationValidationService)
-            Mockito.reset(mockRegistrationConnector)
 
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
             when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn Future.successful(None)
-            when(mockRegistrationConnector.getRegistration()(any()))
-              .thenReturn(Future.successful(Right(registrationWrapper)))
 
             val request =
               FakeRequest(POST, previousOssNumberRoute(waypoints))
@@ -198,7 +175,6 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(waypoints, emptyUserAnswers, expectedAnswers).url
             verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-            verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
           }
         }
       }
@@ -217,31 +193,27 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
       )
 
       "Continue on normal journey if to scheme still active when active OSS found" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-        val mockRegistrationConnector = mock[RegistrationConnector]
 
         val application =
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .configure(
               "features.other-country-reg-validation-enabled" -> true
             )
             .build()
 
         running(application) {
-          forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
+          forAll(allModeModeWaypoints) { (_, waypoints, _) =>
             Mockito.reset(mockSessionRepository)
             Mockito.reset(mockCoreRegistrationValidationService)
-            Mockito.reset(mockRegistrationConnector)
 
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
             when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
               Future.successful(Some(genericMatch))
-            when(mockRegistrationConnector.getRegistration()(any()))
-              .thenReturn(Future.successful(Right(registrationWrapper)))
 
             val request =
               FakeRequest(POST, previousOssNumberRoute(waypoints))
@@ -256,12 +228,12 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
                 index
               ).url
             verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
-            verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
           }
         }
       }
 
       "Redirect to scheme quarantined when quarantined OSS found when not in Amend mode" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
 
@@ -299,9 +271,9 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
       }
 
       "Allow quarantined OSS when in Amend Mode" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-        val mockRegistrationConnector = mock[RegistrationConnector]
 
         val amendModeWaypoints = createCheckModeWayPoint(ChangeRegistrationPage)
 
@@ -309,14 +281,10 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
         when(mockCoreRegistrationValidationService.searchScheme(any(), any(), any(), any())(any(), any())) thenReturn
           Future.successful(Some(genericMatch.copy(exclusionStatusCode = Some(4))))
 
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
         val application =
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .configure(
               "features.other-country-reg-validation-enabled" -> true
             )
@@ -334,32 +302,27 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
           redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(amendModeWaypoints, emptyUserAnswers, baseAnswers).url
 
           verify(mockCoreRegistrationValidationService, times(1)).searchScheme(any(), any(), any(), any())(any(), any())
-          verify(mockRegistrationConnector, times(1)).getRegistration()(any())
         }
       }
 
 
       "not call core validation when OSS Non Union" in {
+
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
         val mockCoreRegistrationValidationService = mock[CoreRegistrationValidationService]
-        val mockRegistrationConnector = mock[RegistrationConnector]
 
         val application =
           applicationBuilder(userAnswers = Some(baseAnswers))
             .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
             .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
-            .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
             .build()
 
         running(application) {
-          forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
+          forAll(allModeModeWaypoints) { (_, waypoints, _) =>
             Mockito.reset(mockSessionRepository)
             Mockito.reset(mockCoreRegistrationValidationService)
-            Mockito.reset(mockRegistrationConnector)
 
             when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-            when(mockRegistrationConnector.getRegistration()(any()))
-              .thenReturn(Future.successful(Right(registrationWrapper)))
 
             val request =
               FakeRequest(POST, previousOssNumberRoute(waypoints))
@@ -373,7 +336,6 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
             status(result) mustEqual SEE_OTHER
             redirectLocation(result).value mustEqual PreviousOssNumberPage(index, index).navigate(waypoints, baseAnswers, expectedAnswers).url
             verify(mockCoreRegistrationValidationService, times(0)).searchScheme(any(), any(), any(), any())(any(), any())
-            verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
           }
         }
 
@@ -381,17 +343,12 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val application = applicationBuilder(userAnswers = Some(baseAnswers))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .build()
 
       running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, registrationCallCount) =>
-          Mockito.reset(mockRegistrationConnector)
-
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
+        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
 
           val request =
             FakeRequest(POST, previousOssNumberRoute(waypoints))
@@ -406,43 +363,6 @@ class PreviousOssNumberControllerSpec extends SpecBase with MockitoSugar with Ta
           status(result) mustEqual BAD_REQUEST
           contentAsString(result) mustEqual view(boundForm, waypoints, index, index, countryWithValidation,
             PreviousSchemeHintText.Both)(request, messages(application)).toString
-
-          verify(mockRegistrationConnector, times(registrationCallCount)).getRegistration()(any())
-        }
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-      val application = applicationBuilder(userAnswers = None)
-        .build()
-
-      running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
-          val request = FakeRequest(GET, previousOssNumberRoute(waypoints))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-        }
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-      val application = applicationBuilder(userAnswers = None)
-        .build()
-
-      running(application) {
-        forAll(allModeModeWaypoints) { (_, waypoints, _) =>
-          val request =
-            FakeRequest(POST, previousOssNumberRoute(waypoints))
-              .withFormUrlEncodedBody(("value", "answer"))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
         }
       }
     }

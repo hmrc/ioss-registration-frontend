@@ -37,18 +37,14 @@ import config.Constants.btaUrl
 import connectors.RegistrationConnector
 import controllers.actions.*
 import models.CheckMode
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
-import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.rejoin.RejoinRegistrationPage
 import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoint, Waypoints}
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import utils.FutureSyntax.FutureOps
 import views.html.EmailVerificationCodesAndEmailsExceededView
 
 class EmailVerificationCodesAndEmailsExceededControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
@@ -90,13 +86,10 @@ class EmailVerificationCodesAndEmailsExceededControllerSpec extends SpecBase wit
 
       s"must return OK and the correct view for a GET in $mode" in {
 
-        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
-
         val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(page, CheckMode, page.urlFragment))
         val aMode: RegistrationModificationMode = mode
 
         val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
         running(application) {
@@ -110,7 +103,6 @@ class EmailVerificationCodesAndEmailsExceededControllerSpec extends SpecBase wit
 
           status(result) `mustBe` OK
           contentAsString(result) `mustBe` view(redirectLink, aMode)(request, messages(application)).toString
-          verify(mockRegistrationConnector, times(1)).getRegistration()(any())
         }
       }
     }

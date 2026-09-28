@@ -71,7 +71,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
       when(mockRejoinRegistrationValidation.validateEuRegistrations(
@@ -121,7 +121,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
       when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
         Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
@@ -160,7 +160,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
       when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
         Right(CurrentReturns(returns = Seq(dueReturn), finalReturnsCompleted = false)).toFuture
@@ -192,7 +192,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
       def createFilterPassingApplicationApplication(mockRejoinRegistrationValidation: RejoinRegistrationValidation) = {
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapperWithExclusionOnBoundary).toFuture
         when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
         when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
         when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
           Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
@@ -235,7 +235,7 @@ class StartRejoinJourneyControllerSpec extends SpecBase with BeforeAndAfterEach 
     "must redirect to Not Registered Page when no registration found" in {
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
       val application = applicationBuilder(

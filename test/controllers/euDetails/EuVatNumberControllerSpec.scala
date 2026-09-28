@@ -17,7 +17,6 @@
 package controllers.euDetails
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import forms.euDetails.EuVatNumberFormProvider
 import models.core.{Match, TraderId}
 import models.euDetails.RegistrationType
@@ -134,13 +133,9 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
     }
 
     "must save and redirect to the next page when valid data is submitted when not in amend" in {
+      
       forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
         val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         when(mockSessionRepository.set(any())) thenReturn true.toFuture
 
@@ -149,7 +144,6 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
             .overrides(
               bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
               bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-              bind[RegistrationConnector].toInstance(mockRegistrationConnector)
             )
             .build()
 
@@ -174,17 +168,13 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
     }
 
     "must redirect to FixedEstablishmentVRNAlreadyRegisteredController page when not in Amend matchType=FixedEstablishmentActiveNETP" in {
+      
       forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val application =
           applicationBuilder(userAnswers = Some(answers))
             .overrides(
-              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-              bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+              bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
             ).build()
 
         running(application) {
@@ -206,17 +196,13 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
     }
 
     "must redirect to the next page when there is no active trader when not in amend" in {
+      
       forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val application = applicationBuilder(userAnswers = Some(answers))
 
           .overrides(
-            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
           ).build()
 
         running(application) {
@@ -240,16 +226,12 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
     }
 
     "must redirect to the next page when there is no excluded trader when not in amend" in {
+      
       forAll(nonAmendWaypointsOptions) { nonAmendsWaypoints =>
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val application = applicationBuilder(userAnswers = Some(answers))
           .overrides(
-            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
           ).build()
 
         running(application) {
@@ -273,17 +255,12 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
     }
 
     "must redirect to the next page when no active match found" in {
+      
       forAll(allWaypointsOptions) { waypoints =>
-
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val application = applicationBuilder(userAnswers = Some(answers))
           .overrides(
-            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+            bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService)
           ).build()
 
         running(application) {
@@ -305,14 +282,10 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
+      
       forAll(allWaypointsOptions) { waypointOption =>
-        val mockRegistrationConnector = mock[RegistrationConnector]
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
 
         val application = applicationBuilder(userAnswers = Some(answers))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
         running(application) {
@@ -366,11 +339,10 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
   "inAmend" - {
 
     "must not redirect to ExcludedVRNController page when the vat number is excluded for match FixedEstablishmentQuarantinedNETP when in Amend" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val application = applicationBuilder(userAnswers = Some(answers))
         .overrides(
           bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService),
-          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
         ).build()
 
       running(application) {
@@ -378,10 +350,7 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
 
         when(mockCoreRegistrationValidationService.searchEuVrn(eqTo(euVatNumber), eqTo(country.code))(any(), any())) thenReturn
           Future.successful(Option(expectedResponse))
-
-        when(mockRegistrationConnector.getRegistration()(any()))
-          .thenReturn(Future.successful(Right(registrationWrapper)))
-
+        
         val request = FakeRequest(POST, amendEuVatNumberSubmitRoute)
           .withFormUrlEncodedBody(("value", euVatNumber))
 
@@ -389,10 +358,7 @@ class EuVatNumberControllerSpec extends SpecBase with MockitoSugar with TableDri
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.euDetails.routes.FixedEstablishmentTradingNameController.onPageLoad(amendWaypoints, countryIndex).url
-
-        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
-
   }
 }

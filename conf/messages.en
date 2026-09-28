@@ -819,3 +819,7 @@ deleteAllFixedEstablishmentsAsPartOfVatGroup.title = Delete your fixed establish
 deleteAllFixedEstablishmentsAsPartOfVatGroup.heading = Delete your fixed establishment information
 deleteAllFixedEstablishmentsAsPartOfVatGroup.p1 = Your business is now registered as a VAT group. To comply with EU law, we cannot hold information about fixed establishments. We''ll now delete these fixed establishment details from your IOSS registration:
 deleteAllFixedEstablishmentsAsPartOfVatGroup.contact = If you have any questions, contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
+
+savedProgressRemoveFixedEstablishments.title = Removing your fixed establishment details
+savedProgressRemoveFixedEstablishments.heading = Removing your fixed establishment details
+savedProgressRemoveFixedEstablishments.p1 = Your business is now registered as a UK VAT group, so we no longer need your fixed establishment details. We will remove them from your registration.

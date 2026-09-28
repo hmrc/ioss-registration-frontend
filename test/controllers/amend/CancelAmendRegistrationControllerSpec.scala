@@ -18,16 +18,15 @@ package controllers.amend
 
 import base.SpecBase
 import config.FrontendAppConfig
-import connectors.RegistrationConnector
 import forms.amend.CancelAmendRegFormProvider
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{EmptyWaypoints, Waypoints}
 import pages.amend.ChangeRegistrationPage
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import uk.gov.hmrc.http.SessionKeys
 import views.html.amend.CancelAmendRegistrationView
@@ -44,14 +43,9 @@ class CancelAmendRegistrationControllerSpec extends SpecBase {
   "CancelAmendRegistration Controller" - {
 
     "must return OK and the correct view for a GET" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .build()
-
-      when(mockRegistrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(registrationWrapper)))
 
       running(application) {
         val request = FakeRequest(GET, CancelAmendRoute)
@@ -62,25 +56,18 @@ class CancelAmendRegistrationControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, waypoints)(request, messages(application)).toString
-
-        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must delete the amended answers and redirect to yourAccount page when the user answers Yes" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
 
-      when(mockRegistrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(registrationWrapper)))
-
-
       val application =
         applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
@@ -97,23 +84,18 @@ class CancelAmendRegistrationControllerSpec extends SpecBase {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual config.iossYourAccountUrl
         verify(mockSessionRepository, times(1)).clear(eqTo(sessionId))
-        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must NOT delete the amended answers and returns user to ChangeYourRegistration page when the user answers No" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.clear(any())) thenReturn Future.successful(true)
 
-      when(mockRegistrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(registrationWrapper)))
-
       val application =
         applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
@@ -128,7 +110,6 @@ class CancelAmendRegistrationControllerSpec extends SpecBase {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual ChangeRegistrationPage.route(waypoints).url
         verify(mockSessionRepository, never()).set(eqTo(basicUserAnswersWithVatInfo))
-        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
   }

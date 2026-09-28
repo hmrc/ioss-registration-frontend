@@ -22,7 +22,7 @@ import models.requests.AuthenticatedDataRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.rejoin.RejoinRegistrationPage
 import pages.{EmptyWaypoints, NonEmptyWaypoints, QuestionPage, Waypoint, Waypoints}
-import play.api.libs.json.{Json, JsPath}
+import play.api.libs.json.{JsPath, Json}
 import play.api.mvc.Results.{Ok, Redirect}
 import play.api.mvc.{AnyContent, Call, Result}
 import play.api.test.FakeRequest
@@ -159,7 +159,6 @@ class AnswerExtractorSpec extends SpecBase {
       val controller = new TestController()
 
       controller.getAsync(amendPreviousWaypoints, TestPage).futureValue mustBe Redirect(ChangePreviousRegistrationPage.route(amendPreviousWaypoints))
-
     }
   }
 }

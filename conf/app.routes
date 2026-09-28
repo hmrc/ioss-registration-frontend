@@ -288,3 +288,6 @@ GET        /cannot-register-vat-quarantined                               contro
 
 GET        /delete-all-fixed-establishments-as-part-of-vat-group          controllers.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST       /delete-all-fixed-establishments-as-part-of-vat-group          controllers.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+
+GET        /saved-progress-remove-fixed-establishments                    controllers.SavedProgressRemoveFixedEstablishmentsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
+POST       /saved-progress-remove-fixed-establishments                    controllers.SavedProgressRemoveFixedEstablishmentsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

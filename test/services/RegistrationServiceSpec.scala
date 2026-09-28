@@ -127,7 +127,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
         previousScheme = schemeType,
         previousSchemeNumbers = PreviousSchemeNumbers(
           previousSchemeNumber =
-            if(schemeType == PreviousScheme.OSSU) {
+            if (schemeType == PreviousScheme.OSSU) {
               s"${etmpPreviousEURegistrationDetails.issuedBy}${etmpPreviousEURegistrationDetails.registrationNumber}"
             } else {
               etmpPreviousEURegistrationDetails.registrationNumber
@@ -177,8 +177,8 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
     }
 
     val convertWebsites: List[Website] = for {
-        website <- etmpRegistration.schemeDetails.websites.toList
-      } yield Website(site = website.websiteAddress)
+      website <- etmpRegistration.schemeDetails.websites.toList
+    } yield Website(site = website.websiteAddress)
 
     val convertedBankDetails: BankDetails = {
       val etmpBankDetails = etmpRegistration.bankDetails
@@ -241,6 +241,32 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
         val receivedRegistrationWrapper: RegistrationWrapper = RegistrationWrapper(vatCustomerInfo, etmpRegistration)
 
         val result = registrationService.toUserAnswers(userId = userAnswersId, registrationWrapper = receivedRegistrationWrapper).futureValue
+
+        result mustBe userAnswers.copy(lastUpdated = result.lastUpdated)
+      }
+
+      "when EuDetails answers are populated when part of VAT group and removeFe true" in {
+
+        val vatInfoWithVatGroup: VatCustomerInfo = vatCustomerInfo.copy(partOfVatGroup = true)
+        val emptyUserAnswersWithVatGroupVatInfo = emptyUserAnswersWithVatInfo.copy(
+          vatInfo = Some(vatInfoWithVatGroup)
+        )
+
+        val userAnswers: UserAnswers = emptyUserAnswersWithVatGroupVatInfo
+          .set(BusinessBasedInNiPage, true).success.value
+          .set(HasTradingNamePage, true).success.value
+          .set(AllTradingNames, convertedTradingNames).success.value
+          .set(PreviouslyRegisteredPage, true).success.value
+          .set(AllPreviousRegistrationsQuery, previousRegistrations.toList).success.value
+          .set(TaxRegisteredInEuPage, true).success.value
+          .set(AllEuDetailsQuery, euDetails.toList).success.value
+          .set(AllWebsites, convertWebsites).success.value
+          .set(BusinessContactDetailsPage, contactDetails).success.value
+          .set(BankDetailsPage, convertedBankDetails).success.value
+
+        val receivedRegistrationWrapper: RegistrationWrapper = RegistrationWrapper(vatInfoWithVatGroup, etmpRegistration)
+
+        val result = registrationService.toUserAnswers(userId = userAnswersId, registrationWrapper = receivedRegistrationWrapper, removeFe = true).futureValue
 
         result mustBe userAnswers.copy(lastUpdated = result.lastUpdated)
       }
