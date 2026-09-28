@@ -17,12 +17,13 @@
 package controllers
 
 import base.SpecBase
-import models.UserAnswers
+import models.{Index, UserAnswers, Website}
 import models.euDetails.EuDetails
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.euDetails.TaxRegisteredInEuPage
+import pages.website.WebsitePage
 import pages.{EmptyWaypoints, SavedProgressRemoveFixedEstablishmentsPage, Waypoints}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -75,6 +76,35 @@ class SavedProgressRemoveFixedEstablishmentsControllerSpec extends SpecBase {
           .remove(TaxRegisteredInEuPage).success.value
 
         status(result) `mustBe` SEE_OTHER
+        redirectLocation(result).value `mustBe`SavedProgressRemoveFixedEstablishmentsPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).url
+      }
+    }
+
+    "must save the answers and navigate to the next page when they have multiple websites already saved for a POST" in {
+
+      val euDetails: EuDetails = arbitraryEuDetails.arbitrary.sample.value
+      val updatedAnswers: UserAnswers = emptyUserAnswers
+        .set(AllEuDetailsQuery, List(euDetails)).success.value
+        .set(WebsitePage(Index(0)), Website("test website 1")).success.value
+        .set(WebsitePage(Index(1)), Website("test website 2")).success.value
+
+      val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
+
+      when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+
+      val application = applicationBuilder(userAnswers = Some(updatedAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.SavedProgressRemoveFixedEstablishmentsController.onSubmit().url)
+
+        val result = route(application, request).value
+
+        val expectedAnswers: UserAnswers = updatedAnswers
+          .remove(AllEuDetailsQuery).success.value
+          .remove(TaxRegisteredInEuPage).success.value
+
+        status(result) `mustBe` SEE_OTHER
+        println(redirectLocation(result).value)
         redirectLocation(result).value `mustBe`SavedProgressRemoveFixedEstablishmentsPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).url
       }
     }

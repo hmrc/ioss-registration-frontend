@@ -20,6 +20,7 @@ import controllers.routes
 import models.{Index, UserAnswers}
 import pages.website.WebsitePage
 import play.api.mvc.Call
+import queries.AllWebsites
 
 case object SavedProgressRemoveFixedEstablishmentsPage extends Page {
 
@@ -28,6 +29,7 @@ case object SavedProgressRemoveFixedEstablishmentsPage extends Page {
   }
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
-    WebsitePage(Index(0))
+    val index: Index = Index(answers.get(AllWebsites).map(_.size).getOrElse(0))
+    WebsitePage(index)
   }
 }
