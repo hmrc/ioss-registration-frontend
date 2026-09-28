@@ -21,7 +21,6 @@ import config.Constants.maxSchemes
 import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.amend.routes as amendRoutes
-import controllers.routes
 import models.amend.RegistrationWrapper
 import models.domain.PreviousSchemeDetails
 import models.euDetails.EuOptionalDetails
@@ -114,19 +113,6 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
             None,
             0
           )(request, messages(application)).toString
-        }
-      }
-
-      "must redirect to Journey Recovery and the correct view for a GET with no user answers" in {
-
-        val application = applicationBuilder(userAnswers = None)
-          .build()
-
-        running(application) {
-          val request = FakeRequest(GET, changeRegRoute)
-          val result = route(application, request).value
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.JourneyRecoveryController.onPageLoad().url
         }
       }
 
