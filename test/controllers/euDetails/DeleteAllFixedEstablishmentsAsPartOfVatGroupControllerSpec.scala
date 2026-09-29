@@ -20,15 +20,14 @@ import base.SpecBase
 import models.amend.RegistrationWrapper
 import models.euDetails.{EuDetails, RegistrationType}
 import models.requests.AuthenticatedDataRequest
-import models.{CheckMode, Country, UserAnswers}
+import models.{Country, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import pages.amend.ChangeRegistrationPage
+import pages.EmptyWaypoints
 import pages.euDetails.{DeleteAllFixedEstablishmentsAsPartOfVatGroupPage, TaxRegisteredInEuPage}
-import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -44,8 +43,6 @@ import views.html.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupView
 class DeleteAllFixedEstablishmentsAsPartOfVatGroupControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
   private val mockRegistrationService: RegistrationService = mock[RegistrationService]
-
-  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
 
   private val ossEnrolmentKey: String = "HMRC-OSS-ORG"
   private val iossEnrolmentKey: String = "HMRC-IOSS-ORG"
@@ -71,7 +68,7 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupControllerSpec extends SpecBas
     .set(TaxRegisteredInEuPage, true).success.value
     .set(AllEuDetailsQuery, euDetailsList).success.value
 
-  private lazy val deleteAllFixedEstablishmentsAsPartOfVatGroupRoute:String = routes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad(waypoints).url
+  private lazy val deleteAllFixedEstablishmentsAsPartOfVatGroupRoute:String = routes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad().url
 
   private val registrationPartOfVatGroup: RegistrationWrapper = registrationWrapper.copy(
     vatInfo = registrationWrapper.vatInfo.copy(partOfVatGroup = true)
@@ -109,21 +106,18 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupControllerSpec extends SpecBas
         val viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel = DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel(euDetailsList)
 
         status(result) `mustBe` OK
-        contentAsString(result) `mustBe` view(waypoints, viewModel)(request, messages(application)).toString
+        contentAsString(result) `mustBe` view(viewModel)(request, messages(application)).toString
         verify(mockRegistrationService, times(1)).toUserAnswers(eqTo(request.userId), eqTo(request.registrationWrapper.value), eqTo(true))
       }
     }
 
     "must throw an Illegal State Exception when registration is missing from the request for a GET" in {
 
-      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn answers.toFuture
+      val errorMessage: String = "Registration not available. Must have a registration."
 
       val application = applicationBuilder(
         userAnswers = Some(answers)
       )
-        .overrides(
-          bind[RegistrationService].toInstance(mockRegistrationService)
-        )
         .build()
 
       running(application) {
@@ -136,10 +130,9 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupControllerSpec extends SpecBas
 
         whenReady(result.failed) { exp =>
           exp `mustBe` a[IllegalStateException]
-
+          exp.getMessage `mustBe` errorMessage
         }
-//        verify(mockRegistrationConnector, times(1)).getRegistration()(any())
-//        verify(mockRegistrationService, times(1)).toUserAnswers(eqTo(request.userId), eqTo(request.registrationWrapper.value), eqTo(true))
+        verifyNoInteractions(mockRegistrationService)
       }
     }
 
@@ -167,7 +160,7 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupControllerSpec extends SpecBas
           .set(TaxRegisteredInEuPage, false).success.value
 
         status(result) `mustBe` SEE_OTHER
-        redirectLocation(result).value `mustBe` DeleteAllFixedEstablishmentsAsPartOfVatGroupPage.navigate(waypoints, answers, expectedAnswers).url
+        redirectLocation(result).value `mustBe` DeleteAllFixedEstablishmentsAsPartOfVatGroupPage.navigate(EmptyWaypoints, answers, expectedAnswers).url
         verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
         verifyNoInteractions(mockRegistrationService)
       }

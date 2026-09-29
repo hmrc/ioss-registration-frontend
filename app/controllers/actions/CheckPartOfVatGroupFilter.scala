@@ -18,10 +18,8 @@ package controllers.actions
 
 import controllers.euDetails.routes as euRoutes
 import logging.Logging
-import models.CheckMode
 import models.requests.AuthenticatedDataRequest
-import pages.amend.ChangeRegistrationPage
-import pages.{EmptyWaypoints, NonEmptyWaypoints, SavedProgressPage, Waypoint}
+import pages.{EmptyWaypoints, SavedProgressPage}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Call, Result}
 import queries.euDetails.AllEuDetailsQuery
@@ -40,8 +38,7 @@ class CheckPartOfVatGroupFilterImpl(
 
     (restrictFromPartOfVatGroup, request.userAnswers.get(SavedProgressPage).nonEmpty, registrationModificationMode) match {
       case (true, false, AmendingActiveRegistration) =>
-        val waypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
-        determineFeAndRedirect(hasSavedAnswers = false, euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad(waypoints))(request)
+        determineFeAndRedirect(hasSavedAnswers = false, euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad())(request)
 
       case (true, _, _) if request.userAnswers.vatInfo.exists(_.partOfVatGroup) =>
         determineFeAndRedirect(false, controllers.routes.CannotAccessPageController.onPageLoad())(request)

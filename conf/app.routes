@@ -286,8 +286,8 @@ GET        /cannot-register-vat-expired                                   contro
 
 GET        /cannot-register-vat-quarantined                               controllers.QuarantinedVatCannotBeUsedForSaveAndComeBackController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints, countryCode: String, exclusionDate: String)
 
-GET        /delete-all-fixed-establishments-as-part-of-vat-group          controllers.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
-POST       /delete-all-fixed-establishments-as-part-of-vat-group          controllers.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)
+GET        /delete-all-fixed-establishments-as-part-of-vat-group          controllers.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad()
+POST       /delete-all-fixed-establishments-as-part-of-vat-group          controllers.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onSubmit()
 
 GET        /saved-progress-remove-fixed-establishments                    controllers.SavedProgressRemoveFixedEstablishmentsController.onPageLoad(waypoints: Waypoints ?= EmptyWaypoints)
 POST       /saved-progress-remove-fixed-establishments                    controllers.SavedProgressRemoveFixedEstablishmentsController.onSubmit(waypoints: Waypoints ?= EmptyWaypoints)

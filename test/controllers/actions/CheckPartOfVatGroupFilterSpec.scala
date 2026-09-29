@@ -19,12 +19,11 @@ package controllers.actions
 import base.SpecBase
 import controllers.euDetails.routes as euRoutes
 import controllers.routes
+import models.UserAnswers
 import models.domain.VatCustomerInfo
 import models.euDetails.EuDetails
 import models.requests.AuthenticatedDataRequest
-import models.{CheckMode, UserAnswers}
-import pages.amend.ChangeRegistrationPage
-import pages.{EmptyWaypoints, NonEmptyWaypoints, SavedProgressPage, Waypoint, Waypoints}
+import pages.{EmptyWaypoints, SavedProgressPage, Waypoints}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
@@ -38,8 +37,7 @@ import scala.concurrent.Future
 class CheckPartOfVatGroupFilterSpec extends SpecBase {
 
   private val waypoints: Waypoints = EmptyWaypoints
-  private val amendWaypoints: NonEmptyWaypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangeRegistrationPage, CheckMode, ChangeRegistrationPage.urlFragment))
-
+  
   class Harness(restrictFromPartOfVatGroup: Boolean, registrationModificationMode: RegistrationModificationMode)
     extends CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup, registrationModificationMode) {
     def callFilter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = filter(request)
@@ -137,7 +135,7 @@ class CheckPartOfVatGroupFilterSpec extends SpecBase {
 
             val result = controller.callFilter(request).futureValue
 
-            result `mustBe` Some(Redirect(euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad(amendWaypoints)))
+            result `mustBe` Some(Redirect(euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad()))
           }
         }
       }

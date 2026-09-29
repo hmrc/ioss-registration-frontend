@@ -16,7 +16,6 @@
 
 @import controllers.euDetails.routes
 @import models.euDetails.EuDetails
-@import pages.Waypoints
 @import viewmodels.DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel
 
 @this(
@@ -26,11 +25,11 @@
     govukButton: GovukButton
 )
 
-@(waypoints: Waypoints, viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel)(implicit request: Request[_], messages: Messages)
+@(viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("deleteAllFixedEstablishmentsAsPartOfVatGroup.title"))) {
 
-    @formHelper(action = routes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onSubmit(waypoints)) {
+    @formHelper(action = routes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onSubmit()) {
 
     <h1 class="govuk-heading-l">@messages("deleteAllFixedEstablishmentsAsPartOfVatGroup.heading")</h1>
 

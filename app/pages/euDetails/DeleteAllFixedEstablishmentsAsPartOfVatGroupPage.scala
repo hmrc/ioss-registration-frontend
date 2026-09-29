@@ -25,7 +25,7 @@ import play.api.mvc.Call
 case object DeleteAllFixedEstablishmentsAsPartOfVatGroupPage extends Page {
 
   override def route(waypoints: Waypoints): Call = {
-    routes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad(waypoints)
+    routes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad()
   }
 
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {

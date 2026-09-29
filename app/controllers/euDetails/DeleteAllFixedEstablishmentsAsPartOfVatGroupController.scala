@@ -19,7 +19,7 @@ package controllers.euDetails
 import controllers.actions.*
 import logging.Logging
 import models.euDetails.EuDetails
-import pages.Waypoints
+import pages.EmptyWaypoints
 import pages.euDetails.{DeleteAllFixedEstablishmentsAsPartOfVatGroupPage, TaxRegisteredInEuPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -43,7 +43,7 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
+  def onPageLoad: Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
     implicit request =>
       
       request.registrationWrapper match {
@@ -52,7 +52,7 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
             val euDetailsList: List[EuDetails] = answers.get(AllEuDetailsQuery).getOrElse(List.empty)
             val viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel = DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel(euDetailsList)
 
-            Ok(view(waypoints, viewModel)).toFuture
+            Ok(view(viewModel)).toFuture
           }
 
         case _ =>
@@ -63,13 +63,13 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
       }
   }
 
-  def onSubmit(waypoints: Waypoints): Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
+  def onSubmit: Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
     implicit request =>
 
       for {
         updatedAnswers <- Future.fromTry(request.userAnswers.remove(AllEuDetailsQuery))
         noEuRegistrationsAnswers <- Future.fromTry(updatedAnswers.set(TaxRegisteredInEuPage, false))
         _ <- cc.sessionRepository.set(noEuRegistrationsAnswers)
-      } yield Redirect(DeleteAllFixedEstablishmentsAsPartOfVatGroupPage.navigate(waypoints, request.userAnswers, noEuRegistrationsAnswers).route)
+      } yield Redirect(DeleteAllFixedEstablishmentsAsPartOfVatGroupPage.navigate(EmptyWaypoints, request.userAnswers, noEuRegistrationsAnswers).route)
   }
 }
