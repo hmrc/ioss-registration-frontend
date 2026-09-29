@@ -40,7 +40,7 @@ class CheckPartOfVatGroupFilterImpl(
       case (true, false, AmendingActiveRegistration) =>
         determineFeAndRedirect(hasSavedAnswers = false, euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad())(request)
 
-      case (true, _, _) if request.userAnswers.vatInfo.exists(_.partOfVatGroup) =>
+      case (true, _, _)  =>
         determineFeAndRedirect(false, controllers.routes.CannotAccessPageController.onPageLoad())(request)
 
       case (_, true, NotModifyingExistingRegistration) =>
@@ -57,7 +57,7 @@ class CheckPartOfVatGroupFilterImpl(
         if registrationWrapper.vatInfo.partOfVatGroup && registrationWrapper.registration.schemeDetails.euRegistrationDetails.nonEmpty =>
         Some(Redirect(redirectCall)).toFuture
 
-      case (false, _) =>
+      case (false, _) if request.userAnswers.vatInfo.exists(_.partOfVatGroup) =>
         Some(Redirect(redirectCall)).toFuture
 
       case (true, _) =>
@@ -67,6 +67,8 @@ class CheckPartOfVatGroupFilterImpl(
 
           case _ => None.toFuture
         }
+
+      case (_, _) => None.toFuture
     }
   }
 }

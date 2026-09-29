@@ -104,7 +104,6 @@ class SavedProgressRemoveFixedEstablishmentsControllerSpec extends SpecBase {
           .remove(TaxRegisteredInEuPage).success.value
 
         status(result) `mustBe` SEE_OTHER
-        println(redirectLocation(result).value)
         redirectLocation(result).value `mustBe`SavedProgressRemoveFixedEstablishmentsPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).url
       }
     }
