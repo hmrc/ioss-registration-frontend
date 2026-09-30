@@ -25,7 +25,7 @@ import utils.AmendWaypoints.AmendWaypointsOps
 object CheckJourneyRecovery {
 
   def determineJourneyRecovery(waypoints: Waypoints): Call = {
-    if (waypoints.inAmend) {
+    if (waypoints.isInAmendOrRejoin) {
       amendRoutes.AmendJourneyRecoveryController.onPageLoad()
     } else {
       routes.JourneyRecoveryController.onPageLoad()

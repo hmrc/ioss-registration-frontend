@@ -53,7 +53,7 @@ class DeletePreviousSchemeController @Inject()(
 
         getPreviousCountry(waypoints, countryIndex) {
           (country: Country) =>
-            if (waypoints.inAmend && getCurrentSchemeFromAnswers(country, countryIndex, schemeIndex)) {
+            if (waypoints.isInAmendOrRejoin && getCurrentSchemeFromAnswers(country, countryIndex, schemeIndex)) {
               Future.successful(Redirect(pages.CannotRemoveExistingPreviousRegistrationsPage.route(waypoints)))
             } else {
               getPreviousScheme(waypoints, countryIndex, schemeIndex) { previousScheme =>
@@ -95,7 +95,7 @@ class DeletePreviousSchemeController @Inject()(
 
         getPreviousCountry(waypoints, countryIndex) {
           country =>
-            if (waypoints.inAmend && getCurrentSchemeFromAnswers(country, countryIndex, schemeIndex)) {
+            if (waypoints.isInAmendOrRejoin && getCurrentSchemeFromAnswers(country, countryIndex, schemeIndex)) {
               Future.failed(
                 new InvalidAmendModeOperationException(s"The schema in country ${country.code} has been registered so cannot be deleted")
               )
