@@ -33,7 +33,6 @@ import services.core.CoreSavedAnswersRevalidationService
 import utils.FutureSyntax.FutureOps
 import views.html.ContinueRegistrationView
 
-import java.time.LocalDate
 import scala.concurrent.Future
 
 class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
@@ -127,12 +126,12 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the expired VAT page and delete the saved registration when the VAT registration is expired" in {
+    "must redirect to the corresponding URL when a result is returned from core revalidation" in {
 
       val mockUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
       val mockSaveForLaterConnector = mock[SaveForLaterConnector]
 
-      val redirectResult = Redirect(controllers.routes.ExpiredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(EmptyWaypoints))
+      val redirectResult = Redirect("/redirectUrl")
 
       when(mockCoreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(any())(any(), any())) thenReturn Some(redirectResult).toFuture
       when(mockUserAnswersRepository.clear(any())) thenReturn Future.successful(true)
@@ -164,112 +163,7 @@ class ContinueRegistrationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
 
-        redirectLocation(result).value mustEqual
-          controllers.routes.ExpiredVatCannotBeUsedForSaveAndComeBackController
-            .onPageLoad(EmptyWaypoints)
-            .url
-
-        verify(mockUserAnswersRepository, times(1)).clear(any())
-        verify(mockSaveForLaterConnector, times(1)).delete()(any())
-      }
-    }
-
-    "must redirect to the already registered page and delete the saved registration when the VRN belongs to an active trader" in {
-
-      val mockUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockSaveForLaterConnector = mock[SaveForLaterConnector]
-
-      val redirectResult = Redirect(controllers.routes.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController.onPageLoad(EmptyWaypoints, "DE"))
-
-      when(mockCoreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(any())(any(), any())) thenReturn Some(redirectResult).toFuture
-
-      when(mockUserAnswersRepository.clear(any())) thenReturn Future.successful(true)
-      when(mockSaveForLaterConnector.delete()(any())) thenReturn Right(true).toFuture
-
-      val application =
-        applicationBuilder(
-          userAnswers = Some(
-            emptyUserAnswers
-              .set(SavedProgressPage, "testUrl")
-              .success
-              .value
-          )
-        )
-          .overrides(
-            bind[CoreSavedAnswersRevalidationService].toInstance(mockCoreSavedAnswersRevalidationService),
-            bind[AuthenticatedUserAnswersRepository].toInstance(mockUserAnswersRepository),
-            bind[SaveForLaterConnector].toInstance(mockSaveForLaterConnector)
-          )
-          .build()
-
-      running(application) {
-        val request = FakeRequest(GET, continueRegistrationRoute)
-          .withFormUrlEncodedBody(
-            "value" -> Continue.toString
-          )
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-
-        redirectLocation(result).value mustEqual
-          controllers.routes.AlreadyRegisteredVatCannotBeUsedForSaveAndComeBackController
-            .onPageLoad(EmptyWaypoints, "DE")
-            .url
-
-        verify(mockUserAnswersRepository, times(1)).clear(any())
-        verify(mockSaveForLaterConnector, times(1)).delete()(any())
-      }
-    }
-
-    "must redirect to the quarantined page and delete the saved registration when the trader is quarantined" in {
-
-      val effectiveDate = LocalDate.now(stubClockAtArbitraryDate).minusMonths(6).toString
-
-      val redirectResult = Redirect(controllers.routes.QuarantinedVatCannotBeUsedForSaveAndComeBackController.onPageLoad(EmptyWaypoints, "DE", effectiveDate))
-
-      val mockUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockSaveForLaterConnector = mock[SaveForLaterConnector]
-
-
-      when(mockCoreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(any())(any(), any())) thenReturn Some(redirectResult).toFuture
-      when(mockUserAnswersRepository.clear(any())) thenReturn Future.successful(true)
-      when(mockSaveForLaterConnector.delete()(any())) thenReturn Right(true).toFuture
-
-      val application =
-        applicationBuilder(
-          userAnswers = Some(
-            emptyUserAnswers
-              .set(SavedProgressPage, "testUrl")
-              .success
-              .value
-          )
-        )
-          .overrides(
-            bind[CoreSavedAnswersRevalidationService].toInstance(mockCoreSavedAnswersRevalidationService),
-            bind[AuthenticatedUserAnswersRepository].toInstance(mockUserAnswersRepository),
-            bind[SaveForLaterConnector].toInstance(mockSaveForLaterConnector)
-          )
-          .build()
-
-      running(application) {
-        val request = FakeRequest(GET, continueRegistrationRoute)
-          .withFormUrlEncodedBody(
-            "value" -> Continue.toString
-          )
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-
-        redirectLocation(result).value mustEqual
-          controllers.routes.QuarantinedVatCannotBeUsedForSaveAndComeBackController
-            .onPageLoad(
-              EmptyWaypoints,
-             "DE",
-              effectiveDate
-            )
-            .url
+        redirectLocation(result).value mustEqual "/redirectUrl"
 
         verify(mockUserAnswersRepository, times(1)).clear(any())
         verify(mockSaveForLaterConnector, times(1)).delete()(any())
