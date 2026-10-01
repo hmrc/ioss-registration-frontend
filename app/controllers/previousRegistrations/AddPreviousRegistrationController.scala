@@ -81,7 +81,7 @@ class AddPreviousRegistrationController @Inject()(
   }
 
   private def getPreviousRegistrationsWhenInAmend(waypoints: Waypoints, request: AuthenticatedDataRequest[AnyContent]): Seq[PreviousRegistration] = {
-    if (waypoints.inAmend) {
+    if (waypoints.isInAmendOrRejoin) {
       val allExistingRegistrations: Seq[EtmpPreviousEuRegistrationDetails] = request.previousEURegistrationDetails
       allExistingRegistrations.map { existingRegistrationDetails =>
         val countryOfRegistrationCode = existingRegistrationDetails.issuedBy
@@ -137,7 +137,7 @@ class AddPreviousRegistrationController @Inject()(
 
   private def calculateNextStepWaypoints(waypoints: Waypoints, addAnotherRegistration: Boolean) = {
     val thisPage = AddPreviousRegistrationPage()
-    if (addAnotherRegistration && (waypoints.inCheck || waypoints.inAmend)) {
+    if (addAnotherRegistration && (waypoints.inCheck || waypoints.isInAmendOrRejoin)) {
       waypoints.setNextWaypoint(Waypoint(thisPage, CheckMode, AddPreviousRegistrationPage.checkModeUrlFragment))
     } else {
       waypoints

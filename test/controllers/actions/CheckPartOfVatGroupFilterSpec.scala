@@ -17,14 +17,18 @@
 package controllers.actions
 
 import base.SpecBase
+import controllers.euDetails.routes as euRoutes
 import controllers.routes
 import models.UserAnswers
-import models.amend.RegistrationWrapper
+import models.domain.VatCustomerInfo
+import models.euDetails.EuDetails
 import models.requests.AuthenticatedDataRequest
+import pages.{EmptyWaypoints, SavedProgressPage, Waypoints}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.running
+import queries.euDetails.AllEuDetailsQuery
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,7 +36,10 @@ import scala.concurrent.Future
 
 class CheckPartOfVatGroupFilterSpec extends SpecBase {
 
-  class Harness(restrictFromPartOfVatGroup: Boolean) extends CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup) {
+  private val waypoints: Waypoints = EmptyWaypoints
+  
+  class Harness(restrictFromPartOfVatGroup: Boolean, registrationModificationMode: RegistrationModificationMode)
+    extends CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup, registrationModificationMode) {
     def callFilter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = filter(request)
   }
 
@@ -62,11 +69,11 @@ class CheckPartOfVatGroupFilterSpec extends SpecBase {
       running(application) {
 
         val request = dataRequest
-        val controller = new Harness(restrictFromPartOfVatGroup = false)
+        val controller = new Harness(restrictFromPartOfVatGroup = false, registrationModificationMode = NotModifyingExistingRegistration)
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe None
+        result `mustBe` None
       }
     }
 
@@ -77,15 +84,15 @@ class CheckPartOfVatGroupFilterSpec extends SpecBase {
       running(application) {
 
         val request = dataRequest
-        val controller = new Harness(restrictFromPartOfVatGroup = true)
+        val controller = new Harness(restrictFromPartOfVatGroup = true, registrationModificationMode = NotModifyingExistingRegistration)
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe None
+        result `mustBe` None
       }
     }
 
-    "must redirect to Cannot Access Page when part of VAT group true and restrictFromPartOfVatGroup true" in {
+    "must redirect to Cannot Access Page when not in amend and part of VAT group true and restrictFromPartOfVatGroup true" in {
 
       val partOfVatGroupVatInfoAnswers: UserAnswers = emptyUserAnswersWithVatInfo.copy(
         vatInfo = emptyUserAnswersWithVatInfo.vatInfo.map(_.copy(partOfVatGroup = true))
@@ -96,28 +103,102 @@ class CheckPartOfVatGroupFilterSpec extends SpecBase {
       running(application) {
 
         val request = dataRequest.copy(userAnswers = partOfVatGroupVatInfoAnswers)
-        val controller = new Harness(restrictFromPartOfVatGroup = true)
+        val controller = new Harness(restrictFromPartOfVatGroup = true, registrationModificationMode = NotModifyingExistingRegistration)
 
         val result = controller.callFilter(request).futureValue
 
-        result mustBe Some(Redirect(routes.CannotAccessPageController.onPageLoad()))
+        result `mustBe` Some(Redirect(routes.CannotAccessPageController.onPageLoad()))
       }
     }
 
-    "must throw an IllegalStateException when restrictFromPartOfVatGroup true but there is no VAT information available" in {
+    "when fixed establishments are present" - {
 
-      val errorMessage = "VAT info unavailable, must have VAT info."
+      "when in amend" - {
 
-      val application = applicationBuilder(None).build()
+        "must redirect to Delete All Fixed Establishments As Part Of Vat Group Page when part of VAT group true" +
+          " and restrictFromPartOfVatGroup true" in {
 
-      running(application) {
+          val euDetails: EuDetails = arbitraryEuDetails.arbitrary.sample.value
+          val updatedAnswers: UserAnswers = emptyUserAnswersWithVatInfo
+            .set(AllEuDetailsQuery, List(euDetails)).success.value
 
-        val request = dataRequest.copy(userAnswers = emptyUserAnswers)
-        val controller = new Harness(restrictFromPartOfVatGroup = true)
+          val partOfVatGroupVatInfoAnswers: UserAnswers = updatedAnswers.copy(
+            vatInfo = emptyUserAnswersWithVatInfo.vatInfo.map(_.copy(partOfVatGroup = true))
+          )
 
-        intercept[IllegalStateException] {
-          controller.callFilter(request).futureValue
-        }.getMessage mustBe errorMessage
+          val application = applicationBuilder(None).build()
+
+          running(application) {
+
+            val request = dataRequest.copy(userAnswers = partOfVatGroupVatInfoAnswers, registrationWrapper = Some(registrationWrapper))
+            val controller = new Harness(restrictFromPartOfVatGroup = true, registrationModificationMode = AmendingActiveRegistration)
+
+            val result = controller.callFilter(request).futureValue
+
+            result `mustBe` Some(Redirect(euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad()))
+          }
+        }
+      }
+
+      "when not in amend or rejoin" - {
+
+        "when saved answers are present" - {
+
+          "must redirect to Saved Progress Remove Fixed Establishments Page when part of VAT group true" +
+            " and restrictFromPartOfVatGroup false" in {
+
+            val euDetails: EuDetails = arbitraryEuDetails.arbitrary.sample.value
+            val updatedAnswers: UserAnswers = emptyUserAnswersWithVatInfo
+              .set(AllEuDetailsQuery, List(euDetails)).success.value
+              .set(SavedProgressPage, "/saved-redirect").success.value
+
+            val partOfVatGroupVatInfoAnswers: UserAnswers = updatedAnswers.copy(
+              vatInfo = emptyUserAnswersWithVatInfo.vatInfo.map(_.copy(partOfVatGroup = true))
+            )
+
+            val application = applicationBuilder(None).build()
+
+            running(application) {
+
+              val request = dataRequest.copy(userAnswers = partOfVatGroupVatInfoAnswers)
+              val controller = new Harness(restrictFromPartOfVatGroup = false, registrationModificationMode = NotModifyingExistingRegistration)
+
+              val result = controller.callFilter(request).futureValue
+
+              result `mustBe` Some(Redirect(routes.SavedProgressRemoveFixedEstablishmentsController.onPageLoad(waypoints)))
+            }
+          }
+        }
+      }
+    }
+
+    "when fixed establishments are not present" - {
+
+      "when not in amend or rejoin" - {
+
+        "must None when part of VAT group false and restrictFromPartOfVatGroup false" in {
+
+          val euDetails: EuDetails = arbitraryEuDetails.arbitrary.sample.value
+          val updatedAnswers: UserAnswers = emptyUserAnswersWithVatInfo
+            .set(AllEuDetailsQuery, List(euDetails)).success.value
+            .set(SavedProgressPage, "/saved-redirect").success.value
+
+          val partOfVatGroupVatInfoAnswers: UserAnswers = updatedAnswers.copy(
+            vatInfo = emptyUserAnswersWithVatInfo.vatInfo.map(_.copy(partOfVatGroup = false))
+          )
+
+          val application = applicationBuilder(None).build()
+
+          running(application) {
+
+            val request = dataRequest.copy(userAnswers = partOfVatGroupVatInfoAnswers)
+            val controller = new Harness(restrictFromPartOfVatGroup = false, registrationModificationMode = NotModifyingExistingRegistration)
+
+            val result = controller.callFilter(request).futureValue
+
+            result `mustBe` None
+          }
+        }
       }
     }
   }

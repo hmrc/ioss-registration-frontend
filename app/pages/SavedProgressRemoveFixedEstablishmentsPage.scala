@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package utils
+package pages
 
 import controllers.routes
-import controllers.amend.{routes => amendRoutes}
-import pages.Waypoints
+import models.{Index, UserAnswers}
+import pages.website.WebsitePage
 import play.api.mvc.Call
-import utils.AmendWaypoints.AmendWaypointsOps
+import queries.AllWebsites
 
-object CheckJourneyRecovery {
+case object SavedProgressRemoveFixedEstablishmentsPage extends Page {
 
-  def determineJourneyRecovery(waypoints: Waypoints): Call = {
-    if (waypoints.isInAmendOrRejoin) {
-      amendRoutes.AmendJourneyRecoveryController.onPageLoad()
-    } else {
-      routes.JourneyRecoveryController.onPageLoad()
-    }
+  override def route(waypoints: Waypoints): Call = {
+    routes.SavedProgressRemoveFixedEstablishmentsController.onPageLoad(waypoints)
+  }
+
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    val index: Index = Index(answers.get(AllWebsites).map(_.size).getOrElse(0))
+    WebsitePage(index)
   }
 }

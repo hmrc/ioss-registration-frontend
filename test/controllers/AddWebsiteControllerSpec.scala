@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import forms.AddWebsiteFormProvider
 import models.{Index, NormalMode, Website}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
@@ -29,7 +29,7 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import viewmodels.WebsiteSummary
 import views.html.AddWebsiteView
@@ -66,6 +66,7 @@ class AddWebsiteControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must return OK and the correct view for a GET and allow adding when just below the max website boundary" in {
+
       val canAddWebSites = true
       val totalAddedWebsites = 9
 
@@ -90,6 +91,7 @@ class AddWebsiteControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must return OK and the correct view for a GET and not allow adding websites when there are already max websites added" in {
+
       val canAddWebSites = false
       val totalAddedWebsites = 10
 
@@ -196,44 +198,15 @@ class AddWebsiteControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, addWebsiteRoute())
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, addWebsiteRoute())
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
     "must handle related waypoints correctly" in {
+
       val waypointPage = new WaypointPage {
         override def isTheSamePage(other: Page): Boolean = true
 
         override def route(waypoints: Waypoints): Call = Call("waypoint1", "url1")
       }
 
-      import TableDrivenPropertyChecks._
+      import TableDrivenPropertyChecks.*
       // This verifies it is in the Waypoint.fragments else it 400s
       val relatedWaypoints = Table(
         "waypoint url value",

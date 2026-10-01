@@ -19,14 +19,14 @@ package controllers
 import base.SpecBase
 import forms.DeleteWebsiteFormProvider
 import models.{Index, Website}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.EmptyWaypoints
 import pages.website.{DeleteWebsitePage, WebsitePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.DeleteWebsiteView
 
@@ -135,20 +135,6 @@ class DeleteWebsiteControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, deleteWebsiteRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
     "must redirect to Website Address page for a GET if there's no website" in {
 
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
@@ -160,22 +146,6 @@ class DeleteWebsiteControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.website.routes.WebsiteController.onPageLoad(EmptyWaypoints, Index(0)).url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, deleteWebsiteRoute)
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

@@ -40,7 +40,6 @@ class DeletePreviousRegistrationController @Inject()(
                                                       formProvider: DeletePreviousRegistrationFormProvider,
                                                       view: DeletePreviousRegistrationView
                                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
-
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
 
@@ -48,7 +47,7 @@ class DeletePreviousRegistrationController @Inject()(
     implicit request: AuthenticatedDataRequest[AnyContent] =>
       getPreviousRegistration(waypoints, index) {
         details =>
-          if (waypoints.inAmend && request.hasCountryRegistered(details.previousEuCountry)) {
+          if (waypoints.isInAmendOrRejoin && request.hasCountryRegistered(details.previousEuCountry)) {
             Future.successful(Redirect(pages.CannotRemoveExistingPreviousRegistrationsPage.route(waypoints)))
           } else {
             Future.successful(Ok(view(form, waypoints, index, details.previousEuCountry.name)))
@@ -69,7 +68,7 @@ class DeletePreviousRegistrationController @Inject()(
     implicit request =>
       getPreviousRegistration(waypoints, index) {
         details =>
-          if (waypoints.inAmend && request.hasCountryRegistered(details.previousEuCountry)) {
+          if (waypoints.isInAmendOrRejoin && request.hasCountryRegistered(details.previousEuCountry)) {
             Future.failed(
               new InvalidAmendModeOperationException(s"The country ${details.previousEuCountry.code} has been registered so cannot be deleted")
             )
@@ -99,5 +98,4 @@ class DeletePreviousRegistrationController @Inject()(
         }
     )
   }
-
 }

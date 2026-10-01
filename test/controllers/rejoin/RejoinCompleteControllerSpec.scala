@@ -37,14 +37,15 @@ import queries.rejoin.NewIossReferenceQuery
 import queries.tradingNames.AllTradingNames
 import services.core.CoreRegistrationValidationService
 import testutils.GenerateCompositeAccount.generateCompositeAccount
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.rejoin.RejoinCompleteView
 
 import java.time.LocalDate
-import scala.concurrent.Future
 
 class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
 
@@ -71,26 +72,30 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
 
   private val originalRegistration = userAnswers.set(OriginalRegistrationQuery(iossNumber), registrationWrapper.registration).success.value
 
+  private lazy val rejoinCompleteCRoute: String = controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url
+
   "RejoinCompleteController" - {
 
     "return OK and the correct view when onPageLoad is called and data is available" in {
 
-      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn None.toFuture
 
-      val application = applicationBuilder(userAnswers = Some(originalRegistration))
+      val application = applicationBuilder(
+        userAnswers = Some(originalRegistration),
+        registrationWrapper = Some(registrationWrapper)
+      )
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val request = FakeRequest(GET, rejoinCompleteCRoute)
         val config = application.injector.instanceOf[FrontendAppConfig]
         val result = route(application, request).value
         val view = application.injector.instanceOf[RejoinCompleteView]
         implicit val msgs: Messages = messages(application)
-        val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(userAnswers, Some(registrationWrapper)))
+        val summaryList = SummaryListViewModel(rows = getAmendedRegistrationSummaryList(originalRegistration, Some(registrationWrapper)))
 
         status(result) `mustBe` OK
 
@@ -113,9 +118,8 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
 
     "return runtimeException when NewIossRefrence not set" in {
 
-      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn None.toFuture
 
       val userAnswers = UserAnswers(
         userAnswersId,
@@ -138,7 +142,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val request = FakeRequest(GET, rejoinCompleteCRoute)
 
         val exception = intercept[RuntimeException] {
           val result = route(application, request).value
@@ -151,9 +155,8 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
 
     "return runtimeException when Company name is not set" in {
 
-      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn None.toFuture
 
       val vatCustomerInfo: VatCustomerInfo =
         VatCustomerInfo(
@@ -188,7 +191,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val request = FakeRequest(GET, rejoinCompleteCRoute)
 
         val exception = intercept[RuntimeException] {
           val result = route(application, request).value
@@ -205,17 +208,20 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
       val updatedAnswers = originalRegistration
         .set(AllTradingNames, List(newTradingName)).success.value
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount)
+      val application = applicationBuilder(
+        userAnswers = Some(updatedAnswers),
+        registrationWrapper = Some(registrationWrapper),
+        compositeAccount = compositeAccount
+      )
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
         .build()
 
-      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn None.toFuture
 
       running(application) {
-        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val request = FakeRequest(GET, rejoinCompleteCRoute)
         val config = application.injector.instanceOf[FrontendAppConfig]
         val result = route(application, request).value
         val view = application.injector.instanceOf[RejoinCompleteView]
@@ -247,17 +253,21 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
       val updatedAnswers = originalRegistration
         .set(AllTradingNames, List(newTradingName)).success.value
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), compositeAccount = compositeAccount, numberOfIossRegistrations = 1)
+      val application = applicationBuilder(
+        userAnswers = Some(updatedAnswers),
+        registrationWrapper = Some(registrationWrapper),
+        compositeAccount = compositeAccount,
+        numberOfIossRegistrations = 1
+      )
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
         .build()
 
-      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn None.toFuture
 
       running(application) {
-        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val request = FakeRequest(GET, rejoinCompleteCRoute)
         val config = application.injector.instanceOf[FrontendAppConfig]
         val result = route(application, request).value
         val view = application.injector.instanceOf[RejoinCompleteView]
@@ -289,17 +299,20 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
       val updatedAnswers = originalRegistration
         .set(AllTradingNames, List(newTradingName)).success.value
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), numberOfIossRegistrations = 1)
+      val application = applicationBuilder(
+        userAnswers = Some(updatedAnswers),
+        registrationWrapper = Some(registrationWrapper),
+        numberOfIossRegistrations = 1
+      )
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
         .build()
 
-      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn None.toFuture
 
       running(application) {
-        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val request = FakeRequest(GET, rejoinCompleteCRoute)
         val config = application.injector.instanceOf[FrontendAppConfig]
         val result = route(application, request).value
         val view = application.injector.instanceOf[RejoinCompleteView]
@@ -331,17 +344,20 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
       val updatedAnswers = originalRegistration
         .set(AllTradingNames, List(newTradingName)).success.value
 
-      val application = applicationBuilder(userAnswers = Some(updatedAnswers), numberOfIossRegistrations = 2)
+      val application = applicationBuilder(
+        userAnswers = Some(updatedAnswers),
+        registrationWrapper = Some(registrationWrapper),
+        numberOfIossRegistrations = 2
+      )
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[CoreRegistrationValidationService].toInstance(mockCoreRegistrationValidationService))
         .build()
 
-      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Future.successful(Right(ExternalEntryUrl(None)))
-      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn Future.successful(None)
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Future.successful(Right(registrationWrapper))
+      when(mockRegistrationConnector.getSavedExternalEntry()(any())) thenReturn Right(ExternalEntryUrl(None)).toFuture
+      when(mockCoreRegistrationValidationService.searchUkVrn(any())(any(), any())) thenReturn None.toFuture
 
       running(application) {
-        val request = FakeRequest(GET, controllers.rejoin.routes.RejoinCompleteController.onPageLoad().url)
+        val request = FakeRequest(GET, rejoinCompleteCRoute)
         val config = application.injector.instanceOf[FrontendAppConfig]
         val result = route(application, request).value
         val view = application.injector.instanceOf[RejoinCompleteView]
@@ -369,10 +385,9 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
   }
 
 
-
   private def getAmendedRegistrationSummaryList(
-                                               answers: UserAnswers,
-                                               registrationWrapper: Option[RegistrationWrapper]
+                                                 answers: UserAnswers,
+                                                 registrationWrapper: Option[RegistrationWrapper]
                                                )(implicit msgs: Messages): Seq[SummaryListRow] = {
     val hasTradingNameSummaryRow = HasTradingNameSummary.amendedRow(answers)
     val tradingNameSummaryRow = TradingNameSummary.amendedAnswersRow(answers)
@@ -403,7 +418,5 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
     val originalAnswers = registrationWrapper.map(_.registration.tradingNames.map(_.tradingName)).getOrElse(List.empty)
 
     originalAnswers.diff(amendedAnswers)
-
   }
-
 }

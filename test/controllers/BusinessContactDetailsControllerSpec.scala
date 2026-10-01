@@ -18,7 +18,6 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
-import connectors.RegistrationConnector
 import forms.BusinessContactDetailsFormProvider
 import models.emailVerification.EmailVerificationResponse
 import models.emailVerification.PasscodeAttemptsStatus.{LockedPasscodeForSingleEmail, LockedTooManyLockedEmails, NotVerified, Verified}
@@ -62,7 +61,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
     EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
 
   private val mockEmailVerificationService = mock[EmailVerificationService]
-  private val mockRegistrationConnector = mock[RegistrationConnector]
   private val mockSaveForLaterService = mock[SaveForLaterService]
 
   private def createEmailVerificationResponse(waypoints: Waypoints): EmailVerificationResponse = EmailVerificationResponse(
@@ -81,7 +79,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
   override def beforeEach(): Unit = {
     Mockito.reset(mockEmailVerificationService)
-    Mockito.reset(mockRegistrationConnector)
   }
 
   "BusinessContactDetails Controller" - {
@@ -124,10 +121,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
       "must return OK and the correct view for a GET when a previous registration is being amended" in {
 
-        when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
-
         val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
         running(application) {
@@ -593,38 +587,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           contentAsString(result) `mustBe` view(boundForm, emptyWaypoints, None, 0)(request, messages(application)).toString
         }
       }
-
-      "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, businessContactDetailsRoute)
-
-          val result = route(application, request).value
-
-          status(result) `mustBe` SEE_OTHER
-          redirectLocation(result).value `mustBe` routes.JourneyRecoveryController.onPageLoad().url
-        }
-      }
-
-      "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-        val application = applicationBuilder(userAnswers = None)
-          .configure("features.enrolments-enabled" -> "false")
-          .build()
-
-        running(application) {
-          val request =
-            FakeRequest(POST, businessContactDetailsRoute)
-              .withFormUrlEncodedBody(("fullName", "value 1"), ("telephoneNumber", "0111 2223334"), ("emailAddress", "email@email.com"))
-
-          val result = route(application, request).value
-
-          status(result) `mustBe` SEE_OTHER
-          redirectLocation(result).value `mustBe` routes.JourneyRecoveryController.onPageLoad().url
-        }
-      }
     }
   }
 
@@ -635,7 +597,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
       when(mockEmailVerificationService.isEmailVerified(
         eqTo(emailVerificationRequest.email.get.address),
@@ -647,8 +608,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           .configure("features.enrolments-enabled" -> "false")
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
-            bind[EmailVerificationService].toInstance(mockEmailVerificationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+            bind[EmailVerificationService].toInstance(mockEmailVerificationService)
           )
           .build()
 
@@ -683,7 +643,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.set(any())) thenReturn true.toFuture
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
 
       when(mockEmailVerificationService.isEmailVerified(
         eqTo(emailVerificationRequest.email.get.address),
@@ -695,8 +654,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           .configure("features.enrolments-enabled" -> "false")
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
-            bind[EmailVerificationService].toInstance(mockEmailVerificationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+            bind[EmailVerificationService].toInstance(mockEmailVerificationService)
           )
           .build()
 
@@ -729,8 +687,6 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
-
       val newEmailAddress = "email@example.co.uk"
 
       val amendEmailVerificationRequest = emailVerificationRequest.copy(
@@ -755,8 +711,7 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
           .configure("features.enrolments-enabled" -> "false")
           .overrides(
             bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository),
-            bind[EmailVerificationService].toInstance(mockEmailVerificationService),
-            bind[RegistrationConnector].toInstance(mockRegistrationConnector)
+            bind[EmailVerificationService].toInstance(mockEmailVerificationService)
           )
           .build()
 
@@ -838,7 +793,11 @@ class BusinessContactDetailsControllerSpec extends SpecBase with MockitoSugar wi
 
     "must return OK and the correct view for a GET when Oss Registration and Ioss registrations are present" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswersWithVatInfo), compositeAccount = compositeAccount, numberOfIossRegistrations = 1)
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswersWithVatInfo),
+        registrationWrapper = Some(registrationWrapper),
+        compositeAccount = compositeAccount,
+        numberOfIossRegistrations = 1)
         .build()
 
       running(application) {

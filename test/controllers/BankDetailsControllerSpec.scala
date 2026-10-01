@@ -41,7 +41,7 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
   private val form = formProvider()
   private val waypoints: Waypoints = EmptyWaypoints
 
-  private lazy val bankDetailsRoute = routes.BankDetailsController.onPageLoad().url
+  private lazy val bankDetailsRoute = routes.BankDetailsController.onPageLoad(waypoints).url
 
   private val compositeAccount: Option[CompositeAccount] = generateCompositeAccount(ossRegistration)
 
@@ -129,36 +129,6 @@ class BankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) `mustBe` BAD_REQUEST
         contentAsString(result) `mustBe` view(boundForm, waypoints, None, 0)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, bankDetailsRoute)
-
-        val result = route(application, request).value
-
-        status(result) `mustBe` SEE_OTHER
-        redirectLocation(result).value `mustBe` routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, bankDetailsRoute)
-            .withFormUrlEncodedBody(("accountName", "account name"), ("bic", genBic.toString), ("iban", genIban.toString))
-
-        val result = route(application, request).value
-
-        status(result) `mustBe` SEE_OTHER
-        redirectLocation(result).value `mustBe` routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 

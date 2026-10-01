@@ -32,7 +32,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class StartAmendPreviousRegistrationJourneyController @Inject()(
                                                                  override val messagesApi: MessagesApi,
                                                                  cc: AuthenticatedControllerComponents,
@@ -55,6 +54,7 @@ class StartAmendPreviousRegistrationJourneyController @Inject()(
               _ <- authenticatedUserAnswersRepository.set(userAnswers)
               _ <- authenticatedUserAnswersRepository.set(originalAnswers)
             } yield Redirect(ChangePreviousRegistrationPage.route(waypoints).url)
+            
           case Left(error) =>
             val exception = new Exception(error.body)
             logger.error(exception.getMessage, exception)

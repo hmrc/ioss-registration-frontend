@@ -66,7 +66,7 @@ class CheckPreviousSchemeAnswersController @Inject()(
   private def getExistingSchemesForTheCountryInAmend(waypoints: Waypoints,
                                                      country: Country,
                                                      request: AuthenticatedDataRequest[AnyContent]): Seq[PreviousScheme] = {
-    if (waypoints.inAmend) {
+    if (waypoints.isInAmendOrRejoin) {
       request.previousEURegistrationDetails.collect {
         case previousEURegistrationDetails if previousEURegistrationDetails.issuedBy == country.code =>
           PreviousScheme.fromEmtpSchemeType(previousEURegistrationDetails.schemeType)

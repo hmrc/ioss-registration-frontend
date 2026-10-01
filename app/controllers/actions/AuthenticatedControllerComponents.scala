@@ -80,7 +80,7 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
       getData andThen
       requireData(modifyingExistingRegistration) andThen
       checkOtherCountryRegistration(registrationModificationMode) andThen
-      checkPartOfVatGroup(restrictFromPartOfVatGroup)
+      checkPartOfVatGroup(restrictFromPartOfVatGroup, registrationModificationMode)
   }
 
   def authAndGetOptionalData(): ActionBuilder[AuthenticatedOptionalDataRequest, AnyContent] = {
@@ -91,16 +91,18 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
 
   def authAndGetDataAndCheckVerifyEmail(
                                          registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
-                                         restrictFromPreviousRegistrations: Boolean = true
+                                         restrictFromPreviousRegistrations: Boolean = true,
+                                         restrictFromPartOfVatGroup: Boolean = false
                                        ): ActionBuilder[AuthenticatedDataRequest, AnyContent] =
-    authAndGetData(registrationModificationMode, restrictFromPreviousRegistrations) andThen
+    authAndGetData(registrationModificationMode, restrictFromPreviousRegistrations, restrictFromPartOfVatGroup) andThen
       checkEmailVerificationStatus(registrationModificationMode)
 
   def authAndRequireIoss(
                           modifyingExistingRegistrationMode: ModifyingExistingRegistrationMode,
-                          restrictFromPreviousRegistrations: Boolean = true
+                          restrictFromPreviousRegistrations: Boolean = true,
+                          restrictFromPartOfVatGroup: Boolean = false
                         ): ActionBuilder[AuthenticatedMandatoryIossRequest, AnyContent] = {
-    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations) andThen
+    authAndGetDataAndCheckVerifyEmail(modifyingExistingRegistrationMode, restrictFromPreviousRegistrations, restrictFromPartOfVatGroup) andThen
       requireIoss() andThen
       checkBouncedEmail(modifyingExistingRegistrationMode)
   }
@@ -109,13 +111,12 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
                                           registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
                                           restrictFromPartOfVatGroup: Boolean = false
                                         ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
-
     actionBuilder andThen
       identify andThen
       checkRegistration(registrationModificationMode) andThen
       getData andThen
       requireData(false) andThen
-      checkPartOfVatGroup(restrictFromPartOfVatGroup)
+      checkPartOfVatGroup(restrictFromPartOfVatGroup, registrationModificationMode)
   }
 }
 

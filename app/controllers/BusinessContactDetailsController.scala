@@ -90,7 +90,7 @@ class BusinessContactDetailsController @Inject()(
             BadRequest(view(formWithErrors, waypoints, compositeAccount, numberOfIossRegistrations)).toFuture,
 
           value => {
-            val continueUrl = if (waypoints.inAmend) {
+            val continueUrl = if (waypoints.isInAmendOrRejoin) {
               s"${config.loginContinueUrl}${waypoints.getNextCheckYourAnswersPageFromWaypoints.getOrElse(BankDetailsPage).route(waypoints).url}"
             } else if (bankDetailsCompleted) {
               s"${config.loginContinueUrl}${CheckYourAnswersPage.route(waypoints).url}"

@@ -18,18 +18,19 @@ package controllers.amend
 
 import base.SpecBase
 import connectors.RegistrationConnector
-import models.UserAnswers
 import models.responses.InternalServerError
+import models.{CheckMode, UserAnswers}
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.amend.ChangePreviousRegistrationPage
-import pages.{EmptyWaypoints, Waypoints}
+import pages.{EmptyWaypoints, Waypoint, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.PreviousRegistrationIossNumberQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.RegistrationService
@@ -37,22 +38,31 @@ import utils.FutureSyntax.FutureOps
 
 class StartAmendPreviousRegistrationJourneyControllerSpec extends SpecBase with BeforeAndAfterEach {
 
-  private val waypoints: Waypoints = EmptyWaypoints
+  private val waypoints: Waypoints = EmptyWaypoints.setNextWaypoint(Waypoint(ChangePreviousRegistrationPage, CheckMode, ChangePreviousRegistrationPage.urlFragment))
   override val iossNumber: String = arbitrary[String].sample.value
 
   private val answers: UserAnswers = completeUserAnswersWithVatInfo.set(PreviousRegistrationIossNumberQuery, iossNumber).success.value
+
   private val mockRegistrationConnector: RegistrationConnector = mock[RegistrationConnector]
   private val mockRegistrationService: RegistrationService = mock[RegistrationService]
   private val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
+
+  override def beforeEach(): Unit = {
+    Mockito.reset(
+      mockRegistrationConnector,
+      mockRegistrationService,
+      mockAuthenticatedUserAnswersRepository
+    )
+  }
 
   "StartAmendJourney Controller" - {
 
     "must redirect to Change Previous Registration when a registration wrapper has been successfully retrieved" in {
 
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+      when(mockRegistrationConnector.getRegistration(any())(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockRegistrationConnector.getRegistration(any())(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn answers.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn answers.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
       val application = applicationBuilder(userAnswers = Some(answers), clock = Some(stubClockAtArbitraryDate))
@@ -73,12 +83,12 @@ class StartAmendPreviousRegistrationJourneyControllerSpec extends SpecBase with 
 
     "must redirect to Not Registered Page when no registration found" in {
 
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
+      when(mockRegistrationConnector.getRegistration(any())(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
-      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(stubClockAtArbitraryDate))
+      val application = applicationBuilder(userAnswers = Some(answers), clock = Some(stubClockAtArbitraryDate))
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
         .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))
@@ -98,12 +108,12 @@ class StartAmendPreviousRegistrationJourneyControllerSpec extends SpecBase with 
 
     "must throw an exception when registration connector returns Left(error)" in {
 
-      when(mockRegistrationConnector.getRegistration()(any())) thenReturn Left(InternalServerError).toFuture
+      when(mockRegistrationConnector.getRegistration(any())(any())) thenReturn Left(InternalServerError).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
-      val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), clock = Some(stubClockAtArbitraryDate))
+      val application = applicationBuilder(userAnswers = Some(answers), clock = Some(stubClockAtArbitraryDate))
         .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
         .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
         .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository))

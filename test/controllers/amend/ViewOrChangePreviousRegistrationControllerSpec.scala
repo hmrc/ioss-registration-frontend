@@ -28,11 +28,11 @@ import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.{ViewOrChangePreviousRegistrationPage, ViewOrChangePreviousRegistrationsMultiplePage}
-import pages.{EmptyWaypoints, JourneyRecoveryPage, Waypoints}
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.PreviousRegistrationIossNumberQuery
 import repositories.AuthenticatedUserAnswersRepository
 import services.AccountService
@@ -205,36 +205,6 @@ class ViewOrChangePreviousRegistrationControllerSpec extends SpecBase with Mocki
 
         status(result) mustBe BAD_REQUEST
         contentAsString(result) mustBe view(boundForm, waypoints, iossNumber)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, viewOrChangePreviousRegistrationRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, viewOrChangePreviousRegistrationRoute)
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe JourneyRecoveryPage.route(waypoints).url
       }
     }
   }

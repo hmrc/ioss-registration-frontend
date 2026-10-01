@@ -22,7 +22,7 @@
         ButtonViewModel(messages(continueMessage)).withAttribute(("id", "continue"))
     )
 
-    @if(!waypoints.inAmend) {
+    @if(!waypoints.isInAmendOrRejoin) {
         <a id="saveProgress" role="button" href="@routes.SavedProgressController.onPageLoad(waypoints, RedirectUrl(continueUrl))" class="govuk-button govuk-button--secondary" data-module="govuk-button">
           @messages("saveProgress.button")
         </a>

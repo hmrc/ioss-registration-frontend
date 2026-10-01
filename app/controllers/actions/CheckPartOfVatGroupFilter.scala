@@ -16,45 +16,66 @@
 
 package controllers.actions
 
-import controllers.routes
+import controllers.euDetails.routes as euRoutes
 import logging.Logging
 import models.requests.AuthenticatedDataRequest
+import pages.{EmptyWaypoints, SavedProgressPage}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionFilter, Result}
+import play.api.mvc.{ActionFilter, Call, Result}
+import queries.euDetails.AllEuDetailsQuery
 import utils.FutureSyntax.FutureOps
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class CheckPartOfVatGroupFilterImpl(
-                                     restrictFromPartOfVatGroup: Boolean
+                                     restrictFromPartOfVatGroup: Boolean,
+                                     registrationModificationMode: RegistrationModificationMode
                                    )(implicit val executionContext: ExecutionContext)
   extends ActionFilter[AuthenticatedDataRequest] with Logging {
 
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
-    if (restrictFromPartOfVatGroup) {
-      request.userAnswers.vatInfo.map { vatCustomerInfo =>
-        if (vatCustomerInfo.partOfVatGroup) {
-          Some(Redirect(routes.CannotAccessPageController.onPageLoad())).toFuture
-        } else {
-          None.toFuture
+
+    (restrictFromPartOfVatGroup, request.userAnswers.get(SavedProgressPage).nonEmpty, registrationModificationMode) match {
+      case (true, false, AmendingActiveRegistration) =>
+        determineFeAndRedirect(hasSavedAnswers = false, euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad())(request)
+
+      case (true, _, _)  =>
+        determineFeAndRedirect(false, controllers.routes.CannotAccessPageController.onPageLoad())(request)
+
+      case (_, true, NotModifyingExistingRegistration) =>
+        val waypoints: EmptyWaypoints.type = EmptyWaypoints
+        determineFeAndRedirect(hasSavedAnswers = true, controllers.routes.SavedProgressRemoveFixedEstablishmentsController.onPageLoad(waypoints))(request)
+
+      case (_, _, _) => None.toFuture
+    }
+  }
+
+  private def determineFeAndRedirect(hasSavedAnswers: Boolean, redirectCall: Call)(implicit request: AuthenticatedDataRequest[_]) = {
+    (hasSavedAnswers, request.registrationWrapper) match {
+      case (false, Some(registrationWrapper))
+        if registrationWrapper.vatInfo.partOfVatGroup && registrationWrapper.registration.schemeDetails.euRegistrationDetails.nonEmpty =>
+        Some(Redirect(redirectCall)).toFuture
+
+      case (false, _) if request.userAnswers.vatInfo.exists(_.partOfVatGroup) =>
+        Some(Redirect(redirectCall)).toFuture
+
+      case (true, _) =>
+        request.userAnswers.vatInfo match {
+          case Some(vatInfo) if vatInfo.partOfVatGroup && request.userAnswers.get(AllEuDetailsQuery).nonEmpty =>
+            Some(Redirect(redirectCall)).toFuture
+
+          case _ => None.toFuture
         }
-      }.getOrElse {
-        val errorMessage = "VAT info unavailable, must have VAT info."
-        logger.error(errorMessage)
-        val exception: IllegalStateException = new IllegalStateException(errorMessage)
-        throw exception
-      }
-    } else {
-      None.toFuture
+
+      case (_, _) => None.toFuture
     }
   }
 }
 
 class CheckPartOfVatGroupFilter @Inject()()(implicit val executionContext: ExecutionContext) {
 
-  def apply(restrictFromPartOfVatGroup: Boolean): CheckPartOfVatGroupFilterImpl = {
-    new CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup)
+  def apply(restrictFromPartOfVatGroup: Boolean, registrationModificationMode: RegistrationModificationMode): CheckPartOfVatGroupFilterImpl = {
+    new CheckPartOfVatGroupFilterImpl(restrictFromPartOfVatGroup, registrationModificationMode)
   }
 }

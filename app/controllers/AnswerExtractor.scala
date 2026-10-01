@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import logging.Logging
 import models.requests.AuthenticatedDataRequest
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
@@ -40,7 +40,7 @@ trait AnswerExtractor extends Logging {
       .get(query)
       .map(block(_))
       .getOrElse({
-        if (waypoints.inAmend) {
+        if (waypoints.isInAmendOrRejoin) {
           waypoints.registrationModificationMode match {
             case RejoiningRegistration => Redirect(RejoinRegistrationPage.route(waypoints))
             case AmendingActiveRegistration => Redirect(ChangeRegistrationPage.route(waypoints))
@@ -61,7 +61,7 @@ trait AnswerExtractor extends Logging {
       .get(query)
       .map(block(_))
       .getOrElse({
-        if (waypoints.inAmend) {
+        if (waypoints.isInAmendOrRejoin) {
           waypoints.registrationModificationMode match {
             case RejoiningRegistration => Redirect(RejoinRegistrationPage.route(waypoints)).toFuture
             case AmendingActiveRegistration => Redirect(ChangeRegistrationPage.route(waypoints)).toFuture

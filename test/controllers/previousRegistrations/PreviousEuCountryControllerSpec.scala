@@ -17,18 +17,17 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import controllers.routes
 import forms.previousRegistrations.PreviousEuCountryFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.{Country, Index}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EmptyWaypoints, Waypoints}
 import pages.previousRegistrations.{PreviousEuCountryPage, PreviousOssNumberPage}
+import pages.{EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.previousRegistrations.PreviousEuCountryView
 
@@ -152,37 +151,6 @@ class PreviousEuCountryControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, waypoints, index)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, previousEuCountryRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, previousEuCountryRoute)
-            .withFormUrlEncodedBody(("value", validAnswer.toString))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

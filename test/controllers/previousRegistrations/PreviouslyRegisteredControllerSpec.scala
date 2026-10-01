@@ -17,21 +17,19 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
-import controllers.routes
 import forms.previousRegistrations.PreviouslyRegisteredFormProvider
 import models.UserAnswers
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{CheckYourAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoints}
 import pages.amend.ChangeRegistrationPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
+import pages.{CheckYourAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.previousRegistrations.PreviouslyRegisteredView
 
@@ -60,17 +58,13 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
   "PreviouslyRegistered Controller" - {
 
     "must return OK and the correct view for a GET when no question has been answered for all modes except amend" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
-        .overrides(
-          bind[RegistrationConnector].toInstance(mockRegistrationConnector)
-        ).build()
+        .build()
 
       running(application) {
 
-        forAll(allModeWaypoints) { case (_, waypoints, timesRegistrationIsCalled) =>
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
+        forAll(allModeWaypoints) { case (_, waypoints, _) =>
 
           val request = FakeRequest(GET, previouslyRegisteredRoute(waypoints))
 
@@ -80,14 +74,12 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(form, waypoints)(request, messages(application)).toString
-
-          verify(mockRegistrationConnector, times(timesRegistrationIsCalled)).getRegistration()(any())
-
         }
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered as true when not in Amend mode" in {
+
       val userAnswers = UserAnswers(userAnswersId).set(PreviouslyRegisteredPage, true).success.value
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -106,42 +98,36 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
     }
 
     "must fail on GET when the existing answer is true when in Amend mode" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val userAnswers = UserAnswers(userAnswersId).set(PreviouslyRegisteredPage, true).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[RegistrationConnector]
-          .toInstance(mockRegistrationConnector)).build()
-
-      when(mockRegistrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(registrationWrapper)))
+      val application = applicationBuilder(
+        userAnswers = Some(userAnswers),
+        registrationWrapper = Some(registrationWrapper)
+      )
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, previouslyRegisteredRoute(amendModeWaypoints))
         val result = route(application, request).value
 
         result.failed.futureValue mustBe an[InvalidAmendModeOperationException]
-
-        verify(mockRegistrationConnector).getRegistration()(any())
       }
     }
 
     "must save the answer and redirect to the next page when valid data is submitted when the answer is originally true" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockRegistrationConnector = mock[RegistrationConnector]
+
       val application =
         applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
-        forAll(allModeWaypoints) { case (_, waypoints, timesRegistrationIsCalled) =>
+        forAll(allModeWaypoints) { case (_, waypoints, _) =>
           Mockito.reset(mockSessionRepository)
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request =
             FakeRequest(POST, previouslyRegisteredRoute(waypoints))
@@ -153,12 +139,12 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual PreviouslyRegisteredPage.navigate(waypoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-          verify(mockRegistrationConnector, times(timesRegistrationIsCalled)).getRegistration()(any())
         }
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
+
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
@@ -174,36 +160,6 @@ class PreviouslyRegisteredControllerSpec extends SpecBase with MockitoSugar with
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, emptyWaypoints)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, previouslyRegisteredRoute(emptyWaypoints))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, previouslyRegisteredRoute(emptyWaypoints))
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

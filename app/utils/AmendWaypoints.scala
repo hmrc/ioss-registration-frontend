@@ -37,7 +37,7 @@ object AmendWaypoints {
       }
 
     def inAmend: Boolean = {
-      isInMode(ChangeRegistrationPage, ChangePreviousRegistrationPage, RejoinRegistrationPage)
+      isInMode(ChangeRegistrationPage, ChangePreviousRegistrationPage)
     }
 
     def inRejoin: Boolean = {

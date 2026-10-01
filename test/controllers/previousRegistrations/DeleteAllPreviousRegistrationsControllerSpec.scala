@@ -17,21 +17,20 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import forms.previousRegistrations.DeleteAllPreviousRegistrationsFormProvider
 import models.domain.PreviousSchemeNumbers
 import models.{Country, Index}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.mockito.MockitoSugar
 import pages.amend.ChangeRegistrationPage
 import pages.previousRegistrations.{DeleteAllPreviousRegistrationsPage, PreviousEuCountryPage, PreviousOssNumberPage, PreviouslyRegisteredPage}
-import pages.{CheckYourAnswersPage, EmptyWaypoints, JourneyRecoveryPage, Waypoints}
+import pages.{CheckYourAnswersPage, EmptyWaypoints, Waypoints}
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.previousRegistration.AllPreviousRegistrationsQuery
 import repositories.AuthenticatedUserAnswersRepository
 import views.html.previousRegistrations.DeleteAllPreviousRegistrationsView
@@ -77,20 +76,14 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
     }
 
     "must fail for a GET when in Amend mode" in {
-      val mockRegistrationConnector = mock[RegistrationConnector]
-      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
-        .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
-        .build()
 
-      when(mockRegistrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(registrationWrapper)))
+      val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, deleteAllPreviousRegistrationsRoute(createCheckModeWayPoint(ChangeRegistrationPage)))
         route(application, request).value.failed.futureValue mustBe an[InvalidAmendModeOperationException]
       }
-
-      verify(mockRegistrationConnector).getRegistration()(any())
     }
 
     "must delete all previous registration answers and redirect to the next page when the user answers Yes and not in Amend mode" in {
@@ -128,22 +121,16 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
 
     "must not delete all previous registration answers and redirect to the next page when the user answers No when not in Amend mode" in {
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockRegistrationConnector = mock[RegistrationConnector]
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
         forAll(nonAmendModeWayPoints) { case (_, nonAmendModeWayPoints) =>
-          Mockito.reset(mockRegistrationConnector)
           Mockito.reset(mockSessionRepository)
 
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request =
             FakeRequest(POST, deleteAllPreviousRegistrationsRoute(nonAmendModeWayPoints))
@@ -157,7 +144,6 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual DeleteAllPreviousRegistrationsPage.navigate(nonAmendModeWayPoints, emptyUserAnswers, expectedAnswers).url
           verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-          verify(mockRegistrationConnector, times(0)).getRegistration()(any())
         }
       }
     }
@@ -170,23 +156,17 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
       )
 
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
-      val mockRegistrationConnector = mock[RegistrationConnector]
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
         forAll(dpDeleteOptions) { case (doDelete) =>
           Mockito.reset(mockSessionRepository)
-          Mockito.reset(mockRegistrationConnector)
 
           when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-          when(mockRegistrationConnector.getRegistration()(any()))
-            .thenReturn(Future.successful(Right(registrationWrapper)))
 
           val request =
             FakeRequest(POST, deleteAllPreviousRegistrationsRoute(createCheckModeWayPoint(ChangeRegistrationPage)))
@@ -199,8 +179,8 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
       }
     }
 
-
     "must return a Bad Request and errors when invalid data is submitted" in {
+
       val application = applicationBuilder(userAnswers = Some(basicUserAnswersWithVatInfo)).build()
 
       running(application) {
@@ -216,36 +196,6 @@ class DeleteAllPreviousRegistrationsControllerSpec extends SpecBase with Mockito
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, waypoints)(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, deleteAllPreviousRegistrationsRoute(EmptyWaypoints))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, deleteAllPreviousRegistrationsRoute(EmptyWaypoints))
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual JourneyRecoveryPage.route(waypoints).url
       }
     }
   }

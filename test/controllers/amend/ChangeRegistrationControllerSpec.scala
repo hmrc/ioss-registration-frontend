@@ -24,9 +24,9 @@ import controllers.amend.routes as amendRoutes
 import models.amend.{PreviousRegistration, RegistrationWrapper}
 import models.audit.SubmissionResult.{Failure, Success}
 import models.audit.{AmendRegistrationAuditModel, RegistrationAuditType}
-import models.etmp.{EtmpAdminUse, EtmpDisplayRegistration, EtmpExclusion, EtmpTradingName}
 import models.etmp.EtmpExclusionReason.NoLongerSupplies
 import models.etmp.amend.AmendRegistrationResponse
+import models.etmp.{EtmpAdminUse, EtmpDisplayRegistration, EtmpExclusion, EtmpTradingName}
 import models.requests.AuthenticatedDataRequest
 import models.responses.InternalServerError
 import models.{CheckMode, Index, TradingName, UserAnswers}
@@ -43,9 +43,9 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{running, *}
-import queries.{AllOriginalRegistrationsRawQuery, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import queries.euDetails.EuDetailsQuery
 import queries.tradingNames.AllTradingNames
+import queries.{AllOriginalRegistrationsRawQuery, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import repositories.AuthenticatedUserAnswersRepository
 import services.*
 import testutils.RegistrationData.etmpDisplayRegistration
@@ -127,7 +127,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWithoutExclusion).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
-        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
 
         val application = applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
@@ -173,7 +173,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq(previousRegistration).toFuture
-        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
 
         val application = applicationBuilder(userAnswers = Some(completeUserAnswersWithVatInfo), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
@@ -228,7 +228,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
             .remove(AllOriginalRegistrationsRawQuery).success.value
             .remove(PreviousRegistrationIossNumberQuery).success.value
 
-        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn originalAnswers.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn originalAnswers.toFuture
 
         val application = applicationBuilder(userAnswers = Some(answers), registrationWrapper = Some(rejoinableRegistration), enrolments = Some(multipleEnrolments))
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
@@ -274,7 +274,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(rejoinableRegistration).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
-        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
 
         val application = applicationBuilder(
           userAnswers = Some(completeUserAnswersWithVatInfo),
@@ -388,7 +388,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(usableRegistrationWrapper).toFuture
         when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
-        when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
 
         val userAnswers = completeUserAnswersWithVatInfo
           .set(OriginalRegistrationQuery(iossNumber), usableRegistrationWrapper.registration).success.value

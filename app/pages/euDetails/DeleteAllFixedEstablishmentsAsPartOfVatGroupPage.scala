@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package utils
+package pages.euDetails
 
-import controllers.routes
-import controllers.amend.{routes => amendRoutes}
-import pages.Waypoints
+import controllers.euDetails.routes
+import models.UserAnswers
+import pages.amend.AmendCompletePage
+import pages.{Page, Waypoints}
 import play.api.mvc.Call
-import utils.AmendWaypoints.AmendWaypointsOps
 
-object CheckJourneyRecovery {
+case object DeleteAllFixedEstablishmentsAsPartOfVatGroupPage extends Page {
 
-  def determineJourneyRecovery(waypoints: Waypoints): Call = {
-    if (waypoints.isInAmendOrRejoin) {
-      amendRoutes.AmendJourneyRecoveryController.onPageLoad()
-    } else {
-      routes.JourneyRecoveryController.onPageLoad()
-    }
+  override def route(waypoints: Waypoints): Call = {
+    routes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad()
+  }
+
+  override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page = {
+    AmendCompletePage
   }
 }

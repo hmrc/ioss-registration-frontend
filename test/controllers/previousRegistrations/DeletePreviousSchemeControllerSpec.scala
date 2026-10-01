@@ -17,12 +17,11 @@
 package controllers.previousRegistrations
 
 import base.SpecBase
-import connectors.RegistrationConnector
 import forms.previousRegistrations.DeletePreviousSchemeFormProvider
 import models.domain.{PreviousSchemeDetails, PreviousSchemeNumbers}
 import models.previousRegistrations.PreviousRegistrationDetails
 import models.{Country, Index, PreviousScheme}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalacheck.Arbitrary.arbitrary
@@ -34,7 +33,7 @@ import pages.{CheckYourAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoints
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import queries.previousRegistration.PreviousSchemeForCountryQuery
 import repositories.AuthenticatedUserAnswersRepository
 import viewmodels.checkAnswers.previousRegistrations.{DeletePreviousSchemeSummary, PreviousSchemeNumberSummary}
@@ -101,15 +100,8 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
     }
 
     "must return OK and the correct view for a GET when in Amend mode and the scheme is not currently registered" in {
-      val registrationConnector = mock[RegistrationConnector]
-
-      when(registrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(registrationWrapper)))
 
       val application = applicationBuilder(userAnswers = Some(baseUserAnswers))
-        .overrides(
-          bind[RegistrationConnector].toInstance(registrationConnector)
-        )
         .build()
 
       implicit val msgs: Messages = messages(application)
@@ -130,12 +122,11 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
         status(result) mustEqual OK
         contentAsString(result) mustEqual
           view(form, amendModeWaypoints, index, index, country, list, isLastPreviousScheme = true)(request, messages(application)).toString
-
-        verify(registrationConnector).getRegistration()(any())
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
+
       val userAnswers = baseUserAnswers.copy().set(DeletePreviousSchemePage(index, index), true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
@@ -164,6 +155,7 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
     }
 
     "must delete a scheme and redirect to the next page when user answers Yes when not in Amend mode" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       val application =
@@ -193,17 +185,13 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
     }
 
     "must delete a scheme and redirect to the next page when user answers Yes when in Amend mode" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val mockRegistrationConnector = mock[RegistrationConnector]
-      when(mockRegistrationConnector.getRegistration()(any()))
-        .thenReturn(Future.successful(Right(registrationWrapper)))
 
       val application =
         applicationBuilder(userAnswers = Some(baseUserAnswers))
           .overrides(bind[AuthenticatedUserAnswersRepository].toInstance(mockSessionRepository))
-          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .build()
 
       running(application) {
@@ -218,12 +206,12 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
         redirectLocation(result).value mustEqual
           DeletePreviousSchemePage(index, index).navigate(amendModeWaypoints, emptyUserAnswers, expectedAnswers).url
         verify(mockSessionRepository, times(1)).set(eqTo(expectedAnswers))
-        verify(mockRegistrationConnector, times(1)).getRegistration()(any())
       }
     }
 
 
     "must not delete a scheme and redirect to the next page when user answers No" in {
+
       val mockSessionRepository = mock[AuthenticatedUserAnswersRepository]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
@@ -246,7 +234,6 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
             DeletePreviousSchemePage(index, index).navigate(waypoints, baseUserAnswers, baseUserAnswers).url
           verifyNoInteractions(mockSessionRepository)
         }
-
       }
     }
 
@@ -287,24 +274,6 @@ class DeletePreviousSchemeControllerSpec extends SpecBase with MockitoSugar with
       running(application) {
         forAll(nonAmendModeWaypoints) { (_, waypoints) =>
           val request = FakeRequest(GET, deletePreviousSchemeRoute(waypoints))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-        }
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        forAll(nonAmendModeWaypoints) { (_, waypoints) =>
-          val request =
-            FakeRequest(POST, deletePreviousSchemeRoute(waypoints))
-              .withFormUrlEncodedBody(("value", "true"))
 
           val result = route(application, request).value
 

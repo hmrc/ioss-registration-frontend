@@ -51,7 +51,7 @@ class StartAmendJourneyControllerSpec extends SpecBase with BeforeAndAfterEach {
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
       val application = applicationBuilder(
@@ -77,7 +77,7 @@ class StartAmendJourneyControllerSpec extends SpecBase with BeforeAndAfterEach {
 
       when(mockRegistrationConnector.getRegistration()(any())) thenReturn Right(registrationWrapper).toFuture
       when(mockRegistrationConnector.getVatCustomerInfo()(any())) thenReturn Right(vatCustomerInfo).toFuture
-      when(mockRegistrationService.toUserAnswers(any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
+      when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn completeUserAnswersWithVatInfo.toFuture
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
 
       val application = applicationBuilder(
