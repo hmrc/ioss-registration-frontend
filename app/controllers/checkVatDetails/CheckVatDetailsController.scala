@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.checkVatDetails.CheckVatDetailsFormProvider
 import models.{CheckVatDetails, Index, TradingName}
 import pages.checkVatDetails.CheckVatDetailsPage
-import pages.tradingNames.{HasTradingNamePage, TradingNamePage}
+import pages.tradingNames.{HasNoOtherTradingNamesPage, TradingNamePage}
 import pages.{JourneyRecoveryPage, Waypoints}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -78,7 +78,7 @@ class CheckVatDetailsController @Inject()(
                 case Some(compositeAccount) if compositeAccount.tradingNames.nonEmpty =>
                   compositeAccount.tradingNames.zipWithIndex.foldLeft(Try(request.userAnswers)) {
                     case (acc, (tradingName, index)) => acc.flatMap(_.set(TradingNamePage(Index(index)), TradingName(tradingName.name)))
-                  }.flatMap(_.set(HasTradingNamePage, true))
+                  }.flatMap(_.set(HasNoOtherTradingNamesPage, false))
                 case _ =>
                   Success(request.userAnswers)
               }

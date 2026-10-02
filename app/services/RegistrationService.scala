@@ -32,7 +32,7 @@ import models.{BankDetails, BusinessContactDetails, Country, InternationalAddres
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.tradingNames.HasTradingNamePage
+import pages.tradingNames.HasNoOtherTradingNamesPage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
@@ -97,11 +97,11 @@ class RegistrationService @Inject()(
         vatInfo = Some(registrationWrapper.vatInfo)
       ).set(BusinessBasedInNiPage, true)
 
-      hasTradingNamesUA <- businessBasedInNi.set(HasTradingNamePage, etmpTradingNames.nonEmpty)
+      hasNoOtherTradingNamesUA <- businessBasedInNi.set(HasNoOtherTradingNamesPage, etmpTradingNames.isEmpty)
       tradingNamesUA <- if (etmpTradingNames.nonEmpty) {
-        hasTradingNamesUA.set(AllTradingNames, convertToTradingNames(etmpTradingNames).toList)
+        hasNoOtherTradingNamesUA.set(AllTradingNames, convertToTradingNames(etmpTradingNames).toList)
       } else {
-        Try(hasTradingNamesUA)
+        Try(hasNoOtherTradingNamesUA)
       }
 
       hasPreviousRegistrationsUA <- tradingNamesUA.set(PreviouslyRegisteredPage, etmpPreviousRegistrations.nonEmpty)

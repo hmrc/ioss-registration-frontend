@@ -38,11 +38,11 @@ import org.scalatestplus.mockito.MockitoSugar
 import pages.*
 import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
 import pages.euDetails.{EuCountryPage, TaxRegisteredInEuPage}
-import pages.tradingNames.HasTradingNamePage
+import pages.tradingNames.HasNoOtherTradingNamesPage
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{running, *}
+import play.api.test.Helpers.*
 import queries.euDetails.EuDetailsQuery
 import queries.tradingNames.AllTradingNames
 import queries.{AllOriginalRegistrationsRawQuery, OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
@@ -54,7 +54,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.tradingName.{HasNoOtherTradingNamesSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.SummaryListFluency
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
@@ -328,7 +328,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
 
         val changedUserAnswers = completeUserAnswersWithVatInfo
-          .set(HasTradingNamePage, true).success.value
+          .set(HasNoOtherTradingNamesPage, false).success.value
           .set(AllTradingNames, List(TradingName("Changed trading name"))).success.value
           .set(OriginalRegistrationQuery(iossNumber), originalRegistration).success.value
 
@@ -499,7 +499,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
         )
 
         val changedUserAnswers = completeUserAnswersWithVatInfo
-          .set(HasTradingNamePage, true).success.value
+          .set(HasNoOtherTradingNamesPage, false).success.value
           .set(AllTradingNames, List(TradingName("Changed trading name"))).success.value
           .set(OriginalRegistrationQuery(iossNumber), originalRegistration).success.value
 
@@ -636,7 +636,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         "the user is redirected when the incomplete prompt is shown" - {
 
-          "to Has Trading Name when trading names are not populated correctly" in {
+          "to Has No Other Trading Names when trading names are not populated correctly" in {
 
             val registrationConnector = mock[RegistrationConnector]
             when(registrationConnector.getRegistration()(any())).thenReturn(Future.successful(Right(registrationWrapper)))
@@ -802,7 +802,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
                                                 page: CheckAnswersPage = amendYourAnswersPage
                                               )(implicit msgs: Messages): Seq[SummaryListRow] = {
 
-    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, waypoints, page)
+    val hasNoOtherTradingNamesSummaryRow = HasNoOtherTradingNamesSummary.row(answers, waypoints, page)
     val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, waypoints, page)
     val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, waypoints, page, lockEditing = false)
     val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, waypoints, page)
@@ -817,7 +817,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
     val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(answers, waypoints, page)
 
     Seq(
-      hasTradingNameSummaryRow.map { sr =>
+      hasNoOtherTradingNamesSummaryRow.map { sr =>
         if (tradingNameSummaryRow.isDefined) {
           sr.withCssClass("govuk-summary-list__row--no-border")
         } else {
@@ -857,7 +857,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
                                                         page: CheckAnswersPage
                                                       )(implicit msgs: Messages): Seq[SummaryListRow] = {
 
-    val hasTradingNameSummaryRow = HasTradingNameSummary.rowWithoutAction(answers, waypoints)
+    val hasNoOtherTradingNamesSummaryRow = HasNoOtherTradingNamesSummary.rowWithoutAction(answers, waypoints)
     val tradingNameSummaryRow = TradingNameSummary.checkAnswersRowWithoutAction(answers, waypoints)
     val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.rowWithoutAction(answers, waypoints, lockEditing = false)
     val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRowWithoutAction(answers, Seq.empty, waypoints)
@@ -872,7 +872,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
     val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(answers, waypoints, page)
 
     Seq(
-      hasTradingNameSummaryRow.map { sr =>
+      hasNoOtherTradingNamesSummaryRow.map { sr =>
         if (tradingNameSummaryRow.isDefined) {
           sr.withCssClass("govuk-summary-list__row--no-border")
         } else {

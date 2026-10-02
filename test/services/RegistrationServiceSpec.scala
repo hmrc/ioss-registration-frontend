@@ -35,7 +35,7 @@ import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.BusinessBasedInNiPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.tradingNames.HasTradingNamePage
+import pages.tradingNames.HasNoOtherTradingNamesPage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import play.api.test.Helpers.running
 import queries.AllWebsites
@@ -209,7 +209,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
 
         val userAnswers: UserAnswers = emptyUserAnswersWithVatGroupVatInfo
           .set(BusinessBasedInNiPage, true).success.value
-          .set(HasTradingNamePage, true).success.value
+          .set(HasNoOtherTradingNamesPage, false).success.value
           .set(AllTradingNames, convertedTradingNames).success.value
           .set(PreviouslyRegisteredPage, true).success.value
           .set(AllPreviousRegistrationsQuery, previousRegistrations.toList).success.value
@@ -228,7 +228,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
 
         val userAnswers: UserAnswers = emptyUserAnswersWithVatInfo
           .set(BusinessBasedInNiPage, true).success.value
-          .set(HasTradingNamePage, true).success.value
+          .set(HasNoOtherTradingNamesPage, false).success.value
           .set(AllTradingNames, convertedTradingNames).success.value
           .set(PreviouslyRegisteredPage, true).success.value
           .set(AllPreviousRegistrationsQuery, previousRegistrations.toList).success.value
@@ -254,7 +254,7 @@ class RegistrationServiceSpec extends SpecBase with WireMockHelper with BeforeAn
 
         val userAnswers: UserAnswers = emptyUserAnswersWithVatGroupVatInfo
           .set(BusinessBasedInNiPage, true).success.value
-          .set(HasTradingNamePage, true).success.value
+          .set(HasNoOtherTradingNamesPage, false).success.value
           .set(AllTradingNames, convertedTradingNames).success.value
           .set(PreviouslyRegisteredPage, true).success.value
           .set(AllPreviousRegistrationsQuery, previousRegistrations.toList).success.value

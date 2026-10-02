@@ -29,7 +29,7 @@ import queries.etmp.EtmpEnrolmentResponseQuery
 import queries.tradingNames.AllTradingNames
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.tradingName.{HasNoOtherTradingNamesSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.ApplicationCompleteView
@@ -48,7 +48,7 @@ class ApplicationCompleteController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] =  (cc.actionBuilder andThen cc.identify andThen cc.getData andThen cc.requireData(isInAmendMode = false)) {
+  def onPageLoad: Action[AnyContent] = (cc.actionBuilder andThen cc.identify andThen cc.getData andThen cc.requireData(isInAmendMode = false)) {
     implicit request =>
 
       (for {
@@ -90,7 +90,7 @@ class ApplicationCompleteController @Inject()(
       case Some(compositeAccountDetails) =>
         SummaryListViewModel(
           rows = (
-            getHasTradingNameRows(compositeAccountDetails) ++
+            getHasNoOtherTradingNamesRows(compositeAccountDetails) ++
               getTradingNameRows(compositeAccountDetails) ++
               getBusinessContactDetailsRows(compositeAccountDetails) ++
               getBankDetailsRows(compositeAccountDetails)
@@ -101,19 +101,19 @@ class ApplicationCompleteController @Inject()(
     }
   }
 
-  private def getHasTradingNameRows(compositeAccount: CompositeAccount)
-                                   (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
+  private def getHasNoOtherTradingNamesRows(compositeAccount: CompositeAccount)
+                                           (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
 
     val originalAnswers = compositeAccount.tradingNames
     val amendedAnswers = request.userAnswers.get(AllTradingNames).getOrElse(List.empty)
-    val hasChangedToNo = amendedAnswers.isEmpty && originalAnswers.nonEmpty
-    val hasChangedToYes = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || originalAnswers.isEmpty
+    val hasChangedToNo = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || originalAnswers.isEmpty
+    val hasChangedToYes = amendedAnswers.isEmpty && originalAnswers.nonEmpty
     val notAmended = amendedAnswers.nonEmpty && originalAnswers.nonEmpty || amendedAnswers.isEmpty && originalAnswers.isEmpty
 
     if (notAmended) {
       Seq.empty
     } else if (hasChangedToNo || hasChangedToYes) {
-      Seq(HasTradingNameSummary.amendedRow(request.userAnswers))
+      Seq(HasNoOtherTradingNamesSummary.amendedRow(request.userAnswers))
     } else {
       Seq.empty
     }

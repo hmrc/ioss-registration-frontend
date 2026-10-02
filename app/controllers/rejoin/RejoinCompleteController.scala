@@ -20,8 +20,8 @@ import config.FrontendAppConfig
 import connectors.RegistrationConnector
 import controllers.actions.*
 import models.amend.RegistrationWrapper
-import models.{TradingName, UserAnswers}
 import models.requests.AuthenticatedDataRequest
+import models.{TradingName, UserAnswers}
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -29,7 +29,7 @@ import queries.rejoin.NewIossReferenceQuery
 import queries.tradingNames.AllTradingNames
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.tradingName.{HasNoOtherTradingNamesSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.rejoin.RejoinCompleteView
@@ -64,7 +64,7 @@ class RejoinCompleteController @Inject()(
         val numberOfIossRegistrations = request.numberOfIossRegistrations
         val originalRegistration = request.registrationWrapper
         val list: SummaryList = detailsList(originalRegistration)
-        
+
         Ok(
           view(
             vrn = request.vrn,
@@ -96,39 +96,39 @@ class RejoinCompleteController @Inject()(
   }
 
   private def detailsList(originalRegistration: Option[RegistrationWrapper])(implicit request: AuthenticatedDataRequest[AnyContent]) = {
-      originalRegistration match {
-        case Some(registration) =>
+    originalRegistration match {
+      case Some(registration) =>
 
-          val result = SummaryListViewModel(
-            rows = (
-              getHasTradingNameRows(registration) ++
-                getTradingNameRows(registration) ++
-                getBusinessContactDetailsRows(registration) ++
-                getBankDetailsRows(registration)
-              ).flatten
-          )
-          result
-        case None =>
-          SummaryListViewModel(rows = Seq.empty)
-      }
+        val result = SummaryListViewModel(
+          rows = (
+            getHasNoOtherTradingNamesRows(registration) ++
+              getTradingNameRows(registration) ++
+              getBusinessContactDetailsRows(registration) ++
+              getBankDetailsRows(registration)
+            ).flatten
+        )
+        result
+      case None =>
+        SummaryListViewModel(rows = Seq.empty)
+    }
   }
 
-  private def getHasTradingNameRows(originalRegistration: RegistrationWrapper)
-                                   (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
+  private def getHasNoOtherTradingNamesRows(originalRegistration: RegistrationWrapper)
+                                           (implicit request: AuthenticatedDataRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
 
     val originalAnswers = originalRegistration.registration.tradingNames
     val amendedAnswers = request.userAnswers.get(AllTradingNames).getOrElse(List.empty)
     val originalNames = originalAnswers.map(_.tradingName)
     val amendedNames = amendedAnswers.map(_.name)
 
-    val hasChangedToNo = amendedNames.isEmpty && originalNames.nonEmpty
-    val hasChangedToYes = amendedNames.nonEmpty && originalNames.nonEmpty || originalNames.isEmpty
+    val hasChangedToNo = amendedNames.nonEmpty && originalNames.nonEmpty || originalNames.isEmpty
+    val hasChangedToYes = amendedNames.isEmpty && originalNames.nonEmpty
     val notAmended = amendedNames.nonEmpty && originalNames.nonEmpty || amendedNames.isEmpty && originalNames.isEmpty
 
     if (notAmended) {
       Seq.empty
     } else if (hasChangedToNo || hasChangedToYes) {
-      Seq(HasTradingNameSummary.amendedRow(request.userAnswers))
+      Seq(HasNoOtherTradingNamesSummary.amendedRow(request.userAnswers))
     } else {
       Seq.empty
     }

@@ -31,7 +31,7 @@ import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.filters.RegisteredForIossInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.tradingNames.HasTradingNamePage
+import pages.tradingNames.HasNoOtherTradingNamesPage
 import pages.website.WebsitePage
 import pages.{BankDetailsPage, BusinessContactDetailsPage, CheckAnswersPage, EmptyWaypoints, NonEmptyWaypoints, Waypoint}
 import play.api.Application
@@ -86,7 +86,7 @@ trait SpecBase
   val bic: Bic = Bic("ABCDGB2A").get
 
   val completeUserAnswers: UserAnswers = basicUserAnswersWithVatInfo
-    .set(HasTradingNamePage, false).success.value
+    .set(HasNoOtherTradingNamesPage, true).success.value
     .set(TaxRegisteredInEuPage, false).success.value
     .set(PreviouslyRegisteredPage, false).success.value
 
@@ -97,7 +97,7 @@ trait SpecBase
 
   def completeUserAnswersWithVatInfo: UserAnswers =
     basicUserAnswersWithVatInfo
-      .set(HasTradingNamePage, false).success.value
+      .set(HasNoOtherTradingNamesPage, true).success.value
       .set(PreviouslyRegisteredPage, false).success.value
       .set(TaxRegisteredInEuPage, false).success.value
       .set(WebsitePage(Index(0)), Website("www.test-website.com")).success.value
