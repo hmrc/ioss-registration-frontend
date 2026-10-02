@@ -44,7 +44,7 @@ import utils.CompletionChecks
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.tradingName.{HasNoOtherTradingNamesSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.summarylist.*
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
@@ -142,7 +142,7 @@ class RejoinRegistrationController @Inject()(
   private def getTradingNameRows(waypoints: Waypoints, sourcePage: CheckAnswersPage, userAnswers: UserAnswers)
                                 (implicit request: AuthenticatedMandatoryIossRequest[AnyContent]): Seq[Option[SummaryListRow]] = {
     val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(userAnswers, waypoints, sourcePage)
-    Seq(HasTradingNameSummary.row(userAnswers, waypoints, sourcePage).map { sr =>
+    Seq(HasNoOtherTradingNamesSummary.row(userAnswers, waypoints, sourcePage).map { sr =>
       if (tradingNameSummaryRow.isDefined) {
         sr.withCssClass("govuk-summary-list__row--no-border")
       } else {

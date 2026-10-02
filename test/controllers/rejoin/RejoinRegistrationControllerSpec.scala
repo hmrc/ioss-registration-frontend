@@ -49,7 +49,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.tradingName.{HasNoOtherTradingNamesSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.SummaryListFluency
 import viewmodels.{VatRegistrationDetailsSummary, WebsiteSummary}
@@ -463,7 +463,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
       "the user is redirected when the incomplete prompt is shown" - {
 
-        "to Has Trading Name when trading names are not populated correctly" in {
+        "to Has No Other Trading Names when trading names are not populated correctly" in {
 
           val registrationWrapperWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now(stubClockAtArbitraryDate))
 
@@ -651,7 +651,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
   private def getChangeRegistrationSummaryList(answers: UserAnswers)(implicit msgs: Messages): Seq[SummaryListRow] = {
 
-    val hasTradingNameSummaryRow = HasTradingNameSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage)
+    val hasNoOtherTradingNamesSummaryRow = HasNoOtherTradingNamesSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage)
     val tradingNameSummaryRow = TradingNameSummary.checkAnswersRow(answers, rejoinWaypoints, rejoinRegistrationPage)
     val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.row(answers, rejoinWaypoints, rejoinRegistrationPage, lockEditing = false)
     val previousRegistrationSummaryRow = PreviousRegistrationSummary.checkAnswersRow(answers, Seq.empty, rejoinWaypoints, rejoinRegistrationPage)
@@ -666,7 +666,7 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
     val bankDetailsIbanSummaryRow = BankDetailsSummary.rowIBAN(answers, rejoinWaypoints, rejoinRegistrationPage)
 
     Seq(
-      hasTradingNameSummaryRow.map { sr =>
+      hasNoOtherTradingNamesSummaryRow.map { sr =>
         if (tradingNameSummaryRow.isDefined) {
           sr.withCssClass("govuk-summary-list__row--no-border")
         } else {

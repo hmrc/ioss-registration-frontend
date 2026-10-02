@@ -49,7 +49,7 @@ import utils.FutureSyntax.FutureOps
 import viewmodels.WebsiteSummary
 import viewmodels.checkAnswers.euDetails.{EuDetailsSummary, TaxRegisteredInEuSummary}
 import viewmodels.checkAnswers.previousRegistrations.{PreviousRegistrationSummary, PreviouslyRegisteredSummary}
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.tradingName.{HasNoOtherTradingNamesSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.amend.AmendCompleteView
@@ -441,7 +441,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
                                                  registrationWrapper: Option[RegistrationWrapper]
                                                )(implicit msgs: Messages): Seq[SummaryListRow] = {
 
-    val hasTradingNameSummaryRow = HasTradingNameSummary.amendedRow(answers)
+    val hasNoOtherTradingNamesSummaryRow = HasNoOtherTradingNamesSummary.amendedRow(answers)
     val tradingNameSummaryRow = TradingNameSummary.amendedAnswersRow(answers)
     val removedTradingNameRow = TradingNameSummary.removedAnswersRow(getRemovedTradingNames(answers, registrationWrapper))
     val previouslyRegisteredSummaryRow = PreviouslyRegisteredSummary.amendedRow(answers)
@@ -459,7 +459,7 @@ class AmendCompleteControllerSpec extends SpecBase with MockitoSugar with Before
     val bankDetailsIbanSummaryRow = BankDetailsSummary.amendedRowIBAN(answers)
 
     Seq(
-      hasTradingNameSummaryRow,
+      hasNoOtherTradingNamesSummaryRow,
       tradingNameSummaryRow,
       removedTradingNameRow,
       previouslyRegisteredSummaryRow,

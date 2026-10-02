@@ -30,12 +30,12 @@ case class DeleteTradingNamePage(index: Index) extends Page {
   override protected def nextPageNormalMode(waypoints: Waypoints, answers: UserAnswers): Page =
     answers.get(DeriveNumberOfTradingNames) match {
       case Some(n) if n > 0 => AddTradingNamePage()
-      case _ => HasTradingNamePage
+      case _ => HasNoOtherTradingNamesPage
     }
 
   override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page =
     answers.get(DeriveNumberOfTradingNames) match {
       case Some(n) if n > 0 => AddTradingNamePage()
-      case _ => HasTradingNamePage
+      case _ => HasNoOtherTradingNamesPage
     }
 }

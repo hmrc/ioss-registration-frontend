@@ -18,6 +18,7 @@ package utils
 
 import controllers.actions.AuthenticatedControllerComponents
 import models.requests.AuthenticatedDataRequest
+import pages.tradingNames.HasNoOtherTradingNamesPage
 import pages.{JourneyRecoveryPage, QuestionPage, Waypoints}
 import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Result}
@@ -48,7 +49,8 @@ object ItemsHelper {
     val removeItems = if (doRemoveItems) {
       request.userAnswers.remove(query)
     } else {
-      request.userAnswers.set(hasItems, true)
+      val setBoolean: Boolean = if hasItems == HasNoOtherTradingNamesPage then false else true
+      request.userAnswers.set(hasItems, setBoolean)
     }
     for {
       updatedAnswers <- Future.fromTry(removeItems)

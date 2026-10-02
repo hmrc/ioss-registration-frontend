@@ -58,9 +58,9 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
         }
       }
 
-      startingFrom(HasTradingNamePage)
+      startingFrom(HasNoOtherTradingNamesPage)
         .run(
-          submitAnswer(HasTradingNamePage, true) +:
+          submitAnswer(HasNoOtherTradingNamesPage, false) +:
             generateTradingNames :+
             pageMustBe(PreviouslyRegisteredPage): _*
         )
@@ -70,23 +70,23 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
 
       "when there is only one" in {
 
-        startingFrom(HasTradingNamePage)
+        startingFrom(HasNoOtherTradingNamesPage)
           .run(
-            submitAnswer(HasTradingNamePage, true),
+            submitAnswer(HasNoOtherTradingNamesPage, false),
             submitAnswer(TradingNamePage(Index(0)), companyNameA),
             submitAnswer(AddTradingNamePage(Some(Index(0))), false),
             goTo(DeleteTradingNamePage(Index(0))),
             removeAddToListItem(TradingNamePage(Index(0))),
-            pageMustBe(HasTradingNamePage),
+            pageMustBe(HasNoOtherTradingNamesPage),
             answersMustNotContain(TradingNamePage(Index(0)))
           )
       }
 
       "when there are multiple" in {
 
-        startingFrom(HasTradingNamePage)
+        startingFrom(HasNoOtherTradingNamesPage)
           .run(
-            submitAnswer(HasTradingNamePage, true),
+            submitAnswer(HasNoOtherTradingNamesPage, false),
             submitAnswer(TradingNamePage(Index(0)), companyNameA),
             submitAnswer(AddTradingNamePage(Some(Index(0))), true),
             submitAnswer(TradingNamePage(Index(1)), companyNameB),
@@ -107,13 +107,13 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
       "when there is only one" in {
 
         val initialise = journeyOf(
-          submitAnswer(HasTradingNamePage, true),
+          submitAnswer(HasNoOtherTradingNamesPage, false),
           submitAnswer(TradingNamePage(Index(0)), companyNameA),
           submitAnswer(AddTradingNamePage(Some(Index(0))), false),
           goTo(AddTradingNamePage())
         )
 
-        startingFrom(HasTradingNamePage)
+        startingFrom(HasNoOtherTradingNamesPage)
           .run(
             initialise,
             goToChangeAnswer(TradingNamePage(Index(0))),
@@ -126,7 +126,7 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
       "when there are multiple changes required" in {
 
         val initialise = journeyOf(
-          submitAnswer(HasTradingNamePage, true),
+          submitAnswer(HasNoOtherTradingNamesPage, false),
           submitAnswer(TradingNamePage(Index(0)), companyNameA),
           submitAnswer(AddTradingNamePage(Some(Index(0))), true),
           submitAnswer(TradingNamePage(Index(1)), companyNameB),
@@ -138,7 +138,7 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
           goTo(AddTradingNamePage())
         )
 
-        startingFrom(HasTradingNamePage)
+        startingFrom(HasNoOtherTradingNamesPage)
           .run(
             initialise,
             goToChangeAnswer(TradingNamePage(Index(0))),
@@ -166,7 +166,7 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
         // values (description) show on assertion failure
         forAll(options) { case (_, waypoints, expectedPage) =>
           val initialise = journeyOf(
-            setUserAnswerTo(HasTradingNamePage, true),
+            setUserAnswerTo(HasNoOtherTradingNamesPage, false),
             setUserAnswerTo(TradingNamePage(Index(0)), companyNameA),
             setUserAnswerTo(AddTradingNamePage(Some(Index(0))), true),
             setUserAnswerTo(TradingNamePage(Index(1)), companyNameB),
@@ -181,8 +181,8 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
           startingFrom(CheckYourAnswersPage, waypoints)
             .run(
               initialise,
-              goToChangeAnswer(HasTradingNamePage),
-              submitAnswer(HasTradingNamePage, false),
+              goToChangeAnswer(HasNoOtherTradingNamesPage),
+              submitAnswer(HasNoOtherTradingNamesPage, true),
               pageMustBe(DeleteAllTradingNamesPage),
               submitAnswer(DeleteAllTradingNamesPage, true),
               pageMustBe(expectedPage),
@@ -209,7 +209,7 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
 
           forAll(options) { case (_, waypoints, expectedPage) =>
             val initialise = journeyOf(
-              setUserAnswerTo(HasTradingNamePage, true),
+              setUserAnswerTo(HasNoOtherTradingNamesPage, false),
               setUserAnswerTo(TradingNamePage(Index(0)), companyNameA),
               setUserAnswerTo(AddTradingNamePage(Some(Index(0))), true),
               setUserAnswerTo(TradingNamePage(Index(1)), companyNameB),
@@ -224,8 +224,8 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
             startingFrom(CheckYourAnswersPage, waypoints)
               .run(
                 initialise,
-                goToChangeAnswer(HasTradingNamePage),
-                submitAnswer(HasTradingNamePage, false),
+                goToChangeAnswer(HasNoOtherTradingNamesPage),
+                submitAnswer(HasNoOtherTradingNamesPage, true),
                 pageMustBe(DeleteAllTradingNamesPage),
                 submitAnswer(DeleteAllTradingNamesPage, false),
                 pageMustBe(expectedPage),
@@ -254,7 +254,7 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
 
           forAll(options) { case (_, waypoints, expectedPage) =>
             val initialise = journeyOf(
-              setUserAnswerTo(HasTradingNamePage, true),
+              setUserAnswerTo(HasNoOtherTradingNamesPage, false),
               setUserAnswerTo(TradingNamePage(Index(0)), companyNameA),
               setUserAnswerTo(AddTradingNamePage(Some(Index(0))), true),
               goTo(CheckYourAnswersPage)
@@ -265,8 +265,8 @@ class TradingNameJourneySpec extends AnyFreeSpec with JourneyHelpers with ModelG
                 initialise,
                 goTo(DeleteTradingNamePage(Index(0))),
                 removeAddToListItem(TradingNamePage(Index(0))),
-                pageMustBe(HasTradingNamePage),
-                submitAnswer(HasTradingNamePage, false),
+                pageMustBe(HasNoOtherTradingNamesPage),
+                submitAnswer(HasNoOtherTradingNamesPage, true),
                 pageMustBe(expectedPage)
               )
           }
