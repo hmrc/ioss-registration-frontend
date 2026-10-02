@@ -57,7 +57,8 @@ class ContinueRegistrationController @Inject()(
           }
 
         case None =>
-          logger.info("No saved progress page, going to index")
+          logger.debug(s"Current user answers for ${request.vrn} ${request.userAnswers}")
+          logger.info(s"No saved progress page, going to index with VRN ${request.vrn}")
           Future.successful(Redirect(controllers.routes.IndexController.onPageLoad()))
       }
   }
