@@ -19,6 +19,7 @@ package controllers
 import connectors.SaveForLaterConnector
 import controllers.actions.*
 import forms.ContinueRegistrationFormProvider
+import logging.Logging
 import models.ContinueRegistration
 import models.requests.AuthenticatedDataRequest
 import pages.{JourneyRecoveryPage, SavedProgressPage, Waypoints}
@@ -39,7 +40,7 @@ class ContinueRegistrationController @Inject()(
                                          formProvider: ContinueRegistrationFormProvider,
                                          view: ContinueRegistrationView,
                                          coreSavedAnswersRevalidationService: CoreSavedAnswersRevalidationService
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   private val form = formProvider()
   protected val controllerComponents: MessagesControllerComponents = cc
@@ -56,6 +57,7 @@ class ContinueRegistrationController @Inject()(
           }
 
         case None =>
+          logger.info("No saved progress page, going to index")
           Future.successful(Redirect(controllers.routes.IndexController.onPageLoad()))
       }
   }
@@ -74,7 +76,10 @@ class ContinueRegistrationController @Inject()(
               for {
                 _ <- cc.sessionRepository.clear(request.userId)
                 _ <- saveForLaterConnector.delete()
-              } yield Redirect(controllers.routes.IndexController.onPageLoad())
+              } yield {
+                logger.info("Save and come back delete requested, returning to index")
+                Redirect(controllers.routes.IndexController.onPageLoad())
+              }
             case _ =>
               Future.successful(Redirect(JourneyRecoveryPage.route(waypoints).url))
           }

@@ -19,6 +19,7 @@ package controllers.actions
 import connectors.RegistrationConnector
 import controllers.filters.routes as filterRoutes
 import controllers.routes
+import logging.Logging
 import models.UserAnswers
 import models.amend.RegistrationWrapper
 import models.requests.{AuthenticatedDataRequest, AuthenticatedOptionalDataRequest, UnauthenticatedDataRequest, UnauthenticatedOptionalDataRequest}
@@ -75,12 +76,13 @@ class AuthenticatedDataRequiredActionImpl @Inject()(
 
 
 class UnauthenticatedDataRequiredAction @Inject()(implicit val executionContext: ExecutionContext)
-  extends ActionRefiner[UnauthenticatedOptionalDataRequest, UnauthenticatedDataRequest] {
+  extends ActionRefiner[UnauthenticatedOptionalDataRequest, UnauthenticatedDataRequest] with Logging {
 
   override protected def refine[A](request: UnauthenticatedOptionalDataRequest[A]): Future[Either[Result, UnauthenticatedDataRequest[A]]] = {
 
     request.userAnswers match {
       case None =>
+        logger.info("No user answers found, starting filter questions")
         Left(Redirect(filterRoutes.RegisteredForIossInEuController.onPageLoad())).toFuture
       case Some(data) =>
         Right(UnauthenticatedDataRequest(request.request, request.userId, data)).toFuture
