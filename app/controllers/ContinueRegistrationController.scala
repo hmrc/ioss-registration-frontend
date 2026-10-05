@@ -51,16 +51,12 @@ class ContinueRegistrationController @Inject()(
         case Some(_) =>
           coreSavedAnswersRevalidationService.checkAndValidateSavedUserAnswers(waypoints).flatMap {
             case Some(redirectResult) =>
-              logger.debug(s"[S4L Issue] Had saved progress for and hit validation for ${request.vrn}")
               deleteSavedRegistration(redirectResult)
             case None =>
-              logger.debug(s"[S4L Issue] Had saved progress but hit no validation for ${request.vrn}")
               Future.successful(Ok(view(form)))
           }
 
         case None =>
-          logger.debug(s"[S4L Issue] Current user answers for ${request.vrn} ${request.userAnswers}")
-          logger.info(s"[S4L Issue] No saved progress page, going to index with VRN ${request.vrn}")
           Future.successful(Redirect(controllers.routes.IndexController.onPageLoad()))
       }
   }
@@ -80,7 +76,6 @@ class ContinueRegistrationController @Inject()(
                 _ <- cc.sessionRepository.clear(request.userId)
                 _ <- saveForLaterConnector.delete()
               } yield {
-                logger.info("[S4L Issue] Save and come back delete requested, returning to index")
                 Redirect(controllers.routes.IndexController.onPageLoad())
               }
             case _ =>

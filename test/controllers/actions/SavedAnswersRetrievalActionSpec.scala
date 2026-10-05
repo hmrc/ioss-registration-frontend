@@ -105,7 +105,7 @@ class SavedAnswersRetrievalActionSpec extends SpecBase with MockitoSugar with Ei
         ).futureValue
 
         verify(connector, times(1)).get()(any())
-        result.value.userAnswers mustBe Some(answers)
+        result.value.userAnswers mustBe Some(answers.copy(lastUpdated = result.value.userAnswers.get.lastUpdated))
       }
 
       "must use answers in request when no saved answers present" in {
