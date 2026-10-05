@@ -90,10 +90,8 @@ class AuthController @Inject()(
       val answers: UserAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId, lastUpdated = Instant.now(clock)))
       answers.get(SavedProgressPage).map {
         _ =>
-          logger.debug(s"[S4L Issue] Had saved progress page for ${request.vrn}")
           Redirect(controllers.routes.ContinueRegistrationController.onPageLoad())
       }.getOrElse {
-        logger.debug(s"[S4L Issue] Didn't have saved progress page for ${request.vrn}")
         Redirect(controllers.routes.NoRegistrationInProgressController.onPageLoad())
       }
   }

@@ -26,6 +26,7 @@ import repositories.AuthenticatedUserAnswersRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,7 +44,7 @@ class SavedAnswersRetrievalAction(repository: AuthenticatedUserAnswersRepository
           val answers = {
             savedForLater match {
               case Right(Some(answers)) =>
-                val newAnswers = UserAnswers(request.userId, answers.data, answers.vatInfo, answers.lastUpdated)
+                val newAnswers = UserAnswers(request.userId, answers.data, answers.vatInfo)
                 repository.set(newAnswers)
                 Some(newAnswers)
 
