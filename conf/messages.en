@@ -224,7 +224,7 @@ checkVatDetails.individualName = Name
 checkVatDetails.address = Principal place of business address
 checkVatDetails.partOfVatGroup = UK VAT group
 checkVatDetails.yes = Yes
-checkVatDetails.detailsIncorrect = Yes, but some of my VAT details are incorrect
+checkVatDetails.detailsIncorrect = Yes, but some of my details are incorrect
 checkVatDetails.wrongAccount = No, I want to register a different business
 
 vatRegistrationDetails.checkYourAnswers.heading = VAT registration details
@@ -264,11 +264,11 @@ cannotRegisterNonEstablishedTaxablePerson.title = You cannot use this service
 cannotRegisterNonEstablishedTaxablePerson.heading = You cannot use this service
 cannotRegisterNonEstablishedTaxablePerson.p1 = If you believe this is an error, contact <a class="govuk-link" href="mailto:vatoss.contact@hmrc.gov.uk">vatoss.contact@hmrc.gov.uk</a>
 
-hasTradingName.title = Does your business trade using a name that is different from {0}?
-hasTradingName.heading = Does your business trade using a name that is different from {0}?
-hasTradingName.checkYourAnswersLabel = Have a different UK trading name
-hasTradingName.error.required = Select yes if you use a different trading name
-hasTradingName.change.hidden = if you have a different trading name
+hasNoOtherTradingNames.title = Is {0} your only trading name?
+hasNoOtherTradingNames.heading = Is {0} your only trading name?
+hasNoOtherTradingNames.checkYourAnswersLabel = Is your only trading name
+hasNoOtherTradingNames.error.required = Select no if you use a different trading name
+hasNoOtherTradingNames.change.hidden = is your only trading name
 
 tradingName.title = What is your UK trading name?
 tradingName.heading = What is your UK trading name?

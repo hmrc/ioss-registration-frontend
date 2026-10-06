@@ -16,15 +16,30 @@
 
 package forms.tradingNames
 
-import forms.mappings.Mappings
-import play.api.data.Form
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-import javax.inject.Inject
+class HasNoOtherTradingNamesFormProviderSpec extends BooleanFieldBehaviours {
 
-class HasTradingNameFormProvider @Inject() extends Mappings {
+  val requiredKey = "hasNoOtherTradingNames.error.required"
+  val invalidKey = "error.boolean"
 
-  def apply(): Form[Boolean] =
-    Form(
-      "value" -> boolean("hasTradingName.error.required")
+  val form = new HasNoOtherTradingNamesFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
     )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

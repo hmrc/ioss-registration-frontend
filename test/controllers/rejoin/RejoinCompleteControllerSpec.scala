@@ -40,7 +40,7 @@ import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.FutureSyntax.FutureOps
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.tradingName.{HasNoOtherTradingNamesSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.rejoin.RejoinCompleteView
@@ -389,7 +389,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
                                                  answers: UserAnswers,
                                                  registrationWrapper: Option[RegistrationWrapper]
                                                )(implicit msgs: Messages): Seq[SummaryListRow] = {
-    val hasTradingNameSummaryRow = HasTradingNameSummary.amendedRow(answers)
+    val hasNoOtherTradingNamesSummaryRow = HasNoOtherTradingNamesSummary.amendedRow(answers)
     val tradingNameSummaryRow = TradingNameSummary.amendedAnswersRow(answers)
     val removedTradingNameRow = TradingNameSummary.removedAnswersRow(getRemovedTradingNames(answers, registrationWrapper))
     val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.amendedRowContactName(answers)
@@ -400,7 +400,7 @@ class RejoinCompleteControllerSpec extends SpecBase with MockitoSugar {
     val bankDetailsIbanSummaryRow = BankDetailsSummary.amendedRowIBAN(answers)
 
     Seq(
-      hasTradingNameSummaryRow,
+      hasNoOtherTradingNamesSummaryRow,
       tradingNameSummaryRow,
       removedTradingNameRow,
       businessContactDetailsContactNameSummaryRow,

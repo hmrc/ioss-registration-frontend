@@ -22,7 +22,7 @@ import journey.JourneyHelpers
 import models.CheckVatDetails
 import org.scalatest.freespec.AnyFreeSpec
 import pages.checkVatDetails.{CheckVatDetailsPage, UpdateVatDetailsPage, UseOtherAccountPage}
-import pages.tradingNames.HasTradingNamePage
+import pages.tradingNames.HasNoOtherTradingNamesPage
 
 class CheckVatDetailsJourney extends AnyFreeSpec with JourneyHelpers with ModelGenerators with SpecBase {
 
@@ -32,7 +32,7 @@ class CheckVatDetailsJourney extends AnyFreeSpec with JourneyHelpers with ModelG
       .run(
         setUserAnswerTo(basicUserAnswersWithVatInfo),
         submitAnswer(CheckVatDetailsPage, CheckVatDetails.Yes),
-        pageMustBe(HasTradingNamePage)
+        pageMustBe(HasNoOtherTradingNamesPage)
       )
   }
 

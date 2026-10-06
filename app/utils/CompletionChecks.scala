@@ -80,9 +80,9 @@ trait CompletionChecks {
   }
 
   private def isTradingNamesValid()(implicit request: AuthenticatedDataRequest[AnyContent]): Boolean = {
-    request.userAnswers.get(HasTradingNamePage).exists {
-      case true => request.userAnswers.get(AllTradingNames).getOrElse(List.empty).nonEmpty
-      case false => request.userAnswers.get(AllTradingNames).getOrElse(List.empty).isEmpty
+    request.userAnswers.get(HasNoOtherTradingNamesPage).exists {
+      case true => request.userAnswers.get(AllTradingNames).getOrElse(List.empty).isEmpty
+      case false => request.userAnswers.get(AllTradingNames).getOrElse(List.empty).nonEmpty
     }
   }
 

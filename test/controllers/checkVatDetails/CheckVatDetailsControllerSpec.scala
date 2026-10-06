@@ -36,7 +36,7 @@ import viewmodels.CheckVatDetailsViewModel
 import views.html.checkVatDetails.CheckVatDetailsView
 import models.CompositeAccount
 import models.intermediaries.EtmpDisplayRegistration
-import pages.tradingNames.HasTradingNamePage
+import pages.tradingNames.HasNoOtherTradingNamesPage
 import queries.tradingNames.AllTradingNames
 import testutils.GenerateCompositeAccount.generateCompositeAccount
 
@@ -145,7 +145,7 @@ class CheckVatDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         val expectedAnswers = basicUserAnswersWithVatInfo
           .set(AllTradingNames, compositeAccount.value.tradingNames.toList).success.value
-          .set(HasTradingNamePage, true).success.value
+          .set(HasNoOtherTradingNamesPage, false).success.value
           .set(CheckVatDetailsPage, CheckVatDetails.Yes).success.value
 
         status(result) mustBe SEE_OTHER

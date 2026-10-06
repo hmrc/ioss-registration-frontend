@@ -189,8 +189,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency wi
       }
 
       "when the user has not answered all necessary data" - {
+
         "the user is redirected when the incomplete prompt is shown" - {
+
           "to Tax Registered In EU when it has a 'yes' answer but all countries were removed" in {
+
             val answers = completeUserAnswersWithVatInfo
               .set(TaxRegisteredInEuPage, true).success.value
               .set(EuCountryPage(Index(0)), country).success.value

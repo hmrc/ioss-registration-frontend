@@ -30,9 +30,9 @@ import org.scalacheck.Gen
 import org.scalatestplus.mockito.MockitoSugar
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.previousRegistrations.PreviouslyRegisteredPage
-import pages.tradingNames.HasTradingNamePage
+import pages.tradingNames.HasNoOtherTradingNamesPage
 import pages.{BankDetailsPage, BusinessContactDetailsPage}
-import play.api.libs.json.{JsError, Json, JsSuccess}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import queries.AllWebsites
 import queries.euDetails.AllEuDetailsQuery
 import queries.previousRegistration.AllPreviousRegistrationsQuery
@@ -152,7 +152,7 @@ class EtmpAmendRegistrationRequestSpec extends SpecBase with MockitoSugar {
       )
 
       val userAnswers: UserAnswers = emptyUserAnswersWithVatInfo
-        .set(HasTradingNamePage, true).success.value
+        .set(HasNoOtherTradingNamesPage, false).success.value
         .set(AllTradingNames, tradingNames).success.value
         .set(PreviouslyRegisteredPage, true).success.value
         .set(AllPreviousRegistrationsQuery, previousEuRegistrations).success.value

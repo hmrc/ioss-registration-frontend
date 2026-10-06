@@ -29,7 +29,7 @@ import queries.etmp.EtmpEnrolmentResponseQuery
 import queries.tradingNames.AllTradingNames
 import testutils.GenerateCompositeAccount.generateCompositeAccount
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
-import viewmodels.checkAnswers.tradingName.{HasTradingNameSummary, TradingNameSummary}
+import viewmodels.checkAnswers.tradingName.{HasNoOtherTradingNamesSummary, TradingNameSummary}
 import viewmodels.checkAnswers.{BankDetailsSummary, BusinessContactDetailsSummary}
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.ApplicationCompleteView
@@ -141,7 +141,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
                                                  answers: UserAnswers,
                                                  compositeAccount: Option[CompositeAccount]
                                                )(implicit msgs: Messages): Seq[SummaryListRow] = {
-    val hasTradingNameSummaryRow = HasTradingNameSummary.amendedRow(answers)
+    val hasNoOtherTradingNamesSummaryRow = HasNoOtherTradingNamesSummary.amendedRow(answers)
     val tradingNameSummaryRow = TradingNameSummary.amendedAnswersRow(answers)
     val removedTradingNameRow = TradingNameSummary.removedAnswersRow(getRemovedTradingNames(answers, compositeAccount))
     val businessContactDetailsContactNameSummaryRow = BusinessContactDetailsSummary.amendedRowContactName(answers)
@@ -152,7 +152,7 @@ class ApplicationCompleteControllerSpec extends SpecBase {
     val bankDetailsIbanSummaryRow = BankDetailsSummary.amendedRowIBAN(answers)
 
     Seq(
-      hasTradingNameSummaryRow,
+      hasNoOtherTradingNamesSummaryRow,
       tradingNameSummaryRow,
       removedTradingNameRow,
       businessContactDetailsContactNameSummaryRow,

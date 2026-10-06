@@ -17,59 +17,56 @@
 package viewmodels.checkAnswers.tradingName
 
 import models.UserAnswers
-import pages.tradingNames.HasTradingNamePage
+import pages.tradingNames.HasNoOtherTradingNamesPage
 import pages.{CheckAnswersPage, Waypoints}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object HasTradingNameSummary {
+object HasNoOtherTradingNamesSummary {
 
   def row(
            answers: UserAnswers,
            waypoints: Waypoints,
            sourcePage: CheckAnswersPage
          )(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(HasTradingNamePage).map {
-      answer =>
+    answers.get(HasNoOtherTradingNamesPage).map { answer =>
 
-        val value = if (answer) "site.yes" else "site.no"
+      val value = if (answer) "site.yes" else "site.no"
 
-        SummaryListRowViewModel(
-          key = "hasTradingName.checkYourAnswersLabel",
-          value = ValueViewModel(value),
-          actions = Seq(
-            ActionItemViewModel("site.change", HasTradingNamePage.changeLink(waypoints, sourcePage).url)
-              .withVisuallyHiddenText(messages("hasTradingName.change.hidden"))
-          )
+      SummaryListRowViewModel(
+        key = "hasNoOtherTradingNames.checkYourAnswersLabel",
+        value = ValueViewModel(value),
+        actions = Seq(
+          ActionItemViewModel("site.change", HasNoOtherTradingNamesPage.changeLink(waypoints, sourcePage).url)
+            .withVisuallyHiddenText(messages("hasNoOtherTradingNames.change.hidden"))
         )
+      )
     }
 
   def rowWithoutAction(
                         answers: UserAnswers,
                         waypoints: Waypoints
                       )(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(HasTradingNamePage).map {
-      answer =>
+    answers.get(HasNoOtherTradingNamesPage).map { answer =>
 
-        val value = if (answer) "site.yes" else "site.no"
+      val value = if (answer) "site.yes" else "site.no"
 
-        SummaryListRowViewModel(
-          key = "hasTradingName.checkYourAnswersLabel",
-          value = ValueViewModel(value)
-        )
+      SummaryListRowViewModel(
+        key = "hasNoOtherTradingNames.checkYourAnswersLabel",
+        value = ValueViewModel(value)
+      )
     }
 
   def amendedRow(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(HasTradingNamePage).map {
-      answer =>
+    answers.get(HasNoOtherTradingNamesPage).map { answer =>
 
-        val value = if (answer) "site.yes" else "site.no"
+      val value = if (answer) "site.yes" else "site.no"
 
-        SummaryListRowViewModel(
-          key = KeyViewModel("hasTradingName.checkYourAnswersLabel").withCssClass("govuk-!-width-one-half"),
-          value = ValueViewModel(value),
-        )
+      SummaryListRowViewModel(
+        key = KeyViewModel("hasNoOtherTradingNames.checkYourAnswersLabel").withCssClass("govuk-!-width-one-half"),
+        value = ValueViewModel(value),
+      )
     }
 }
