@@ -25,6 +25,7 @@ import play.api.mvc.ActionTransformer
 import repositories.AuthenticatedUserAnswersRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import utils.FutureSyntax.FutureOps
 
 import java.time.Instant
 import javax.inject.Inject
@@ -38,23 +39,23 @@ class SavedAnswersRetrievalAction(repository: AuthenticatedUserAnswersRepository
     val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request.request, request.request.session)
     val userAnswers: Future[Option[UserAnswers]] =
       if (request.userAnswers.flatMap(_.get(SavedProgressPage)).isEmpty) {
-        for {
+        (for {
           savedForLater: SaveForLaterResponse <- saveForLaterConnector.get()(hc)
         } yield {
           val answers = {
             savedForLater match {
               case Right(Some(answers)) =>
                 val newAnswers = UserAnswers(request.userId, answers.data, answers.vatInfo)
-                repository.set(newAnswers)
-                Some(newAnswers)
-
-              case _ => request.userAnswers
+                repository.set(newAnswers).map { _ =>
+                  Some(newAnswers)
+                }
+              case _ => request.userAnswers.toFuture
             }
           }
           answers
-        }
+        }).flatten
       } else {
-        Future.successful(request.userAnswers)
+        request.userAnswers.toFuture
       }
 
     userAnswers.map { (maybeUserAnswers: Option[UserAnswers]) =>
