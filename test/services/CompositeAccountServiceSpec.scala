@@ -107,7 +107,9 @@ class CompositeAccountServiceSpec extends SpecBase with BeforeAndAfterEach with 
 
       "with OSS enrolment" - {
 
-        "must return None when the server responds with anything other than a successful response" in {
+        "must throw an Exception when the server responds with an error" in {
+
+          val errorMessage: String = s"There was a problem retrieving OSS Registration, error: $InternalServerError."
 
           val app = application
 
@@ -117,9 +119,12 @@ class CompositeAccountServiceSpec extends SpecBase with BeforeAndAfterEach with 
 
             val service = CompositeAccountService(mockRegistrationConnector, mockFrontendAppConfig)
 
-            val result = service.getCompositeAccount(enrolments, vrn).futureValue
+            val result = service.getCompositeAccount(enrolments, vrn).failed
 
-            result `mustBe` None
+            whenReady(result) { exp =>
+              exp `mustBe` a[Exception]
+              exp.getMessage `mustBe` errorMessage
+            }
             verify(mockRegistrationConnector, times(1)).getOssRegistration(eqTo(vrn))(any())
           }
         }
@@ -156,7 +161,9 @@ class CompositeAccountServiceSpec extends SpecBase with BeforeAndAfterEach with 
 
       "with Intermediary enrolment" - {
 
-        "must return None when the server responds with anything other than a successful response" in {
+        "must throw an Exception when the server responds with an error" in {
+
+          val errorMessage: String = s"There was a problem retrieving Intermediary Registration, error: $InternalServerError."
 
           val intermediaryEnrolment: Enrolments = enrolments.copy(enrolments = enrolments.enrolments.tail)
 
@@ -168,9 +175,12 @@ class CompositeAccountServiceSpec extends SpecBase with BeforeAndAfterEach with 
 
             val service = CompositeAccountService(mockRegistrationConnector, mockFrontendAppConfig)
 
-            val result = service.getCompositeAccount(intermediaryEnrolment, vrn).futureValue
+            val result = service.getCompositeAccount(intermediaryEnrolment, vrn).failed
 
-            result `mustBe` None
+            whenReady(result) { exp =>
+              exp `mustBe` a[Exception]
+              exp.getMessage `mustBe` errorMessage
+            }
             verify(mockRegistrationConnector, times(1)).getIntermediaryRegistration(eqTo(intermediaryNumber))(any())
           }
         }
@@ -206,45 +216,6 @@ class CompositeAccountServiceSpec extends SpecBase with BeforeAndAfterEach with 
             result `mustBe` Some(expectedResult)
             verify(mockRegistrationConnector, times(1)).getIntermediaryRegistration(eqTo(intermediaryNumber))(any())
           }
-        }
-      }
-    }
-
-    ".getLatestOssRegistration"- {
-
-      "must return an OSS registration when the server responds with one" in {
-
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Right(ossRegistration.value).toFuture
-
-        val app = application
-
-        running(app) {
-
-          val service = CompositeAccountService(mockRegistrationConnector, mockFrontendAppConfig)
-
-          val getLatestOssRegistration = PrivateMethod[Future[Option[OssRegistration]]](Symbol("getLatestOssRegistration"))
-          val result = service invokePrivate getLatestOssRegistration(vrn, hc)
-
-          result.futureValue `mustBe` ossRegistration
-          verify(mockRegistrationConnector, times(1)).getOssRegistration(eqTo(vrn))(any())
-        }
-      }
-
-      "must return None when the server returns anything other than an Intermediary registration" in {
-
-        val app = application
-
-        when(mockRegistrationConnector.getOssRegistration(any())(any())) thenReturn Left(InternalServerError).toFuture
-
-        running(app) {
-
-          val service = CompositeAccountService(mockRegistrationConnector, mockFrontendAppConfig)
-
-          val getLatestOssRegistration = PrivateMethod[Future[Option[OssRegistration]]](Symbol("getLatestOssRegistration"))
-          val result = service invokePrivate getLatestOssRegistration(vrn, hc)
-
-          result.futureValue `mustBe` None
-          verify(mockRegistrationConnector, times(1)).getOssRegistration(eqTo(vrn))(any())
         }
       }
     }
@@ -288,7 +259,9 @@ class CompositeAccountServiceSpec extends SpecBase with BeforeAndAfterEach with 
         }
       }
 
-      "must return None when the server returns anything other than an Intermediary registration" in {
+      "must throw an Exception when the server returns anything other than an Intermediary registration" in {
+
+        val errorMessage: String = s"There was a problem retrieving Intermediary Registration, error: $InternalServerError."
 
         val app = application
 
@@ -301,7 +274,10 @@ class CompositeAccountServiceSpec extends SpecBase with BeforeAndAfterEach with 
           val getIntermediaryRegistration = PrivateMethod[Future[Option[EtmpDisplayRegistration]]](Symbol("getIntermediaryRegistration"))
           val result = service invokePrivate getIntermediaryRegistration(enrolments, hc)
 
-          result.futureValue `mustBe` None
+          whenReady(result.failed) { exp =>
+            exp `mustBe` a[Exception]
+            exp.getMessage `mustBe` errorMessage
+          }
           verify(mockRegistrationConnector, times(1)).getIntermediaryRegistration(eqTo(intermediaryNumber))(any())
         }
       }

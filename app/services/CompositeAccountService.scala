@@ -42,17 +42,21 @@ class CompositeAccountService @Inject()(
     val hasIntermediaryEnrolment = enrolments.enrolments.exists(_.key == frontendAppConfig.intermediaryEnrolment)
 
     if (hasOssEnrolment) {
-      getLatestOssRegistration(vrn).map {
-        case Some(ossRegistration) =>
-        createCompositeAccount(
-          tradingNames = ossRegistration.tradingNames,
-          fullName = ossRegistration.contactDetails.fullName,
-          telephoneNumber = ossRegistration.contactDetails.telephoneNumber,
-          emailAddress = ossRegistration.contactDetails.emailAddress,
-          bankDetails = ossRegistration.bankDetails
-        )
+      registrationConnector.getOssRegistration(vrn).flatMap {
+        case Right(ossRegistration) =>
+          createCompositeAccount(
+            tradingNames = ossRegistration.tradingNames,
+            fullName = ossRegistration.contactDetails.fullName,
+            telephoneNumber = ossRegistration.contactDetails.telephoneNumber,
+            emailAddress = ossRegistration.contactDetails.emailAddress,
+            bankDetails = ossRegistration.bankDetails
+          ).toFuture
 
-        case _ => None
+        case Left(error) =>
+          val errorMessage: String = s"There was a problem retrieving OSS Registration, error: $error."
+          logger.error(errorMessage)
+          val exception: Exception = new Exception(errorMessage)
+          throw exception
       }
     } else if (hasIntermediaryEnrolment) {
       getIntermediaryRegistration(enrolments).map {
@@ -79,8 +83,11 @@ class CompositeAccountService @Inject()(
           case Right(etmpDisplayRegistration) =>
             Some(etmpDisplayRegistration).toFuture
 
-          case Left(_) =>
-            None.toFuture
+          case Left(error) =>
+            val errorMessage: String = s"There was a problem retrieving Intermediary Registration, error: $error."
+            logger.error(errorMessage)
+            val exception: Exception = new Exception(errorMessage)
+            throw exception
         }
 
       case _ =>
@@ -104,13 +111,6 @@ class CompositeAccountService @Inject()(
       ),
       bankDetails = bankDetails
     ))
-  }
-
-  private def getLatestOssRegistration(vrn: Vrn)(implicit hc: HeaderCarrier): Future[Option[OssRegistration]] = {
-    registrationConnector.getOssRegistration(vrn).map {
-      case Right(ossRegistration) => Some(ossRegistration)
-      case Left(_) => None
-    }
   }
 
   private def getIntermediaryEnrolment(
