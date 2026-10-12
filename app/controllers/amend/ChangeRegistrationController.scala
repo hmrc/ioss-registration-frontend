@@ -145,7 +145,7 @@ class ChangeRegistrationController @Inject()(
             val unusableStatus = request.registrationWrapper.registration.schemeDetails.unusableStatus
             val noAmendmentsWithUnusableStatusCheck: Boolean = noAmendments && !unusableStatus
             val changeDate = request.registrationWrapper.registration.adminUse.changeDate
-            val reviewRegistrationDetails = changeDate.exists(_.isBefore(LocalDateTime.now(clock).minusYears(2)))
+            val reviewRegistrationDetails = changeDate.exists(_.isBefore(LocalDateTime.now(clock).minusMonths(6)))
 
             val registrationDueForReview: Boolean = if (frontendAppConfig.registrationReviewEnabled) {
               reviewRegistrationDetails
