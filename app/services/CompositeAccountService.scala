@@ -42,7 +42,7 @@ class CompositeAccountService @Inject()(
     val hasIntermediaryEnrolment = enrolments.enrolments.exists(_.key == frontendAppConfig.intermediaryEnrolment)
 
     if (hasOssEnrolment) {
-      registrationConnector.getOssRegistration(vrn).flatMap {
+      registrationConnector.getOssRegistration(vrn).map {
         case Right(ossRegistration) =>
           createCompositeAccount(
             tradingNames = ossRegistration.tradingNames,
@@ -50,7 +50,7 @@ class CompositeAccountService @Inject()(
             telephoneNumber = ossRegistration.contactDetails.telephoneNumber,
             emailAddress = ossRegistration.contactDetails.emailAddress,
             bankDetails = ossRegistration.bankDetails
-          ).toFuture
+          )
 
         case Left(error) =>
           val errorMessage: String = s"There was a problem retrieving OSS Registration, error: $error."
