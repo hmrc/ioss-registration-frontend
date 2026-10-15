@@ -20,7 +20,7 @@ import controllers.previousRegistrations.routes
 import models.{Country, Index, UserAnswers}
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.website.WebsitePage
-import pages.{AddItemPage, Page, QuestionPage, RecoveryOps, Waypoints}
+import pages.{AddItemPage, CheckYourAnswersPage, NonEmptyWaypoints, Page, QuestionPage, RecoveryOps, Waypoints}
 import play.api.libs.json.{JsObject, JsPath}
 import play.api.mvc.Call
 import queries.Derivable
@@ -70,6 +70,10 @@ case class AddPreviousRegistrationPage(override val index: Option[Index] = None)
 
       case false => TaxRegisteredInEuPage
     }.orRecover
+  }
+
+  override protected def nextPageCheckMode(waypoints: NonEmptyWaypoints, answers: UserAnswers): Page = {
+    CheckYourAnswersPage
   }
 
   override def deriveNumberOfItems: Derivable[Seq[JsObject], Int] = DeriveNumberOfPreviousRegistrations
