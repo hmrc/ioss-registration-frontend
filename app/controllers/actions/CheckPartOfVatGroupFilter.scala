@@ -38,13 +38,14 @@ class CheckPartOfVatGroupFilterImpl(
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
 
     (restrictFromPartOfVatGroup, request.userAnswers.get(SavedProgressPage).nonEmpty, registrationModificationMode) match {
+      case (true, _, _) if isVatGroup()(request) =>
+        println("b")
+        Some(Redirect(controllers.routes.CannotAccessPageController.onPageLoad())).toFuture
+
       case (_, _, AmendingActiveRegistration) =>
         println("a")
         determineFeAndRedirect(hasSavedAnswers = false, euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad())(request)
 
-      case (true, _, _) if isVatGroup()(request) =>
-        println("b")
-        Some(Redirect(controllers.routes.CannotAccessPageController.onPageLoad())).toFuture
       case (_, true, NotModifyingExistingRegistration) =>
         println("c")
         val waypoints: EmptyWaypoints.type = EmptyWaypoints
