@@ -43,7 +43,7 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
+  def onPageLoad: Action[AnyContent] = cc.authAndGetDataBase(AmendingActiveRegistration).async {
     implicit request =>
       
       request.registrationWrapper match {
@@ -63,7 +63,7 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
       }
   }
 
-  def onSubmit: Action[AnyContent] = cc.authAndGetData(AmendingActiveRegistration).async {
+  def onSubmit: Action[AnyContent] = cc.authAndGetDataBase(AmendingActiveRegistration).async {
     implicit request =>
 
       for {

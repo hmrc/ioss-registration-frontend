@@ -37,7 +37,7 @@ class FixedEstablishmentVRNAlreadyRegisteredController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints, countryCode: String): Action[AnyContent] = {
-    cc.authAndGetData(waypoints.registrationModificationMode, restrictFromPartOfVatGroup = true) {
+    cc.authAndGetData(waypoints.registrationModificationMode) {
       implicit request =>
         Country.fromCountryCode(countryCode).map { country =>
           Ok(view(country.name))

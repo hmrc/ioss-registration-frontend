@@ -20,6 +20,7 @@ import controllers.euDetails.routes as euRoutes
 import logging.Logging
 import models.requests.AuthenticatedDataRequest
 import pages.{EmptyWaypoints, SavedProgressPage}
+import play.api.libs.json.Json
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Call, Result}
 import queries.euDetails.AllEuDetailsQuery
@@ -37,17 +38,30 @@ class CheckPartOfVatGroupFilterImpl(
   override protected def filter[A](request: AuthenticatedDataRequest[A]): Future[Option[Result]] = {
 
     (restrictFromPartOfVatGroup, request.userAnswers.get(SavedProgressPage).nonEmpty, registrationModificationMode) match {
-      case (true, false, AmendingActiveRegistration) =>
-        determineFeAndRedirect(hasSavedAnswers = false, euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad())(request)
+      case (true, _, _) if isVatGroup()(request) =>
+        Some(Redirect(controllers.routes.CannotAccessPageController.onPageLoad())).toFuture
 
-      case (true, _, _)  =>
-        determineFeAndRedirect(false, controllers.routes.CannotAccessPageController.onPageLoad())(request)
+      case (_, _, AmendingActiveRegistration) =>
+        determineFeAndRedirect(hasSavedAnswers = false, euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad())(request)
 
       case (_, true, NotModifyingExistingRegistration) =>
         val waypoints: EmptyWaypoints.type = EmptyWaypoints
         determineFeAndRedirect(hasSavedAnswers = true, controllers.routes.SavedProgressRemoveFixedEstablishmentsController.onPageLoad(waypoints))(request)
 
-      case (_, _, _) => None.toFuture
+      case (_, _, _) =>
+        None.toFuture
+    }
+  }
+
+  private def isVatGroup()(implicit request: AuthenticatedDataRequest[_]): Boolean = {
+    request.registrationWrapper match {
+      case Some(registrationWrapper) if registrationWrapper.vatInfo.partOfVatGroup =>
+        true
+      case _ =>
+        request.userAnswers.vatInfo match {
+          case Some(vatInfo) if vatInfo.partOfVatGroup => true
+          case _ => false
+        }
     }
   }
 
@@ -57,18 +71,17 @@ class CheckPartOfVatGroupFilterImpl(
         if registrationWrapper.vatInfo.partOfVatGroup && registrationWrapper.registration.schemeDetails.euRegistrationDetails.nonEmpty =>
         Some(Redirect(redirectCall)).toFuture
 
-      case (false, _) if request.userAnswers.vatInfo.exists(_.partOfVatGroup) =>
-        Some(Redirect(redirectCall)).toFuture
-
       case (true, _) =>
         request.userAnswers.vatInfo match {
           case Some(vatInfo) if vatInfo.partOfVatGroup && request.userAnswers.get(AllEuDetailsQuery).nonEmpty =>
             Some(Redirect(redirectCall)).toFuture
 
-          case _ => None.toFuture
+          case _ =>
+            None.toFuture
         }
 
-      case (_, _) => None.toFuture
+      case (_, _) =>
+        None.toFuture
     }
   }
 }

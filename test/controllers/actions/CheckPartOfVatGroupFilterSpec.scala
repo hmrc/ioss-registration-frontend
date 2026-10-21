@@ -116,22 +116,28 @@ class CheckPartOfVatGroupFilterSpec extends SpecBase {
       "when in amend" - {
 
         "must redirect to Delete All Fixed Establishments As Part Of Vat Group Page when part of VAT group true" +
-          " and restrictFromPartOfVatGroup true" in {
+          " and restrictFromPartOfVatGroup false" in {
 
           val euDetails: EuDetails = arbitraryEuDetails.arbitrary.sample.value
+          val etmpEuRegistrationDetails = arbitraryEtmpDisplayEuRegistrationDetails.arbitrary.sample.value
           val updatedAnswers: UserAnswers = emptyUserAnswersWithVatInfo
             .set(AllEuDetailsQuery, List(euDetails)).success.value
 
           val partOfVatGroupVatInfoAnswers: UserAnswers = updatedAnswers.copy(
             vatInfo = emptyUserAnswersWithVatInfo.vatInfo.map(_.copy(partOfVatGroup = true))
           )
+          val registrationWrapperWithVatGroupAndFe = registrationWrapper
+            .copy(
+              vatInfo = registrationWrapper.vatInfo.copy(partOfVatGroup = true),
+              registration = registrationWrapper.registration.copy(schemeDetails = registrationWrapper.registration.schemeDetails.copy(euRegistrationDetails = Seq(etmpEuRegistrationDetails)))
+            )
 
           val application = applicationBuilder(None).build()
 
           running(application) {
 
-            val request = dataRequest.copy(userAnswers = partOfVatGroupVatInfoAnswers, registrationWrapper = Some(registrationWrapper))
-            val controller = new Harness(restrictFromPartOfVatGroup = true, registrationModificationMode = AmendingActiveRegistration)
+            val request = dataRequest.copy(userAnswers = partOfVatGroupVatInfoAnswers, registrationWrapper = Some(registrationWrapperWithVatGroupAndFe))
+            val controller = new Harness(restrictFromPartOfVatGroup = false, registrationModificationMode = AmendingActiveRegistration)
 
             val result = controller.callFilter(request).futureValue
 

@@ -66,19 +66,27 @@ trait AuthenticatedControllerComponents extends MessagesControllerComponents {
   def requireIoss: IossRequiredAction
 
   def checkPartOfVatGroup: CheckPartOfVatGroupFilter
-
-  def authAndGetData(
-                      registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
-                      restrictFromPreviousRegistrations: Boolean = true,
-                      restrictFromPartOfVatGroup: Boolean = false
-                    ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+  
+  def authAndGetDataBase(
+                          registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
+                          restrictFromPreviousRegistrations: Boolean = true,
+                          restrictFromPartOfVatGroup: Boolean = false
+                        ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
     val modifyingExistingRegistration = registrationModificationMode != NotModifyingExistingRegistration
     actionBuilder andThen
       identify andThen
       checkRegistration(registrationModificationMode) andThen
       checkPreviousRegistration(registrationModificationMode, restrictFromPreviousRegistrations) andThen
       getData andThen
-      requireData(modifyingExistingRegistration) andThen
+      requireData(modifyingExistingRegistration)
+  }
+  
+  def authAndGetData(
+                      registrationModificationMode: RegistrationModificationMode = NotModifyingExistingRegistration,
+                      restrictFromPreviousRegistrations: Boolean = true,
+                      restrictFromPartOfVatGroup: Boolean = false
+                    ): ActionBuilder[AuthenticatedDataRequest, AnyContent] = {
+    authAndGetDataBase(registrationModificationMode, restrictFromPreviousRegistrations, restrictFromPartOfVatGroup) andThen
       checkOtherCountryRegistration(registrationModificationMode) andThen
       checkPartOfVatGroup(restrictFromPartOfVatGroup, registrationModificationMode)
   }
