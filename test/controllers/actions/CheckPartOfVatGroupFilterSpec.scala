@@ -119,18 +119,24 @@ class CheckPartOfVatGroupFilterSpec extends SpecBase {
           " and restrictFromPartOfVatGroup true" in {
 
           val euDetails: EuDetails = arbitraryEuDetails.arbitrary.sample.value
+          val etmpEuRegistrationDetails = arbitraryEtmpDisplayEuRegistrationDetails.arbitrary.sample.value
           val updatedAnswers: UserAnswers = emptyUserAnswersWithVatInfo
             .set(AllEuDetailsQuery, List(euDetails)).success.value
 
           val partOfVatGroupVatInfoAnswers: UserAnswers = updatedAnswers.copy(
             vatInfo = emptyUserAnswersWithVatInfo.vatInfo.map(_.copy(partOfVatGroup = true))
           )
+          val registrationWrapperWithVatGroupAndFe = registrationWrapper
+            .copy(
+              vatInfo = registrationWrapper.vatInfo.copy(partOfVatGroup = true),
+              registration = registrationWrapper.registration.copy(schemeDetails = registrationWrapper.registration.schemeDetails.copy(euRegistrationDetails = Seq(etmpEuRegistrationDetails)))
+            )
 
           val application = applicationBuilder(None).build()
 
           running(application) {
 
-            val request = dataRequest.copy(userAnswers = partOfVatGroupVatInfoAnswers, registrationWrapper = Some(registrationWrapper))
+            val request = dataRequest.copy(userAnswers = partOfVatGroupVatInfoAnswers, registrationWrapper = Some(registrationWrapperWithVatGroupAndFe))
             val controller = new Harness(restrictFromPartOfVatGroup = true, registrationModificationMode = AmendingActiveRegistration)
 
             val result = controller.callFilter(request).futureValue
