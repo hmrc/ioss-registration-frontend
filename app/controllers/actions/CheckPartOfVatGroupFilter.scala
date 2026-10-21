@@ -39,20 +39,16 @@ class CheckPartOfVatGroupFilterImpl(
 
     (restrictFromPartOfVatGroup, request.userAnswers.get(SavedProgressPage).nonEmpty, registrationModificationMode) match {
       case (true, _, _) if isVatGroup()(request) =>
-        println("b")
         Some(Redirect(controllers.routes.CannotAccessPageController.onPageLoad())).toFuture
 
       case (_, _, AmendingActiveRegistration) =>
-        println("a")
         determineFeAndRedirect(hasSavedAnswers = false, euRoutes.DeleteAllFixedEstablishmentsAsPartOfVatGroupController.onPageLoad())(request)
 
       case (_, true, NotModifyingExistingRegistration) =>
-        println("c")
         val waypoints: EmptyWaypoints.type = EmptyWaypoints
         determineFeAndRedirect(hasSavedAnswers = true, controllers.routes.SavedProgressRemoveFixedEstablishmentsController.onPageLoad(waypoints))(request)
 
       case (_, _, _) =>
-        println("d")
         None.toFuture
     }
   }
@@ -73,22 +69,18 @@ class CheckPartOfVatGroupFilterImpl(
     (hasSavedAnswers, request.registrationWrapper) match {
       case (false, Some(registrationWrapper))
         if registrationWrapper.vatInfo.partOfVatGroup && registrationWrapper.registration.schemeDetails.euRegistrationDetails.nonEmpty =>
-        println("1")
         Some(Redirect(redirectCall)).toFuture
 
       case (true, _) =>
         request.userAnswers.vatInfo match {
           case Some(vatInfo) if vatInfo.partOfVatGroup && request.userAnswers.get(AllEuDetailsQuery).nonEmpty =>
-            println("2")
             Some(Redirect(redirectCall)).toFuture
 
           case _ =>
-            println("3")
             None.toFuture
         }
 
       case (_, _) =>
-        println(s"4 $hasSavedAnswers ${Json.toJson(request.registrationWrapper.map(_.vatInfo.partOfVatGroup))}")
         None.toFuture
     }
   }
