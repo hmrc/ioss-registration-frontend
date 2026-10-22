@@ -60,7 +60,7 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
 
         for {
           withOriginalRegistrationAnswers <- Future
-            .fromTry(request.userAnswers.set(OriginalRegistrationQuery(iossNumber), request.registrationWrapper.registration))
+            .fromTry(answers.set(OriginalRegistrationQuery(iossNumber), request.registrationWrapper.registration))
           _ <- cc.sessionRepository.set(withOriginalRegistrationAnswers)
         } yield {
           Ok(view(viewModel))
