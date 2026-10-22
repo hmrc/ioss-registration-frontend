@@ -28,7 +28,7 @@ import pages.amend.ChangeRegistrationPage
 import pages.euDetails.TaxRegisteredInEuPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PreviousRegistrationIossNumberQuery
+import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import queries.euDetails.AllEuDetailsQuery
 import services.{AuditService, RegistrationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -51,13 +51,17 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (cc.authAndGetDataBase(AmendingActiveRegistration) andThen cc.requireIoss()).async {
     implicit request =>
-      
+
+      val iossNumber: String = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
+
       registrationService.toUserAnswers(request.userId, request.registrationWrapper, removeFe = true).flatMap { answers =>
         val euDetailsList: List[EuDetails] = answers.get(AllEuDetailsQuery).getOrElse(List.empty)
         val viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel = DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel(euDetailsList)
 
         for {
-          _ <- cc.sessionRepository.set(answers)
+          withOriginalRegistrationAnswers <- Future
+            .fromTry(request.userAnswers.set(OriginalRegistrationQuery(iossNumber), request.registrationWrapper.registration))
+          _ <- cc.sessionRepository.set(withOriginalRegistrationAnswers)
         } yield {
           Ok(view(viewModel))
         }
