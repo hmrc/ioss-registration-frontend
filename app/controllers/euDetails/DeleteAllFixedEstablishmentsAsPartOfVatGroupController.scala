@@ -17,16 +17,21 @@
 package controllers.euDetails
 
 import controllers.actions.*
+import controllers.amend.routes
 import logging.Logging
+import models.audit.AmendRegistrationAuditModel
+import models.audit.RegistrationAuditType.AmendRegistration
+import models.audit.SubmissionResult.{Failure, Success}
 import models.euDetails.EuDetails
 import pages.EmptyWaypoints
-import pages.euDetails.{DeleteAllFixedEstablishmentsAsPartOfVatGroupPage, TaxRegisteredInEuPage}
+import pages.amend.ChangeRegistrationPage
+import pages.euDetails.TaxRegisteredInEuPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.{OriginalRegistrationQuery, PreviousRegistrationIossNumberQuery}
 import queries.euDetails.AllEuDetailsQuery
-import services.RegistrationService
+import services.{AuditService, RegistrationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.FutureSyntax.FutureOps
 import viewmodels.DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel
 import views.html.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupView
 
@@ -37,39 +42,71 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupController @Inject()(
                                                                         override val messagesApi: MessagesApi,
                                                                         cc: AuthenticatedControllerComponents,
                                                                         registrationService: RegistrationService,
+                                                                        auditService: AuditService,
                                                                         view: DeleteAllFixedEstablishmentsAsPartOfVatGroupView
                                                                       )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport with Logging {
 
   protected val controllerComponents: MessagesControllerComponents = cc
 
-  def onPageLoad: Action[AnyContent] = cc.authAndGetDataBase(AmendingActiveRegistration).async {
+  def onPageLoad: Action[AnyContent] = (cc.authAndGetDataBase(AmendingActiveRegistration) andThen cc.requireIoss()).async {
     implicit request =>
-      
-      request.registrationWrapper match {
-        case Some(registration) =>
-          registrationService.toUserAnswers(request.userId, registration, removeFe = true).flatMap { answers =>
-            val euDetailsList: List[EuDetails] = answers.get(AllEuDetailsQuery).getOrElse(List.empty)
-            val viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel = DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel(euDetailsList)
 
-            Ok(view(viewModel)).toFuture
-          }
+      val iossNumber: String = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
 
-        case _ =>
-          val errorMessage: String = s"Registration not available. Must have a registration."
-          logger.error(errorMessage)
-          val exception: IllegalStateException = new IllegalStateException(errorMessage)
-          throw exception
+      registrationService.toUserAnswers(request.userId, request.registrationWrapper, removeFe = true).flatMap { answers =>
+        val euDetailsList: List[EuDetails] = answers.get(AllEuDetailsQuery).getOrElse(List.empty)
+        val viewModel: DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel = DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel(euDetailsList)
+
+        for {
+          withOriginalRegistrationAnswers <- Future
+            .fromTry(answers.set(OriginalRegistrationQuery(iossNumber), request.registrationWrapper.registration))
+          _ <- cc.sessionRepository.set(withOriginalRegistrationAnswers)
+        } yield {
+          Ok(view(viewModel))
+        }
       }
   }
 
-  def onSubmit: Action[AnyContent] = cc.authAndGetDataBase(AmendingActiveRegistration).async {
+  def onSubmit: Action[AnyContent] = (cc.authAndGetDataBase(AmendingActiveRegistration) andThen cc.requireIoss()).async {
     implicit request =>
 
-      for {
+      val iossNumber: String = request.userAnswers.get(PreviousRegistrationIossNumberQuery).getOrElse(request.iossNumber)
+
+      (for {
         updatedAnswers <- Future.fromTry(request.userAnswers.remove(AllEuDetailsQuery))
         noEuRegistrationsAnswers <- Future.fromTry(updatedAnswers.set(TaxRegisteredInEuPage, false))
         _ <- cc.sessionRepository.set(noEuRegistrationsAnswers)
-      } yield Redirect(DeleteAllFixedEstablishmentsAsPartOfVatGroupPage.navigate(EmptyWaypoints, request.userAnswers, noEuRegistrationsAnswers).route)
+      } yield {
+        registrationService.amendRegistration(
+          answers = request.userAnswers,
+          registration = request.registrationWrapper.registration,
+          vrn = request.vrn,
+          iossNumber = iossNumber,
+          rejoin = false
+        ).map {
+          case Right(response) =>
+            auditService.audit(
+              AmendRegistrationAuditModel.build(
+                registrationAuditType = AmendRegistration,
+                userAnswers = request.userAnswers,
+                amendRegistrationResponse = Some(response),
+                submissionResult = Success
+              )(request.request)
+            )
+            Redirect(ChangeRegistrationPage.navigate(EmptyWaypoints, request.userAnswers, request.userAnswers).route)
+          case Left(e) =>
+            logger.error(s"Unexpected result on submitting amend: ${e.body}")
+            auditService.audit(
+              AmendRegistrationAuditModel.build(
+                registrationAuditType = AmendRegistration,
+                userAnswers = request.userAnswers,
+                amendRegistrationResponse = None,
+                submissionResult = Failure
+              )(request.request)
+            )
+            Redirect(routes.ErrorSubmittingAmendmentController.onPageLoad())
+        }
+      }).flatten
   }
 }

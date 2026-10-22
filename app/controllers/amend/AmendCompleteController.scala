@@ -57,7 +57,7 @@ class AmendCompleteController @Inject()(
   protected val controllerComponents: MessagesControllerComponents = cc
 
   def onPageLoad(waypoints: Waypoints): Action[AnyContent] =
-    cc.authAndRequireIoss(AmendingActiveRegistration, restrictFromPreviousRegistrations = false).async {
+    (cc.authAndGetDataBase(AmendingActiveRegistration, restrictFromPreviousRegistrations = false) andThen cc.requireIoss()).async {
 
       implicit request => {
 

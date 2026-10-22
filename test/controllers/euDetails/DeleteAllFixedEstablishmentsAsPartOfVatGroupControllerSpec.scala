@@ -18,12 +18,13 @@ package controllers.euDetails
 
 import base.SpecBase
 import models.amend.RegistrationWrapper
+import models.etmp.amend.AmendRegistrationResponse
 import models.euDetails.{EuDetails, RegistrationType}
 import models.requests.AuthenticatedDataRequest
 import models.{Country, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
-import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
+import org.mockito.Mockito.{doNothing, times, verify, verifyNoInteractions, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.EmptyWaypoints
@@ -34,11 +35,13 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.euDetails.AllEuDetailsQuery
 import repositories.AuthenticatedUserAnswersRepository
-import services.RegistrationService
+import services.{AuditService, RegistrationService}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import utils.FutureSyntax.FutureOps
 import viewmodels.DeleteAllFixedEstablishmentsAsPartOfVatGroupViewModel
 import views.html.euDetails.DeleteAllFixedEstablishmentsAsPartOfVatGroupView
+
+import java.time.LocalDateTime
 
 class DeleteAllFixedEstablishmentsAsPartOfVatGroupControllerSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
@@ -111,41 +114,31 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupControllerSpec extends SpecBas
       }
     }
 
-    "must throw an Illegal State Exception when registration is missing from the request for a GET" in {
-
-      val errorMessage: String = "Registration not available. Must have a registration."
-
-      val application = applicationBuilder(
-        userAnswers = Some(answers)
-      )
-        .build()
-
-      running(application) {
-        val request = dataRequest.copy(
-          request = aRequest.copy(registrationWrapper = None),
-          registrationWrapper = None
-        )
-
-        val result = route(application, request).value
-
-        whenReady(result.failed) { exp =>
-          exp `mustBe` a[IllegalStateException]
-          exp.getMessage `mustBe` errorMessage
-        }
-        verifyNoInteractions(mockRegistrationService)
-      }
-    }
-
     "must remove the answers and redirect to the next page when valid data is submitted" in {
 
       val mockAuthenticatedUserAnswersRepository: AuthenticatedUserAnswersRepository = mock[AuthenticatedUserAnswersRepository]
+      val mockRegistrationService: RegistrationService = mock[RegistrationService]
+      val mockAuditService: AuditService = mock[AuditService]
+
+      val amendRegistrationResponse: AmendRegistrationResponse =
+        AmendRegistrationResponse(
+          processingDateTime = LocalDateTime.now(),
+          formBundleNumber = "12345",
+          vrn = "123456789",
+          iossReference = "IM900100000001",
+          businessPartner = "businessPartner"
+        )
 
       when(mockAuthenticatedUserAnswersRepository.set(any())) thenReturn true.toFuture
+      when(mockRegistrationService.amendRegistration(any(), any(), any(), any(), any())(any())) thenReturn Right(amendRegistrationResponse).toFuture
+      doNothing().when(mockAuditService).audit(any())(any(), any())
 
       val application =
         applicationBuilder(userAnswers = Some(answers))
           .overrides(
-            bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository)
+            bind[AuthenticatedUserAnswersRepository].toInstance(mockAuthenticatedUserAnswersRepository),
+            bind[RegistrationService].toInstance(mockRegistrationService),
+            bind[AuditService].toInstance(mockAuditService)
           )
           .build()
 
@@ -162,7 +155,8 @@ class DeleteAllFixedEstablishmentsAsPartOfVatGroupControllerSpec extends SpecBas
         status(result) `mustBe` SEE_OTHER
         redirectLocation(result).value `mustBe` DeleteAllFixedEstablishmentsAsPartOfVatGroupPage.navigate(EmptyWaypoints, answers, expectedAnswers).url
         verify(mockAuthenticatedUserAnswersRepository, times(1)).set(eqTo(expectedAnswers))
-        verifyNoInteractions(mockRegistrationService)
+        verify(mockRegistrationService, times(1)).amendRegistration(any(), any(), any(), any(), any())(any())
+        verify(mockAuditService, times(1)).audit(any())(any(), any())
       }
     }
   }
