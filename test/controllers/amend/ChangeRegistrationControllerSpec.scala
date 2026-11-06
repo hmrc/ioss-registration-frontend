@@ -557,7 +557,7 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
         val application = applicationBuilder(
           userAnswers = Some(emptyUserAnswers),
-          registrationWrapper = None
+          registrationWrapper = Some(registrationWrapper)
         )
           .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
           .overrides(bind[AccountService].toInstance(mockAccountService))

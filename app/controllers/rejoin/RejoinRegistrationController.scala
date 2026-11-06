@@ -104,11 +104,14 @@ class RejoinRegistrationController @Inject()(
               ).flatten
             )
 
-            Future.successful(Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, btaUrl)))
+            if (vatRegistrationDetailsList.rows.nonEmpty) {
+              Ok(view(waypoints, vatRegistrationDetailsList, list, iossNumber, isValid, btaUrl)).toFuture
+            } else {
+              Redirect(routes.StartRejoinJourneyController.onPageLoad(waypoints)).toFuture
+            }
           }
-        }
-        else {
-          Future.successful(Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url))
+        } else {
+          Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url).toFuture
         }
       }
   }
@@ -120,7 +123,7 @@ class RejoinRegistrationController @Inject()(
     implicit val authenticatedDataRequest: AuthenticatedDataRequest[AnyContent] = request.request
 
     rejoinRegistrationValidator.validateEuRegistrations(registrationWrapper, waypoints).flatMap {
-      case Left(validationFailureRedirectLocation) => Future.successful(Redirect(validationFailureRedirectLocation))
+      case Left(validationFailureRedirectLocation) => Redirect(validationFailureRedirectLocation).toFuture
       case _ => successCall
     }
   }
@@ -246,7 +249,7 @@ class RejoinRegistrationController @Inject()(
                       userAnswers.set(NewIossReferenceQuery, amendRegistrationResponse.iossReference) match {
                         case Failure(throwable) =>
                           logger.error(s"Unexpected result on updating answers with new IOSS Reference: ${throwable.getMessage}", throwable)
-                          Future.successful(Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()))
+                          Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()).toFuture
                         case Success(updatedUserAnswers) =>
                           cc.sessionRepository.set(updatedUserAnswers).map { _ =>
                             auditService.audit(
@@ -270,12 +273,12 @@ class RejoinRegistrationController @Inject()(
                           submissionResult = SubmissionResult.Failure
                         )(request.request)
                       )
-                      Future.successful(Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()))
+                      Redirect(routes.ErrorSubmittingRejoinController.onPageLoad()).toFuture
                   }
               }
             }
           } else {
-            Future.successful(Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url))
+            Redirect(CannotRejoinRegistrationPage.route(EmptyWaypoints).url).toFuture
           }
         }
 
