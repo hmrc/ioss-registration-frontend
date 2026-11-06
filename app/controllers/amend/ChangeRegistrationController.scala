@@ -153,21 +153,24 @@ class ChangeRegistrationController @Inject()(
               false
             }
 
-            Ok(view(
-              waypoints,
-              vatRegistrationDetailsList,
-              list,
-              iossNumber,
-              isValid,
-              hasPreviousRegistrations,
-              isCurrentIossAccount,
-              btaUrl,
-              noAmendmentsWithUnusableStatusCheck,
-              frontendAppConfig.iossYourAccountUrl,
-              registrationDueForReview
-            ))
+            if (vatRegistrationDetailsList.rows.nonEmpty) {
+              Ok(view(
+                waypoints,
+                vatRegistrationDetailsList,
+                list,
+                iossNumber,
+                isValid,
+                hasPreviousRegistrations,
+                isCurrentIossAccount,
+                btaUrl,
+                noAmendmentsWithUnusableStatusCheck,
+                frontendAppConfig.iossYourAccountUrl,
+                registrationDueForReview
+              ))
+            } else {
+              Redirect(routes.StartAmendJourneyController.onPageLoad(waypoints))
+            }
           }
-
         }
     }
   }
