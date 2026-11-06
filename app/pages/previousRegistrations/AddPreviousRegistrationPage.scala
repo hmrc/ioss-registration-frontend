@@ -18,7 +18,7 @@ package pages.previousRegistrations
 
 import controllers.previousRegistrations.routes
 import models.{Country, Index, UserAnswers}
-import pages.amend.{ChangePreviousRegistrationPage, ChangeRegistrationPage}
+import pages.amend.ChangeRegistrationPage
 import pages.euDetails.TaxRegisteredInEuPage
 import pages.rejoin.RejoinRegistrationPage
 import pages.website.WebsitePage
