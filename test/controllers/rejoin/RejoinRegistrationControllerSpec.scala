@@ -19,8 +19,8 @@ package controllers.rejoin
 import base.SpecBase
 import config.Constants.{btaUrl, correctionsPeriodsLimit}
 import connectors.{RegistrationConnector, ReturnStatusConnector}
-import controllers.rejoin.validation.RejoinRegistrationValidation
 import controllers.rejoin.routes as rejoinRoutes
+import controllers.rejoin.validation.RejoinRegistrationValidation
 import models.audit.SubmissionResult.{Failure, Success}
 import models.audit.{AmendRegistrationAuditModel, RegistrationAuditType}
 import models.etmp.EtmpExclusion
@@ -243,6 +243,41 @@ class RejoinRegistrationControllerSpec extends SpecBase with MockitoSugar with S
 
           status(result) `mustBe` SEE_OTHER
           redirectLocation(result).value `mustBe` CannotRejoinRegistrationPage.route(rejoinWaypoints).url
+        }
+      }
+
+      "must redirect to Start Rejoin Journey Controller for a GET when VAT registration details unpopulated" in {
+
+        val registrationWithExclusionOnBoundary = createRegistrationWrapperWithExclusion(LocalDate.now(stubClockAtArbitraryDate))
+
+        when(registrationConnector.getRegistration()(any()))
+          .thenReturn(Future.successful(Right(registrationWithExclusionOnBoundary)))
+
+        when(mockReturnStatusConnector.getCurrentReturns(any())(any())) thenReturn
+          Right(CurrentReturns(returns = Seq(), finalReturnsCompleted = true)).toFuture
+
+        val application = applicationBuilder(
+          userAnswers = Some(emptyUserAnswers),
+          clock = Some(stubClockAtArbitraryDate),
+          registrationWrapper = Some(registrationWithExclusionOnBoundary)
+        )
+          .overrides(bind[RejoinRegistrationValidation].toInstance(rejoinRegistrationValidation))
+          .overrides(bind[RegistrationConnector].toInstance(registrationConnector))
+          .overrides(bind[ReturnStatusConnector].toInstance(mockReturnStatusConnector))
+          .build()
+
+        when(rejoinRegistrationValidation.validateEuRegistrations(
+          ArgumentMatchers.eq(registrationWithExclusionOnBoundary),
+          ArgumentMatchers.eq(rejoinWaypoints)
+        )(any(), any(), any()))
+          .thenReturn(Future.successful(Right(true)))
+
+        running(application) {
+          val request = FakeRequest(GET, rejoinRoutes.RejoinRegistrationController.onPageLoad().url)
+          val result = route(application, request).value
+
+          status(result) `mustBe` SEE_OTHER
+          redirectLocation(result).value `mustBe` routes.StartRejoinJourneyController.onPageLoad(rejoinWaypoints).url
         }
       }
     }

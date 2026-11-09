@@ -549,6 +549,31 @@ class ChangeRegistrationControllerSpec extends SpecBase with MockitoSugar with S
           )(request, messages(application)).toString
         }
       }
+
+      "must redirect to Start Amend Journey Controller for a GET when VAT registration details unpopulated" in {
+
+        when(mockAccountService.getPreviousRegistrations()(any())) thenReturn Seq.empty.toFuture
+        when(mockRegistrationService.toUserAnswers(any(), any(), any())) thenReturn emptyUserAnswers.toFuture
+
+        val application = applicationBuilder(
+          userAnswers = Some(emptyUserAnswers),
+          registrationWrapper = Some(registrationWrapper)
+        )
+          .overrides(bind[RegistrationConnector].toInstance(mockRegistrationConnector))
+          .overrides(bind[AccountService].toInstance(mockAccountService))
+          .overrides(bind[RegistrationService].toInstance(mockRegistrationService))
+          .build()
+
+        running(application) {
+
+          val request = FakeRequest(GET, amendRoutes.ChangeRegistrationController.onPageLoad(isPreviousRegistration = false).url)
+
+          val result = route(application, request).value
+
+          status(result) `mustBe` SEE_OTHER
+          redirectLocation(result).value `mustBe` amendRoutes.StartAmendJourneyController.onPageLoad(waypoints).url
+        }
+      }
     }
 
     ".onSubmit" - {

@@ -20,7 +20,6 @@ import controllers.euDetails.routes as euRoutes
 import logging.Logging
 import models.requests.AuthenticatedDataRequest
 import pages.{EmptyWaypoints, SavedProgressPage}
-import play.api.libs.json.Json
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Call, Result}
 import queries.euDetails.AllEuDetailsQuery
