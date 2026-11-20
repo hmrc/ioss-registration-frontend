@@ -17,7 +17,7 @@
 package forms.euDetails
 
 import forms.mappings.Mappings
-import forms.validation.Validation.{commonTextPattern, postcodePattern}
+import forms.validation.Validation.{commonTextPattern, postcodeCleanerPattern, postcodePattern}
 import models.{Country, InternationalAddress}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, optional}
@@ -41,6 +41,11 @@ class FixedEstablishmentAddressFormProvider @Inject() extends Mappings {
         .verifying(maxLength(35, "fixedEstablishmentAddress.error.stateOrRegion.length"))
         .verifying(regexp(commonTextPattern, "fixedEstablishmentAddress.error.stateOrRegion.format"))),
       "postCode" -> optional(text("fixedEstablishmentAddress.error.postCode.required")
+        .transform[String](value =>
+          val trimmed = value.trim
+          trimmed.replaceAll(postcodeCleanerPattern, ""),
+          identity
+        )
         .verifying(firstError(
           maxLength(40, "fixedEstablishmentAddress.error.postCode.length"),
           regexp(postcodePattern, "fixedEstablishmentAddress.error.postCode.invalid"))))
