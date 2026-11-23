@@ -120,12 +120,14 @@ class WebsiteFormProviderSpec extends StringFieldBehaviours {
         requiredError = FormError(fieldName, requiredKey)
       )
 
-      behave like fieldWithMaxLength(
-        form,
-        fieldName,
-        maxLength = maxLength,
-        lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
-      )
+      "must not bind a website longer than 250 characters" in {
+        val longWebsite = s"https://${"a" * 241}.com"
+
+        val result = form.bind(Map(fieldName -> longWebsite))
+
+        result.errors must contain only FormError(fieldName, lengthKey, Seq(maxLength))
+      }
+
     }
   }
 }
