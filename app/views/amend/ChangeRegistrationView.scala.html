@@ -16,7 +16,7 @@
 
 @import controllers.amend.{routes => amendRoutes}
 @import pages.amend.{ChangeRegistrationPage, StartAmendJourneyPage, ViewOrChangePreviousRegistrationPage}
-@import views.html.components.{CancelAmendRegButton, ReviewRegDetailsButton}
+@import views.html.components.{CancelAmendRegButton, PrintPage, ReviewRegDetailsButton}
 
 @this(
         formHelper: FormWithCSRF,
@@ -25,7 +25,8 @@
         button: CancelAmendRegButton,
         reviewButton: ReviewRegDetailsButton,
         govukErrorSummary: GovukErrorSummary,
-        govukWarningText: GovukWarningText
+        govukWarningText: GovukWarningText,
+        printPage: PrintPage
 )
 
 @(waypoints: Waypoints,
@@ -62,6 +63,8 @@
     } else {
         <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">@messages("changeRegistration.heading")</h1>
     }
+
+    @printPage()
 
     @if(hasPreviousRegistrations) {
         <p class="govuk-caption-l govuk-!-margin-bottom-6" style="margin-top-8">@messages("changeRegistration.reference", iossNumber)</p>

@@ -18,10 +18,12 @@
 @import java.time.LocalDate
 @import formats.Format
 @import models.CompositeAccount
+@import views.html.components.PrintPage
 
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        printPage: PrintPage
 )
 
 @(
@@ -46,6 +48,8 @@
             <h1 class="govuk-panel__title">@messages("rejoinComplete.heading")</h1>
             <div class="govuk-panel__body"> @Html(messages("rejoinComplete.newIossReference", newIossReference))</div>
         </div>
+
+        @printPage()
 
         <p class="govuk-body">
             @Html(messages("rejoinComplete.organisationName", organisationName))
