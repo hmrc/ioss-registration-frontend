@@ -16,9 +16,9 @@
 
 @this()
 @(implicit messages: Messages)
-<div class="govuk-!-padding-bottom-3 visible-js-enabled" id="print-link-wrapper">
+<div class="govuk-!-padding-bottom-3 hmrc-!-js-visible" id="print-link-wrapper">
     <p class="govuk-body">
-        <a class="govuk-link" href="#print-dialogue" id="print-page" role="link">
+        <a class="govuk-link" href="#" id="print-page" role="link" data-module="hmrc-print-link">
             <img src='@controllers.routes.Assets.versioned("images/icon-print.svg")' class="align-with-text" alt="">
             @messages("site.print")
         </a>
