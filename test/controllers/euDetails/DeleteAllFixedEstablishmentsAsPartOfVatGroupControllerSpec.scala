@@ -24,7 +24,7 @@ import models.requests.AuthenticatedDataRequest
 import models.{Country, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
-import org.mockito.Mockito.{doNothing, times, verify, verifyNoInteractions, when}
+import org.mockito.Mockito.{doNothing, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.EmptyWaypoints

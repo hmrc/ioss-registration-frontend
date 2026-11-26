@@ -16,6 +16,7 @@ site.submit = Register
 site.confirm = Confirm
 site.processing = We are processing your registration.
 site.warning = Warning
+site.print = Print this page
 
 site.back.BTA = Return to your business tax account
 

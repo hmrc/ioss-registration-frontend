@@ -15,7 +15,7 @@
  *@
 
 @import pages.CheckYourAnswersPage
-@import views.html.components.ButtonGroupProcessing
+@import views.html.components.{ButtonGroupProcessing, PrintPage}
 
 @this(
         formHelper: FormWithCSRF,
@@ -23,7 +23,8 @@
         govukSummaryList: GovukSummaryList,
         button: ButtonGroupProcessing,
         govukErrorSummary: GovukErrorSummary,
-        govukWarningText: GovukWarningText
+        govukWarningText: GovukWarningText,
+        printPage: PrintPage
 )
 
 @(waypoints: Waypoints, vatRegistrationDetailsList: SummaryList, list: SummaryList, isValid: Boolean, btaUrl: String)(implicit request: Request[_], messages: Messages)
@@ -38,6 +39,8 @@
     }
 
     <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
+
+    @printPage()
 
     <h2 class="govuk-heading-m">@messages("vatRegistrationDetails.checkYourAnswers.heading")</h2>
 

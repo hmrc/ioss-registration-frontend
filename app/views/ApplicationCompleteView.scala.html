@@ -15,10 +15,12 @@
  *@
 
 @import models.CompositeAccount
+@import views.html.components.PrintPage
 
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        printPage: PrintPage
 )
 
 @(
@@ -39,6 +41,8 @@
             <h1 class="govuk-panel__title">@messages("applicationComplete.heading")</h1>
             <p class="govuk-panel__body">@Html(messages("applicationComplete.reference", iossReferenceNumber))</p>
         </div>
+
+        @printPage()
 
         <p class="govuk-body">@Html(messages("applicationComplete.registration.text", organisationName))</p>
 

@@ -17,11 +17,13 @@
 @import uk.gov.hmrc.domain.Vrn
 @import models.CompositeAccount
 @import utils.AmendWaypoints.AmendWaypointsOps
+@import views.html.components.PrintPage
 
 @this(
         layout: templates.Layout,
         govukButton: GovukButton,
         govukSummaryList: GovukSummaryList,
+        printPage: PrintPage
 )
 
 @(
@@ -44,6 +46,8 @@
         <h1 class="govuk-panel__title">@messages("amendComplete.heading")</h1>
       }
       </div>
+
+      @printPage()
 
       @if(list.rows.nonEmpty) {
         <div class="govuk-body">@messages("amendComplete.info")</div>
